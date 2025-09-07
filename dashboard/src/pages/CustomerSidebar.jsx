@@ -1,0 +1,139 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
+import '../css/CustomerSidebar.css'; // Import the CSS file for styling
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import HistoryIcon from '@mui/icons-material/History';
+import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/Logout';
+import MenuIcon from '@mui/icons-material/Menu';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+
+const CustomerSidebar = ({ onSidebarToggle }) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Start with sidebar open
+  const [isMobileView, setIsMobileView] = useState(false);
+  const location = useLocation(); // Get the current route
+  const navigate = useNavigate(); // Initialize navigate
+
+  // Detect screen size and update state
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth <= 768;
+      setIsMobileView(isMobile);
+      if (isMobile) {
+        setIsSidebarOpen(false); // Start collapsed on mobile
+      } else {
+        setIsSidebarOpen(true); // Start expanded on desktop
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial check
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Memoize the callback to prevent infinite re-renders
+  const notifyParent = useCallback(() => {
+    if (onSidebarToggle) {
+      onSidebarToggle({
+        isOpen: isSidebarOpen,
+        isMobile: isMobileView,
+        isCollapsed: !isSidebarOpen && !isMobileView
+      });
+    }
+  }, [isSidebarOpen, isMobileView, onSidebarToggle]);
+
+  // Notify parent component when sidebar state changes
+  useEffect(() => {
+    notifyParent();
+  }, [notifyParent]);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    // You can add additional logout logic here (e.g., clear localStorage, sessionStorage, etc.)
+    navigate('/');
+  };
+
+  return (
+    <>
+      {/* Burger Menu for Mobile */}
+      {isMobileView && !isSidebarOpen && (
+        <button className="customer-sidebar-burger-menu" onClick={toggleSidebar}>
+          <MenuIcon />
+        </button>
+      )}
+
+      {/* Sidebar */}
+      <div className={`customer-sidebar ${isMobileView ? 'customer-sidebar--mobile' : 'customer-sidebar--desktop'} ${isSidebarOpen ? 'customer-sidebar--open' : 'customer-sidebar--closed'} ${!isSidebarOpen && !isMobileView ? 'customer-sidebar--collapsed' : ''}`}>
+        <div className="customer-sidebar__header">
+          {isMobileView && isSidebarOpen && (
+            <button className="customer-sidebar__back-arrow" onClick={toggleSidebar}>
+              <ChevronLeftIcon />
+            </button>
+          )}
+          {!isMobileView && (
+            <button className="customer-sidebar__desktop-toggle" onClick={toggleSidebar}>
+              {isSidebarOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+            </button>
+          )}
+          {(!isMobileView || isSidebarOpen) && (
+            <div className="customer-sidebar__title">
+              <h2>Customer Panel</h2>
+            </div>
+          )}
+        </div>
+        <nav className="customer-sidebar__nav">
+          <ul className="customer-sidebar__nav-list">
+            <li className="customer-sidebar__nav-item">
+              <Link to="/customer-dashboard" className={`customer-sidebar__nav-link ${location.pathname === '/customer-dashboard' ? 'customer-sidebar__nav-link--active' : ''}`} title="Dashboard">
+                <DashboardIcon className="customer-sidebar__icon" />
+                <span className="customer-sidebar__text">Browse Products</span>
+              </Link>
+            </li>
+            <li className="customer-sidebar__nav-item">
+              <Link to="/customer-shopping" className={`customer-sidebar__nav-link ${location.pathname === '/customer-shopping' ? 'customer-sidebar__nav-link--active' : ''}`} title="Shopping">
+                <ShoppingCartIcon className="customer-sidebar__icon" />
+                <span className="customer-sidebar__text">Favorites</span>
+              </Link>
+            </li>
+            <li className="customer-sidebar__nav-item">
+              <Link to="/customer-wishlist" className={`customer-sidebar__nav-link ${location.pathname === '/customer-wishlist' ? 'customer-sidebar__nav-link--active' : ''}`} title="Wishlist">
+                <FavoriteIcon className="customer-sidebar__icon" />
+                <span className="customer-sidebar__text">My Reviews</span>
+              </Link>
+            </li>
+            <li className="customer-sidebar__nav-item">
+              <Link to="/customer-orders" className={`customer-sidebar__nav-link ${location.pathname === '/customer-orders' ? 'customer-sidebar__nav-link--active' : ''}`} title="Order History">
+                <HistoryIcon className="customer-sidebar__icon" />
+                <span className="customer-sidebar__text">Messages</span>
+              </Link>
+            </li>
+            <li className="customer-sidebar__nav-item">
+              <Link to="/customer-settings" className={`customer-sidebar__nav-link ${location.pathname === '/customer-settings' ? 'customer-sidebar__nav-link--active' : ''}`} title="Settings">
+                <SettingsIcon className="customer-sidebar__icon" />
+                <span className="customer-sidebar__text">Profile</span>
+              </Link>
+            </li>
+          </ul>
+        </nav>
+        {(!isMobileView || isSidebarOpen) && (
+          <div className="customer-sidebar__footer">
+            <button className="customer-sidebar__logout-button" onClick={handleLogout}>
+              <LogoutIcon className="customer-sidebar__icon" /> 
+              <span className="customer-sidebar__text">Logout</span>
+            </button>
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
+
+export default CustomerSidebar;

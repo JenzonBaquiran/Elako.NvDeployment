@@ -73,6 +73,22 @@
   padding: 15px !important;
 }
 
+/* Hide browser-generated password visibility icons */
+.login-input input[type="password"]::-ms-reveal,
+.login-input input[type="password"]::-ms-clear {
+  display: none;
+}
+
+.login-input input[type="password"]::-webkit-credentials-auto-fill-button,
+.login-input input[type="password"]::-webkit-strong-password-auto-fill-button {
+  display: none !important;
+}
+
+/* Ensure only our custom icon shows */
+.login-input .MuiInputAdornment-root {
+  z-index: 10;
+}
+
 /* Make all input text use Poppins font */
 .login-input .MuiInputBase-input,
 .login-input-inner,
@@ -91,23 +107,23 @@
 .login-links {
   display: flex;
   justify-content: space-between;
-  font-size: 0.65rem;      /* Smaller text size */
+  font-size: 1rem;        /* Match signup text size */
   color: #ffffff !important;
   text-decoration: none !important;
   margin: 5px 0 0px 0;
-  font-weight: 600;        /* Slightly bolder */
-  letter-spacing: 0.5px;   /* Optional: improve readability */
+  font-weight: 400;       /* Match signup text weight */
+  letter-spacing: normal; /* Match signup text */
 }
 
 .login-link {
   cursor: pointer;
-  opacity: 0.8;
+  opacity: 1;             /* Full opacity like signup */
   color: #fff !important;
   text-transform: none !important;
-  font-size: 13px !important;   /* Smaller text size */
-  font-weight: bold !important;     /* Slightly bolder */
-  padding: 8px 12px !important;   /* More padding for better click area */
-  border-radius: 4px !important;  /* Consistent border radius */
+  font-size: 1rem !important;        /* Match signup text size */
+  font-weight: 400 !important;       /* Match signup text weight */
+  padding: 8px 12px !important;
+  border-radius: 4px !important;
 }
 
 .login-link:hover {
@@ -119,18 +135,17 @@
   background: #1a1a1a !important;
   color: #fff !important;
   border-radius: 10px !important;
-  font-weight: 800 !important;         /* Make font bolder */
+  font-weight: 700 !important;         /* Make font bolder */
   font-size: 1rem !important;
-  padding: 20px 0 !important;
+  padding: 15px 0 !important;
   text-transform: uppercase !important;
   box-shadow: none !important;
-  width: 60% !important;               /* Make button width smaller */
+  width: 50% !important;               /* Make button width smaller */
   margin: 0 auto !important;           /* Center the button */
 }
 
 .login-btn:hover {
   background: #7ed957 !important;
-  color: black !important;
 }
 
 

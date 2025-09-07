@@ -10,6 +10,7 @@
 
 .notification-wrapper {
   position: absolute;
+  top: 80px; /* Moved down from the very top */
   right: 20px;
   pointer-events: none;
 }
@@ -193,6 +194,7 @@
 /* Mobile responsiveness */
 @media (max-width: 640px) {
   .notification-wrapper {
+    top: 60px; /* Slightly less spacing on mobile */
     right: 10px;
     left: 10px;
   }

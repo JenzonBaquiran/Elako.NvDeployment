@@ -13,12 +13,18 @@ function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [validating, setValidating] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    // First show validating data message
+    setValidating(true);
+    await new Promise(resolve => setTimeout(resolve, 1500)); // 1.5 second delay for validation
+    setValidating(false);
 
     try {
       // Try admin login first
@@ -166,24 +172,36 @@ function Login() {
                   }}
                   onClick={() => !loading && navigate("/signup")}
                 >
-                  NEW HERE ? SIGN UP
+                 New here ? Sign Up
                 </span>
                 <span 
                   className="login-link"
                   style={{ opacity: loading ? 0.5 : 1 }}
                 >
-                  FORGOT YOUR PASSWORD?
+                  Forgot Password?
                 </span>
               </div>
               <hr style={{ margin: "10px 0" }} />
+              
+              {/* Loading circle above button */}
+              {loading && (
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                  marginBottom: '10px'
+                }}>
+                  <CircularProgress size={30} style={{ color: '#ffffff' }} />
+                </div>
+              )}
+              
               <Button 
                 type="submit"
                 variant="contained" 
                 className="login-btn"
                 disabled={loading}
-                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
               >
-                {loading ? "LOGGING IN..." : "LOGIN"}
+                LOGIN
               </Button>
             </form>
           </div>

@@ -73,6 +73,22 @@
   padding: 15px !important;
 }
 
+/* Hide browser-generated password visibility icons */
+.signup-input input[type="password"]::-ms-reveal,
+.signup-input input[type="password"]::-ms-clear {
+  display: none;
+}
+
+.signup-input input[type="password"]::-webkit-credentials-auto-fill-button,
+.signup-input input[type="password"]::-webkit-strong-password-auto-fill-button {
+  display: none !important;
+}
+
+/* Ensure only our custom icon shows */
+.signup-input .MuiInputAdornment-root {
+  z-index: 10;
+}
+
 .signup-input .MuiOutlinedInput-notchedOutline {
   border-color: rgba(255, 255, 255, 0.2) !important;
 }
@@ -112,18 +128,17 @@
   background: #1a1a1a !important;
   color: #fff !important;
   border-radius: 10px !important;
-  font-weight: 800 !important;         /* Make font bolder */
+  font-weight: 700 !important;         /* Match login button font weight */
   font-size: 1rem !important;
-  padding: 20px 0 !important;
+  padding: 15px 0 !important;          /* Match login button padding */
   text-transform: uppercase !important;
   box-shadow: none !important;
-  width: 60% !important;               /* Make button width smaller */
+  width: 50% !important;               /* Match login button width */
   margin: 0 auto !important;           /* Center the button */
 }
 
 .signup-btn:hover {
-  background: #7ed957 !important;
-  color: black !important;
+  background: #7ed957 !important;      /* Match login button hover color */
 }
 
 /* Hide any default MUI password visibility toggle if present */

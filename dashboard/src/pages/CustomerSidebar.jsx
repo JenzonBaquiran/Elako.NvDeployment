@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNotification } from '../components/NotificationProvider';
 import '../css/CustomerSidebar.css'; // Import the CSS file for styling
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
@@ -12,10 +13,20 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 const CustomerSidebar = ({ onSidebarToggle }) => {
+  const { showSuccess } = useNotification();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Start with sidebar open
   const [isMobileView, setIsMobileView] = useState(false);
+  const [customerUser, setCustomerUser] = useState(null);
   const location = useLocation(); // Get the current route
   const navigate = useNavigate(); // Initialize navigate
+
+  // Get customer data from localStorage
+  useEffect(() => {
+    const userData = localStorage.getItem("customerUser");
+    if (userData) {
+      setCustomerUser(JSON.parse(userData));
+    }
+  }, []);
 
   // Detect screen size and update state
   useEffect(() => {
@@ -57,8 +68,22 @@ const CustomerSidebar = ({ onSidebarToggle }) => {
 
   // Handle logout
   const handleLogout = () => {
-    // You can add additional logout logic here (e.g., clear localStorage, sessionStorage, etc.)
-    navigate('/');
+    // Clear localStorage for all user types
+    localStorage.removeItem("adminUser");
+    localStorage.removeItem("customerUser");
+    localStorage.removeItem("msmeUser");
+    localStorage.removeItem("user"); // Also clear the main user key
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new Event('userStatusChanged'));
+    
+    // Redirect immediately without delay
+    navigate("/");
+    
+    // Show success message after redirect (with shorter duration)
+    setTimeout(() => {
+      showSuccess("You have been logged out successfully", "Goodbye!");
+    }, 100);
   };
 
   return (
@@ -85,7 +110,14 @@ const CustomerSidebar = ({ onSidebarToggle }) => {
           )}
           {(!isMobileView || isSidebarOpen) && (
             <div className="customer-sidebar__title">
-              <h2>Customer Panel</h2>
+              {customerUser ? (
+                <div className="customer-sidebar__user-info">
+                  <h2>{`${customerUser.firstname} ${customerUser.lastname}`}</h2>
+                  <p className="customer-sidebar__username">@{customerUser.username}</p>
+                </div>
+              ) : (
+                <h2>Customer Panel</h2>
+              )}
             </div>
           )}
         </div>

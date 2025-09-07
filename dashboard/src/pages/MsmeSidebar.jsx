@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNotification } from '../components/NotificationProvider';
 import '../css/MsmeSidebar.css'; // Import the CSS file for styling
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -12,10 +13,20 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 const MsmeSidebar = ({ onSidebarToggle }) => {
+  const { showSuccess } = useNotification();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Start with sidebar open
   const [isMobileView, setIsMobileView] = useState(false);
+  const [msmeUser, setMsmeUser] = useState(null);
   const location = useLocation(); // Get the current route
   const navigate = useNavigate(); // Initialize navigate
+
+  // Get MSME data from localStorage
+  useEffect(() => {
+    const userData = localStorage.getItem("msmeUser");
+    if (userData) {
+      setMsmeUser(JSON.parse(userData));
+    }
+  }, []);
 
   // Detect screen size and update state
   useEffect(() => {
@@ -57,8 +68,22 @@ const MsmeSidebar = ({ onSidebarToggle }) => {
 
   // Handle logout
   const handleLogout = () => {
-    // You can add additional logout logic here (e.g., clear localStorage, sessionStorage, etc.)
-    navigate('/');
+    // Clear localStorage for all user types
+    localStorage.removeItem("adminUser");
+    localStorage.removeItem("customerUser");
+    localStorage.removeItem("msmeUser");
+    localStorage.removeItem("user"); // Also clear the main user key
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new Event('userStatusChanged'));
+    
+    // Redirect immediately without delay
+    navigate("/");
+    
+    // Show success message after redirect (with shorter duration)
+    setTimeout(() => {
+      showSuccess("You have been logged out successfully", "Goodbye!");
+    }, 100);
   };
 
   return (
@@ -85,7 +110,14 @@ const MsmeSidebar = ({ onSidebarToggle }) => {
           )}
           {(!isMobileView || isSidebarOpen) && (
             <div className="msme-sidebar__title">
-              <h2>MSME Panel</h2>
+              {msmeUser ? (
+                <div className="msme-sidebar__user-info">
+                  <h2>{msmeUser.businessName}</h2>
+                  <p className="msme-sidebar__username">@{msmeUser.username}</p>
+                </div>
+              ) : (
+                <h2>MSME Panel</h2>
+              )}
             </div>
           )}
         </div>

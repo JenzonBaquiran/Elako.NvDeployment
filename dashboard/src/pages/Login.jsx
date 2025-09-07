@@ -1,13 +1,100 @@
 import React, { useState } from "react";
-import { TextField, Button, IconButton, InputAdornment } from "@mui/material";
+import { TextField, Button, IconButton, InputAdornment, Alert, CircularProgress } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom"; // Add this import
+import { useNavigate } from "react-router-dom";
+import { useNotification } from "../components/NotificationProvider";
 import "../css/Login.css";
 import logo from "../logos/Icon on dark with text.png";
 
 function Login() {
+  const { showError, showSuccess } = useNotification();
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate(); // Add this line
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      // Try admin login first
+      let response = await fetch("http://localhost:1337/api/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      let data = await response.json();
+
+      if (data.success) {
+        localStorage.setItem("adminUser", JSON.stringify(data.user));
+        window.dispatchEvent(new Event('userStatusChanged'));
+        showSuccess("Welcome back, Admin!", "Login Successful");
+        navigate("/admin-user-management");
+        return;
+      }
+
+      // Try customer login
+      response = await fetch("http://localhost:1337/api/customers/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      data = await response.json();
+
+      if (data.success) {
+        localStorage.setItem("customerUser", JSON.stringify(data.user));
+        window.dispatchEvent(new Event('userStatusChanged'));
+        showSuccess("Welcome back! Let's get started.", "Login Successful");
+        navigate("/customer-sidebar");
+        return;
+      }
+
+      // Try MSME login
+      response = await fetch("http://localhost:1337/api/msme/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      data = await response.json();
+
+      if (data.success) {
+        // Check if MSME is approved
+        if (data.user.status === "approved") {
+          localStorage.setItem("msmeUser", JSON.stringify(data.user));
+          window.dispatchEvent(new Event('userStatusChanged'));
+          showSuccess("Login successful! Welcome back.", "Welcome");
+          navigate("/msme-sidebar");
+        } else if (data.user.status === "pending") {
+          showError("Your account is pending approval. Please wait for admin approval.", "Account Pending");
+        } else if (data.user.status === "rejected") {
+          showError("Your account has been rejected. Please contact support.", "Account Rejected");
+        }
+        return;
+      }
+
+      // If all login attempts fail
+      showError("Invalid username or password", "Login Failed");
+
+    } catch (error) {
+      console.error("Login error:", error);
+      showError("Network error. Please try again.", "Connection Error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="login-bg">
@@ -17,46 +104,88 @@ function Login() {
             <div className="logo-container">
               <img src={logo} alt="Logo" className="brand-logo" />
             </div>
-            <p className="text">Digital Marketing Solution For The Micro, Small, and Medium Enterprises MSME’s in Nueva Vizcaya</p>
-            <TextField
-              variant="outlined"
-              placeholder="Username"
-              fullWidth
-              className="login-input"
-              InputProps={{
-                classes: { notchedOutline: "input-outline" },
-              }}
-              inputProps={{
-                className: "login-input-inner",
-              }}
-            />
-            <TextField
-              variant="outlined"
-              placeholder="Password"
-              type={showPassword ? "text" : "password"}
-              fullWidth
-              className="login-input"
-              InputProps={{
-                classes: { notchedOutline: "input-outline" }, 
-              }}
-              inputProps={{
-                className: "login-input-inner",
-              }}
-            />
-            <div className="login-links">
-              <span
-                className="login-link"
-                style={{ cursor: "pointer" }}
-                onClick={() => navigate("/signup")}
+            <p className="text">Digital Marketing Solution For The Micro, Small, and Medium Enterprises MSME's in Nueva Vizcaya</p>
+            
+            {error && (
+              <Alert severity="error" style={{ marginBottom: "16px" }}>
+                {error}
+              </Alert>
+            )}
+
+            <form onSubmit={handleLogin}>
+              <TextField
+                variant="outlined"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                fullWidth
+                className="login-input"
+                InputProps={{
+                  classes: { notchedOutline: "input-outline" },
+                }}
+                inputProps={{
+                  className: "login-input-inner",
+                }}
+                required
+                disabled={loading}
+              />
+              <TextField
+                variant="outlined"
+                placeholder="Password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                fullWidth
+                className="login-input"
+                InputProps={{
+                  classes: { notchedOutline: "input-outline" },
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        disabled={loading}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                inputProps={{
+                  className: "login-input-inner",
+                }}
+                required
+                disabled={loading}
+              />
+              <div className="login-links">
+                <span
+                  className="login-link"
+                  style={{ 
+                    cursor: loading ? "not-allowed" : "pointer",
+                    opacity: loading ? 0.5 : 1 
+                  }}
+                  onClick={() => !loading && navigate("/signup")}
+                >
+                  NEW HERE ? SIGN UP
+                </span>
+                <span 
+                  className="login-link"
+                  style={{ opacity: loading ? 0.5 : 1 }}
+                >
+                  FORGOT YOUR PASSWORD?
+                </span>
+              </div>
+              <hr style={{ margin: "10px 0" }} />
+              <Button 
+                type="submit"
+                variant="contained" 
+                className="login-btn"
+                disabled={loading}
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
               >
-                NEW HERE ? SIGN UP
-              </span>
-              <span className="login-link">FORGOT YOUR PASSWORD?</span>
-            </div>
-            <hr style={{ margin: "10px 0" }} />
-            <Button variant="contained" className="login-btn">
-              LOGIN
-            </Button>
+                {loading ? "LOGGING IN..." : "LOGIN"}
+              </Button>
+            </form>
           </div>
         </div>
       </div>

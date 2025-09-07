@@ -169,7 +169,7 @@ function Home() {
   <div className="recently-joined-header">
     {/* <span className="recently-joined-icon">🛍️</span> */}
     <h1></h1>
-    <h2>Current Stores</h2>
+    <h2>New Stores</h2>
     <div className="recently-joined-viewall">
        <button className="hero-button hero-button-outline">View All</button>
     </div>

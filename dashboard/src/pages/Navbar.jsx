@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import SearchIcon from "@mui/icons-material/Search"
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart"
@@ -7,9 +7,84 @@ import logo from "../logos/Icon on dark with text.png"
 import "../css/Navbar.css"
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import ChatIcon from '@mui/icons-material/Chat';
+import { useNotification } from "../components/NotificationProvider";
+
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [user, setUser] = useState(null)
+  const [userType, setUserType] = useState(null)
   const navigate = useNavigate()
+  const { showSuccess } = useNotification()
+
+  useEffect(() => {
+    // Check for logged in user in localStorage
+    const checkUserStatus = () => {
+      const adminUser = localStorage.getItem("adminUser")
+      const customerUser = localStorage.getItem("customerUser")
+      const msmeUser = localStorage.getItem("msmeUser")
+
+      if (adminUser) {
+        setUser(JSON.parse(adminUser))
+        setUserType("admin")
+      } else if (customerUser) {
+        setUser(JSON.parse(customerUser))
+        setUserType("customer")
+      } else if (msmeUser) {
+        setUser(JSON.parse(msmeUser))
+        setUserType("msme")
+      } else {
+        setUser(null)
+        setUserType(null)
+      }
+    }
+
+    // Initial check
+    checkUserStatus()
+
+    // Listen for storage changes (when user logs in/out in another tab)
+    window.addEventListener('storage', checkUserStatus)
+    
+    // Listen for custom event (when user logs in/out in same tab)
+    window.addEventListener('userStatusChanged', checkUserStatus)
+
+    return () => {
+      window.removeEventListener('storage', checkUserStatus)
+      window.removeEventListener('userStatusChanged', checkUserStatus)
+    }
+  }, [])
+
+  const handleLogout = () => {
+    // Clear localStorage
+    localStorage.removeItem("adminUser")
+    localStorage.removeItem("customerUser")
+    localStorage.removeItem("msmeUser")
+    
+    // Reset state
+    setUser(null)
+    setUserType(null)
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new Event('userStatusChanged'))
+    
+    // Show success message and redirect
+    showSuccess("You have been logged out successfully", "Goodbye!")
+    navigate("/")
+  }
+
+  const getUserGreeting = () => {
+    if (!user) return null
+    
+    let firstName = ""
+    if (userType === "admin") {
+      firstName = "Admin"
+    } else if (userType === "customer") {
+      firstName = user.firstname || user.name?.split(" ")[0] || "User"
+    } else if (userType === "msme") {
+      firstName = user.firstname || user.businessName?.split(" ")[0] || "Business"
+    }
+    
+    return `Hi, ${firstName}`
+  }
 
   return (
     <header className="header">
@@ -45,8 +120,23 @@ function Header() {
               <NotificationsIcon fontSize="medium" />
             </button>
         
-            <button className="nav-button nav-button-outline" onClick={() => navigate('/login')}>Login</button>
-            <button className="nav-button nav-button-primary" onClick={() => navigate('/signup')}>Register</button>
+            {user ? (
+              <>
+                <span className="user-greeting">{getUserGreeting()}</span>
+                <button className="nav-button nav-button-primary" onClick={handleLogout}>
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="nav-button nav-button-outline" onClick={() => navigate('/login')}>
+                  Login
+                </button>
+                <button className="nav-button nav-button-primary" onClick={() => navigate('/signup')}>
+                  Register
+                </button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -80,12 +170,23 @@ function Header() {
               Notifications
             </button>
            
-            <button className="nav-button nav-button-outline mobile-menu-button" onClick={() => navigate('/login')}>
-              Login
-            </button>
-            <button className="nav-button nav-button-primary mobile-menu-button" onClick={() => navigate('/signup')}>
-              Register
-            </button>
+            {user ? (
+              <>
+                <div className="mobile-user-greeting">{getUserGreeting()}</div>
+                <button className="nav-button nav-button-primary mobile-menu-button" onClick={handleLogout}>
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="nav-button nav-button-outline mobile-menu-button" onClick={() => navigate('/login')}>
+                  Login
+                </button>
+                <button className="nav-button nav-button-primary mobile-menu-button" onClick={() => navigate('/signup')}>
+                  Register
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

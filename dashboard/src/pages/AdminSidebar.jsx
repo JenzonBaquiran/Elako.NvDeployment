@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNotification } from '../components/NotificationProvider';
 import '../css/AdminSidebar.css'; // Import the CSS file for styling
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -12,6 +13,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 const AdminSidebar = ({ onSidebarToggle }) => {
+  const { showSuccess } = useNotification();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Start with sidebar open
   const [isMobileView, setIsMobileView] = useState(false);
   const location = useLocation(); // Get the current route
@@ -57,8 +59,22 @@ const AdminSidebar = ({ onSidebarToggle }) => {
 
   // Handle logout
   const handleLogout = () => {
-    // You can add additional logout logic here (e.g., clear localStorage, sessionStorage, etc.)
-    navigate('/');
+    // Clear localStorage for all user types
+    localStorage.removeItem("adminUser");
+    localStorage.removeItem("customerUser");
+    localStorage.removeItem("msmeUser");
+    localStorage.removeItem("user"); // Also clear the main user key
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new Event('userStatusChanged'));
+    
+    // Redirect immediately without delay
+    navigate("/");
+    
+    // Show success message after redirect (with shorter duration)
+    setTimeout(() => {
+      showSuccess("You have been logged out successfully", "Goodbye!");
+    }, 100);
   };
 
   return (

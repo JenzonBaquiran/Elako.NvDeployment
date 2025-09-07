@@ -3,9 +3,14 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
-const Product = require("./models/product");
-const User = require("./models/user.model");
 const bcrypt = require("bcryptjs");
+
+// Import Models
+const Customer = require("./models/customer.model");
+const MSME = require("./models/msme.model");
+const Admin = require("./models/admin.model");
+
+
 const app = express();
 const port = 1337;
 
@@ -29,185 +34,441 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // MongoDB Connection
-mongoose.connect("mongodb://127.0.0.1:27017/MariaCoffee", {});
+mongoose.connect("mongodb://127.0.0.1:27017/ElakoNv", {});
 
 mongoose.connection.on("connected", () => {
-  console.log(" Connected to MongoDB");
+  console.log("✅ Connected to MongoDB");
 });
 mongoose.connection.on("error", (err) => {
   console.error("❌ MongoDB connection error:", err);
 });
 
 // --- Validation Helpers ---
-function validateProductInput(data) {
+function validateCustomerInput(data) {
   const errors = [];
-  if (!data.id || typeof data.id !== "string") errors.push("Product ID is required and must be a string.");
-  if (!data.name || typeof data.name !== "string") errors.push("Product name is required and must be a string.");
-  if (data.price === undefined || isNaN(Number(data.price))) errors.push("Product price is required and must be a number.");
-  if (!data.description || typeof data.description !== "string") errors.push("Product description is required and must be a string.");
-  if (!data.type || typeof data.type !== "string") errors.push("Product type is required and must be a string.");
-  if (
-    data.available === undefined ||
-    (typeof data.available !== "boolean" &&
-      data.available !== "true" &&
-      data.available !== "false")
-  )
-    errors.push("Product availability is required and must be true or false.");
+  if (!data.firstname || typeof data.firstname !== "string") errors.push("First name is required.");
+  if (!data.lastname || typeof data.lastname !== "string") errors.push("Last name is required.");
+  if (!data.username || typeof data.username !== "string") errors.push("Username is required.");
+  if (!data.email || typeof data.email !== "string") errors.push("Email is required.");
+  if (!data.contactNumber || typeof data.contactNumber !== "string") errors.push("Contact number is required.");
+  if (!data.address || typeof data.address !== "string") errors.push("Address is required.");
+  if (!data.password || typeof data.password !== "string" || data.password.length < 6) errors.push("Password must be at least 6 characters.");
   return errors;
 }
 
-function validateUserInput(data) {
+function validateMSMEInput(data) {
   const errors = [];
-  if (!data.id || typeof data.id !== "string") errors.push("User ID is required and must be a string.");
-  if (!data.username || typeof data.username !== "string") errors.push("Username is required and must be a string.");
-  if (!data.password || typeof data.password !== "string" || data.password.length < 6) errors.push("Password is required and must be at least 6 characters.");
+  if (!data.clientProfilingNumber || typeof data.clientProfilingNumber !== "string") errors.push("Client profiling number is required.");
+  if (!data.category || !["food", "artisan"].includes(data.category)) errors.push("Category must be 'food' or 'artisan'.");
+  if (!data.businessName || typeof data.businessName !== "string") errors.push("Business name is required.");
+  if (!data.username || typeof data.username !== "string") errors.push("Username is required.");
+  if (!data.password || typeof data.password !== "string" || data.password.length < 6) errors.push("Password must be at least 6 characters.");
   return errors;
 }
 
-// --- Product Routes ---
-
-app.get("/api/products", async (req, res) => {
-  try {
-    const products = await Product.find();
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Create product with image upload
-app.post("/api/products", upload.single("image"), async (req, res) => {
-  const { id, name, price, description, type, available } = req.body;
-  const errors = validateProductInput(req.body);
+// --- Customer Routes ---
+app.post("/api/customers/register", async (req, res) => {
+  const errors = validateCustomerInput(req.body);
   if (errors.length > 0) {
     return res.status(400).json({ errors });
   }
+
   try {
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : "";
-    const product = new Product({
-      id,
-      name,
-      price,
-      description,
-      imageUrl,
-      type,
-      available,
+    // Generate unique ID
+    const id = `CUST_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const customer = new Customer({
+      ...req.body,
+      id
     });
-    await product.save();
-    res.json(product);
+    
+    await customer.save();
+    res.status(201).json({ 
+      success: true, 
+      message: "Customer registered successfully",
+      customer: { ...customer.toObject(), password: undefined } // Don't return password
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// Update product (optionally with image)
-app.put("/api/products/:id", upload.single("image"), async (req, res) => {
-  const errors = validateProductInput({ ...req.body, id: req.params.id });
-  if (errors.length > 0) {
-    return res.status(400).json({ errors });
-  }
-  try {
-    const updateData = { ...req.body };
-    if (req.file) {
-      updateData.imageUrl = `/uploads/${req.file.filename}`;
+    if (err.code === 11000) {
+      return res.status(400).json({ error: "Username or email already exists" });
     }
-    const updated = await Product.findOneAndUpdate(
-      { id: req.params.id },
-      updateData,
-      { new: true }
-    );
-    res.json(updated);
-  } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-app.delete("/api/products/:id", async (req, res) => {
-  if (!req.params.id) {
-    return res.status(400).json({ error: "Product ID is required." });
-  }
+app.get("/api/customers", async (req, res) => {
   try {
-    await Product.findOneAndDelete({ id: req.params.id });
-    res.json({ success: true });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// --- User Routes ---
-
-app.post("/api/users", async (req, res) => {
-  const errors = validateUserInput(req.body);
-  if (errors.length > 0) {
-    return res.status(400).json({ errors });
-  }
-  try {
-    const user = new User(req.body); // password is saved as plain text
-    await user.save();
-    res.json(user);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-app.get("/api/users", async (req, res) => {
-  try {
-    const users = await User.find();
-    res.json(users);
+    const customers = await Customer.find({}, { password: 0 }); // Exclude password
+    res.json(customers);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Login user (plain text password check)
-app.post("/api/login", async (req, res) => {
+app.post("/api/customers/login", async (req, res) => {
   const { username, password } = req.body;
+  
   if (!username || !password) {
     return res.status(400).json({ error: "Username and password are required." });
   }
+  
   try {
-    const user = await User.findOne({ username, password }); // plain text match
-    if (!user) {
-      return res.status(401).json({ success: false, error: "Invalid username or password" });
+    const customer = await Customer.findOne({ username });
+    if (!customer || customer.password !== password) { // Plain text comparison
+      return res.status(401).json({ success: false, error: "Invalid credentials" });
     }
-    res.json({ success: true, user });
+    
+    res.json({ 
+      success: true, 
+      user: { ...customer.toObject(), password: undefined },
+      userType: 'customer'
+    });
   } catch (error) {
-    console.error("Error during login:", error);
-    res.status(500).json({ success: false, error: "Error during login" });
+    console.error("Customer login error:", error);
+    res.status(500).json({ success: false, error: "Login error" });
   }
 });
 
-app.put("/api/users/:id", async (req, res) => {
-  const errors = validateUserInput({ ...req.body, id: req.params.id });
+// --- MSME Routes ---
+app.post("/api/msme/register", async (req, res) => {
+  const errors = validateMSMEInput(req.body);
   if (errors.length > 0) {
     return res.status(400).json({ errors });
   }
+
   try {
-    const updated = await User.findOneAndUpdate(
+    // Generate unique ID
+    const id = `MSME_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const msme = new MSME({
+      ...req.body,
+      id
+    });
+    
+    await msme.save();
+    res.status(201).json({ 
+      success: true, 
+      message: "MSME registered successfully",
+      msme: { ...msme.toObject(), password: undefined }
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(400).json({ error: "Client profiling number or username already exists" });
+    }
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.get("/api/msme", async (req, res) => {
+  try {
+    const msmes = await MSME.find({}, { password: 0 });
+    res.json(msmes);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/msme/login", async (req, res) => {
+  const { username, password } = req.body;
+  
+  if (!username || !password) {
+    return res.status(400).json({ error: "Username and password are required." });
+  }
+  
+  try {
+    const msme = await MSME.findOne({ username });
+    if (!msme || msme.password !== password) {
+      return res.status(401).json({ success: false, error: "Invalid credentials" });
+    }
+    
+    res.json({ 
+      success: true, 
+      user: { ...msme.toObject(), password: undefined },
+      userType: 'msme'
+    });
+  } catch (error) {
+    console.error("MSME login error:", error);
+    res.status(500).json({ success: false, error: "Login error" });
+  }
+});
+
+// Update MSME status (for admin approval)
+app.put("/api/msme/:id/status", async (req, res) => {
+  const { status } = req.body;
+  
+  if (!["pending", "approved", "rejected"].includes(status)) {
+    return res.status(400).json({ error: "Invalid status" });
+  }
+  
+  try {
+    const msme = await MSME.findOneAndUpdate(
       { id: req.params.id },
-      req.body,
+      { status, updatedAt: new Date() },
       { new: true }
     );
-    res.json(updated);
+    
+    if (!msme) {
+      return res.status(404).json({ error: "MSME not found" });
+    }
+    
+    res.json({ success: true, msme: { ...msme.toObject(), password: undefined } });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-// Delete user by id
-app.delete("/api/users/:id", async (req, res) => {
-  if (!req.params.id) {
-    return res.status(400).json({ error: "User ID is required." });
+// --- Admin Routes ---
+app.post("/api/admin/login", async (req, res) => {
+  const { username, password } = req.body;
+  
+  if (!username || !password) {
+    return res.status(400).json({ error: "Username and password are required." });
   }
+  
   try {
-    await User.findOneAndDelete({ id: req.params.id });
-    res.json({ success: true });
+    // First check hardcoded admin credentials (for backward compatibility)
+    const ADMIN_USERNAME = "admin";
+    const ADMIN_PASSWORD = "admin123";
+    
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      res.json({ 
+        success: true, 
+        user: { 
+          id: "admin", 
+          username: ADMIN_USERNAME, 
+          firstname: "Super",
+          lastname: "Admin",
+          userType: "admin"
+        },
+        userType: 'admin'
+      });
+      return;
+    }
+
+    // Check database for created admins
+    const admin = await Admin.findOne({ username });
+    
+    if (!admin) {
+      return res.status(401).json({ success: false, error: "Invalid admin credentials" });
+    }
+
+    // Check if admin is active
+    if (admin.status !== "active") {
+      return res.status(401).json({ success: false, error: "Admin account is not active" });
+    }
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, admin.password);
+    
+    if (!isPasswordValid) {
+      return res.status(401).json({ success: false, error: "Invalid admin credentials" });
+    }
+
+    // Login successful
+    res.json({ 
+      success: true, 
+      user: { 
+        id: admin._id, 
+        username: admin.username, 
+        firstname: admin.firstname,
+        lastname: admin.lastname,
+        email: admin.email,
+        userType: "admin"
+      },
+      userType: 'admin'
+    });
+    
+  } catch (error) {
+    console.error("Error during admin login:", error);
+    res.status(500).json({ success: false, error: "Error during admin login" });
+  }
+});
+
+// Get all users (admin only)
+app.get("/api/admin/users", async (req, res) => {
+  try {
+    const customers = await Customer.find({}, { password: 0 });
+    const msmes = await MSME.find({}, { password: 0 });
+    
+    res.json({
+      customers,
+      msmes,
+      total: customers.length + msmes.length
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete customer (admin only)
+app.delete("/api/admin/customers/:id", async (req, res) => {
+  try {
+    const result = await Customer.findOneAndDelete({ id: req.params.id });
+    if (!result) {
+      return res.status(404).json({ error: "Customer not found" });
+    }
+    res.json({ success: true, message: "Customer deleted successfully" });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
+});
+
+// Delete MSME (admin only)
+app.delete("/api/admin/msme/:id", async (req, res) => {
+  try {
+    const result = await MSME.findOneAndDelete({ id: req.params.id });
+    if (!result) {
+      return res.status(404).json({ error: "MSME not found" });
+    }
+    res.json({ success: true, message: "MSME deleted successfully" });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// --- Admin Management Routes ---
+// Create new admin
+app.post("/api/admin/create", async (req, res) => {
+  try {
+    const { username, password, firstname, lastname, email, createdBy } = req.body;
+
+    // Check if admin already exists
+    const existingAdmin = await Admin.findOne({ 
+      $or: [{ username }, { email }] 
+    });
+    
+    if (existingAdmin) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Admin with this username or email already exists" 
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create new admin
+    const newAdmin = new Admin({
+      username,
+      password: hashedPassword,
+      firstname,
+      lastname,
+      email,
+      createdBy
+    });
+
+    await newAdmin.save();
+
+    // Return admin without password
+    const adminResponse = {
+      id: newAdmin._id,
+      username: newAdmin.username,
+      firstname: newAdmin.firstname,
+      lastname: newAdmin.lastname,
+      email: newAdmin.email,
+      role: newAdmin.role,
+      status: newAdmin.status,
+      createdAt: newAdmin.createdAt,
+      updatedAt: newAdmin.updatedAt
+    };
+
+    res.status(201).json({ 
+      success: true, 
+      message: "Admin created successfully",
+      admin: adminResponse
+    });
+  } catch (err) {
+    console.error("Error creating admin:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error creating admin" 
+    });
+  }
+});
+
+// Get all admins
+app.get("/api/admin/admins", async (req, res) => {
+  try {
+    const admins = await Admin.find({}, { password: 0 });
+    res.json({
+      success: true,
+      admins
+    });
+  } catch (err) {
+    console.error("Error fetching admins:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error fetching admins" 
+    });
+  }
+});
+
+// Update admin status
+app.put("/api/admin/admins/:id/status", async (req, res) => {
+  try {
+    const { status } = req.body;
+    const adminId = req.params.id;
+
+    const updatedAdmin = await Admin.findByIdAndUpdate(
+      adminId,
+      { status },
+      { new: true, select: '-password' }
+    );
+
+    if (!updatedAdmin) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "Admin not found" 
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Admin status updated successfully",
+      admin: updatedAdmin
+    });
+  } catch (err) {
+    console.error("Error updating admin status:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error updating admin status" 
+    });
+  }
+});
+
+// Delete admin
+app.delete("/api/admin/admins/:id", async (req, res) => {
+  try {
+    const adminId = req.params.id;
+    
+    const deletedAdmin = await Admin.findByIdAndDelete(adminId);
+    
+    if (!deletedAdmin) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "Admin not found" 
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Admin deleted successfully"
+    });
+  } catch (err) {
+    console.error("Error deleting admin:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error deleting admin" 
+    });
+  }
+});
+
+// --- Legacy User Routes (keep for backward compatibility) ---
+app.post("/api/users", async (req, res) => {
+  // ... existing user routes ...
 });
 
 // --- Start Server ---
 app.listen(port, () => {
-  console.log(` Server running at http://localhost:${port}`);
+  console.log(`🚀 Server running at http://localhost:${port}`);
 });

@@ -21,6 +21,8 @@ const AdminUserManagement = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [showAddAdminModal, setShowAddAdminModal] = useState(false);
+  const [showAddMsmeModal, setShowAddMsmeModal] = useState(false);
+  const [showAddUserDropdown, setShowAddUserDropdown] = useState(false);
   const [adminFormData, setAdminFormData] = useState({
     username: '',
     password: '',
@@ -28,7 +30,17 @@ const AdminUserManagement = () => {
     lastname: '',
     email: ''
   });
+  const [msmeFormData, setMsmeFormData] = useState({
+    username: '',
+    password: '',
+    businessName: '',
+    category: '',
+    address: '',
+    contactNumber: '',
+    clientProfilingNumber: ''
+  });
   const [adminFormLoading, setAdminFormLoading] = useState(false);
+  const [msmeFormLoading, setMsmeFormLoading] = useState(false);
 
   // Fetch users from API
   useEffect(() => {
@@ -242,6 +254,44 @@ const AdminUserManagement = () => {
     setSelectedUser(null);
   };
 
+  const handleAddMsme = async (e) => {
+    e.preventDefault();
+    setMsmeFormLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:1337/api/admin/msme/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(msmeFormData)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showSuccess("MSME created successfully!", "Success");
+        setShowAddMsmeModal(false);
+        setMsmeFormData({
+          username: '',
+          password: '',
+          businessName: '',
+          category: '',
+          address: '',
+          contactNumber: '',
+          clientProfilingNumber: ''
+        });
+        // Refresh users list
+        fetchUsers();
+      } else {
+        showError(data.error || "Failed to create MSME", "Error");
+      }
+    } catch (err) {
+      console.error("Error creating MSME:", err);
+      showError("Failed to create MSME. Please try again.", "Error");
+    } finally {
+      setMsmeFormLoading(false);
+    }
+  };
+
   const handleAddAdmin = async (e) => {
     e.preventDefault();
     setAdminFormLoading(true);
@@ -303,6 +353,27 @@ const AdminUserManagement = () => {
     });
   };
 
+  const handleMsmeFormChange = (e) => {
+    const { name, value } = e.target;
+    setMsmeFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleCloseAddMsmeModal = () => {
+    setShowAddMsmeModal(false);
+    setMsmeFormData({
+      username: '',
+      password: '',
+      businessName: '',
+      category: '',
+      address: '',
+      contactNumber: '',
+      clientProfilingNumber: ''
+    });
+  };
+
   const toggleDropdown = (userId) => {
     setActiveDropdown(activeDropdown === userId ? null : userId);
   };
@@ -311,13 +382,14 @@ const AdminUserManagement = () => {
   useEffect(() => {
     const handleClickOutside = () => {
       setActiveDropdown(null);
+      setShowAddUserDropdown(false);
     };
     
-    if (activeDropdown) {
+    if (activeDropdown || showAddUserDropdown) {
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
-  }, [activeDropdown]);
+  }, [activeDropdown, showAddUserDropdown]);
 
   const handleSidebarToggle = (state) => {
     setSidebarState(state);
@@ -342,12 +414,38 @@ const AdminUserManagement = () => {
               <h1>User Management</h1>
               <p>Manage customers and MSME businesses on the platform.</p>
             </div>
-            <button 
-              className="admin-user-management__add-admin-btn"
-              onClick={() => setShowAddAdminModal(true)}
-            >
-              + Add New Admin
-            </button>
+            <div className="admin-user-management__add-user-dropdown">
+              <button 
+                className="admin-user-management__add-user-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowAddUserDropdown(!showAddUserDropdown);
+                }}
+              >
+                + Add New User
+                <span className="admin-user-management__dropdown-arrow">▼</span>
+              </button>
+              <div className={`admin-user-management__add-user-menu ${showAddUserDropdown ? 'show' : ''}`}>
+                <button 
+                  className="admin-user-management__add-user-option"
+                  onClick={() => {
+                    setShowAddAdminModal(true);
+                    setShowAddUserDropdown(false);
+                  }}
+                >
+                  Add Admin
+                </button>
+                <button 
+                  className="admin-user-management__add-user-option"
+                  onClick={() => {
+                    setShowAddMsmeModal(true);
+                    setShowAddUserDropdown(false);
+                  }}
+                >
+                  Add MSME
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -570,6 +668,125 @@ const AdminUserManagement = () => {
         </div>
       </div>
 
+      {/* Add MSME Modal */}
+      <div className={`admin-user-management__modal-overlay ${showAddMsmeModal ? 'show' : ''}`} onClick={handleCloseAddMsmeModal}>
+        <div className="admin-user-management__modal admin-user-management__modal--add-msme" onClick={(e) => e.stopPropagation()}>
+          <div className="admin-user-management__modal-header">
+            <h3 className="admin-user-management__modal-title">Add New MSME</h3>
+            <button className="admin-user-management__modal-close" onClick={handleCloseAddMsmeModal}>
+              ×
+            </button>
+          </div>
+          
+          <form onSubmit={handleAddMsme} className="admin-user-management__msme-form">
+            <div className="admin-user-management__form-field">
+              <label className="admin-user-management__form-label">Business Name *</label>
+              <input
+                type="text"
+                name="businessName"
+                value={msmeFormData.businessName}
+                onChange={handleMsmeFormChange}
+                className="admin-user-management__form-input"
+                required
+              />
+            </div>
+
+            <div className="admin-user-management__form-row">
+              <div className="admin-user-management__form-field">
+                <label className="admin-user-management__form-label">Username *</label>
+                <input
+                  type="text"
+                  name="username"
+                  value={msmeFormData.username}
+                  onChange={handleMsmeFormChange}
+                  className="admin-user-management__form-input"
+                  required
+                />
+              </div>
+              <div className="admin-user-management__form-field">
+                <label className="admin-user-management__form-label">Password *</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={msmeFormData.password}
+                  onChange={handleMsmeFormChange}
+                  className="admin-user-management__form-input"
+                  required
+                  minLength="6"
+                />
+              </div>
+            </div>
+
+            <div className="admin-user-management__form-row">
+              <div className="admin-user-management__form-field">
+                <label className="admin-user-management__form-label">Category *</label>
+                <select
+                  name="category"
+                  value={msmeFormData.category}
+                  onChange={handleMsmeFormChange}
+                  className="admin-user-management__form-input"
+                  required
+                >
+                  <option value="">Select Category</option>
+                  <option value="food">Food</option>
+                  <option value="artisan">Artisan</option>
+                </select>
+              </div>
+              <div className="admin-user-management__form-field">
+                <label className="admin-user-management__form-label">Contact Number</label>
+                <input
+                  type="tel"
+                  name="contactNumber"
+                  value={msmeFormData.contactNumber}
+                  onChange={handleMsmeFormChange}
+                  className="admin-user-management__form-input"
+                />
+              </div>
+            </div>
+
+            <div className="admin-user-management__form-field">
+              <label className="admin-user-management__form-label">Address</label>
+              <textarea
+                name="address"
+                value={msmeFormData.address}
+                onChange={handleMsmeFormChange}
+                className="admin-user-management__form-input"
+                rows="3"
+              />
+            </div>
+
+            <div className="admin-user-management__form-field">
+              <label className="admin-user-management__form-label">Client Profiling Number</label>
+              <input
+                type="text"
+                name="clientProfilingNumber"
+                value={msmeFormData.clientProfilingNumber}
+                onChange={handleMsmeFormChange}
+                className="admin-user-management__form-input"
+              />
+            </div>
+
+            <div className="admin-user-management__form-actions">
+              <button
+                type="button"
+                className="admin-user-management__form-btn admin-user-management__form-btn--cancel"
+                onClick={handleCloseAddMsmeModal}
+                disabled={msmeFormLoading}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="admin-user-management__form-btn admin-user-management__form-btn--submit"
+                disabled={msmeFormLoading}
+              >
+                {msmeFormLoading ? "Creating..." : "Create MSME"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
       {/* Add Admin Modal */}
       <div className={`admin-user-management__modal-overlay ${showAddAdminModal ? 'show' : ''}`} onClick={handleCloseAddAdminModal}>
         <div className="admin-user-management__modal admin-user-management__modal--add-admin" onClick={(e) => e.stopPropagation()}>
@@ -737,6 +954,66 @@ const AdminUserManagement = () => {
                   <div className="admin-user-management__modal-value">{selectedUser.clientProfilingNumber}</div>
                 </div>
               )}
+
+              {/* Action Buttons */}
+              <div className="admin-user-management__modal-actions">
+                {selectedUser.type === "MSME" && selectedUser.status === "pending" && (
+                  <>
+                    <button 
+                      className="admin-user-management__modal-action-btn admin-user-management__modal-action-btn--approve"
+                      onClick={() => {
+                        handleStatusUpdate(selectedUser.id, "approved", "MSME");
+                        handleCloseModal();
+                      }}
+                    >
+                      APPROVE
+                    </button>
+                    <button 
+                      className="admin-user-management__modal-action-btn admin-user-management__modal-action-btn--reject"
+                      onClick={() => {
+                        handleStatusUpdate(selectedUser.id, "rejected", "MSME");
+                        handleCloseModal();
+                      }}
+                    >
+                      REJECT
+                    </button>
+                  </>
+                )}
+                
+                {selectedUser.type === "Admin" && selectedUser.status === "active" && (
+                  <button 
+                    className="admin-user-management__modal-action-btn admin-user-management__modal-action-btn--reject"
+                    onClick={() => {
+                      handleStatusUpdate(selectedUser.id, "suspended", "Admin");
+                      handleCloseModal();
+                    }}
+                  >
+                    SUSPEND
+                  </button>
+                )}
+                
+                {selectedUser.type === "Admin" && selectedUser.status === "suspended" && (
+                  <button 
+                    className="admin-user-management__modal-action-btn admin-user-management__modal-action-btn--approve"
+                    onClick={() => {
+                      handleStatusUpdate(selectedUser.id, "active", "Admin");
+                      handleCloseModal();
+                    }}
+                  >
+                    ACTIVATE
+                  </button>
+                )}
+                
+                <button 
+                  className="admin-user-management__modal-action-btn admin-user-management__modal-action-btn--delete"
+                  onClick={() => {
+                    handleDeleteUser(selectedUser.id, selectedUser.type);
+                    handleCloseModal();
+                  }}
+                >
+                  DELETE
+                </button>
+              </div>
             </div>
           )}
         </div>

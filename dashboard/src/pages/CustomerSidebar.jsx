@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
 import { useNotification } from '../components/NotificationProvider';
 import '../css/CustomerSidebar.css'; // Import the CSS file for styling
@@ -46,24 +46,49 @@ const CustomerSidebar = ({ onSidebarToggle }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Memoize the callback to prevent infinite re-renders
-  const notifyParent = useCallback(() => {
-    if (onSidebarToggle) {
-      onSidebarToggle({
-        isOpen: isSidebarOpen,
-        isMobile: isMobileView,
-        isCollapsed: !isSidebarOpen && !isMobileView
-      });
+  // Notify parent component when sidebar state changes - use ref to prevent infinite loops
+  const previousStateRef = useRef();
+  
+  useEffect(() => {
+    const currentState = {
+      isOpen: isSidebarOpen,
+      isMobile: isMobileView,
+      isCollapsed: !isSidebarOpen && !isMobileView
+    };
+    
+    // Only notify if state actually changed
+    if (onSidebarToggle && 
+        (!previousStateRef.current || 
+         previousStateRef.current.isOpen !== currentState.isOpen ||
+         previousStateRef.current.isMobile !== currentState.isMobile ||
+         previousStateRef.current.isCollapsed !== currentState.isCollapsed)) {
+      
+      previousStateRef.current = currentState;
+      onSidebarToggle(currentState);
     }
   }, [isSidebarOpen, isMobileView, onSidebarToggle]);
 
-  // Notify parent component when sidebar state changes
-  useEffect(() => {
-    notifyParent();
-  }, [notifyParent]);
-
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  // Handle icon click to expand sidebar when collapsed
+  const handleIconClick = (e) => {
+    if (!isMobileView && !isSidebarOpen) {
+      e.preventDefault(); // Prevent navigation
+      setIsSidebarOpen(true); // Expand sidebar
+    }
+    // If sidebar is open or on mobile, let normal navigation happen
+  };
+
+  // Handle logout with sidebar expansion check
+  const handleLogoutClick = (e) => {
+    if (!isMobileView && !isSidebarOpen) {
+      e.preventDefault();
+      setIsSidebarOpen(true);
+    } else {
+      handleLogout();
+    }
   };
 
   // Handle logout
@@ -103,9 +128,10 @@ const CustomerSidebar = ({ onSidebarToggle }) => {
               <ChevronLeftIcon />
             </button>
           )}
-          {!isMobileView && (
+          {/* Hide desktop toggle when collapsed */}
+          {!isMobileView && isSidebarOpen && (
             <button className="customer-sidebar__desktop-toggle" onClick={toggleSidebar}>
-              {isSidebarOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+              <ChevronLeftIcon />
             </button>
           )}
           {(!isMobileView || isSidebarOpen) && (
@@ -124,31 +150,31 @@ const CustomerSidebar = ({ onSidebarToggle }) => {
         <nav className="customer-sidebar__nav">
           <ul className="customer-sidebar__nav-list">
             <li className="customer-sidebar__nav-item">
-              <Link to="/customer-dashboard" className={`customer-sidebar__nav-link ${location.pathname === '/customer-dashboard' ? 'customer-sidebar__nav-link--active' : ''}`} title="Dashboard">
+              <Link to="/customer-dashboard" className={`customer-sidebar__nav-link ${location.pathname === '/customer-dashboard' ? 'customer-sidebar__nav-link--active' : ''}`} title="Dashboard" onClick={handleIconClick}>
                 <DashboardIcon className="customer-sidebar__icon" />
                 <span className="customer-sidebar__text">Browse Products</span>
               </Link>
             </li>
             <li className="customer-sidebar__nav-item">
-              <Link to="/customer-shopping" className={`customer-sidebar__nav-link ${location.pathname === '/customer-shopping' ? 'customer-sidebar__nav-link--active' : ''}`} title="Shopping">
+              <Link to="/customer-shopping" className={`customer-sidebar__nav-link ${location.pathname === '/customer-shopping' ? 'customer-sidebar__nav-link--active' : ''}`} title="Shopping" onClick={handleIconClick}>
                 <ShoppingCartIcon className="customer-sidebar__icon" />
                 <span className="customer-sidebar__text">Favorites</span>
               </Link>
             </li>
             <li className="customer-sidebar__nav-item">
-              <Link to="/customer-wishlist" className={`customer-sidebar__nav-link ${location.pathname === '/customer-wishlist' ? 'customer-sidebar__nav-link--active' : ''}`} title="Wishlist">
+              <Link to="/customer-wishlist" className={`customer-sidebar__nav-link ${location.pathname === '/customer-wishlist' ? 'customer-sidebar__nav-link--active' : ''}`} title="Wishlist" onClick={handleIconClick}>
                 <FavoriteIcon className="customer-sidebar__icon" />
                 <span className="customer-sidebar__text">My Reviews</span>
               </Link>
             </li>
             <li className="customer-sidebar__nav-item">
-              <Link to="/customer-orders" className={`customer-sidebar__nav-link ${location.pathname === '/customer-orders' ? 'customer-sidebar__nav-link--active' : ''}`} title="Order History">
+              <Link to="/customer-orders" className={`customer-sidebar__nav-link ${location.pathname === '/customer-orders' ? 'customer-sidebar__nav-link--active' : ''}`} title="Order History" onClick={handleIconClick}>
                 <HistoryIcon className="customer-sidebar__icon" />
                 <span className="customer-sidebar__text">Messages</span>
               </Link>
             </li>
             <li className="customer-sidebar__nav-item">
-              <Link to="/customer-settings" className={`customer-sidebar__nav-link ${location.pathname === '/customer-settings' ? 'customer-sidebar__nav-link--active' : ''}`} title="Settings">
+              <Link to="/customer-settings" className={`customer-sidebar__nav-link ${location.pathname === '/customer-settings' ? 'customer-sidebar__nav-link--active' : ''}`} title="Settings" onClick={handleIconClick}>
                 <SettingsIcon className="customer-sidebar__icon" />
                 <span className="customer-sidebar__text">Profile</span>
               </Link>
@@ -157,7 +183,7 @@ const CustomerSidebar = ({ onSidebarToggle }) => {
         </nav>
         {(!isMobileView || isSidebarOpen) && (
           <div className="customer-sidebar__footer">
-            <button className="customer-sidebar__logout-button" onClick={handleLogout}>
+            <button className="customer-sidebar__logout-button" onClick={handleLogoutClick}>
               <LogoutIcon className="customer-sidebar__icon" /> 
               <span className="customer-sidebar__text">Logout</span>
             </button>

@@ -386,6 +386,108 @@ app.post("/api/admin/create", async (req, res) => {
   }
 });
 
+// Create new MSME (Admin only)
+app.post("/api/admin/msme/create", async (req, res) => {
+  try {
+    const { 
+      username, 
+      password, 
+      businessName, 
+      category, 
+      address, 
+      contactNumber, 
+      clientProfilingNumber 
+    } = req.body;
+
+    // Validate required fields
+    if (!username || !password || !businessName || !category) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Username, password, business name, and category are required" 
+      });
+    }
+
+    // Validate category (only food and artisan allowed)
+    if (!['food', 'artisan'].includes(category)) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Category must be either 'food' or 'artisan'" 
+      });
+    }
+
+    // Check if MSME already exists
+    const existingMSME = await MSME.findOne({ username });
+    
+    if (existingMSME) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "MSME with this username already exists" 
+      });
+    }
+
+    // Check if clientProfilingNumber already exists (if provided)
+    if (clientProfilingNumber) {
+      const existingCPN = await MSME.findOne({ clientProfilingNumber });
+      if (existingCPN) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Client Profiling Number already exists" 
+        });
+      }
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Generate unique ID
+    const generateId = () => {
+      return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    };
+
+    // Create new MSME
+    const newMSME = new MSME({
+      id: generateId(),
+      username,
+      password: hashedPassword,
+      businessName,
+      category,
+      address: address || '',
+      contactNumber: contactNumber || '',
+      clientProfilingNumber: clientProfilingNumber || '',
+      status: 'approved' // Auto-approve MSMEs created by admin
+    });
+
+    await newMSME.save();
+
+    // Return MSME without password
+    const msmeResponse = {
+      id: newMSME.id,
+      _id: newMSME._id,
+      username: newMSME.username,
+      businessName: newMSME.businessName,
+      category: newMSME.category,
+      address: newMSME.address,
+      contactNumber: newMSME.contactNumber,
+      clientProfilingNumber: newMSME.clientProfilingNumber,
+      status: newMSME.status,
+      createdAt: newMSME.createdAt,
+      updatedAt: newMSME.updatedAt
+    };
+
+    res.status(201).json({ 
+      success: true, 
+      message: "MSME created successfully",
+      msme: msmeResponse
+    });
+  } catch (err) {
+    console.error("Error creating MSME:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error creating MSME" 
+    });
+  }
+});
+
 // Get all admins
 app.get("/api/admin/admins", async (req, res) => {
   try {

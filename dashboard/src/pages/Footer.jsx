@@ -7,13 +7,13 @@ import EmailIcon from '@mui/icons-material/Email';
 
 function Footer() {
   return (
- <footer class="footer">
-  <div class="footer-container">
+ <footer className="footer">
+  <div className="footer-container">
 
-    <div class="footer-brand">
-      <img src={logoDarkText} alt="ELako.NV Logo" class="footer-logo" />
+    <div className="footer-brand">
+      <img src={logoDarkText} alt="ELako.NV Logo" className="footer-logo" />
       <p> Digital Marketing  Solution For The Micro, Small, and 
-        Medium Enterprises MSME’s in Nueva Vizcaya</p>
+        Medium Enterprises MSME's in Nueva Vizcaya</p>
         
         <div style={{  gap: '30px', marginTop: 10 }}>
           <FacebookIcon style={{ color: 'white', fontSize: 30, cursor: 'pointer' }} />
@@ -23,8 +23,8 @@ function Footer() {
 
     </div>
 
-    <div class="footer-links">
-      <div class="footer-col">
+    <div className="footer-links">
+      <div className="footer-col">
         <h4>Services</h4>
         <ul>
           <li><a href="#">SEO Optimization</a></li>
@@ -35,7 +35,7 @@ function Footer() {
         </ul>
       </div>
 
-      <div class="footer-col">
+      <div className="footer-col">
         <h4>Company</h4>
         <ul>
           <li><a href="#">About Us</a></li>
@@ -46,7 +46,7 @@ function Footer() {
         </ul>
       </div>
 
-      <div class="footer-col">
+      <div className="footer-col">
         <h4>Contact</h4> 
         <ul>
           <li>Email: <a href="mailto:hello@elako.com">hello@elako.com</a></li>
@@ -56,7 +56,7 @@ function Footer() {
     </div>
   </div>
 
-  <div class="footer-bottom">
+  <div className="footer-bottom">
     © 2025 ELako.NV. All rights reserved.
   </div>
 </footer>

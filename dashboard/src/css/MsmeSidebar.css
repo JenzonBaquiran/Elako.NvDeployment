@@ -104,7 +104,7 @@
   width: 30px;
   height: 30px;
   cursor: pointer;
-  display: flex; /* Changed from display: none to display: flex */
+  display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -112,8 +112,9 @@
   z-index: 1001;
 }
 
+/* Hide toggle button when collapsed */
 .msme-sidebar.msme-sidebar--desktop.msme-sidebar--collapsed .msme-sidebar__desktop-toggle {
-  right: -15px;
+  display: none;
 }
 
 .msme-sidebar__desktop-toggle:hover {
@@ -188,6 +189,36 @@
 .msme-sidebar.msme-sidebar--desktop.msme-sidebar--collapsed .msme-sidebar__nav-link {
   justify-content: center;
   padding: 12px;
+  position: relative;
+}
+
+/* Tooltip for collapsed sidebar */
+.msme-sidebar.msme-sidebar--desktop.msme-sidebar--collapsed .msme-sidebar__nav-link:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: 70px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #313131;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1002;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.msme-sidebar.msme-sidebar--desktop.msme-sidebar--collapsed .msme-sidebar__nav-link:hover::before {
+  content: '';
+  position: absolute;
+  left: 65px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-right: 5px solid #313131;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  z-index: 1002;
 }
 
 /* Footer */
@@ -263,7 +294,7 @@
 }
 
 .msme-sidebar-burger-menu:hover {
-  background-color: #01a477;
+  background-color: #7ed957;
   transform: scale(1.05);
 }
 

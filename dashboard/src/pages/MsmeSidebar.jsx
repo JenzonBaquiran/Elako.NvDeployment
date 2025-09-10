@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
 import { useNotification } from '../components/NotificationProvider';
 import '../css/MsmeSidebar.css'; // Import the CSS file for styling
@@ -46,24 +46,49 @@ const MsmeSidebar = ({ onSidebarToggle }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Memoize the callback to prevent infinite re-renders
-  const notifyParent = useCallback(() => {
-    if (onSidebarToggle) {
-      onSidebarToggle({
-        isOpen: isSidebarOpen,
-        isMobile: isMobileView,
-        isCollapsed: !isSidebarOpen && !isMobileView
-      });
+  // Notify parent component when sidebar state changes - use ref to prevent infinite loops
+  const previousStateRef = useRef();
+  
+  useEffect(() => {
+    const currentState = {
+      isOpen: isSidebarOpen,
+      isMobile: isMobileView,
+      isCollapsed: !isSidebarOpen && !isMobileView
+    };
+    
+    // Only notify if state actually changed
+    if (onSidebarToggle && 
+        (!previousStateRef.current || 
+         previousStateRef.current.isOpen !== currentState.isOpen ||
+         previousStateRef.current.isMobile !== currentState.isMobile ||
+         previousStateRef.current.isCollapsed !== currentState.isCollapsed)) {
+      
+      previousStateRef.current = currentState;
+      onSidebarToggle(currentState);
     }
   }, [isSidebarOpen, isMobileView, onSidebarToggle]);
 
-  // Notify parent component when sidebar state changes
-  useEffect(() => {
-    notifyParent();
-  }, [notifyParent]);
-
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  // Handle icon click to expand sidebar when collapsed
+  const handleIconClick = (e) => {
+    if (!isMobileView && !isSidebarOpen) {
+      e.preventDefault(); // Prevent navigation
+      setIsSidebarOpen(true); // Expand sidebar
+    }
+    // If sidebar is open or on mobile, let normal navigation happen
+  };
+
+  // Handle logout with sidebar expansion check
+  const handleLogoutClick = (e) => {
+    if (!isMobileView && !isSidebarOpen) {
+      e.preventDefault();
+      setIsSidebarOpen(true);
+    } else {
+      handleLogout();
+    }
   };
 
   // Handle logout
@@ -103,9 +128,10 @@ const MsmeSidebar = ({ onSidebarToggle }) => {
               <ChevronLeftIcon />
             </button>
           )}
-          {!isMobileView && (
+          {/* Hide desktop toggle when collapsed */}
+          {!isMobileView && isSidebarOpen && (
             <button className="msme-sidebar__desktop-toggle" onClick={toggleSidebar}>
-              {isSidebarOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+              <ChevronLeftIcon />
             </button>
           )}
           {(!isMobileView || isSidebarOpen) && (
@@ -124,31 +150,31 @@ const MsmeSidebar = ({ onSidebarToggle }) => {
         <nav className="msme-sidebar__nav">
           <ul className="msme-sidebar__nav-list">
             <li className="msme-sidebar__nav-item">
-              <Link to="/msme-dashboard" className={`msme-sidebar__nav-link ${location.pathname === '/msme-dashboard' ? 'msme-sidebar__nav-link--active' : ''}`} title="Dashboard">
+              <Link to="/msme-dashboard" className={`msme-sidebar__nav-link ${location.pathname === '/msme-dashboard' ? 'msme-sidebar__nav-link--active' : ''}`} title="Dashboard" onClick={handleIconClick}>
                 <DashboardIcon className="msme-sidebar__icon" />
                 <span className="msme-sidebar__text">Dashboard</span>
               </Link>
             </li>
             <li className="msme-sidebar__nav-item">
-              <Link to="/msme-inventory" className={`msme-sidebar__nav-link ${location.pathname === '/msme-inventory' ? 'msme-sidebar__nav-link--active' : ''}`} title="Inventory">
+              <Link to="/msme-manage-product" className={`msme-sidebar__nav-link ${location.pathname === '/msme-manage-product' ? 'msme-sidebar__nav-link--active' : ''}`} title="Inventory" onClick={handleIconClick}>
                 <InventoryIcon className="msme-sidebar__icon" />
                 <span className="msme-sidebar__text">Manage Product</span>
               </Link>
             </li>
             <li className="msme-sidebar__nav-item">
-              <Link to="/msme-business" className={`msme-sidebar__nav-link ${location.pathname === '/msme-business' ? 'msme-sidebar__nav-link--active' : ''}`} title="Business">
+              <Link to="/msme-business" className={`msme-sidebar__nav-link ${location.pathname === '/msme-business' ? 'msme-sidebar__nav-link--active' : ''}`} title="Business" onClick={handleIconClick}>
                 <ApartmentIcon className="msme-sidebar__icon" />
                 <span className="msme-sidebar__text">Growth & Analytics</span>
               </Link>
             </li>
             <li className="msme-sidebar__nav-item">
-              <Link to="/msme-analytics" className={`msme-sidebar__nav-link ${location.pathname === '/msme-analytics' ? 'msme-sidebar__nav-link--active' : ''}`} title="Analytics">
+              <Link to="/msme-analytics" className={`msme-sidebar__nav-link ${location.pathname === '/msme-analytics' ? 'msme-sidebar__nav-link--active' : ''}`} title="Analytics" onClick={handleIconClick}>
                 <AnalyticsIcon className="msme-sidebar__icon" />
                 <span className="msme-sidebar__text">Messages</span>
               </Link>
             </li>
             <li className="msme-sidebar__nav-item">
-              <Link to="/msme-settings" className={`msme-sidebar__nav-link ${location.pathname === '/msme-settings' ? 'msme-sidebar__nav-link--active' : ''}`} title="Settings">
+              <Link to="/msme-settings" className={`msme-sidebar__nav-link ${location.pathname === '/msme-settings' ? 'msme-sidebar__nav-link--active' : ''}`} title="Settings" onClick={handleIconClick}>
                 <SettingsIcon className="msme-sidebar__icon" />
                 <span className="msme-sidebar__text">Profile</span>
               </Link>
@@ -157,7 +183,7 @@ const MsmeSidebar = ({ onSidebarToggle }) => {
         </nav>
         {(!isMobileView || isSidebarOpen) && (
           <div className="msme-sidebar__footer">
-            <button className="msme-sidebar__logout-button" onClick={handleLogout}>
+            <button className="msme-sidebar__logout-button" onClick={handleLogoutClick}>
               <LogoutIcon className="msme-sidebar__icon" /> 
               <span className="msme-sidebar__text">Logout</span>
             </button>

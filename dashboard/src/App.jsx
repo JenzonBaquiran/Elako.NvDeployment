@@ -8,6 +8,7 @@ import AdminUserManagement from "./pages/AdminUserManagement";
 import MsmeSidebar from "./pages/MsmeSidebar";
 import CustomerSidebar from "./pages/CustomerSidebar";
 import NotificationProvider from "./components/NotificationProvider";
+import MsmeManageProduct from "./pages/MsmeManageProduct";
 
 
 
@@ -22,6 +23,7 @@ function App() {
           <Route path="/admin-user-management" element={<AdminUserManagement />} />
           <Route path="/msme-sidebar" element={<MsmeSidebar />} />
           <Route path="/customer-sidebar" element={<CustomerSidebar />} />
+          <Route path="/msme-manage-product" element={<MsmeManageProduct />} />
         </Routes>
       </BrowserRouter>
     </NotificationProvider>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
 import { useNotification } from '../components/NotificationProvider';
 import '../css/AdminSidebar.css'; // Import the CSS file for styling
@@ -37,24 +37,49 @@ const AdminSidebar = ({ onSidebarToggle }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Memoize the callback to prevent infinite re-renders
-  const notifyParent = useCallback(() => {
-    if (onSidebarToggle) {
-      onSidebarToggle({
-        isOpen: isSidebarOpen,
-        isMobile: isMobileView,
-        isCollapsed: !isSidebarOpen && !isMobileView
-      });
+  // Notify parent component when sidebar state changes - use ref to prevent infinite loops
+  const previousStateRef = useRef();
+  
+  useEffect(() => {
+    const currentState = {
+      isOpen: isSidebarOpen,
+      isMobile: isMobileView,
+      isCollapsed: !isSidebarOpen && !isMobileView
+    };
+    
+    // Only notify if state actually changed
+    if (onSidebarToggle && 
+        (!previousStateRef.current || 
+         previousStateRef.current.isOpen !== currentState.isOpen ||
+         previousStateRef.current.isMobile !== currentState.isMobile ||
+         previousStateRef.current.isCollapsed !== currentState.isCollapsed)) {
+      
+      previousStateRef.current = currentState;
+      onSidebarToggle(currentState);
     }
   }, [isSidebarOpen, isMobileView, onSidebarToggle]);
 
-  // Notify parent component when sidebar state changes
-  useEffect(() => {
-    notifyParent();
-  }, [notifyParent]);
-
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  // Handle icon click to expand sidebar when collapsed
+  const handleIconClick = (e) => {
+    if (!isMobileView && !isSidebarOpen) {
+      e.preventDefault(); // Prevent navigation
+      setIsSidebarOpen(true); // Expand sidebar
+    }
+    // If sidebar is open or on mobile, let normal navigation happen
+  };
+
+  // Handle logout with sidebar expansion check
+  const handleLogoutClick = (e) => {
+    if (!isMobileView && !isSidebarOpen) {
+      e.preventDefault();
+      setIsSidebarOpen(true);
+    } else {
+      handleLogout();
+    }
   };
 
   // Handle logout
@@ -68,13 +93,11 @@ const AdminSidebar = ({ onSidebarToggle }) => {
     // Dispatch custom event to notify other components
     window.dispatchEvent(new Event('userStatusChanged'));
     
-    // Redirect immediately without delay
-    navigate("/");
+    // Show success message immediately
+    showSuccess("You have been logged out successfully", "Goodbye!");
     
-    // Show success message after redirect (with shorter duration)
-    setTimeout(() => {
-      showSuccess("You have been logged out successfully", "Goodbye!");
-    }, 100);
+    // Redirect immediately
+    navigate("/");
   };
 
   return (
@@ -94,9 +117,10 @@ const AdminSidebar = ({ onSidebarToggle }) => {
               <ChevronLeftIcon />
             </button>
           )}
-          {!isMobileView && (
+          {/* Hide desktop toggle when collapsed */}
+          {!isMobileView && isSidebarOpen && (
             <button className="admin-sidebar__desktop-toggle" onClick={toggleSidebar}>
-              {isSidebarOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+              <ChevronLeftIcon />
             </button>
           )}
           {(!isMobileView || isSidebarOpen) && (
@@ -108,31 +132,31 @@ const AdminSidebar = ({ onSidebarToggle }) => {
         <nav className="admin-sidebar__nav">
           <ul className="admin-sidebar__nav-list">
             <li className="admin-sidebar__nav-item">
-              <Link to="/admin-dashboard" className={`admin-sidebar__nav-link ${location.pathname === '/admin-dashboard' ? 'admin-sidebar__nav-link--active' : ''}`} title="Overview">
+              <Link to="/admin-dashboard" className={`admin-sidebar__nav-link ${location.pathname === '/admin-dashboard' ? 'admin-sidebar__nav-link--active' : ''}`} title="Overview" onClick={handleIconClick}>
                 <DashboardIcon className="admin-sidebar__icon" />
                 <span className="admin-sidebar__text">Overview</span>
               </Link>
             </li>
             <li className="admin-sidebar__nav-item">
-              <Link to="/admin-user-management" className={`admin-sidebar__nav-link ${location.pathname === '/admin-user-management' ? 'admin-sidebar__nav-link--active' : ''}`} title="User Management">
+              <Link to="/admin-user-management" className={`admin-sidebar__nav-link ${location.pathname === '/admin-user-management' ? 'admin-sidebar__nav-link--active' : ''}`} title="User Management" onClick={handleIconClick}>
                 <InventoryIcon className="admin-sidebar__icon" />
                 <span className="admin-sidebar__text">User Management</span>
               </Link>
             </li>
             <li className="admin-sidebar__nav-item">
-              <Link to="/msme-oversight" className={`admin-sidebar__nav-link ${location.pathname === '/msme-oversight' ? 'admin-sidebar__nav-link--active' : ''}`} title="MSME Oversight">
+              <Link to="/msme-oversight" className={`admin-sidebar__nav-link ${location.pathname === '/msme-oversight' ? 'admin-sidebar__nav-link--active' : ''}`} title="MSME Oversight" onClick={handleIconClick}>
                 <ApartmentIcon className="admin-sidebar__icon" />
                 <span className="admin-sidebar__text">MSME Oversight</span>
               </Link>
             </li>
             <li className="admin-sidebar__nav-item">
-              <Link to="/platform-analytics" className={`admin-sidebar__nav-link ${location.pathname === '/platform-analytics' ? 'admin-sidebar__nav-link--active' : ''}`} title="Platform Analytics">
+              <Link to="/platform-analytics" className={`admin-sidebar__nav-link ${location.pathname === '/platform-analytics' ? 'admin-sidebar__nav-link--active' : ''}`} title="Platform Analytics" onClick={handleIconClick}>
                 <AnalyticsIcon className="admin-sidebar__icon" />
                 <span className="admin-sidebar__text">Platform Analytics</span>
               </Link>
             </li>
             <li className="admin-sidebar__nav-item">
-              <Link to="/settings" className={`admin-sidebar__nav-link ${location.pathname === '/settings' ? 'admin-sidebar__nav-link--active' : ''}`} title="Settings">
+              <Link to="/settings" className={`admin-sidebar__nav-link ${location.pathname === '/settings' ? 'admin-sidebar__nav-link--active' : ''}`} title="Settings" onClick={handleIconClick}>
                 <SettingsIcon className="admin-sidebar__icon" />
                 <span className="admin-sidebar__text">Settings</span>
               </Link>
@@ -141,7 +165,7 @@ const AdminSidebar = ({ onSidebarToggle }) => {
         </nav>
         {(!isMobileView || isSidebarOpen) && (
           <div className="admin-sidebar__footer">
-            <button className="admin-sidebar__logout-button" onClick={handleLogout}>
+            <button className="admin-sidebar__logout-button" onClick={handleLogoutClick}>
               <LogoutIcon className="admin-sidebar__icon" /> 
               <span className="admin-sidebar__text">Logout</span>
             </button>

@@ -84,7 +84,7 @@
   width: 30px;
   height: 30px;
   cursor: pointer;
-  display: flex; /* Changed from display: none to display: flex */
+  display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
@@ -92,8 +92,9 @@
   z-index: 1001;
 }
 
+/* Hide toggle button when collapsed */
 .admin-sidebar.admin-sidebar--desktop.admin-sidebar--collapsed .admin-sidebar__desktop-toggle {
-  right: -15px;
+  display: none;
 }
 
 .admin-sidebar__desktop-toggle:hover {
@@ -168,6 +169,39 @@
 .admin-sidebar.admin-sidebar--desktop.admin-sidebar--collapsed .admin-sidebar__nav-link {
   justify-content: center;
   padding: 12px;
+  cursor: pointer;
+  position: relative;
+}
+
+/* Add hover effect for collapsed icons */
+.admin-sidebar.admin-sidebar--desktop.admin-sidebar--collapsed .admin-sidebar__nav-link:hover {
+  background-color: #92e575;
+  transform: scale(1.1);
+}
+
+/* Add tooltip effect when collapsed */
+.admin-sidebar.admin-sidebar--desktop.admin-sidebar--collapsed .admin-sidebar__nav-link::after {
+  content: attr(title);
+  position: absolute;
+  left: 80px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #313131;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 1002;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.admin-sidebar.admin-sidebar--desktop.admin-sidebar--collapsed .admin-sidebar__nav-link:hover::after {
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Footer */
@@ -243,7 +277,7 @@
 }
 
 .admin-sidebar-burger-menu:hover {
-  background-color: #01a477;
+  background-color: #7ed957;
   transform: scale(1.05);
 }
 

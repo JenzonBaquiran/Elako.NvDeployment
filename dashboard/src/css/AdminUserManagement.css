@@ -351,6 +351,76 @@
   grid-column: 1 / -1;
 }
 
+/* Modal Action Buttons */
+.admin-user-management__modal-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+
+.admin-user-management__modal-action-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 100px;
+  background: #313131;
+  color: white;
+}
+
+.admin-user-management__modal-action-btn:hover {
+  background: #7ed957;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(126, 217, 87, 0.3);
+}
+
+.admin-user-management__modal-action-btn--approve {
+  background: #313131;
+  color: white;
+}
+
+.admin-user-management__modal-action-btn--approve:hover {
+  background: #7ed957;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(126, 217, 87, 0.3);
+}
+
+.admin-user-management__modal-action-btn--reject {
+  background: #313131;
+  color: white;
+}
+
+.admin-user-management__modal-action-btn--reject:hover {
+  background: #7ed957;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(126, 217, 87, 0.3);
+}
+
+.admin-user-management__modal-action-btn--delete {
+  background: #313131;
+  color: white;
+}
+
+.admin-user-management__modal-action-btn--delete:hover {
+  background: #7ed957;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(126, 217, 87, 0.3);
+}
+
+.admin-user-management__modal-action-btn:active {
+  transform: translateY(0);
+}
+
 .admin-user-management__user-info {
   display: flex;
   flex-direction: column;
@@ -683,7 +753,13 @@
   flex: 1;
 }
 
-.admin-user-management__add-admin-btn {
+/* Add User Dropdown Styles */
+.admin-user-management__add-user-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.admin-user-management__add-user-btn {
   background: #313131;
   color: white;
   border: none;
@@ -699,14 +775,75 @@
   gap: 8px;
 }
 
-.admin-user-management__add-admin-btn:hover {
+.admin-user-management__add-user-btn:hover {
   background: #7ed957;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(126, 217, 87, 0.3);
 }
 
-.admin-user-management__add-admin-btn:active {
+.admin-user-management__add-user-btn:active {
   transform: translateY(0);
+}
+
+.admin-user-management__dropdown-arrow {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.admin-user-management__add-user-dropdown.show .admin-user-management__dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.admin-user-management__add-user-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 150px;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+}
+
+.admin-user-management__add-user-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.admin-user-management__add-user-option {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.admin-user-management__add-user-option:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.admin-user-management__add-user-option:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
+.admin-user-management__add-user-option:hover {
+  background-color: #f5f5f5;
+}
+
+.admin-user-management__add-user-option:active {
+  background-color: #7ed957;
+  color: white;
 }
 
 /* Add Admin Modal Styles */
@@ -715,7 +852,14 @@
   width: 90%;
 }
 
-.admin-user-management__admin-form {
+/* Add MSME Modal Styles */
+.admin-user-management__modal--add-msme {
+  max-width: 600px;
+  width: 90%;
+}
+
+.admin-user-management__admin-form,
+.admin-user-management__msme-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -818,9 +962,19 @@
     gap: 16px;
   }
 
-  .admin-user-management__add-admin-btn {
+  .admin-user-management__add-user-dropdown {
     align-self: stretch;
+  }
+
+  .admin-user-management__add-user-btn {
+    width: 100%;
     justify-content: center;
+  }
+
+  .admin-user-management__add-user-menu {
+    right: 0;
+    left: 0;
+    width: auto;
   }
 
   .admin-user-management__form-row {
@@ -836,9 +990,70 @@
     width: 100%;
   }
 
-  .admin-user-management__modal--add-admin {
+  .admin-user-management__modal--add-admin,
+  .admin-user-management__modal--add-msme {
     width: 95%;
     max-height: 90vh;
     overflow-y: auto;
+  }
+
+  .admin-user-management__modal {
+    width: 95%;
+    max-width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    margin: 20px auto;
+  }
+
+  .admin-user-management__modal-content {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .admin-user-management__modal-actions {
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .admin-user-management__modal-action-btn {
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 16px;
+  }
+}
+
+/* Extra small screens (smartphones in portrait) */
+@media (max-width: 480px) {
+  .admin-user-management__modal {
+    width: 98%;
+    padding: 20px;
+    margin: 10px auto;
+    max-height: 95vh;
+  }
+
+  .admin-user-management__modal-content {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .admin-user-management__modal-actions {
+    margin-top: 15px;
+    padding-top: 15px;
+    gap: 10px;
+  }
+
+  .admin-user-management__modal-action-btn {
+    width: 100%;
+    padding: 16px 20px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .admin-user-management__modal-avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+    margin-bottom: 20px;
   }
 }

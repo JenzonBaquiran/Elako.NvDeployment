@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Add, Message, Analytics, Settings } from '@mui/icons-material';
 import MsmeSidebar from './MsmeSidebar';
 import '../css/MsmeDashboard.css';
 
@@ -141,28 +142,28 @@ const MsmeDashboard = () => {
               className="msme-dashboard__action-btn msme-dashboard__action-btn--primary"
               onClick={() => navigate('/msme-manage-product')}
             >
-              <span className="msme-dashboard__action-icon">+</span>
+              <Add className="msme-dashboard__action-icon" />
               <span className="msme-dashboard__action-text">Add Product</span>
             </button>
             <button 
               className="msme-dashboard__action-btn msme-dashboard__action-btn--secondary"
               onClick={() => navigate('/msme-messages')}
             >
-              <span className="msme-dashboard__action-icon">@</span>
+              <Message className="msme-dashboard__action-icon" />
               <span className="msme-dashboard__action-text">View Messages</span>
             </button>
             <button 
               className="msme-dashboard__action-btn msme-dashboard__action-btn--success"
               onClick={() => navigate('/msme-analytics')}
             >
-              <span className="msme-dashboard__action-icon">#</span>
+              <Analytics className="msme-dashboard__action-icon" />
               <span className="msme-dashboard__action-text">Check Analytics</span>
             </button>
             <button 
               className="msme-dashboard__action-btn msme-dashboard__action-btn--info"
               onClick={() => navigate('/msme-profile')}
             >
-              <span className="msme-dashboard__action-icon">*</span>
+              <Settings className="msme-dashboard__action-icon" />
               <span className="msme-dashboard__action-text">Settings</span>
             </button>
           </div>

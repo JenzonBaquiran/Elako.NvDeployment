@@ -342,7 +342,9 @@
 }
 
 .msme-dashboard__action-icon {
-  font-size: 18px;
+  font-size: 20px !important;
+  width: 20px;
+  height: 20px;
 }
 
 .msme-dashboard__action-text {

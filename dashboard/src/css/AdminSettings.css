@@ -1,0 +1,416 @@
+/* Main container and layout */
+.admin-settings {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.admin-settings__content {
+  flex-grow: 1;
+  padding: 24px;
+  margin-left: 0;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  transition: all 0.3s ease-in-out;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  
+}
+
+.admin-settings__content--sidebar-open {
+  margin-left: 250px;
+  width: calc(100vw - 250px);
+  max-width: calc(100vw - 250px);
+}
+
+.admin-settings__content--sidebar-collapsed {
+  margin-left: 70px;
+  width: calc(100vw - 70px);
+  max-width: calc(100vw - 70px);
+}
+
+.admin-settings__content--mobile {
+  margin-left: 0;
+  width: 100vw;
+  max-width: 100vw;
+}
+
+/* Header */
+.admin-settings__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.admin-settings__header h1 {
+  font-size: 24px;
+  color: #313131;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+.admin-settings__edit-btn {
+  background-color: #313131;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-settings__edit-btn:hover {
+  background-color: #7ed957;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(126, 217, 87, 0.3);
+}
+
+/* Layout */
+.admin-settings__layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Section styling */
+.admin-settings__section {
+  background: white;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 2px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.admin-settings__section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #313131;
+}
+
+.admin-settings__section h2 {
+  color: #313131;
+  font-size: 18px;
+  margin-bottom: 24px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+/* Profile Information */
+.admin-settings__profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.admin-settings__profile-avatar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.admin-settings__avatar {
+  width: 80px;
+  height: 80px;
+  background-color: #313131;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: white;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.admin-settings__avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(49, 49, 49, 0.3);
+}
+
+.admin-settings__profile-title h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  color: #313131;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+.admin-settings__profile-title p {
+  margin: 0 0 12px 0;
+  color: #666;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+}
+
+.admin-settings__role-badge {
+  display: inline-block;
+  background-color: #7ed957;
+  color: #313131;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Info Grid */
+.admin-settings__info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.admin-settings__info-item {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.admin-settings__info-item:hover {
+  background: #e9ecef;
+  transform: translateY(-1px);
+}
+
+.admin-settings__info-item label,
+.admin-settings__bio-section label {
+  display: block;
+  color: #666;
+  font-size: 12px;
+  margin-bottom: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-settings__info-item p,
+.admin-settings__bio-section p {
+  margin: 0;
+  color: #313131;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Bio Section */
+.admin-settings__bio-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.admin-settings__bio-section:hover {
+  background: #e9ecef;
+  transform: translateY(-1px);
+}
+
+/* Statistics */
+.admin-settings__stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+}
+
+.admin-settings__stat-item {
+  text-align: center;
+  padding: 24px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.admin-settings__stat-item:hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.admin-settings__stat-item label {
+  display: block;
+  color: #666;
+  font-size: 12px;
+  margin-bottom: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-settings__stat-item p {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #313131;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Account Options */
+.admin-settings__account-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.admin-settings__settings-btn {
+  background: white;
+  border: 2px solid #313131;
+  padding: 16px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #313131;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-settings__settings-btn:hover {
+  background: #313131;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(49, 49, 49, 0.3);
+}
+
+.admin-settings__settings-btn--delete {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.admin-settings__settings-btn--delete:hover {
+  background: #dc3545;
+  color: white;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .admin-settings__content,
+  .admin-settings__content--sidebar-open,
+  .admin-settings__content--sidebar-collapsed,
+  .admin-settings__content--mobile {
+    margin-left: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    padding: 16px;
+  }
+
+  .admin-settings__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .admin-settings__header h1 {
+    font-size: 20px;
+  }
+
+  .admin-settings__edit-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .admin-settings__section {
+    padding: 24px 20px;
+  }
+
+  .admin-settings__profile-avatar {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .admin-settings__avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 24px;
+    align-self: center;
+  }
+
+  .admin-settings__info-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .admin-settings__stats-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .admin-settings__account-options {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .admin-settings__stat-item p {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-settings__content {
+    padding: 12px;
+  }
+
+  .admin-settings__header h1 {
+    font-size: 18px;
+  }
+
+  .admin-settings__section {
+    padding: 20px 16px;
+    border-radius: 8px;
+  }
+
+  .admin-settings__section h2 {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+  .admin-settings__avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 20px;
+  }
+
+  .admin-settings__profile-title h3 {
+    font-size: 18px;
+  }
+
+  .admin-settings__info-item,
+  .admin-settings__bio-section,
+  .admin-settings__stat-item {
+    padding: 16px;
+  }
+
+  .admin-settings__stat-item p {
+    font-size: 20px;
+  }
+
+  .admin-settings__settings-btn {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+}

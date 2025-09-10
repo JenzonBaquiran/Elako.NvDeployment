@@ -143,20 +143,16 @@ const MsmeProfile = () => {
             </div>
             <div className="msme-profile__settings-grid">
               <button className="msme-profile__setting-btn msme-profile__setting-btn--primary">
-                <span className="msme-profile__setting-icon">🔒</span>
-                <span className="msme-profile__setting-text">Change Password</span>
+                Change Password
               </button>
               <button className="msme-profile__setting-btn msme-profile__setting-btn--secondary">
-                <span className="msme-profile__setting-icon">🔔</span>
-                <span className="msme-profile__setting-text">Notification Preferences</span>
+                Privacy Settings
               </button>
               <button className="msme-profile__setting-btn msme-profile__setting-btn--info">
-                <span className="msme-profile__setting-icon">🛡️</span>
-                <span className="msme-profile__setting-text">Privacy Settings</span>
+                Notification Preferences
               </button>
               <button className="msme-profile__setting-btn msme-profile__setting-btn--danger">
-                <span className="msme-profile__setting-icon">⚠️</span>
-                <span className="msme-profile__setting-text">Delete Account</span>
+                Delete Account
               </button>
             </div>
           </div>

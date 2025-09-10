@@ -132,7 +132,7 @@ const AdminSidebar = ({ onSidebarToggle }) => {
         <nav className="admin-sidebar__nav">
           <ul className="admin-sidebar__nav-list">
             <li className="admin-sidebar__nav-item">
-              <Link to="/admin-dashboard" className={`admin-sidebar__nav-link ${location.pathname === '/admin-dashboard' ? 'admin-sidebar__nav-link--active' : ''}`} title="Overview" onClick={handleIconClick}>
+              <Link to="/admin-overview" className={`admin-sidebar__nav-link ${location.pathname === '/admin-overview' ? 'admin-sidebar__nav-link--active' : ''}`} title="Overview" onClick={handleIconClick}>
                 <DashboardIcon className="admin-sidebar__icon" />
                 <span className="admin-sidebar__text">Overview</span>
               </Link>
@@ -144,19 +144,19 @@ const AdminSidebar = ({ onSidebarToggle }) => {
               </Link>
             </li>
             <li className="admin-sidebar__nav-item">
-              <Link to="/msme-oversight" className={`admin-sidebar__nav-link ${location.pathname === '/msme-oversight' ? 'admin-sidebar__nav-link--active' : ''}`} title="MSME Oversight" onClick={handleIconClick}>
+              <Link to="/admin-msme-oversight" className={`admin-sidebar__nav-link ${location.pathname === '/admin-msme-oversight' ? 'admin-sidebar__nav-link--active' : ''}`} title="MSME Oversight" onClick={handleIconClick}>
                 <ApartmentIcon className="admin-sidebar__icon" />
                 <span className="admin-sidebar__text">MSME Oversight</span>
               </Link>
             </li>
             <li className="admin-sidebar__nav-item">
-              <Link to="/platform-analytics" className={`admin-sidebar__nav-link ${location.pathname === '/platform-analytics' ? 'admin-sidebar__nav-link--active' : ''}`} title="Platform Analytics" onClick={handleIconClick}>
+              <Link to="/admin-analytics" className={`admin-sidebar__nav-link ${location.pathname === '/admin-analytics' ? 'admin-sidebar__nav-link--active' : ''}`} title="Platform Analytics" onClick={handleIconClick}>
                 <AnalyticsIcon className="admin-sidebar__icon" />
-                <span className="admin-sidebar__text">Platform Analytics</span>
+                <span className="admin-sidebar__text">MSME Analytics</span>
               </Link>
             </li>
             <li className="admin-sidebar__nav-item">
-              <Link to="/settings" className={`admin-sidebar__nav-link ${location.pathname === '/settings' ? 'admin-sidebar__nav-link--active' : ''}`} title="Settings" onClick={handleIconClick}>
+              <Link to="/admin-settings" className={`admin-sidebar__nav-link ${location.pathname === '/settings' ? 'admin-sidebar__nav-link--active' : ''}`} title="Settings" onClick={handleIconClick}>
                 <SettingsIcon className="admin-sidebar__icon" />
                 <span className="admin-sidebar__text">Settings</span>
               </Link>

@@ -13,6 +13,10 @@ import MsmeDashboard from "./pages/MsmeDashboard";
 import MsmeMessage from "./pages/MsmeMessage";
 import MsmeAnalytics from "./pages/MsmeAnalytics";
 import MsmeProfile from "./pages/MsmeProfile";
+import AdminOverview from "./pages/AdminOverview";
+import AdminMsmeOversight from "./pages/AdminMsmeOversight";
+import AdminAnalytics from "./pages/AdminAnalytics";
+import AdminSettings from "./pages/AdminSettings";
 
 
 
@@ -32,6 +36,10 @@ function App() {
           <Route path="/msme-messages" element={<MsmeMessage />} />
           <Route path="/msme-analytics" element={<MsmeAnalytics />} />
           <Route path="/msme-profile" element={<MsmeProfile />} />
+          <Route path="/admin-overview" element={<AdminOverview />} />
+          <Route path="/admin-msme-oversight" element={<AdminMsmeOversight />} />
+          <Route path="/admin-analytics" element={<AdminAnalytics />} />
+          <Route path="/admin-settings" element={<AdminSettings />} />
 
         </Routes>
       </BrowserRouter>

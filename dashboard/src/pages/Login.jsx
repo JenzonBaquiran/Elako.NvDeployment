@@ -82,7 +82,7 @@ function Login() {
           localStorage.setItem("msmeUser", JSON.stringify(data.user));
           window.dispatchEvent(new Event('userStatusChanged'));
           showSuccess("Login successful! Welcome back.", "Welcome");
-          navigate("/msme-sidebar");
+          navigate("/msme-dashboard");
         } else if (data.user.status === "pending") {
           showError("Your account is pending approval. Please wait for admin approval.", "Account Pending");
         } else if (data.user.status === "rejected") {

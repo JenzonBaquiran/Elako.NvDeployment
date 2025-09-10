@@ -1,0 +1,474 @@
+/* Main container and layout */
+.msme-profile {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.msme-profile__content {
+  flex-grow: 1;
+  padding: 24px;
+  margin-left: 0;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  transition: all 0.3s ease-in-out;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.msme-profile__content--sidebar-open {
+  margin-left: 250px;
+  width: calc(100vw - 250px);
+  max-width: calc(100vw - 250px);
+}
+
+.msme-profile__content--sidebar-collapsed {
+  margin-left: 70px;
+  width: calc(100vw - 70px);
+  max-width: calc(100vw - 70px);
+}
+
+.msme-profile__content--mobile {
+  margin-left: 0;
+  width: 100vw;
+  max-width: 100vw;
+}
+
+.msme-profile__header {
+  margin-bottom: 32px;
+}
+
+.msme-profile__header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.msme-profile__header-text h1 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+.msme-profile__header-text p {
+  color: #666;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+}
+
+.msme-profile__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.msme-profile__save-btn,
+.msme-profile__preview-btn {
+  background: #313131;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-profile__save-btn:hover,
+.msme-profile__preview-btn:hover {
+  background: #7ed957;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(126, 217, 87, 0.3);
+}
+
+/* Stats section - matching AdminUserManagement */
+.msme-profile__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.msme-profile__stat-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  padding: 24px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 2px solid #f0f0f0;
+  min-width: 160px;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.msme-profile__stat-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #313131;
+}
+
+.msme-profile__stat-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #313131;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.msme-profile__stat-label {
+  font-size: 14px;
+  color: #666;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Content grid */
+.msme-profile__content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.msme-profile__card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 2px solid #f0f0f0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.msme-profile__card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #313131;
+}
+
+.msme-profile__card-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+}
+
+.msme-profile__card-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-profile__edit-btn {
+  background: #313131;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-profile__edit-btn:hover {
+  background: #7ed957;
+  transform: translateY(-1px);
+}
+
+/* Personal info content */
+.msme-profile__info-content {
+  padding: 24px;
+  display: flex;
+  gap: 24px;
+}
+
+.msme-profile__avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.msme-profile__avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.msme-profile__avatar:hover {
+  border-color: #7ed957;
+  transform: scale(1.05);
+}
+
+.msme-profile__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.msme-profile__upload-btn {
+  background: #313131;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-profile__upload-btn:hover {
+  background: #7ed957;
+}
+
+.msme-profile__info-fields {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.msme-profile__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.msme-profile__field--full {
+  grid-column: 1 / -1;
+}
+
+.msme-profile__field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-profile__field span {
+  font-size: 14px;
+  color: #333;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.4;
+}
+
+/* Business info content */
+.msme-profile__business-content {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.msme-profile__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.msme-profile__tag {
+  background: #f0f0f0;
+  color: #333;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.msme-profile__tag:hover {
+  background: #7ed957;
+  color: white;
+}
+
+/* Account settings */
+.msme-profile__account-settings {
+  margin-bottom: 32px;
+}
+
+.msme-profile__settings-grid {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.msme-profile__setting-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  text-align: left;
+  font-family: 'Poppins', sans-serif;
+  background: #313131;
+  color: white;
+}
+
+.msme-profile__setting-btn:hover {
+  background: #7ed957;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(126, 217, 87, 0.3);
+}
+
+.msme-profile__setting-btn--danger {
+  background: #dc3545;
+}
+
+.msme-profile__setting-btn--danger:hover {
+  background: #c82333;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.msme-profile__setting-icon {
+  font-size: 18px;
+}
+
+.msme-profile__setting-text {
+  font-weight: 500;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .msme-profile__content {
+    margin-left: 0;
+    width: 100vw;
+    max-width: 100vw;
+    padding: 16px;
+  }
+
+  .msme-profile__content--sidebar-open,
+  .msme-profile__content--sidebar-collapsed {
+    margin-left: 0;
+    width: 100vw;
+    max-width: 100vw;
+  }
+
+  .msme-profile__header-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .msme-profile__actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .msme-profile__save-btn,
+  .msme-profile__preview-btn {
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .msme-profile__stats {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+  }
+
+  .msme-profile__content-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .msme-profile__info-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .msme-profile__info-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .msme-profile__business-content {
+    grid-template-columns: 1fr;
+  }
+
+  .msme-profile__settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .msme-profile__content {
+    padding: 12px;
+  }
+
+  .msme-profile__header-text h1 {
+    font-size: 20px;
+  }
+
+  .msme-profile__stat-box {
+    padding: 20px 16px;
+  }
+
+  .msme-profile__stat-value {
+    font-size: 28px;
+  }
+
+  .msme-profile__card {
+    border-radius: 8px;
+  }
+
+  .msme-profile__card-header {
+    padding: 16px 20px;
+  }
+
+  .msme-profile__info-content {
+    padding: 20px;
+  }
+
+  .msme-profile__avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .msme-profile__business-content {
+    padding: 20px;
+  }
+
+  .msme-profile__settings-grid {
+    padding: 20px;
+  }
+
+  .msme-profile__setting-btn {
+    padding: 14px 16px;
+    font-size: 13px;
+  }
+}

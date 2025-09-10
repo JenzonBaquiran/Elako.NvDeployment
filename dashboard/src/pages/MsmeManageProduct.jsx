@@ -43,9 +43,7 @@ const MsmeManageProduct = () => {
             </div>
           </div>
         </div>
-        
         <div className="msme-manage-product-filters">
-          <h2>Filters</h2>
           <div className="msme-manage-product-filters-row">
             <input 
               type="text" 

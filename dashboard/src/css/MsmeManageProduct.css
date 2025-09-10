@@ -323,13 +323,19 @@
 
   .msme-manage-product-filters-row {
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
   }
 
   .msme-manage-product-search-input,
   .msme-manage-product-filter-select {
     width: 100%;
     min-width: unset;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .msme-manage-product-filter-select {
+    height: 44px;
   }
 
   .msme-manage-product-grid {
@@ -353,6 +359,23 @@
     padding: 0.6rem 1rem;
     font-size: 0.8rem;
     width: 100%;
+  }
+
+  .msme-manage-product-filters-row {
+    gap: 6px;
+  }
+
+  .msme-manage-product-search-input,
+  .msme-manage-product-filter-select {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    height: 40px;
+    box-sizing: border-box;
+  }
+
+  .msme-manage-product-filters h2 {
+    font-size: 1rem;
+    margin-bottom: 12px;
   }
 
   .msme-manage-product-grid {

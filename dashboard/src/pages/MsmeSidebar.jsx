@@ -162,19 +162,19 @@ const MsmeSidebar = ({ onSidebarToggle }) => {
               </Link>
             </li>
             <li className="msme-sidebar__nav-item">
-              <Link to="/msme-business" className={`msme-sidebar__nav-link ${location.pathname === '/msme-business' ? 'msme-sidebar__nav-link--active' : ''}`} title="Business" onClick={handleIconClick}>
+              <Link to="/msme-analytics" className={`msme-sidebar__nav-link ${location.pathname === '/msme-analytics' ? 'msme-sidebar__nav-link--active' : ''}`} title="Business" onClick={handleIconClick}>
                 <ApartmentIcon className="msme-sidebar__icon" />
                 <span className="msme-sidebar__text">Growth & Analytics</span>
               </Link>
             </li>
             <li className="msme-sidebar__nav-item">
-              <Link to="/msme-analytics" className={`msme-sidebar__nav-link ${location.pathname === '/msme-analytics' ? 'msme-sidebar__nav-link--active' : ''}`} title="Analytics" onClick={handleIconClick}>
+              <Link to="/msme-messages" className={`msme-sidebar__nav-link ${location.pathname === '/msme-messages' ? 'msme-sidebar__nav-link--active' : ''}`} title="Messages" onClick={handleIconClick}>
                 <AnalyticsIcon className="msme-sidebar__icon" />
                 <span className="msme-sidebar__text">Messages</span>
               </Link>
             </li>
             <li className="msme-sidebar__nav-item">
-              <Link to="/msme-settings" className={`msme-sidebar__nav-link ${location.pathname === '/msme-settings' ? 'msme-sidebar__nav-link--active' : ''}`} title="Settings" onClick={handleIconClick}>
+              <Link to="/msme-profile" className={`msme-sidebar__nav-link ${location.pathname === '/msme-profile' ? 'msme-sidebar__nav-link--active' : ''}`} title="Settings" onClick={handleIconClick}>
                 <SettingsIcon className="msme-sidebar__icon" />
                 <span className="msme-sidebar__text">Profile</span>
               </Link>

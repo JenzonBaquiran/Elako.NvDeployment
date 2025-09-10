@@ -1,0 +1,399 @@
+/* Main container and layout */
+.msme-analytics {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.msme-analytics__content {
+  flex-grow: 1;
+  padding: 24px;
+  margin-left: 0;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  transition: all 0.3s ease-in-out;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.msme-analytics__content--sidebar-open {
+  margin-left: 250px;
+  width: calc(100vw - 250px);
+  max-width: calc(100vw - 250px);
+}
+
+.msme-analytics__content--sidebar-collapsed {
+  margin-left: 70px;
+  width: calc(100vw - 70px);
+  max-width: calc(100vw - 70px);
+}
+
+.msme-analytics__content--mobile {
+  margin-left: 0;
+  width: 100vw;
+  max-width: 100vw;
+}
+
+.msme-analytics__header {
+  margin-bottom: 32px;
+}
+
+.msme-analytics__header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.msme-analytics__header-text h1 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+.msme-analytics__header-text p {
+  color: #666;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+}
+
+.msme-analytics__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.msme-analytics__export-btn,
+.msme-analytics__filter-btn {
+  background: #313131;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__export-btn:hover,
+.msme-analytics__filter-btn:hover {
+  background: #7ed957;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(126, 217, 87, 0.3);
+}
+
+/* Stats section - matching AdminUserManagement */
+.msme-analytics__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.msme-analytics__stat-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  padding: 24px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 2px solid #f0f0f0;
+  min-width: 160px;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.msme-analytics__stat-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #313131;
+}
+
+.msme-analytics__stat-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #313131;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.msme-analytics__stat-label {
+  font-size: 14px;
+  color: #666;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.msme-analytics__stat-change {
+  font-size: 12px;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__stat-change.positive {
+  color: #7ed957;
+}
+
+.msme-analytics__stat-change.negative {
+  color: #dc3545;
+}
+
+.msme-analytics__stat-change.neutral {
+  color: #666;
+}
+
+/* Charts grid */
+.msme-analytics__charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.msme-analytics__chart-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 2px solid #f0f0f0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.msme-analytics__chart-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #313131;
+}
+
+.msme-analytics__chart-header {
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.msme-analytics__chart-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__chart-header p {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__chart-container {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 350px;
+}
+
+/* Insights section */
+.msme-analytics__insights {
+  margin-bottom: 32px;
+}
+
+.msme-analytics__insights-card {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 2px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.msme-analytics__insights-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #313131;
+}
+
+.msme-analytics__insights-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 20px 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__insights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.msme-analytics__insight-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.msme-analytics__insight-item:hover {
+  background: #e9ecef;
+}
+
+.msme-analytics__insight-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__insight-icon.positive {
+  background: #7ed957;
+  color: white;
+}
+
+.msme-analytics__insight-icon.negative {
+  background: #dc3545;
+  color: white;
+}
+
+.msme-analytics__insight-icon.neutral {
+  background: #313131;
+  color: white;
+}
+
+.msme-analytics__insight-content h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__insight-content p {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .msme-analytics__content {
+    margin-left: 0;
+    width: 100vw;
+    max-width: 100vw;
+    padding: 16px;
+  }
+
+  .msme-analytics__content--sidebar-open,
+  .msme-analytics__content--sidebar-collapsed {
+    margin-left: 0;
+    width: 100vw;
+    max-width: 100vw;
+  }
+
+  .msme-analytics__header-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .msme-analytics__actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .msme-analytics__export-btn,
+  .msme-analytics__filter-btn {
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .msme-analytics__stats {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+  }
+
+  .msme-analytics__charts-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .msme-analytics__chart-container {
+    min-height: 280px;
+    overflow-x: auto;
+  }
+
+  .msme-analytics__chart-container > div {
+    min-width: 500px;
+  }
+}
+
+@media (max-width: 480px) {
+  .msme-analytics__content {
+    padding: 12px;
+  }
+
+  .msme-analytics__header-text h1 {
+    font-size: 20px;
+  }
+
+  .msme-analytics__stat-box {
+    padding: 20px 16px;
+  }
+
+  .msme-analytics__stat-value {
+    font-size: 28px;
+  }
+
+  .msme-analytics__chart-card {
+    border-radius: 8px;
+  }
+
+  .msme-analytics__chart-header {
+    padding: 20px 20px 12px 20px;
+  }
+
+  .msme-analytics__chart-container {
+    padding: 16px;
+    min-height: 250px;
+  }
+
+  .msme-analytics__insights-card {
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+  .msme-analytics__insight-item {
+    padding: 12px;
+  }
+
+  .msme-analytics__insight-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+}

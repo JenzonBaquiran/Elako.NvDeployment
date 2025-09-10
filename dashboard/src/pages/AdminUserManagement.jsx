@@ -487,7 +487,6 @@ const AdminUserManagement = () => {
         </div>
 
         <div className="admin-user-management__filters">
-          <h2>Filters</h2>
           <div className="admin-user-management__filters-row">
             <input 
               type="text" 

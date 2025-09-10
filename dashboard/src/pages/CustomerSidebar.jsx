@@ -9,6 +9,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import HistoryIcon from '@mui/icons-material/History';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
+import HomeIcon from '@mui/icons-material/Home';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -97,7 +98,8 @@ const CustomerSidebar = ({ onSidebarToggle }) => {
     const logoutSuccess = logout();
     if (logoutSuccess) {
       showSuccess("You have been logged out successfully", "Goodbye!");
-      navigate("/");
+      // Use window.location to bypass ProtectedRoute redirect
+      window.location.href = "/";
     }
   };
 
@@ -139,6 +141,12 @@ const CustomerSidebar = ({ onSidebarToggle }) => {
         </div>
         <nav className="customer-sidebar__nav">
           <ul className="customer-sidebar__nav-list">
+            <li className="customer-sidebar__nav-item">
+              <Link to="/" className={`customer-sidebar__nav-link ${location.pathname === '/' ? 'customer-sidebar__nav-link--active' : ''}`} title="Home" onClick={handleIconClick}>
+                <HomeIcon className="customer-sidebar__icon" />
+                <span className="customer-sidebar__text">Home</span>
+              </Link>
+            </li>
             <li className="customer-sidebar__nav-item">
               <Link to="/customer-dashboard" className={`customer-sidebar__nav-link ${location.pathname === '/customer-dashboard' ? 'customer-sidebar__nav-link--active' : ''}`} title="Dashboard" onClick={handleIconClick}>
                 <DashboardIcon className="customer-sidebar__icon" />

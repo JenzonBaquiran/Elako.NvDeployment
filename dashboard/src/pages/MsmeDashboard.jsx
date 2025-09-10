@@ -65,7 +65,12 @@ const MsmeDashboard = () => {
               <h1>Welcome back, {businessName}!</h1>
               <p>Here's what's happening with your business today</p>
             </div>
-            <button className="msme-dashboard__customize-btn">Customize Dashboard</button>
+            <button 
+              className="msme-dashboard__customize-btn"
+              onClick={() => navigate('/msme-customize-dashboard')}
+            >
+              Customize Dashboard
+            </button>
           </div>
         </div>
         

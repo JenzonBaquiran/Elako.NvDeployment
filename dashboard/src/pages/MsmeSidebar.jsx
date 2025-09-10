@@ -9,6 +9,7 @@ import AnalyticsIcon from '@mui/icons-material/Analytics';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
+import HomeIcon from '@mui/icons-material/Home';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -97,7 +98,8 @@ const MsmeSidebar = ({ onSidebarToggle }) => {
     const logoutSuccess = logout();
     if (logoutSuccess) {
       showSuccess("You have been logged out successfully", "Goodbye!");
-      navigate("/");
+      // Use window.location to bypass ProtectedRoute redirect
+      window.location.href = "/";
     }
   };
 
@@ -139,6 +141,12 @@ const MsmeSidebar = ({ onSidebarToggle }) => {
         </div>
         <nav className="msme-sidebar__nav">
           <ul className="msme-sidebar__nav-list">
+            <li className="msme-sidebar__nav-item">
+              <Link to="/" className={`msme-sidebar__nav-link ${location.pathname === '/' ? 'msme-sidebar__nav-link--active' : ''}`} title="Home" onClick={handleIconClick}>
+                <HomeIcon className="msme-sidebar__icon" />
+                <span className="msme-sidebar__text">Home</span>
+              </Link>
+            </li>
             <li className="msme-sidebar__nav-item">
               <Link to="/msme-dashboard" className={`msme-sidebar__nav-link ${location.pathname === '/msme-dashboard' ? 'msme-sidebar__nav-link--active' : ''}`} title="Dashboard" onClick={handleIconClick}>
                 <DashboardIcon className="msme-sidebar__icon" />

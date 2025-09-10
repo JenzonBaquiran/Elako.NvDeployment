@@ -19,6 +19,7 @@ import AdminOverview from "./pages/AdminOverview";
 import AdminMsmeOversight from "./pages/AdminMsmeOversight";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminSettings from "./pages/AdminSettings";
+import MsmeCustomizeDashboard from "./pages/MsmeCustomizeDashboard";
 
 
 
@@ -121,6 +122,14 @@ function App() {
               element={
                 <ProtectedRoute allowedUserTypes={['msme']}>
                   <MsmeProfile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/msme-customize-dashboard" 
+              element={
+                <ProtectedRoute allowedUserTypes={['msme']}>
+                  <MsmeCustomizeDashboard />
                 </ProtectedRoute>
               } 
             />

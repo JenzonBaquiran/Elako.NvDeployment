@@ -21,6 +21,14 @@ body {
   font-size: 14px;
   margin-right: 12px;
   white-space: nowrap;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.user-greeting:hover {
+  color: #7ed957;
 }
 
 .mobile-user-greeting {
@@ -32,6 +40,15 @@ body {
   text-align: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   margin-bottom: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  width: 100%;
+}
+
+.mobile-user-greeting:hover {
+  color: #7ed957;
 }
 
 .header-container {

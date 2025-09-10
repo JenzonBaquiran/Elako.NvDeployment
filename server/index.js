@@ -10,6 +10,7 @@ const Customer = require("./models/customer.model");
 const MSME = require("./models/msme.model");
 const Admin = require("./models/admin.model");
 const Product = require("./models/product.model");
+const Dashboard = require("./models/dashboard.model");
 
 
 const app = express();
@@ -876,6 +877,188 @@ app.get("/api/products/available", async (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: "Error fetching available products" 
+    });
+  }
+});
+
+// --- Dashboard Routes ---
+
+// Get dashboard by MSME ID
+app.get("/api/msme/:msmeId/dashboard", async (req, res) => {
+  try {
+    const { msmeId } = req.params;
+    
+    let dashboard = await Dashboard.findByMsmeId(msmeId);
+    
+    // If no dashboard exists, create a default one
+    if (!dashboard) {
+      const msme = await MSME.findById(msmeId);
+      if (!msme) {
+        return res.status(404).json({
+          success: false,
+          error: "MSME not found"
+        });
+      }
+      
+      dashboard = new Dashboard({
+        msmeId,
+        businessName: msme.businessName || msme.username,
+        description: `Welcome to ${msme.businessName || msme.username}!`,
+        rating: 4.0
+      });
+      await dashboard.save();
+    }
+    
+    res.json({
+      success: true,
+      dashboard
+    });
+  } catch (err) {
+    console.error("Error fetching dashboard:", err);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching dashboard"
+    });
+  }
+});
+
+// Create or update dashboard
+app.post("/api/msme/dashboard", upload.fields([
+  { name: 'coverPhoto', maxCount: 1 },
+  { name: 'storeLogo', maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const {
+      msmeId,
+      businessName,
+      description,
+      contactNumber,
+      location,
+      socialLinks,
+      isPublic
+    } = req.body;
+    
+    if (!msmeId) {
+      return res.status(400).json({
+        success: false,
+        error: "MSME ID is required"
+      });
+    }
+    
+    // Parse socialLinks if it's a string
+    let parsedSocialLinks = {};
+    if (socialLinks) {
+      try {
+        parsedSocialLinks = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
+      } catch (error) {
+        console.error("Error parsing socialLinks:", error);
+        parsedSocialLinks = {};
+      }
+    }
+    
+    // Prepare update data
+    const updateData = {
+      businessName,
+      description,
+      contactNumber,
+      location,
+      socialLinks: parsedSocialLinks,
+      isPublic: isPublic === 'true' || isPublic === true
+    };
+    
+    // Handle file uploads
+    if (req.files) {
+      if (req.files.coverPhoto) {
+        updateData.coverPhoto = req.files.coverPhoto[0].filename;
+      }
+      if (req.files.storeLogo) {
+        updateData.storeLogo = req.files.storeLogo[0].filename;
+      }
+    }
+    
+    // Update or create dashboard
+    let dashboard = await Dashboard.findOne({ msmeId });
+    
+    if (dashboard) {
+      // Update existing dashboard
+      Object.assign(dashboard, updateData);
+      await dashboard.save();
+    } else {
+      // Create new dashboard
+      dashboard = new Dashboard({
+        msmeId,
+        ...updateData,
+        rating: 4.0 // Default rating
+      });
+      await dashboard.save();
+    }
+    
+    res.json({
+      success: true,
+      message: "Dashboard updated successfully",
+      dashboard
+    });
+  } catch (err) {
+    console.error("Error updating dashboard:", err);
+    res.status(500).json({
+      success: false,
+      error: "Error updating dashboard"
+    });
+  }
+});
+
+// Get all public dashboards
+app.get("/api/dashboards/public", async (req, res) => {
+  try {
+    const dashboards = await Dashboard.findPublic();
+    
+    res.json({
+      success: true,
+      dashboards
+    });
+  } catch (err) {
+    console.error("Error fetching public dashboards:", err);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching public dashboards"
+    });
+  }
+});
+
+// Get specific public dashboard by MSME ID
+app.get("/api/dashboard/public/:msmeId", async (req, res) => {
+  try {
+    const { msmeId } = req.params;
+    
+    const dashboard = await Dashboard.findOne({ 
+      msmeId, 
+      isPublic: true 
+    }).populate('msmeId', 'businessName username');
+    
+    if (!dashboard) {
+      return res.status(404).json({
+        success: false,
+        error: "Public dashboard not found"
+      });
+    }
+    
+    // Also get the products for this MSME
+    const products = await Product.find({ 
+      msmeId, 
+      visible: true,
+      availability: true 
+    });
+    
+    res.json({
+      success: true,
+      dashboard,
+      products
+    });
+  } catch (err) {
+    console.error("Error fetching public dashboard:", err);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching public dashboard"
     });
   }
 });

@@ -26,6 +26,24 @@ function Header() {
     }
   }
 
+  const handleUserGreetingClick = () => {
+    if (!user || !userType) return
+    
+    switch (userType) {
+      case "customer":
+        navigate("/customer-sidebar")
+        break
+      case "admin":
+        navigate("/admin-overview")
+        break
+      case "msme":
+        navigate("/msme-dashboard")
+        break
+      default:
+        break
+    }
+  }
+
   const getUserGreeting = () => {
     if (!user) return null
     
@@ -77,7 +95,9 @@ function Header() {
         
             {user ? (
               <>
-                <span className="user-greeting">{getUserGreeting()}</span>
+                <button className="user-greeting" onClick={handleUserGreetingClick}>
+                  {getUserGreeting()}
+                </button>
                 <button className="nav-button nav-button-primary" onClick={handleLogout}>
                   Logout
                 </button>
@@ -127,7 +147,9 @@ function Header() {
            
             {user ? (
               <>
-                <div className="mobile-user-greeting">{getUserGreeting()}</div>
+                <button className="mobile-user-greeting" onClick={handleUserGreetingClick}>
+                  {getUserGreeting()}
+                </button>
                 <button className="nav-button nav-button-primary mobile-menu-button" onClick={handleLogout}>
                   Logout
                 </button>

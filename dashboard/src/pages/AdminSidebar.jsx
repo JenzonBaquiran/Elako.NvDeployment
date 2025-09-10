@@ -9,6 +9,7 @@ import AnalyticsIcon from '@mui/icons-material/Analytics';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
+import HomeIcon from '@mui/icons-material/Home';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -89,7 +90,8 @@ const AdminSidebar = ({ onSidebarToggle }) => {
     const logoutSuccess = logout();
     if (logoutSuccess) {
       showSuccess("You have been logged out successfully", "Goodbye!");
-      navigate("/");
+      // Use window.location to bypass ProtectedRoute redirect
+      window.location.href = "/";
     }
   };
 
@@ -125,11 +127,18 @@ const AdminSidebar = ({ onSidebarToggle }) => {
         <nav className="admin-sidebar__nav">
           <ul className="admin-sidebar__nav-list">
             <li className="admin-sidebar__nav-item">
+              <Link to="/" className={`admin-sidebar__nav-link ${location.pathname === '/' ? 'admin-sidebar__nav-link--active' : ''}`} title="Home" onClick={handleIconClick}>
+                <HomeIcon className="admin-sidebar__icon" />
+                <span className="admin-sidebar__text">Home</span>
+              </Link>
+            </li>
+            <li className="admin-sidebar__nav-item">
               <Link to="/admin-overview" className={`admin-sidebar__nav-link ${location.pathname === '/admin-overview' ? 'admin-sidebar__nav-link--active' : ''}`} title="Overview" onClick={handleIconClick}>
                 <DashboardIcon className="admin-sidebar__icon" />
                 <span className="admin-sidebar__text">Overview</span>
               </Link>
             </li>
+            
             <li className="admin-sidebar__nav-item">
               <Link to="/admin-user-management" className={`admin-sidebar__nav-link ${location.pathname === '/admin-user-management' ? 'admin-sidebar__nav-link--active' : ''}`} title="User Management" onClick={handleIconClick}>
                 <InventoryIcon className="admin-sidebar__icon" />

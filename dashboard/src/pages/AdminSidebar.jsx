@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
 import { useNotification } from '../components/NotificationProvider';
+import { useAuth } from '../contexts/AuthContext';
 import '../css/AdminSidebar.css'; // Import the CSS file for styling
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -14,6 +15,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 const AdminSidebar = ({ onSidebarToggle }) => {
   const { showSuccess } = useNotification();
+  const { logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Start with sidebar open
   const [isMobileView, setIsMobileView] = useState(false);
   const location = useLocation(); // Get the current route
@@ -84,20 +86,11 @@ const AdminSidebar = ({ onSidebarToggle }) => {
 
   // Handle logout
   const handleLogout = () => {
-    // Clear localStorage for all user types
-    localStorage.removeItem("adminUser");
-    localStorage.removeItem("customerUser");
-    localStorage.removeItem("msmeUser");
-    localStorage.removeItem("user"); // Also clear the main user key
-    
-    // Dispatch custom event to notify other components
-    window.dispatchEvent(new Event('userStatusChanged'));
-    
-    // Show success message immediately
-    showSuccess("You have been logged out successfully", "Goodbye!");
-    
-    // Redirect immediately
-    navigate("/");
+    const logoutSuccess = logout();
+    if (logoutSuccess) {
+      showSuccess("You have been logged out successfully", "Goodbye!");
+      navigate("/");
+    }
   };
 
   return (

@@ -8,67 +8,22 @@ import "../css/Navbar.css"
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import ChatIcon from '@mui/icons-material/Chat';
 import { useNotification } from "../components/NotificationProvider";
+import { useAuth } from "../contexts/AuthContext";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [user, setUser] = useState(null)
-  const [userType, setUserType] = useState(null)
+  const { user, userType, isAuthenticated, logout } = useAuth()
   const navigate = useNavigate()
   const { showSuccess } = useNotification()
 
-  useEffect(() => {
-    // Check for logged in user in localStorage
-    const checkUserStatus = () => {
-      const adminUser = localStorage.getItem("adminUser")
-      const customerUser = localStorage.getItem("customerUser")
-      const msmeUser = localStorage.getItem("msmeUser")
-
-      if (adminUser) {
-        setUser(JSON.parse(adminUser))
-        setUserType("admin")
-      } else if (customerUser) {
-        setUser(JSON.parse(customerUser))
-        setUserType("customer")
-      } else if (msmeUser) {
-        setUser(JSON.parse(msmeUser))
-        setUserType("msme")
-      } else {
-        setUser(null)
-        setUserType(null)
-      }
-    }
-
-    // Initial check
-    checkUserStatus()
-
-    // Listen for storage changes (when user logs in/out in another tab)
-    window.addEventListener('storage', checkUserStatus)
-    
-    // Listen for custom event (when user logs in/out in same tab)
-    window.addEventListener('userStatusChanged', checkUserStatus)
-
-    return () => {
-      window.removeEventListener('storage', checkUserStatus)
-      window.removeEventListener('userStatusChanged', checkUserStatus)
-    }
-  }, [])
+  // No need for useEffect to check localStorage since AuthContext handles it
 
   const handleLogout = () => {
-    // Clear localStorage
-    localStorage.removeItem("adminUser")
-    localStorage.removeItem("customerUser")
-    localStorage.removeItem("msmeUser")
-    
-    // Reset state
-    setUser(null)
-    setUserType(null)
-    
-    // Dispatch custom event to notify other components
-    window.dispatchEvent(new Event('userStatusChanged'))
-    
-    // Show success message and redirect
-    showSuccess("You have been logged out successfully", "Goodbye!")
-    navigate("/")
+    const logoutSuccess = logout()
+    if (logoutSuccess) {
+      showSuccess("You have been logged out successfully", "Goodbye!")
+      navigate("/")
+    }
   }
 
   const getUserGreeting = () => {

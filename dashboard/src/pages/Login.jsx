@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TextField, Button, IconButton, InputAdornment, Alert, CircularProgress } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
+import { useAuth } from "../contexts/AuthContext";
 import "../css/Login.css";
 import logo from "../logos/Icon on dark with text.png";
 
 function Login() {
   const { showError, showSuccess } = useNotification();
+  const { login, isAuthenticated, userType } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -15,6 +17,28 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [validating, setValidating] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isAuthenticated) {
+      const from = location.state?.from?.pathname || getDefaultRoute(userType);
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, userType, navigate, location]);
+
+  const getDefaultRoute = (type) => {
+    switch (type) {
+      case 'admin':
+        return '/admin-user-management';
+      case 'msme':
+        return '/msme-dashboard';
+      case 'customer':
+        return '/customer-sidebar';
+      default:
+        return '/';
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -39,11 +63,13 @@ function Login() {
       let data = await response.json();
 
       if (data.success) {
-        localStorage.setItem("adminUser", JSON.stringify(data.user));
-        window.dispatchEvent(new Event('userStatusChanged'));
-        showSuccess("Welcome back, Admin!", "Login Successful");
-        navigate("/admin-user-management");
-        return;
+        const loginSuccess = login(data.user, 'admin');
+        if (loginSuccess) {
+          showSuccess("Welcome back, Admin!", "Login Successful");
+          const from = location.state?.from?.pathname || '/admin-user-management';
+          navigate(from, { replace: true });
+          return;
+        }
       }
 
       // Try customer login
@@ -58,11 +84,13 @@ function Login() {
       data = await response.json();
 
       if (data.success) {
-        localStorage.setItem("customerUser", JSON.stringify(data.user));
-        window.dispatchEvent(new Event('userStatusChanged'));
-        showSuccess("Welcome back! Let's get started.", "Login Successful");
-        navigate("/customer-sidebar");
-        return;
+        const loginSuccess = login(data.user, 'customer');
+        if (loginSuccess) {
+          showSuccess("Welcome back! Let's get started.", "Login Successful");
+          const from = location.state?.from?.pathname || '/customer-sidebar';
+          navigate(from, { replace: true });
+          return;
+        }
       }
 
       // Try MSME login
@@ -79,10 +107,13 @@ function Login() {
       if (data.success) {
         // Check if MSME is approved
         if (data.user.status === "approved") {
-          localStorage.setItem("msmeUser", JSON.stringify(data.user));
-          window.dispatchEvent(new Event('userStatusChanged'));
-          showSuccess("Login successful! Welcome back.", "Welcome");
-          navigate("/msme-dashboard");
+          const loginSuccess = login(data.user, 'msme');
+          if (loginSuccess) {
+            showSuccess("Login successful! Welcome back.", "Welcome");
+            const from = location.state?.from?.pathname || '/msme-dashboard';
+            navigate(from, { replace: true });
+            return;
+          }
         } else if (data.user.status === "pending") {
           showError("Your account is pending approval. Please wait for admin approval.", "Account Pending");
         } else if (data.user.status === "rejected") {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
 import { useNotification } from '../components/NotificationProvider';
+import { useAuth } from '../contexts/AuthContext';
 import '../css/CustomerSidebar.css'; // Import the CSS file for styling
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
@@ -14,19 +15,19 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 const CustomerSidebar = ({ onSidebarToggle }) => {
   const { showSuccess } = useNotification();
+  const { user, logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Start with sidebar open
   const [isMobileView, setIsMobileView] = useState(false);
   const [customerUser, setCustomerUser] = useState(null);
   const location = useLocation(); // Get the current route
   const navigate = useNavigate(); // Initialize navigate
 
-  // Get customer data from localStorage
+  // Get customer data from AuthContext
   useEffect(() => {
-    const userData = localStorage.getItem("customerUser");
-    if (userData) {
-      setCustomerUser(JSON.parse(userData));
+    if (user) {
+      setCustomerUser(user);
     }
-  }, []);
+  }, [user]);
 
   // Detect screen size and update state
   useEffect(() => {
@@ -93,22 +94,11 @@ const CustomerSidebar = ({ onSidebarToggle }) => {
 
   // Handle logout
   const handleLogout = () => {
-    // Clear localStorage for all user types
-    localStorage.removeItem("adminUser");
-    localStorage.removeItem("customerUser");
-    localStorage.removeItem("msmeUser");
-    localStorage.removeItem("user"); // Also clear the main user key
-    
-    // Dispatch custom event to notify other components
-    window.dispatchEvent(new Event('userStatusChanged'));
-    
-    // Redirect immediately without delay
-    navigate("/");
-    
-    // Show success message after redirect (with shorter duration)
-    setTimeout(() => {
+    const logoutSuccess = logout();
+    if (logoutSuccess) {
       showSuccess("You have been logged out successfully", "Goodbye!");
-    }, 100);
+      navigate("/");
+    }
   };
 
   return (

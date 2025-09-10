@@ -8,6 +8,8 @@ import AdminUserManagement from "./pages/AdminUserManagement";
 import MsmeSidebar from "./pages/MsmeSidebar";
 import CustomerSidebar from "./pages/CustomerSidebar";
 import NotificationProvider from "./components/NotificationProvider";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthProvider } from "./contexts/AuthContext";
 import MsmeManageProduct from "./pages/MsmeManageProduct";
 import MsmeDashboard from "./pages/MsmeDashboard";
 import MsmeMessage from "./pages/MsmeMessage";
@@ -22,28 +24,120 @@ import AdminSettings from "./pages/AdminSettings";
 
 function App() {
   return (
-    <NotificationProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/admin-user-management" element={<AdminUserManagement />} />
-          <Route path="/msme-sidebar" element={<MsmeSidebar />} />
-          <Route path="/customer-sidebar" element={<CustomerSidebar />} />
-          <Route path="/msme-manage-product" element={<MsmeManageProduct />} />
-          <Route path="/msme-dashboard" element={<MsmeDashboard />} />
-          <Route path="/msme-messages" element={<MsmeMessage />} />
-          <Route path="/msme-analytics" element={<MsmeAnalytics />} />
-          <Route path="/msme-profile" element={<MsmeProfile />} />
-          <Route path="/admin-overview" element={<AdminOverview />} />
-          <Route path="/admin-msme-oversight" element={<AdminMsmeOversight />} />
-          <Route path="/admin-analytics" element={<AdminAnalytics />} />
-          <Route path="/admin-settings" element={<AdminSettings />} />
+    <AuthProvider>
+      <NotificationProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            
+            {/* Admin Protected Routes */}
+            <Route 
+              path="/admin-user-management" 
+              element={
+                <ProtectedRoute allowedUserTypes={['admin']}>
+                  <AdminUserManagement />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-overview" 
+              element={
+                <ProtectedRoute allowedUserTypes={['admin']}>
+                  <AdminOverview />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-msme-oversight" 
+              element={
+                <ProtectedRoute allowedUserTypes={['admin']}>
+                  <AdminMsmeOversight />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-analytics" 
+              element={
+                <ProtectedRoute allowedUserTypes={['admin']}>
+                  <AdminAnalytics />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-settings" 
+              element={
+                <ProtectedRoute allowedUserTypes={['admin']}>
+                  <AdminSettings />
+                </ProtectedRoute>
+              } 
+            />
 
-        </Routes>
-      </BrowserRouter>
-    </NotificationProvider>
+            {/* MSME Protected Routes */}
+            <Route 
+              path="/msme-sidebar" 
+              element={
+                <ProtectedRoute allowedUserTypes={['msme']}>
+                  <MsmeSidebar />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/msme-dashboard" 
+              element={
+                <ProtectedRoute allowedUserTypes={['msme']}>
+                  <MsmeDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/msme-manage-product" 
+              element={
+                <ProtectedRoute allowedUserTypes={['msme']}>
+                  <MsmeManageProduct />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/msme-messages" 
+              element={
+                <ProtectedRoute allowedUserTypes={['msme']}>
+                  <MsmeMessage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/msme-analytics" 
+              element={
+                <ProtectedRoute allowedUserTypes={['msme']}>
+                  <MsmeAnalytics />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/msme-profile" 
+              element={
+                <ProtectedRoute allowedUserTypes={['msme']}>
+                  <MsmeProfile />
+                </ProtectedRoute>
+              } 
+            />
+
+            {/* Customer Protected Routes */}
+            <Route 
+              path="/customer-sidebar" 
+              element={
+                <ProtectedRoute allowedUserTypes={['customer']}>
+                  <CustomerSidebar />
+                </ProtectedRoute>
+              } 
+            />
+          </Routes>
+        </BrowserRouter>
+      </NotificationProvider>
+    </AuthProvider>
   );    
 }
 export default App;

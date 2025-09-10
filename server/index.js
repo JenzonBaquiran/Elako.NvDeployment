@@ -9,6 +9,7 @@ const bcrypt = require("bcryptjs");
 const Customer = require("./models/customer.model");
 const MSME = require("./models/msme.model");
 const Admin = require("./models/admin.model");
+const Product = require("./models/product.model");
 
 
 const app = express();
@@ -561,6 +562,320 @@ app.delete("/api/admin/admins/:id", async (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: "Error deleting admin" 
+    });
+  }
+});
+
+// --- Product Routes ---
+// Create new product
+app.post("/api/products", upload.single('picture'), async (req, res) => {
+  try {
+    const { 
+      productName, 
+      price, 
+      description, 
+      availability, 
+      stocks, 
+      category,
+      hashtags,
+      msmeId 
+    } = req.body;
+
+    // Validate required fields
+    if (!productName || !price || !description || !stocks || !msmeId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Product name, price, description, stocks, and MSME ID are required" 
+      });
+    }
+
+    // Parse hashtags if it's a string
+    let parsedHashtags = [];
+    if (hashtags) {
+      try {
+        parsedHashtags = typeof hashtags === 'string' ? JSON.parse(hashtags) : hashtags;
+      } catch (e) {
+        parsedHashtags = [];
+      }
+    }
+
+    // Handle file upload
+    let picturePath = null;
+    if (req.file) {
+      picturePath = req.file.filename;
+    }
+
+    // Create new product
+    const newProduct = new Product({
+      productName,
+      price: parseFloat(price),
+      description,
+      availability: availability === 'true' || availability === true,
+      visible: true, // New products are visible by default
+      stocks: parseInt(stocks),
+      picture: picturePath,
+      hashtags: parsedHashtags,
+      category: category || '',
+      msmeId
+    });
+
+    await newProduct.save();
+
+    res.status(201).json({ 
+      success: true, 
+      message: "Product created successfully",
+      product: newProduct
+    });
+  } catch (err) {
+    console.error("Error creating product:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error creating product" 
+    });
+  }
+});
+
+// Get all products
+app.get("/api/products", async (req, res) => {
+  try {
+    const { msmeId, category, availability } = req.query;
+    
+    let filter = {};
+    if (msmeId) filter.msmeId = msmeId;
+    if (category) filter.category = category;
+    if (availability) filter.availability = availability === 'true';
+
+    const products = await Product.find(filter).populate('msmeId', 'businessName username');
+    
+    res.json({
+      success: true,
+      products
+    });
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error fetching products" 
+    });
+  }
+});
+
+// Get single product by ID
+app.get("/api/products/:id", async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id).populate('msmeId', 'businessName username');
+    
+    if (!product) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "Product not found" 
+      });
+    }
+
+    res.json({
+      success: true,
+      product
+    });
+  } catch (err) {
+    console.error("Error fetching product:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error fetching product" 
+    });
+  }
+});
+
+// Update product
+app.put("/api/products/:id", upload.single('picture'), async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const { 
+      productName, 
+      price, 
+      description, 
+      availability,
+      visible,
+      stocks, 
+      category,
+      hashtags 
+    } = req.body;
+
+    // Find existing product
+    const existingProduct = await Product.findById(productId);
+    if (!existingProduct) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "Product not found" 
+      });
+    }
+
+    // Parse hashtags if it's a string
+    let parsedHashtags = existingProduct.hashtags;
+    if (hashtags) {
+      try {
+        parsedHashtags = typeof hashtags === 'string' ? JSON.parse(hashtags) : hashtags;
+      } catch (e) {
+        // Keep existing hashtags if parsing fails
+      }
+    }
+
+    // Handle file upload
+    let picturePath = existingProduct.picture;
+    if (req.file) {
+      picturePath = req.file.filename;
+    }
+
+    // Update product
+    const updatedProduct = await Product.findByIdAndUpdate(
+      productId,
+      {
+        productName: productName || existingProduct.productName,
+        price: price ? parseFloat(price) : existingProduct.price,
+        description: description || existingProduct.description,
+        availability: availability !== undefined ? (availability === 'true' || availability === true) : existingProduct.availability,
+        visible: visible !== undefined ? (visible === 'true' || visible === true) : existingProduct.visible,
+        stocks: stocks ? parseInt(stocks) : existingProduct.stocks,
+        picture: picturePath,
+        hashtags: parsedHashtags,
+        category: category !== undefined ? category : existingProduct.category,
+        updatedAt: new Date()
+      },
+      { new: true }
+    );
+
+    res.json({
+      success: true,
+      message: "Product updated successfully",
+      product: updatedProduct
+    });
+  } catch (err) {
+    console.error("Error updating product:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error updating product" 
+    });
+  }
+});
+
+// Delete product
+app.delete("/api/products/:id", async (req, res) => {
+  try {
+    const productId = req.params.id;
+    
+    const deletedProduct = await Product.findByIdAndDelete(productId);
+    
+    if (!deletedProduct) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "Product not found" 
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Product deleted successfully"
+    });
+  } catch (err) {
+    console.error("Error deleting product:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error deleting product" 
+    });
+  }
+});
+
+// Toggle product visibility
+app.put("/api/products/:id/visibility", async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const { visible } = req.body;
+    
+    const product = await Product.findById(productId);
+    
+    if (!product) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "Product not found" 
+      });
+    }
+
+    // Update visibility
+    product.visible = visible !== undefined ? visible : !product.visible;
+    await product.save();
+
+    res.json({
+      success: true,
+      message: `Product ${product.visible ? 'shown' : 'hidden'} successfully`,
+      product: product
+    });
+  } catch (err) {
+    console.error("Error toggling product visibility:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error updating product visibility" 
+    });
+  }
+});
+
+// Get products by MSME ID
+app.get("/api/msme/:msmeId/products", async (req, res) => {
+  try {
+    const { msmeId } = req.params;
+    const { category, availability } = req.query;
+    
+    let filter = { msmeId };
+    if (category && category !== 'all') filter.category = category;
+    if (availability && availability !== 'all') filter.availability = availability === 'true';
+
+    const products = await Product.find(filter).sort({ createdAt: -1 });
+    
+    res.json({
+      success: true,
+      products
+    });
+  } catch (err) {
+    console.error("Error fetching MSME products:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error fetching MSME products" 
+    });
+  }
+});
+
+// Search products by hashtag
+app.get("/api/products/search/hashtag/:hashtag", async (req, res) => {
+  try {
+    const { hashtag } = req.params;
+    
+    const products = await Product.findByHashtag(hashtag).populate('msmeId', 'businessName username');
+    
+    res.json({
+      success: true,
+      products
+    });
+  } catch (err) {
+    console.error("Error searching products by hashtag:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error searching products" 
+    });
+  }
+});
+
+// Get available products only
+app.get("/api/products/available", async (req, res) => {
+  try {
+    const products = await Product.findAvailable().populate('msmeId', 'businessName username');
+    
+    res.json({
+      success: true,
+      products
+    });
+  } catch (err) {
+    console.error("Error fetching available products:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error fetching available products" 
     });
   }
 });

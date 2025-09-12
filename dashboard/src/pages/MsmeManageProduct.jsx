@@ -7,7 +7,11 @@ import shakshoukaImg from '../assets/shakshouka.jpg';
 
 const MsmeManageProduct = () => {
   const { user } = useAuth();
-  const { showSuccess, showError } = useNotification();
+  const { showSuccess, showError, showConfirm } = useNotification();
+  
+  // Debug log to check if showConfirm is available
+  console.log('Notification functions available:', { showSuccess, showError, showConfirm });
+  
   const [sidebarState, setSidebarState] = useState({ isOpen: true, isMobile: false });
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -44,7 +48,8 @@ const MsmeManageProduct = () => {
     
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:1337/api/msme/${user._id}/products?category=${categoryFilter}&availability=${statusFilter}`);
+      // Fetch all products without filters - let frontend handle filtering
+      const response = await fetch(`http://localhost:1337/api/msme/${user._id}/products`);
       const data = await response.json();
       
       if (data.success) {
@@ -165,16 +170,26 @@ const MsmeManageProduct = () => {
     
     let matchesStatus = true;
     if (statusFilter === 'available') {
-      matchesStatus = product.availability && product.stocks > 0;
+      matchesStatus = product.availability === true && product.stocks > 0;
     } else if (statusFilter === 'out-of-stock') {
-      matchesStatus = !product.availability || product.stocks === 0;
+      matchesStatus = product.availability === false || product.stocks === 0;
     } else if (statusFilter === 'visible') {
       matchesStatus = product.visible === true;
     } else if (statusFilter === 'hidden') {
       matchesStatus = product.visible === false;
     }
+    // If statusFilter is 'all', matchesStatus stays true
     
     const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
+    
+    // Debug logging (remove this after testing)
+    if (statusFilter !== 'all') {
+      console.log(`Product: ${product.productName}, Status Filter: ${statusFilter}, Matches: ${matchesStatus}`, {
+        availability: product.availability,
+        stocks: product.stocks,
+        visible: product.visible
+      });
+    }
     
     return matchesSearch && matchesStatus && matchesCategory;
   });
@@ -306,8 +321,30 @@ const MsmeManageProduct = () => {
     setShowEditModal(true);
   };
 
+// Delete product handler with notification confirmation
   const handleDelete = async (product) => {
-    if (window.confirm(`Are you sure you want to delete "${product.productName}"?`)) {
+    console.log('handleDelete called, showConfirm available:', typeof showConfirm);
+    console.log('All notification functions:', { showSuccess, showError, showConfirm });
+    
+    // Fallback to window.confirm if showConfirm is not available
+    let confirmed = false;
+    
+    if (typeof showConfirm === 'function') {
+      try {
+        confirmed = await showConfirm(
+          `Are you sure you want to delete "${product.productName}"?`,
+          "Confirm Delete"
+        );
+      } catch (error) {
+        console.error('Error with showConfirm:', error);
+        confirmed = window.confirm(`Are you sure you want to delete "${product.productName}"?`);
+      }
+    } else {
+      console.warn('showConfirm not available, using window.confirm');
+      confirmed = window.confirm(`Are you sure you want to delete "${product.productName}"?`);
+    }
+    
+    if (confirmed) {
       await deleteProduct(product._id);
     }
   };
@@ -332,7 +369,7 @@ const MsmeManageProduct = () => {
     if (user?._id) {
       fetchProducts();
     }
-  }, [statusFilter, categoryFilter, user]);
+  }, [user]); // Only refetch when user changes, not when filters change
 
   // Close dropdown when clicking outside
   useEffect(() => {

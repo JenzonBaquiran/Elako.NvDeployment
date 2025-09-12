@@ -12,6 +12,7 @@ const MSMESchema = new mongoose.Schema(
     contactNumber: { type: String, default: '' },
     userType: { type: String, default: 'msme' },
     status: { type: String, default: 'pending', enum: ['pending', 'approved', 'rejected'] },
+    isVisible: { type: Boolean, default: true }, // Controls visibility on homepage and login access
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
   },

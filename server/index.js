@@ -183,6 +183,14 @@ app.post("/api/msme/login", async (req, res) => {
       return res.status(401).json({ success: false, error: "Invalid credentials" });
     }
     
+    // Check if MSME is visible (can log in)
+    if (msme.isVisible === false) {
+      return res.status(403).json({ 
+        success: false, 
+        error: "Your account has been temporarily suspended. Please contact support." 
+      });
+    }
+    
     res.json({ 
       success: true, 
       user: { ...msme.toObject(), password: undefined },
@@ -315,6 +323,40 @@ app.delete("/api/admin/customers/:id", async (req, res) => {
   }
 });
 
+// Update customer (admin only)
+app.put("/api/admin/customers/:id/update", async (req, res) => {
+  try {
+    const { username, firstname, lastname, email, address, contactNumber } = req.body;
+    
+    const updatedCustomer = await Customer.findOneAndUpdate(
+      { id: req.params.id },
+      {
+        username,
+        firstname,
+        lastname,
+        email,
+        address,
+        contactNumber,
+        updatedAt: new Date()
+      },
+      { new: true, select: '-password' }
+    );
+    
+    if (!updatedCustomer) {
+      return res.status(404).json({ success: false, error: "Customer not found" });
+    }
+    
+    res.json({ 
+      success: true, 
+      message: "Customer updated successfully",
+      customer: updatedCustomer 
+    });
+  } catch (err) {
+    console.error("Error updating customer:", err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
 // Delete MSME (admin only)
 app.delete("/api/admin/msme/:id", async (req, res) => {
   try {
@@ -325,6 +367,47 @@ app.delete("/api/admin/msme/:id", async (req, res) => {
     res.json({ success: true, message: "MSME deleted successfully" });
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+// Update MSME (admin only)
+app.put("/api/admin/msme/:id/update", async (req, res) => {
+  try {
+    const { 
+      username, 
+      businessName, 
+      category, 
+      address, 
+      contactNumber, 
+      clientProfilingNumber 
+    } = req.body;
+    
+    const updatedMSME = await MSME.findOneAndUpdate(
+      { id: req.params.id },
+      {
+        username,
+        businessName,
+        category,
+        address,
+        contactNumber,
+        clientProfilingNumber,
+        updatedAt: new Date()
+      },
+      { new: true, select: '-password' }
+    );
+    
+    if (!updatedMSME) {
+      return res.status(404).json({ success: false, error: "MSME not found" });
+    }
+    
+    res.json({ 
+      success: true, 
+      message: "MSME updated successfully",
+      msme: updatedMSME 
+    });
+  } catch (err) {
+    console.error("Error updating MSME:", err);
+    res.status(400).json({ success: false, error: err.message });
   }
 });
 
@@ -536,6 +619,45 @@ app.put("/api/admin/admins/:id/status", async (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: "Error updating admin status" 
+    });
+  }
+});
+
+// Update admin details
+app.put("/api/admin/admins/:id", async (req, res) => {
+  try {
+    const { username, firstname, lastname, email } = req.body;
+    const adminId = req.params.id;
+
+    const updatedAdmin = await Admin.findByIdAndUpdate(
+      adminId,
+      {
+        username,
+        firstname,
+        lastname,
+        email,
+        updatedAt: new Date()
+      },
+      { new: true, select: '-password' }
+    );
+
+    if (!updatedAdmin) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "Admin not found" 
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Admin updated successfully",
+      admin: updatedAdmin
+    });
+  } catch (err) {
+    console.error("Error updating admin:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error updating admin" 
     });
   }
 });
@@ -814,6 +936,51 @@ app.put("/api/products/:id/visibility", async (req, res) => {
     res.status(500).json({ 
       success: false, 
       error: "Error updating product visibility" 
+    });
+  }
+});
+
+// Toggle MSME visibility (controls homepage display and login access)
+app.put("/api/admin/msme/:id/visibility", async (req, res) => {
+  try {
+    const msmeId = req.params.id;
+    const { isVisible } = req.body;
+    
+    // Try to find by MongoDB _id first, then by custom id field
+    let msme = await MSME.findById(msmeId);
+    if (!msme) {
+      msme = await MSME.findOne({ id: msmeId });
+    }
+    
+    if (!msme) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "MSME not found" 
+      });
+    }
+
+    // Update visibility
+    msme.isVisible = isVisible !== undefined ? isVisible : !msme.isVisible;
+    msme.updatedAt = new Date();
+    await msme.save();
+
+    res.json({
+      success: true,
+      message: `MSME ${msme.isVisible ? 'shown' : 'hidden'} successfully. ${msme.isVisible ? 'They can now log in and appear on homepage.' : 'They cannot log in or appear on homepage.'}`,
+      msme: {
+        id: msme.id,
+        _id: msme._id,
+        businessName: msme.businessName,
+        username: msme.username,
+        isVisible: msme.isVisible,
+        status: msme.status
+      }
+    });
+  } catch (err) {
+    console.error("Error toggling MSME visibility:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Error updating MSME visibility" 
     });
   }
 });

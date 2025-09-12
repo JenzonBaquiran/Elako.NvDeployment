@@ -18,13 +18,15 @@ body {
   color: #fff;
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 18px; /* Increased from 14px to 18px */
   margin-right: 12px;
   white-space: nowrap;
   background: none;
   border: none;
   cursor: pointer;
   transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
 }
 
 .user-greeting:hover {
@@ -35,9 +37,9 @@ body {
   color: #fff;
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 18px; /* Increased from 14px to 18px */
   padding: 8px 16px;
-  text-align: center;
+  text-align: left; /* Changed from center to left */
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   margin-bottom: 8px;
   background: none;
@@ -45,6 +47,9 @@ body {
   cursor: pointer;
   transition: color 0.2s ease;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Changed from center to flex-start */
 }
 
 .mobile-user-greeting:hover {
@@ -257,7 +262,7 @@ body {
 }
 
 .search-button {
-  background-color: #92fe75 !important;
+  background-color:  #7ed957 !important;
   color: #000000 !important;
 }
 
@@ -266,13 +271,13 @@ body {
 }
 
 .nav-button-primary {
-  background-color: #92fe75 !important;
+  background-color:  #7ed957 !important;
   color: #000000 !important;
 }
 
 .nav-button-primary:hover,
 .search-button:hover {
-  background-color: #92fe75 !important;
+  background-color:  #7ed957 !important;
 }
 
 /* Optional: Make placeholder text visible */

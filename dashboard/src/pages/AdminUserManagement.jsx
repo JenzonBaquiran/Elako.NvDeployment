@@ -17,11 +17,14 @@ const AdminUserManagement = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [activeStatFilter, setActiveStatFilter] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [showAddAdminModal, setShowAddAdminModal] = useState(false);
   const [showAddMsmeModal, setShowAddMsmeModal] = useState(false);
+  const [showEditUserModal, setShowEditUserModal] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
   const [showAddUserDropdown, setShowAddUserDropdown] = useState(false);
   const [adminFormData, setAdminFormData] = useState({
     username: '',
@@ -39,8 +42,20 @@ const AdminUserManagement = () => {
     contactNumber: '',
     clientProfilingNumber: ''
   });
+  const [editUserFormData, setEditUserFormData] = useState({
+    username: '',
+    firstname: '',
+    lastname: '',
+    email: '',
+    businessName: '',
+    category: '',
+    address: '',
+    contactNumber: '',
+    clientProfilingNumber: ''
+  });
   const [adminFormLoading, setAdminFormLoading] = useState(false);
   const [msmeFormLoading, setMsmeFormLoading] = useState(false);
+  const [editUserFormLoading, setEditUserFormLoading] = useState(false);
 
   // Fetch users from API
   useEffect(() => {
@@ -126,7 +141,7 @@ const AdminUserManagement = () => {
     }
   };
 
-  // Filter users based on active tab, search term, and status
+  // Filter users based on active tab, search term, status, and stat filter
   const filteredUsers = users.filter(user => {
     const matchesTab = activeTab === "all" || 
                       (activeTab === "customers" && user.type === "Customer") ||
@@ -138,10 +153,34 @@ const AdminUserManagement = () => {
     
     const matchesStatus = statusFilter === "all" || user.status === statusFilter;
     
-    return matchesTab && matchesSearch && matchesStatus;
+    // Apply stat filter
+    let matchesStatFilter = true;
+    if (activeStatFilter) {
+      switch (activeStatFilter) {
+        case 'customers':
+          matchesStatFilter = user.type === "Customer";
+          break;
+        case 'msmes':
+          matchesStatFilter = user.type === "MSME";
+          break;
+        case 'active':
+          matchesStatFilter = user.status === "active" || user.status === "approved";
+          break;
+        case 'pending':
+          matchesStatFilter = user.status === "pending";
+          break;
+        case 'suspended':
+          matchesStatFilter = user.status === "suspended" || user.status === "rejected";
+          break;
+        default:
+          matchesStatFilter = true;
+      }
+    }
+    
+    return matchesTab && matchesSearch && matchesStatus && matchesStatFilter;
   });
 
-  // Filter admins based on search term and status
+  // Filter admins based on search term, status, and stat filter
   const filteredAdmins = admins.filter(admin => {
     const matchesSearch = admin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          admin.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -149,11 +188,50 @@ const AdminUserManagement = () => {
     
     const matchesStatus = statusFilter === "all" || admin.status === statusFilter;
     
-    return matchesSearch && matchesStatus;
+    // Apply stat filter for admins
+    let matchesStatFilter = true;
+    if (activeStatFilter) {
+      switch (activeStatFilter) {
+        case 'admins':
+          matchesStatFilter = true; // Already filtering admins
+          break;
+        case 'active':
+          matchesStatFilter = admin.status === "active";
+          break;
+        case 'suspended':
+          matchesStatFilter = admin.status === "suspended";
+          break;
+        default:
+          matchesStatFilter = activeStatFilter === 'total' || activeStatFilter === 'admins';
+      }
+    }
+    
+    return matchesSearch && matchesStatus && matchesStatFilter;
   });
 
-  // Get current display data based on active tab
+  // Get current display data based on active tab and stat filter
   const getCurrentDisplayData = () => {
+    // If stat filter is active, override tab selection for certain filters
+    if (activeStatFilter) {
+      switch (activeStatFilter) {
+        case 'customers':
+          return filteredUsers.filter(user => user.type === "Customer");
+        case 'msmes':
+          return filteredUsers.filter(user => user.type === "MSME");
+        case 'admins':
+          return filteredAdmins;
+        case 'total':
+          return [...filteredUsers, ...filteredAdmins];
+        case 'active':
+        case 'pending':
+        case 'suspended':
+          return activeTab === "admins" ? filteredAdmins : filteredUsers;
+        default:
+          break;
+      }
+    }
+    
+    // Default behavior based on active tab
     if (activeTab === "admins") {
       return filteredAdmins;
     }
@@ -161,6 +239,54 @@ const AdminUserManagement = () => {
   };
 
   const currentDisplayData = getCurrentDisplayData();
+
+  // Handle stat box clicks
+  const handleStatBoxClick = (statType) => {
+    // Special case for 'active' - show all users instead of filtering
+    if (statType === 'active') {
+      setActiveStatFilter(null);
+      setActiveTab('all');
+      setSearchTerm('');
+      setStatusFilter('all');
+      return;
+    }
+
+    // Toggle the stat filter - if same is clicked, clear it
+    if (activeStatFilter === statType) {
+      setActiveStatFilter(null);
+      // Reset to show all users by default
+      if (statType === 'admins') {
+        setActiveTab('all');
+      }
+    } else {
+      setActiveStatFilter(statType);
+      
+      // Set appropriate tab based on stat type
+      switch (statType) {
+        case 'customers':
+          setActiveTab('customers');
+          break;
+        case 'msmes':
+          setActiveTab('msmes');
+          break;
+        case 'admins':
+          setActiveTab('admins');
+          break;
+        case 'total':
+          setActiveTab('all');
+          break;
+        default:
+          // For status-based filters (pending, suspended), keep current tab
+          break;
+      }
+    }
+    
+    // Clear search and status filters when stat filter is applied
+    if (activeStatFilter !== statType) {
+      setSearchTerm('');
+      setStatusFilter('all');
+    }
+  };
 
   // Calculate statistics
   const stats = {
@@ -361,6 +487,156 @@ const AdminUserManagement = () => {
     }));
   };
 
+  const handleEditUser = (user) => {
+    setEditingUser(user);
+    // Populate form data based on user type
+    if (user.type === 'Admin') {
+      setEditUserFormData({
+        username: user.username,
+        firstname: user.name.split(' ')[0] || '',
+        lastname: user.name.split(' ').slice(1).join(' ') || '',
+        email: user.email,
+        businessName: '',
+        category: '',
+        address: '',
+        contactNumber: '',
+        clientProfilingNumber: ''
+      });
+    } else if (user.type === 'MSME') {
+      setEditUserFormData({
+        username: user.username,
+        firstname: '',
+        lastname: '',
+        email: user.email,
+        businessName: user.name,
+        category: user.category || '',
+        address: user.address || '',
+        contactNumber: user.contactNumber || '',
+        clientProfilingNumber: user.clientProfilingNumber || ''
+      });
+    } else if (user.type === 'Customer') {
+      setEditUserFormData({
+        username: user.username,
+        firstname: user.name.split(' ')[0] || '',
+        lastname: user.name.split(' ').slice(1).join(' ') || '',
+        email: user.email,
+        businessName: '',
+        category: '',
+        address: user.address || '',
+        contactNumber: user.contactNumber || '',
+        clientProfilingNumber: ''
+      });
+    }
+    setShowEditUserModal(true);
+    setActiveDropdown(null);
+  };
+
+  const handleEditUserFormChange = (e) => {
+    const { name, value } = e.target;
+    setEditUserFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleEditUserSubmit = async (e) => {
+    e.preventDefault();
+    setEditUserFormLoading(true);
+
+    try {
+      let endpoint;
+      let requestBody = {};
+
+      if (editingUser.type === 'Admin') {
+        endpoint = `http://localhost:1337/api/admin/admins/${editingUser.id}`;
+        requestBody = {
+          username: editUserFormData.username,
+          firstname: editUserFormData.firstname,
+          lastname: editUserFormData.lastname,
+          email: editUserFormData.email
+        };
+      } else if (editingUser.type === 'MSME') {
+        endpoint = `http://localhost:1337/api/admin/msme/${editingUser.id}/update`;
+        requestBody = {
+          username: editUserFormData.username,
+          businessName: editUserFormData.businessName,
+          category: editUserFormData.category,
+          address: editUserFormData.address,
+          contactNumber: editUserFormData.contactNumber,
+          clientProfilingNumber: editUserFormData.clientProfilingNumber
+        };
+      } else if (editingUser.type === 'Customer') {
+        endpoint = `http://localhost:1337/api/admin/customers/${editingUser.id}/update`;
+        requestBody = {
+          username: editUserFormData.username,
+          firstname: editUserFormData.firstname,
+          lastname: editUserFormData.lastname,
+          email: editUserFormData.email,
+          address: editUserFormData.address,
+          contactNumber: editUserFormData.contactNumber
+        };
+      }
+
+      const response = await fetch(endpoint, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody)
+      });
+
+      // Check if response is JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error(`Server returned non-JSON response (${response.status}). The edit endpoint may not exist on the server.`);
+      }
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        showSuccess(`${editingUser.type} updated successfully!`, "Success");
+        setShowEditUserModal(false);
+        setEditingUser(null);
+        
+        // Refresh appropriate data
+        if (editingUser.type === "Admin") {
+          fetchAdmins();
+        } else {
+          fetchUsers();
+        }
+      } else {
+        throw new Error(data.error || `Failed to update ${editingUser.type.toLowerCase()}`);
+      }
+    } catch (err) {
+      console.error(`Error updating ${editingUser.type.toLowerCase()}:`, err);
+      
+      // Show more specific error message
+      if (err.message.includes("404")) {
+        showError(`Edit functionality is not yet implemented on the server for ${editingUser.type.toLowerCase()}s. Please contact the developer.`, "Feature Not Available");
+      } else if (err.message.includes("non-JSON response")) {
+        showError(`Server error: ${err.message}`, "Server Error");
+      } else {
+        showError(`Failed to update ${editingUser.type.toLowerCase()}. ${err.message}`, "Error");
+      }
+    } finally {
+      setEditUserFormLoading(false);
+    }
+  };
+
+  const handleCloseEditUserModal = () => {
+    setShowEditUserModal(false);
+    setEditingUser(null);
+    setEditUserFormData({
+      username: '',
+      firstname: '',
+      lastname: '',
+      email: '',
+      businessName: '',
+      category: '',
+      address: '',
+      contactNumber: '',
+      clientProfilingNumber: ''
+    });
+  };
+
   const handleCloseAddMsmeModal = () => {
     setShowAddMsmeModal(false);
     setMsmeFormData({
@@ -456,31 +732,52 @@ const AdminUserManagement = () => {
         )}
 
         <div className="admin-user-management__stats">
-          <div className="admin-user-management__stat-box">
+          <div 
+            className={`admin-user-management__stat-box ${activeStatFilter === 'total' ? 'admin-user-management__stat-box--active' : ''}`}
+            onClick={() => handleStatBoxClick('total')}
+          >
             <span className="admin-user-management__stat-value">{stats.total}</span>
             <span className="admin-user-management__stat-label">Total Users</span>
           </div>
-          <div className="admin-user-management__stat-box">
+          <div 
+            className={`admin-user-management__stat-box ${activeStatFilter === 'customers' ? 'admin-user-management__stat-box--active' : ''}`}
+            onClick={() => handleStatBoxClick('customers')}
+          >
             <span className="admin-user-management__stat-value">{stats.customers}</span>
             <span className="admin-user-management__stat-label">Customers</span>
           </div>
-          <div className="admin-user-management__stat-box">
+          <div 
+            className={`admin-user-management__stat-box ${activeStatFilter === 'msmes' ? 'admin-user-management__stat-box--active' : ''}`}
+            onClick={() => handleStatBoxClick('msmes')}
+          >
             <span className="admin-user-management__stat-value">{stats.msmes}</span>
             <span className="admin-user-management__stat-label">MSMEs</span>
           </div>
-          <div className="admin-user-management__stat-box">
+          <div 
+            className={`admin-user-management__stat-box ${activeStatFilter === 'admins' ? 'admin-user-management__stat-box--active' : ''}`}
+            onClick={() => handleStatBoxClick('admins')}
+          >
             <span className="admin-user-management__stat-value">{stats.admins}</span>
             <span className="admin-user-management__stat-label">Admins</span>
           </div>
-          <div className="admin-user-management__stat-box">
+          <div 
+            className="admin-user-management__stat-box"
+            onClick={() => handleStatBoxClick('active')}
+          >
             <span className="admin-user-management__stat-value">{stats.active}</span>
             <span className="admin-user-management__stat-label">Active</span>
           </div>
-          <div className="admin-user-management__stat-box">
+          <div 
+            className={`admin-user-management__stat-box ${activeStatFilter === 'pending' ? 'admin-user-management__stat-box--active' : ''}`}
+            onClick={() => handleStatBoxClick('pending')}
+          >
             <span className="admin-user-management__stat-value">{stats.pending}</span>
             <span className="admin-user-management__stat-label">Pending</span>
           </div>
-          <div className="admin-user-management__stat-box">
+          <div 
+            className={`admin-user-management__stat-box ${activeStatFilter === 'suspended' ? 'admin-user-management__stat-box--active' : ''}`}
+            onClick={() => handleStatBoxClick('suspended')}
+          >
             <span className="admin-user-management__stat-value">{stats.suspended}</span>
             <span className="admin-user-management__stat-label">Suspended</span>
           </div>
@@ -616,6 +913,12 @@ const AdminUserManagement = () => {
                               onClick={() => handleViewUser(user)}
                             >
                               View
+                            </button>
+                            <button 
+                              className="admin-user-management__dropdown-item"
+                              onClick={() => handleEditUser(user)}
+                            >
+                              Edit
                             </button>
                             {user.type === "MSME" && user.status === "pending" && (
                               <>
@@ -877,6 +1180,165 @@ const AdminUserManagement = () => {
               </button>
             </div>
           </form>
+        </div>
+      </div>
+
+      {/* Edit User Modal */}
+      <div className={`admin-user-management__modal-overlay ${showEditUserModal ? 'show' : ''}`} onClick={handleCloseEditUserModal}>
+        <div className="admin-user-management__modal admin-user-management__modal--edit-user" onClick={(e) => e.stopPropagation()}>
+          <div className="admin-user-management__modal-header">
+            <h3 className="admin-user-management__modal-title">Edit {editingUser?.type}</h3>
+            <button className="admin-user-management__modal-close" onClick={handleCloseEditUserModal}>
+              ×
+            </button>
+          </div>
+          
+          {editingUser && (
+            <form onSubmit={handleEditUserSubmit} className="admin-user-management__edit-form">
+              {/* Common Fields */}
+              <div className="admin-user-management__form-field">
+                <label className="admin-user-management__form-label">Username *</label>
+                <input
+                  type="text"
+                  name="username"
+                  value={editUserFormData.username}
+                  onChange={handleEditUserFormChange}
+                  className="admin-user-management__form-input"
+                  required
+                />
+              </div>
+
+              {/* Admin and Customer Fields */}
+              {(editingUser.type === 'Admin' || editingUser.type === 'Customer') && (
+                <>
+                  <div className="admin-user-management__form-row">
+                    <div className="admin-user-management__form-field">
+                      <label className="admin-user-management__form-label">First Name *</label>
+                      <input
+                        type="text"
+                        name="firstname"
+                        value={editUserFormData.firstname}
+                        onChange={handleEditUserFormChange}
+                        className="admin-user-management__form-input"
+                        required
+                      />
+                    </div>
+                    <div className="admin-user-management__form-field">
+                      <label className="admin-user-management__form-label">Last Name *</label>
+                      <input
+                        type="text"
+                        name="lastname"
+                        value={editUserFormData.lastname}
+                        onChange={handleEditUserFormChange}
+                        className="admin-user-management__form-input"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="admin-user-management__form-field">
+                    <label className="admin-user-management__form-label">Email *</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={editUserFormData.email}
+                      onChange={handleEditUserFormChange}
+                      className="admin-user-management__form-input"
+                      required
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* MSME Fields */}
+              {editingUser.type === 'MSME' && (
+                <>
+                  <div className="admin-user-management__form-field">
+                    <label className="admin-user-management__form-label">Business Name *</label>
+                    <input
+                      type="text"
+                      name="businessName"
+                      value={editUserFormData.businessName}
+                      onChange={handleEditUserFormChange}
+                      className="admin-user-management__form-input"
+                      required
+                    />
+                  </div>
+
+                  <div className="admin-user-management__form-field">
+                    <label className="admin-user-management__form-label">Category *</label>
+                    <select
+                      name="category"
+                      value={editUserFormData.category}
+                      onChange={handleEditUserFormChange}
+                      className="admin-user-management__form-input"
+                      required
+                    >
+                      <option value="">Select Category</option>
+                      <option value="food">Food</option>
+                      <option value="artisan">Artisan</option>
+                    </select>
+                  </div>
+
+                  <div className="admin-user-management__form-field">
+                    <label className="admin-user-management__form-label">Client Profiling Number</label>
+                    <input
+                      type="text"
+                      name="clientProfilingNumber"
+                      value={editUserFormData.clientProfilingNumber}
+                      onChange={handleEditUserFormChange}
+                      className="admin-user-management__form-input"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Common Fields for Customer and MSME */}
+              {(editingUser.type === 'Customer' || editingUser.type === 'MSME') && (
+                <>
+                  <div className="admin-user-management__form-field">
+                    <label className="admin-user-management__form-label">Contact Number</label>
+                    <input
+                      type="tel"
+                      name="contactNumber"
+                      value={editUserFormData.contactNumber}
+                      onChange={handleEditUserFormChange}
+                      className="admin-user-management__form-input"
+                    />
+                  </div>
+
+                  <div className="admin-user-management__form-field">
+                    <label className="admin-user-management__form-label">Address</label>
+                    <textarea
+                      name="address"
+                      value={editUserFormData.address}
+                      onChange={handleEditUserFormChange}
+                      className="admin-user-management__form-input"
+                      rows="3"
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="admin-user-management__form-actions">
+                <button
+                  type="button"
+                  className="admin-user-management__form-btn admin-user-management__form-btn--cancel"
+                  onClick={handleCloseEditUserModal}
+                  disabled={editUserFormLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="admin-user-management__form-btn admin-user-management__form-btn--submit"
+                  disabled={editUserFormLoading}
+                >
+                  {editUserFormLoading ? "Updating..." : "Update User"}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
 

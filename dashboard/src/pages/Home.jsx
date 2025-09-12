@@ -21,8 +21,11 @@ function Home() {
       const msmeData = await msmeResponse.json();
       
       if (msmeResponse.ok) {
+        // Filter out hidden MSMEs (only show visible ones)
+        const visibleStores = msmeData.filter(store => store.isVisible !== false);
+        
         // Sort by creation date (newest first) and take first 6
-        const sortedStores = msmeData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6);
+        const sortedStores = visibleStores.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6);
         
         // Fetch dashboard information for each store
         const storesWithDashboards = await Promise.all(

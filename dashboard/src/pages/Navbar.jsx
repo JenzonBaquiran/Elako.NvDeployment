@@ -7,6 +7,7 @@ import logo from "../logos/Icon on dark with text.png"
 import "../css/Navbar.css"
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import ChatIcon from '@mui/icons-material/Chat';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNotification } from "../components/NotificationProvider";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -89,13 +90,10 @@ function Header() {
 
           {/* Navigation - Desktop */}
           <div className="nav-section" style={{ left: '1.5rem' }}>
-            <button className="nav-button nav-button-ghost">
-              <NotificationsIcon fontSize="medium" />
-            </button>
-        
             {user ? (
               <>
                 <button className="user-greeting" onClick={handleUserGreetingClick}>
+                  <AccountCircleIcon fontSize="medium" style={{ marginRight: '8px' }} />
                   {getUserGreeting()}
                 </button>
                 <button className="nav-button nav-button-primary" onClick={handleLogout}>
@@ -112,6 +110,10 @@ function Header() {
                 </button>
               </>
             )}
+            
+            <button className="nav-button nav-button-ghost">
+              <NotificationsIcon fontSize="medium" />
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -148,6 +150,7 @@ function Header() {
             {user ? (
               <>
                 <button className="mobile-user-greeting" onClick={handleUserGreetingClick}>
+                  <AccountCircleIcon fontSize="medium" style={{ marginRight: '8px' }} />
                   {getUserGreeting()}
                 </button>
                 <button className="nav-button nav-button-primary mobile-menu-button" onClick={handleLogout}>

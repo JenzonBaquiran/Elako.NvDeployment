@@ -13,106 +13,109 @@ const AdminMsmeOversight = () => {
     isCollapsed: false
   });
   const [msmeData, setMsmeData] = useState([]);
+  const [productsData, setProductsData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [visibilityFilter, setVisibilityFilter] = useState('all');
   const [selectedMsme, setSelectedMsme] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
-  // Mock MSME data - replace with actual API call
-  const mockMsmeData = [
-    {
-      id: 1,
-      businessName: "Maria's Bakery",
-      ownerName: 'Maria Santos',
-      email: 'maria.bakery@email.com',
-      phone: '+63 912 345 6789',
-      address: 'Baguio City, Benguet',
-      businessType: 'Food',
-      registrationDate: '2024-01-15',
-      status: 'verified',
-      revenue: '₱45K',
-      employees: 15,
-      products: 15,
-      sales: '₱45K',
-      rating: 4.8,
-      followers: 234,
-      businessPermit: 'BP-2024-001',
-      taxId: 'TIN-123456789',
-      isVisible: true
-    },
-    {
-      id: 2,
-      businessName: 'TechCraft Solutions',
-      ownerName: 'Juan Dela Cruz',
-      email: 'juan@techcraft.ph',
-      phone: '+63 917 234 5678',
-      address: 'Cebu City, Cebu',
-      businessType: 'Technology',
-      registrationDate: '2024-02-20',
-      status: 'pending',
-      revenue: '₱32K',
-      employees: 8,
-      products: 12,
-      sales: '₱32K',
-      rating: 4.5,
-      followers: 156,
-      businessPermit: 'BP-2024-002',
-      taxId: 'TIN-987654321',
-      isVisible: true
-    },
-    {
-      id: 3,
-      businessName: 'Coastal Handicrafts',
-      ownerName: 'Ana Rodriguez',
-      email: 'ana@coastal.com',
-      phone: '+63 905 876 5432',
-      address: 'Boracay, Aklan',
-      businessType: 'Handicrafts',
-      registrationDate: '2024-03-10',
-      status: 'verified',
-      revenue: '₱28K',
-      employees: 5,
-      products: 25,
-      sales: '₱28K',
-      rating: 4.2,
-      followers: 89,
-      businessPermit: 'BP-2024-003',
-      taxId: 'TIN-456789123',
-      isVisible: false
-    },
-    {
-      id: 4,
-      businessName: 'Green Gardens',
-      ownerName: 'Carlos Mendoza',
-      email: 'carlos@greengardens.com',
-      phone: '+63 908 123 4567',
-      address: 'Davao City, Davao',
-      businessType: 'Agriculture',
-      registrationDate: '2024-03-25',
-      status: 'verified',
-      revenue: '₱67K',
-      employees: 12,
-      products: 8,
-      sales: '₱67K',
-      rating: 4.9,
-      followers: 312,
-      businessPermit: 'BP-2024-004',
-      taxId: 'TIN-789123456',
-      isVisible: true
+  // Fetch MSMEs from API
+  const fetchMsmes = async () => {
+    try {
+      const response = await fetch('http://localhost:1337/api/admin/users');
+      const data = await response.json();
+      
+      if (data.msmes) {
+        // Transform MSME data to match component structure
+        const transformedMsmes = data.msmes.map(msme => ({
+          id: msme.id,
+          _id: msme._id,
+          businessName: msme.businessName,
+          ownerName: msme.businessName, // Using businessName as owner name
+          email: `${msme.username}@msme.com`, // Generate email from username
+          phone: msme.contactNumber || 'N/A',
+          address: msme.address || 'N/A',
+          businessType: msme.category || 'N/A',
+          registrationDate: new Date(msme.createdAt).toLocaleDateString(),
+          status: msme.status || 'pending',
+          username: msme.username,
+          revenue: '₱0', // Default revenue
+          employees: 0, // Default employees
+          products: 0, // Will be updated with actual product count
+          sales: '₱0', // Default sales
+          rating: 4.0, // Default rating
+          followers: 0, // Default followers
+          businessPermit: msme.clientProfilingNumber || 'N/A',
+          taxId: 'N/A',
+          isVisible: msme.isVisible !== undefined ? msme.isVisible : true, // Use API value or default to true
+          clientProfilingNumber: msme.clientProfilingNumber
+        }));
+        
+        setMsmeData(transformedMsmes);
+        return transformedMsmes;
+      }
+    } catch (error) {
+      console.error('Error fetching MSMEs:', error);
+      setMsmeData([]);
+      return [];
     }
-  ];
+  };
+
+  // Fetch products to get total count and individual MSME product counts
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('http://localhost:1337/api/products');
+      const data = await response.json();
+      
+      if (data.success && data.products) {
+        setProductsData(data.products);
+        return data.products;
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      setProductsData([]);
+      return [];
+    }
+  };
+
+  // Update MSME data with product counts
+  const updateMsmeWithProductCounts = (msmes, products) => {
+    return msmes.map(msme => {
+      const msmeProducts = products.filter(product => product.msmeId === msme._id);
+      return {
+        ...msme,
+        products: msmeProducts.length
+      };
+    });
+  };
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setMsmeData(mockMsmeData);
-      setFilteredData(mockMsmeData);
-      setLoading(false);
-    }, 1000);
+    // Fetch data when component mounts
+    const fetchAllData = async () => {
+      setLoading(true);
+      try {
+        const [msmes, products] = await Promise.all([
+          fetchMsmes(),
+          fetchProducts()
+        ]);
+        
+        // Update MSMEs with product counts
+        const updatedMsmes = updateMsmeWithProductCounts(msmes, products);
+        setMsmeData(updatedMsmes);
+        setFilteredData(updatedMsmes);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllData();
   }, []);
 
   useEffect(() => {
@@ -132,13 +135,21 @@ const AdminMsmeOversight = () => {
       filtered = filtered.filter(msme =>
         msme.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         msme.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        msme.email.toLowerCase().includes(searchTerm.toLowerCase())
+        msme.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        msme.username.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     // Apply category filter
     if (categoryFilter !== 'all') {
-      filtered = filtered.filter(msme => msme.businessType.toLowerCase() === categoryFilter.toLowerCase());
+      filtered = filtered.filter(msme => 
+        msme.businessType && msme.businessType.toLowerCase() === categoryFilter.toLowerCase()
+      );
+    }
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(msme => msme.status === statusFilter);
     }
 
     // Apply visibility filter
@@ -149,12 +160,44 @@ const AdminMsmeOversight = () => {
     }
 
     setFilteredData(filtered);
-  }, [searchTerm, categoryFilter, visibilityFilter, msmeData, activeTab]);
+  }, [searchTerm, categoryFilter, statusFilter, visibilityFilter, msmeData, activeTab]);
 
-  const handleVisibilityToggle = (msmeId) => {
-    setMsmeData(prev => prev.map(msme =>
-      msme.id === msmeId ? { ...msme, isVisible: !msme.isVisible } : msme
-    ));
+  const handleVisibilityToggle = async (msmeId) => {
+    try {
+      // Find the MSME to get current visibility status
+      const msme = msmeData.find(m => m.id === msmeId);
+      if (!msme) return;
+
+      const newVisibility = !msme.isVisible;
+
+      // Call API to update visibility
+      const response = await fetch(`http://localhost:1337/api/admin/msme/${msme._id}/visibility`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isVisible: newVisibility })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update local state
+        setMsmeData(prev => prev.map(m =>
+          m.id === msmeId ? { ...m, isVisible: newVisibility } : m
+        ));
+
+        // Show success notification (you can implement this)
+        console.log(`${msme.businessName} is now ${newVisibility ? 'visible' : 'hidden'} on the homepage and ${newVisibility ? 'can' : 'cannot'} log in.`);
+      } else {
+        console.error('Error toggling visibility:', data.error);
+        // Show error notification
+        alert('Error updating visibility: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error toggling visibility:', error);
+      alert('Error updating visibility. Please try again.');
+    }
   };
 
   const handleViewDetails = (msme) => {
@@ -165,9 +208,12 @@ const AdminMsmeOversight = () => {
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'verified':
+      case 'approved':
         return 'admin-msme-oversight__status-badge--verified';
       case 'pending':
         return 'admin-msme-oversight__status-badge--pending';
+      case 'rejected':
+        return 'admin-msme-oversight__status-badge--rejected';
       default:
         return 'admin-msme-oversight__status-badge--inactive';
     }
@@ -188,9 +234,10 @@ const AdminMsmeOversight = () => {
 
   const stats = {
     total: msmeData.length,
-    verified: msmeData.filter(m => m.status === 'verified').length,
-    totalProducts: msmeData.reduce((sum, m) => sum + m.products, 0),
-    avgRating: msmeData.reduce((sum, m) => sum + m.rating, 0) / msmeData.length,
+    verified: msmeData.filter(m => m.status === 'approved' || m.status === 'verified').length,
+    totalProducts: productsData.length, // Use actual products count
+    avgRating: msmeData.length > 0 ? 
+      (msmeData.reduce((sum, m) => sum + m.rating, 0) / msmeData.length) : 0,
     pending: msmeData.filter(m => m.status === 'pending').length,
     topPerformers: msmeData.filter(m => m.rating >= 4.5).length
   };
@@ -267,18 +314,18 @@ const AdminMsmeOversight = () => {
             >
               <option value="all">All Categories</option>
               <option value="food">Food</option>
-              <option value="technology">Technology</option>
-              <option value="handicrafts">Handicrafts</option>
-              <option value="agriculture">Agriculture</option>
+              <option value="artisan">Artisan</option>
             </select>
             <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
               className="admin-msme-oversight__filter-dropdown"
             >
               <option value="all">All Status</option>
+              <option value="approved">Approved</option>
               <option value="verified">Verified</option>
               <option value="pending">Pending</option>
+              <option value="rejected">Rejected</option>
             </select>
             <select
               value={visibilityFilter}

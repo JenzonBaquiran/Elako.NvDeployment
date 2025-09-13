@@ -319,6 +319,44 @@ app.delete("/api/admin/customers/:id", async (req, res) => {
     }
     res.json({ success: true, message: "Customer deleted successfully" });
   } catch (err) {
+// Get single product by productId
+app.get("/api/products/:productId", async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.productId).populate('msmeId', 'businessName username');
+    if (!product) {
+      return res.status(404).json({ success: false, error: "Product not found" });
+    }
+    res.json({ success: true, product });
+  } catch (err) {
+    console.error("Error fetching product:", err);
+    res.status(500).json({ success: false, error: "Error fetching product" });
+  }
+});
+
+// Add feedback and rating to product
+app.post("/api/products/:productId/feedback", async (req, res) => {
+  try {
+    const { rating, comment, user } = req.body;
+    if (!rating || !comment || !user) {
+      return res.status(400).json({ success: false, error: "Rating, comment, and user are required" });
+    }
+    const product = await Product.findById(req.params.productId);
+    if (!product) {
+      return res.status(404).json({ success: false, error: "Product not found" });
+    }
+    // Add feedback to product
+    if (!Array.isArray(product.feedback)) product.feedback = [];
+    product.feedback.push({ user, comment, rating });
+    // Update average rating
+    const ratings = product.feedback.map(fb => fb.rating);
+    product.rating = ratings.length > 0 ? (ratings.reduce((a, b) => a + b, 0) / ratings.length) : null;
+    await product.save();
+    res.json({ success: true, message: "Feedback submitted" });
+  } catch (err) {
+    console.error("Error submitting feedback:", err);
+    res.status(500).json({ success: false, error: "Error submitting feedback" });
+  }
+});
     res.status(400).json({ error: err.message });
   }
 });
@@ -1049,6 +1087,167 @@ app.get("/api/products/available", async (req, res) => {
 });
 
 // --- Dashboard Routes ---
+
+// Get individual store details (for customer store view)
+app.get("/api/stores/:storeId", async (req, res) => {
+  try {
+    const { storeId } = req.params;
+    
+    // Find the MSME store
+    const store = await MSME.findById(storeId);
+    if (!store) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Store not found' 
+      });
+    }
+    
+    // Only show visible stores to customers
+    if (store.isVisible === false || store.status !== 'approved') {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Store not available' 
+      });
+    }
+    
+    // Find the dashboard information
+    let dashboard = await Dashboard.findByMsmeId(storeId);
+    
+    // If no dashboard exists, create a minimal one
+    if (!dashboard) {
+      dashboard = {
+        businessName: store.businessName,
+        description: null,
+        coverPhoto: null,
+        storeLogo: null,
+        contactNumber: null,
+        location: null,
+        socialLinks: {},
+        rating: 0
+      };
+    }
+    
+    // Combine store and dashboard data
+    const storeWithDashboard = {
+      ...store.toObject(),
+      dashboard: dashboard
+    };
+    
+    res.json({ 
+      success: true, 
+      store: storeWithDashboard 
+    });
+  } catch (error) {
+    console.error('Error fetching store details:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Internal server error' 
+    });
+  }
+});
+
+// Get all stores with dashboard information for customer view
+app.get("/api/stores", async (req, res) => {
+  try {
+    // Fetch all visible and approved MSMEs
+    const msmes = await MSME.find({ 
+      status: 'approved', 
+      isVisible: true 
+    }).sort({ createdAt: -1 });
+
+    // Fetch dashboard information for each MSME
+    const storesWithDashboards = await Promise.all(
+      msmes.map(async (msme) => {
+        try {
+          let dashboard = await Dashboard.findByMsmeId(msme._id);
+          
+          // If no dashboard exists, create a minimal one
+          if (!dashboard) {
+            dashboard = {
+              businessName: msme.businessName,
+              description: '',
+              coverPhoto: null,
+              storeLogo: null,
+              contactNumber: msme.contactNumber || '',
+              location: msme.address || '',
+              socialLinks: {
+                facebook: '',
+                instagram: '',
+                twitter: '',
+                website: ''
+              },
+              rating: 0,
+              isPublic: true
+            };
+          }
+
+          return {
+            _id: msme._id,
+            msmeId: msme._id,
+            businessName: dashboard.businessName || msme.businessName,
+            category: msme.category,
+            username: msme.username,
+            status: msme.status,
+            createdAt: msme.createdAt,
+            dashboard: dashboard
+          };
+        } catch (error) {
+          console.error(`Error fetching dashboard for ${msme.businessName}:`, error);
+          return {
+            _id: msme._id,
+            msmeId: msme._id,
+            businessName: msme.businessName,
+            category: msme.category,
+            username: msme.username,
+            status: msme.status,
+            createdAt: msme.createdAt,
+            dashboard: null
+          };
+        }
+      })
+    );
+
+    res.json({
+      success: true,
+      stores: storesWithDashboards
+    });
+  } catch (error) {
+    console.error("Error fetching stores:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch stores"
+    });
+  }
+});
+
+// Follow/Unfollow store endpoint
+app.post("/api/stores/:storeId/follow", async (req, res) => {
+  try {
+    const { storeId } = req.params;
+    const { customerId, action } = req.body;
+    
+    if (!customerId) {
+      return res.status(400).json({
+        success: false,
+        error: "Customer ID is required"
+      });
+    }
+    
+    const message = action === 'follow' ? 'Store followed successfully!' : 'Store unfollowed successfully!';
+    
+    res.json({
+      success: true,
+      message: message,
+      following: action === 'follow'
+    });
+  } catch (error) {
+    console.error("Error following/unfollowing store:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error processing follow request"
+    });
+  }
+});
 
 // Get dashboard by MSME ID
 app.get("/api/msme/:msmeId/dashboard", async (req, res) => {

@@ -298,7 +298,6 @@ const AdminMsmeOversight = () => {
 
         {/* Filters Section */}
         <div className="admin-msme-oversight__filters">
-          <h2>Filters & Controls</h2>
           <div className="admin-msme-oversight__filters-row">
             <input
               type="text"

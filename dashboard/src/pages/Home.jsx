@@ -163,7 +163,7 @@ function Home() {
                   {card.price}
                 </div>
                 <button className="hero-button hero-button-primary" style={{width: "100%", marginTop: "1rem"}}>
-                  Get Started
+                  View Product
                 </button>
               </div>
             ))}
@@ -188,7 +188,7 @@ function Home() {
         <h3>Content Creation Studio</h3>
         <p>AI-powered content generation for all platforms</p>
         <div className="top-stores-rating">★ 4.9 (412 reviews)</div>
-        <button className="hero-button hero-button-outline" style={{width: "100%", marginTop: "1rem"}}>Learn More</button>
+        <button className="hero-button hero-button-outline" style={{width: "100%", marginTop: "1rem"}}>Visit Store</button>
       </div>
       <div className="top-stores-card">
         <img src={heroPic} alt="Analytics Pro Dashboard" />
@@ -196,7 +196,7 @@ function Home() {
         <h3>Analytics Pro Dashboard</h3>
         <p>Advanced marketing analytics and reporting</p>
         <div className="top-stores-rating">★ 4.8 (356 reviews)</div>
-        <button className="hero-button hero-button-outline" style={{width: "100%", marginTop: "1rem"}}>Learn More</button>
+        <button className="hero-button hero-button-outline" style={{width: "100%", marginTop: "1rem"}}>Visit Store</button>
       </div>
       <div className="top-stores-card">
         <img src={heroPic} alt="Influencer Connect" />
@@ -204,7 +204,7 @@ function Home() {
         <h3>Influencer Connect</h3>
         <p>Connect with top influencers in your niche</p>
         <div className="top-stores-rating">★ 4.7 (289 reviews)</div>
-        <button className="hero-button hero-button-outline" style={{width: "100%", marginTop: "1rem"}}>Learn More</button>
+        <button className="hero-button hero-button-outline" style={{width: "100%", marginTop: "1rem"}}>Visit Store</button>
       </div>
       <div className="top-stores-card">
         <img src={heroPic} alt="Brand Design Suite" />
@@ -212,7 +212,7 @@ function Home() {
         <h3>Brand Design Suite</h3>
         <p>Professional branding and design tools</p>
         <div className="top-stores-rating">★ 4.8 (234 reviews)</div>
-        <button className="hero-button hero-button-outline" style={{width: "100%", marginTop: "1rem"}}>Learn More</button>
+        <button className="hero-button hero-button-outline" style={{width: "100%", marginTop: "1rem"}}>Visit Store</button>
       </div>
       <div className="top-stores-card">
         <img src={heroPic} alt="Video Marketing Hub" />
@@ -220,7 +220,7 @@ function Home() {
         <h3>Video Marketing Hub</h3>
         <p>Create and distribute engaging video content</p>
         <div className="top-stores-rating">★ 4.9 (178 reviews)</div>
-        <button className="hero-button hero-button-outline" style={{width: "100%", marginTop: "1rem"}}>Learn More</button>
+        <button className="hero-button hero-button-outline" style={{width: "100%", marginTop: "1rem"}}>Visit Store</button>
       </div>
       <div className="top-stores-card">
         <img src={heroPic} alt="Conversion Optimizer" />
@@ -228,7 +228,7 @@ function Home() {
         <h3>Conversion Optimizer</h3>
         <p>A/B testing and conversion rate optimization</p>
         <div className="top-stores-rating">★ 4.6 (145 reviews)</div>
-        <button className="hero-button hero-button-outline" style={{width: "100%", marginTop: "1rem"}}>Learn More</button>
+        <button className="hero-button hero-button-outline" style={{width: "100%", marginTop: "1rem"}}>Visit Store</button>
       </div>
     </div>
   </div>
@@ -315,7 +315,7 @@ function Home() {
                   console.log('Visit store:', businessName, 'Dashboard:', dashboard);
                 }}
               >
-                Learn More
+                Visit Store
               </button>
             </div>
           </div>

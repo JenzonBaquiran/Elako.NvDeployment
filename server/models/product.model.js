@@ -54,6 +54,20 @@ const productSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  // Customer feedback and rating
+  feedback: [
+      {
+        user: { type: String, required: true },
+        comment: { type: String, required: true },
+        rating: { type: Number, required: true, min: 1, max: 5 }
+      }
+    ],
+    rating: {
+      type: Number,
+      min: 1,
+      max: 5,
+      default: null
+    },
   createdAt: {
     type: Date,
     default: Date.now
@@ -63,7 +77,20 @@ const productSchema = new mongoose.Schema({
     default: Date.now
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  toObject: { virtuals: true },
+  toJSON: { virtuals: true }
+});
+
+// Ensure feedback and rating are always present
+productSchema.pre('validate', function(next) {
+  if (!Array.isArray(this.feedback)) {
+    this.feedback = [];
+  }
+  if (typeof this.rating === 'undefined') {
+    this.rating = null;
+  }
+  next();
 });
 
 // Index for better search performance

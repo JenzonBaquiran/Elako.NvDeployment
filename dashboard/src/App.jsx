@@ -20,6 +20,9 @@ import AdminMsmeOversight from "./pages/AdminMsmeOversight";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminSettings from "./pages/AdminSettings";
 import MsmeCustomizeDashboard from "./pages/MsmeCustomizeDashboard";
+import CustomerViewStore from "./pages/CustomerViewStore";
+import CustomerStoreView from "./pages/CustomerStoreView";
+import ProductDetails from "./pages/ProductDetails";
 
 
 
@@ -140,6 +143,38 @@ function App() {
               element={
                 <ProtectedRoute allowedUserTypes={['customer']}>
                   <CustomerSidebar />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/customer-view-store" 
+              element={
+                <ProtectedRoute allowedUserTypes={['customer']}>
+                  <CustomerViewStore />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/customer/stores" 
+              element={
+                <ProtectedRoute allowedUserTypes={['customer']}>
+                  <CustomerViewStore />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/customer/store/:storeId" 
+              element={
+                <ProtectedRoute allowedUserTypes={['customer']}>
+                  <CustomerStoreView />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/product/:productId" 
+              element={
+                <ProtectedRoute allowedUserTypes={['customer', 'msme', 'admin']}>
+                  <ProductDetails />
                 </ProtectedRoute>
               } 
             />

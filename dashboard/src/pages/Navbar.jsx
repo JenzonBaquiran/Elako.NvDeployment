@@ -70,7 +70,8 @@ function Header() {
               src={logo}
               alt="MarketHub Logo"
               className="logo-img"
-              style={{ height: "2.5rem" }}
+              style={{ height: "2.5rem", cursor: "pointer" }}
+              onClick={() => navigate("/")}
             />
           </div>
 

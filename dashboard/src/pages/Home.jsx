@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import heroPic from '../pictures/IMG_6125.jpg';
@@ -6,6 +7,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import '../css/Home.css';
 
 function Home() {
+  const navigate = useNavigate();
   const [newStores, setNewStores] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -239,7 +241,12 @@ function Home() {
       <h2>New Stores</h2>
     </div>
     <div className="recently-joined-viewall">
-       <button className="hero-button hero-button-outline">View All</button>
+       <button 
+         className="hero-button hero-button-outline"
+         onClick={() => navigate('/customer/stores')}
+       >
+         View All
+       </button>
     </div>
   </div>
  
@@ -311,8 +318,7 @@ function Home() {
               <button 
                 className="store-learn-btn"
                 onClick={() => {
-                  // You can add navigation to store page here
-                  console.log('Visit store:', businessName, 'Dashboard:', dashboard);
+                  navigate(`/customer/store/${store._id}`);
                 }}
               >
                 Visit Store

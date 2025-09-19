@@ -1,0 +1,577 @@
+/* CustomerMessage.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+/* Main container and layout */
+.customer-message {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow-x: hidden;
+  font-family: 'Poppins', sans-serif;
+}
+
+.customer-message__content {
+  flex-grow: 1;
+  padding: 24px;
+  margin-left: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: all 0.3s ease-in-out;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.customer-message__content--sidebar-open {
+  margin-left: 250px;
+  width: calc(100vw - 250px);
+  max-width: calc(100vw - 250px);
+}
+
+.customer-message__content--sidebar-collapsed {
+  margin-left: 70px;
+  width: calc(100vw - 70px);
+  max-width: calc(100vw - 70px);
+}
+
+.customer-message__content--mobile {
+  margin-left: 0;
+  width: 100vw;
+  max-width: 100vw;
+}
+
+/* Header */
+.customer-message__header {
+  margin-bottom: 24px;
+}
+
+.customer-message__header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.customer-message__header-text h1 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Poppins', sans-serif;
+}
+
+.customer-message__header-text p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Layout */
+.customer-message__layout {
+  display: flex;
+  flex: 1;
+  gap: 16px;
+  min-height: 600px;
+  max-height: calc(100vh - 200px);
+}
+
+/* Conversations Panel */
+.customer-message__conversations-panel {
+  width: 350px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.customer-message__conversations-header {
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.customer-message__panel-title {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Poppins', sans-serif;
+}
+
+.customer-message__search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.customer-message__search-input {
+  width: 100%;
+  padding: 10px 12px 10px 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.customer-message__search-input:focus {
+  border-color: #01a477;
+  box-shadow: 0 0 0 3px rgba(1, 164, 119, 0.1);
+}
+
+.customer-message__search-icon {
+  position: absolute;
+  left: 12px;
+  color: #6b7280;
+  font-size: 18px;
+}
+
+.customer-message__clear-search {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #6b7280;
+  border-radius: 4px;
+  transition: all 0.2s ease-in-out;
+}
+
+.customer-message__clear-search:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+/* Conversations List */
+.customer-message__conversations-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.customer-message__conversation-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border-left: 3px solid transparent;
+}
+
+.customer-message__conversation-item:hover {
+  background: #f9fafb;
+}
+
+.customer-message__conversation-item--active {
+  background: #f0fdf4;
+  border-left-color: #01a477;
+}
+
+.customer-message__conversation-item--unread {
+  background: #fefefe;
+}
+
+.customer-message__conversation-avatar {
+  width: 45px;
+  height: 45px;
+  background: #01a477;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.customer-message__conversation-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.customer-message__conversation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  position: relative;
+}
+
+.customer-message__conversation-name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Poppins', sans-serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-message__conversation-time {
+  font-size: 12px;
+  color: #6b7280;
+  font-family: 'Poppins', sans-serif;
+  flex-shrink: 0;
+}
+
+.customer-message__unread-indicator {
+  width: 8px;
+  height: 8px;
+  background: #01a477;
+  border-radius: 50%;
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.customer-message__conversation-type {
+  margin: 0 0 4px 0;
+  font-size: 12px;
+  color: #01a477;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+}
+
+.customer-message__last-message {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+  font-family: 'Poppins', sans-serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-message__no-conversations {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.customer-message__no-conversations-text {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #6b7280;
+  font-family: 'Poppins', sans-serif;
+}
+
+.customer-message__search-hint {
+  margin: 0;
+  font-size: 12px;
+  color: #9ca3af;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Chat Panel */
+.customer-message__chat-panel {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Chat Header */
+.customer-message__chat-header {
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.customer-message__chat-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.customer-message__chat-avatar {
+  width: 40px;
+  height: 40px;
+  background: #01a477;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.customer-message__chat-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.customer-message__chat-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: 'Poppins', sans-serif;
+}
+
+.customer-message__chat-type {
+  margin: 0;
+  font-size: 12px;
+  color: #01a477;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+}
+
+.customer-message__chat-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.customer-message__action-btn {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #01a477;
+  color: #01a477;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-family: 'Poppins', sans-serif;
+}
+
+.customer-message__action-btn:hover {
+  background: #01a477;
+  color: white;
+}
+
+.customer-message__action-btn--icon {
+  padding: 8px;
+  min-width: auto;
+}
+
+/* Chat Messages */
+.customer-message__chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.customer-message__message {
+  display: flex;
+  flex-direction: column;
+  max-width: 70%;
+}
+
+.customer-message__message--own {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.customer-message__message--other {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.customer-message__message-content {
+  padding: 12px 16px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.4;
+  font-family: 'Poppins', sans-serif;
+  word-wrap: break-word;
+}
+
+.customer-message__message--own .customer-message__message-content {
+  background: #01a477;
+  color: white;
+  border-bottom-right-radius: 6px;
+}
+
+.customer-message__message--other .customer-message__message-content {
+  background: #f3f4f6;
+  color: #1f2937;
+  border-bottom-left-radius: 6px;
+}
+
+.customer-message__message-time {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 4px;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Chat Input */
+.customer-message__chat-input {
+  padding: 20px;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.customer-message__attach-btn {
+  padding: 10px;
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+}
+
+.customer-message__attach-btn:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.customer-message__input-field {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 24px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.customer-message__input-field:focus {
+  border-color: #01a477;
+  box-shadow: 0 0 0 3px rgba(1, 164, 119, 0.1);
+}
+
+.customer-message__send-button {
+  padding: 10px;
+  background: #01a477;
+  border: none;
+  color: white;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.customer-message__send-button:hover:not(:disabled) {
+  background: #018a66;
+  transform: scale(1.05);
+}
+
+.customer-message__send-button:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+}
+
+/* No Chat Selected */
+.customer-message__no-chat-selected {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.customer-message__no-chat-title {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  font-family: 'Poppins', sans-serif;
+}
+
+.customer-message__no-chat-text {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .customer-message__content,
+  .customer-message__content--sidebar-open,
+  .customer-message__content--sidebar-collapsed,
+  .customer-message__content--mobile {
+    margin-left: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    padding: 16px;
+  }
+  
+  .customer-message__layout {
+    flex-direction: column;
+    gap: 16px;
+    max-height: none;
+  }
+  
+  .customer-message__conversations-panel {
+    width: 100%;
+    max-height: 300px;
+  }
+  
+  .customer-message__chat-panel {
+    min-height: 400px;
+  }
+  
+  .customer-message__message {
+    max-width: 85%;
+  }
+  
+  .customer-message__chat-header {
+    padding: 16px;
+  }
+  
+  .customer-message__chat-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .customer-message__action-btn {
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .customer-message__conversations-panel {
+    max-height: 250px;
+  }
+  
+  .customer-message__chat-input {
+    padding: 16px;
+    gap: 8px;
+  }
+  
+  .customer-message__input-field {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  
+  .customer-message__send-button {
+    width: 36px;
+    height: 36px;
+  }
+}

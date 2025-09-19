@@ -22,6 +22,10 @@ import AdminSettings from "./pages/AdminSettings";
 import MsmeCustomizeDashboard from "./pages/MsmeCustomizeDashboard";
 import CustomerViewStore from "./pages/CustomerViewStore";
 import CustomerStoreView from "./pages/CustomerStoreView";
+import CustomerFavorites from "./pages/CustomerFavorites";
+import CustomerReviews from "./pages/CustomerReviews";
+import CustomerMessage from "./pages/CustomerMessage";
+import CustomerProfile from "./pages/CustomerProfile";
 import ProductDetails from "./pages/ProductDetails";
 
 
@@ -167,6 +171,38 @@ function App() {
               element={
                 <ProtectedRoute allowedUserTypes={['customer']}>
                   <CustomerStoreView />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/customer-favorites" 
+              element={
+                <ProtectedRoute allowedUserTypes={['customer']}>
+                  <CustomerFavorites />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/customer-reviews" 
+              element={
+                <ProtectedRoute allowedUserTypes={['customer']}>
+                  <CustomerReviews />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/customer-message" 
+              element={
+                <ProtectedRoute allowedUserTypes={['customer']}>
+                  <CustomerMessage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/customer-profile" 
+              element={
+                <ProtectedRoute allowedUserTypes={['customer']}>
+                  <CustomerProfile />
                 </ProtectedRoute>
               } 
             />

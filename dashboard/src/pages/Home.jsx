@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import FloatingMessageIcon from '../components/FloatingMessageIcon';
 import heroPic from '../pictures/IMG_6125.jpg';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import '../css/Home.css';
@@ -332,6 +333,7 @@ function Home() {
 </section>
 
       <Footer />
+      <FloatingMessageIcon />
     </div>
   );
 }

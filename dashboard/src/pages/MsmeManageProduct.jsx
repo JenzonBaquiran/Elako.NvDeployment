@@ -42,6 +42,43 @@ const MsmeManageProduct = () => {
     }
   }, [user]);
 
+  // Get categories based on user's business type
+  const getCategories = () => {
+    if (user?.category === 'food') {
+      return [
+        { value: 'processed-foods', label: 'Processed Foods' },
+        { value: 'baked-goods', label: 'Baked Goods' },
+        { value: 'beverages', label: 'Beverages' },
+        { value: 'confectionery', label: 'Confectionery' }
+      ];
+    } else if (user?.category === 'artisan') {
+      return [
+        { value: 'furniture', label: 'Furniture' },
+        { value: 'paintings-visual-arts', label: 'Paintings & Visual Arts' },
+        { value: 'weaved-products', label: 'Weaved Products' },
+        { value: 'handmade-accessories', label: 'Handmade Accessories' },
+        { value: 'sculptures', label: 'Sculptures' }
+      ];
+    }
+    // Default categories for backward compatibility
+    return [
+      { value: 'breakfast-items', label: 'Breakfast Items' },
+      { value: 'beverages', label: 'Beverages' },
+      { value: 'desserts', label: 'Desserts' },
+      { value: 'snacks', label: 'Snacks' },
+      { value: 'meal-sets', label: 'Meal Sets' },
+      { value: 'bakery', label: 'Bakery' },
+      { value: 'other', label: 'Other' }
+    ];
+  };
+
+  // Get category label from value
+  const getCategoryLabel = (categoryValue) => {
+    const categories = getCategories();
+    const category = categories.find(cat => cat.value === categoryValue);
+    return category ? category.label : categoryValue;
+  };
+
   // API Functions
   const fetchProducts = async () => {
     if (!user?._id) return;
@@ -457,13 +494,11 @@ const MsmeManageProduct = () => {
               onChange={(e) => setCategoryFilter(e.target.value)}
             >
               <option value="all">All Categories</option>
-              <option value="breakfast-items">Breakfast Items</option>
-              <option value="beverages">Beverages</option>
-              <option value="desserts">Desserts</option>
-              <option value="snacks">Snacks</option>
-              <option value="meal-sets">Meal Sets</option>
-              <option value="bakery">Bakery</option>
-              <option value="other">Other</option>
+              {getCategories().map((category) => (
+                <option key={category.value} value={category.value}>
+                  {category.label}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -684,13 +719,11 @@ const MsmeManageProduct = () => {
                       onChange={handleInputChange}
                     >
                       <option value="">Select category</option>
-                      <option value="breakfast-items">Breakfast Items</option>
-                      <option value="beverages">Beverages</option>
-                      <option value="desserts">Desserts</option>
-                      <option value="snacks">Snacks</option>
-                      <option value="meal-sets">Meal Sets</option>
-                      <option value="bakery">Bakery</option>
-                      <option value="other">Other</option>
+                      {getCategories().map((category) => (
+                        <option key={category.value} value={category.value}>
+                          {category.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>

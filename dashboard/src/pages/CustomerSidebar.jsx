@@ -154,25 +154,25 @@ const CustomerSidebar = ({ onSidebarToggle }) => {
               </Link>
             </li>
             <li className="customer-sidebar__nav-item">
-              <Link to="/customer-shopping" className={`customer-sidebar__nav-link ${location.pathname === '/customer-shopping' ? 'customer-sidebar__nav-link--active' : ''}`} title="Shopping" onClick={handleIconClick}>
+              <Link to="/customer-favorites" className={`customer-sidebar__nav-link ${location.pathname === '/customer-favorites' ? 'customer-sidebar__nav-link--active' : ''}`} title="Favorites" onClick={handleIconClick}>
                 <ShoppingCartIcon className="customer-sidebar__icon" />
                 <span className="customer-sidebar__text">Favorites</span>
               </Link>
             </li>
             <li className="customer-sidebar__nav-item">
-              <Link to="/customer-wishlist" className={`customer-sidebar__nav-link ${location.pathname === '/customer-wishlist' ? 'customer-sidebar__nav-link--active' : ''}`} title="Wishlist" onClick={handleIconClick}>
+              <Link to="/customer-reviews" className={`customer-sidebar__nav-link ${location.pathname === '/customer-wishlist' ? 'customer-sidebar__nav-link--active' : ''}`} title="Wishlist" onClick={handleIconClick}>
                 <FavoriteIcon className="customer-sidebar__icon" />
                 <span className="customer-sidebar__text">My Reviews</span>
               </Link>
             </li>
             <li className="customer-sidebar__nav-item">
-              <Link to="/customer-orders" className={`customer-sidebar__nav-link ${location.pathname === '/customer-orders' ? 'customer-sidebar__nav-link--active' : ''}`} title="Order History" onClick={handleIconClick}>
+              <Link to="/customer-message" className={`customer-sidebar__nav-link ${location.pathname === '/customer-orders' ? 'customer-sidebar__nav-link--active' : ''}`} title="Order History" onClick={handleIconClick}>
                 <HistoryIcon className="customer-sidebar__icon" />
                 <span className="customer-sidebar__text">Messages</span>
               </Link>
             </li>
             <li className="customer-sidebar__nav-item">
-              <Link to="/customer-settings" className={`customer-sidebar__nav-link ${location.pathname === '/customer-settings' ? 'customer-sidebar__nav-link--active' : ''}`} title="Settings" onClick={handleIconClick}>
+              <Link to="/customer-profile" className={`customer-sidebar__nav-link ${location.pathname === '/customer-profile' ? 'customer-sidebar__nav-link--active' : ''}`} title="Profile" onClick={handleIconClick}>
                 <SettingsIcon className="customer-sidebar__icon" />
                 <span className="customer-sidebar__text">Profile</span>
               </Link>

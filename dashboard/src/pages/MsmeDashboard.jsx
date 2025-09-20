@@ -216,54 +216,54 @@ const MsmeDashboard = () => {
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="msme-dashboard__card msme-dashboard__card--compact">
-            <h3>Weekly Rating Analysis</h3>
-            <div className="msme-dashboard__rating-analysis">
-              {loading ? (
-                <div>Loading rating data...</div>
-              ) : analytics.ratings.weeklyBreakdown.length > 0 ? (
-                <>
-                  <div className="msme-dashboard__rating-summary">
-                    <div className="msme-dashboard__rating-overall">
-                      <span className="msme-dashboard__rating-value">{analytics.ratings.currentAverage.toFixed(1)}</span>
-                      <div className="msme-dashboard__rating-stars">
-                        {[1, 2, 3, 4, 5].map(star => (
-                          <span 
-                            key={star} 
-                            className={`msme-dashboard__star ${star <= Math.round(analytics.ratings.currentAverage) ? 'filled' : ''}`}
-                          >
-                            ★
-                          </span>
-                        ))}
-                      </div>
-                      <span className="msme-dashboard__rating-count">({analytics.ratings.totalRatings} reviews)</span>
+        <div className="msme-dashboard__card msme-dashboard__card--full-width">
+          <h3>Weekly Rating Analysis</h3>
+          <div className="msme-dashboard__rating-analysis">
+            {loading ? (
+              <div>Loading rating data...</div>
+            ) : analytics.ratings.weeklyBreakdown.length > 0 ? (
+              <>
+                <div className="msme-dashboard__rating-summary">
+                  <div className="msme-dashboard__rating-overall">
+                    <span className="msme-dashboard__rating-value">{analytics.ratings.currentAverage.toFixed(1)}</span>
+                    <div className="msme-dashboard__rating-stars">
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <span 
+                          key={star} 
+                          className={`msme-dashboard__star ${star <= Math.round(analytics.ratings.currentAverage) ? 'filled' : ''}`}
+                        >
+                          ★
+                        </span>
+                      ))}
                     </div>
+                    <span className="msme-dashboard__rating-count">({analytics.ratings.totalRatings} reviews)</span>
                   </div>
-                  <div className="msme-dashboard__weekly-breakdown">
-                    {analytics.ratings.weeklyBreakdown.map((week, index) => (
-                      <div key={index} className="msme-dashboard__week-item">
-                        <div className="msme-dashboard__week-info">
-                          <span className="msme-dashboard__week-label">{week.week}</span>
-                          <span className="msme-dashboard__week-average">
-                            {week.average > 0 ? week.average.toFixed(1) : 'No ratings'}
-                          </span>
-                        </div>
-                        <div className="msme-dashboard__week-details">
-                          <span className="msme-dashboard__week-count">
-                            {week.count} rating{week.count !== 1 ? 's' : ''}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className="msme-dashboard__no-ratings">
-                  <p>No ratings yet. Encourage customers to rate your store!</p>
                 </div>
-              )}
-            </div>
+                <div className="msme-dashboard__weekly-breakdown">
+                  {analytics.ratings.weeklyBreakdown.map((week, index) => (
+                    <div key={index} className="msme-dashboard__week-item">
+                      <div className="msme-dashboard__week-info">
+                        <span className="msme-dashboard__week-label">{week.week}</span>
+                        <span className="msme-dashboard__week-average">
+                          {week.average > 0 ? week.average.toFixed(1) : 'No ratings'}
+                        </span>
+                      </div>
+                      <div className="msme-dashboard__week-details">
+                        <span className="msme-dashboard__week-count">
+                          {week.count} rating{week.count !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="msme-dashboard__no-ratings">
+                <p>No ratings yet. Encourage customers to rate your store!</p>
+              </div>
+            )}
           </div>
         </div>
 

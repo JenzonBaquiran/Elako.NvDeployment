@@ -268,22 +268,22 @@
 }
 
 .customer-reviews__action-btn--edit {
-  background-color: #f3f4f6;
-  color: #01a477;
+  background-color: #313131;
+  color: #ffffff;
 }
 
 .customer-reviews__action-btn--edit:hover {
-  background-color: #01a477;
+  background-color: #7ed957;
   color: white;
 }
 
 .customer-reviews__action-btn--delete {
-  background-color: #f3f4f6;
-  color: #ef4444;
+  background-color:  #313131;
+  color: #ffffff;
 }
 
 .customer-reviews__action-btn--delete:hover {
-  background-color: #ef4444;
+  background-color:  #7ed957;
   color: white;
 }
 
@@ -311,7 +311,7 @@
 
 .customer-reviews__view-product-btn {
   padding: 8px 16px;
-  background-color: #01a477;
+  background-color: #313131;
   color: white;
   border: none;
   border-radius: 6px;
@@ -323,7 +323,7 @@
 }
 
 .customer-reviews__view-product-btn:hover {
-  background-color: #018a66;
+  background-color: #7ed957;
   transform: translateY(-1px);
 }
 
@@ -435,12 +435,12 @@
 }
 
 .customer-reviews__action-btn--edit:hover {
-  background-color: #17a2b8;
+  background-color: #7ed957;
   transform: translateY(-1px);
 }
 
 .customer-reviews__action-btn--delete:hover {
-  background-color: #dc3545;
+  background-color:  #7ed957;
   transform: translateY(-1px);
 }
 

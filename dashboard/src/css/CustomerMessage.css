@@ -121,8 +121,8 @@
 }
 
 .customer-message__search-input:focus {
-  border-color: #01a477;
-  box-shadow: 0 0 0 3px rgba(1, 164, 119, 0.1);
+  border-color: #313131;
+  box-shadow: 0 0 0 3px rgba(49, 49, 49, 0.1);
 }
 
 .customer-message__search-icon {
@@ -172,7 +172,7 @@
 
 .customer-message__conversation-item--active {
   background: #f0fdf4;
-  border-left-color: #01a477;
+  border-left-color: #313131;
 }
 
 .customer-message__conversation-item--unread {
@@ -182,7 +182,7 @@
 .customer-message__conversation-avatar {
   width: 45px;
   height: 45px;
-  background: #01a477;
+  background: #313131;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -227,7 +227,7 @@
 .customer-message__unread-indicator {
   width: 8px;
   height: 8px;
-  background: #01a477;
+  background: #7ed957;
   border-radius: 50%;
   position: absolute;
   right: -12px;
@@ -238,7 +238,7 @@
 .customer-message__conversation-type {
   margin: 0 0 4px 0;
   font-size: 12px;
-  color: #01a477;
+  color: #313131;
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
 }
@@ -302,7 +302,7 @@
 .customer-message__chat-avatar {
   width: 40px;
   height: 40px;
-  background: #01a477;
+  background: #313131;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -329,7 +329,7 @@
 .customer-message__chat-type {
   margin: 0;
   font-size: 12px;
-  color: #01a477;
+  color: #313131;
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
 }
@@ -342,9 +342,9 @@
 
 .customer-message__action-btn {
   padding: 8px 16px;
-  background: transparent;
-  border: 1px solid #01a477;
-  color: #01a477;
+  background: #313131;
+  border: 1px solid #313131;
+  color: white;
   border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
@@ -354,12 +354,13 @@
 }
 
 .customer-message__action-btn:hover {
-  background: #01a477;
+  background: #7ed957;
+  border-color: #7ed957;
   color: white;
 }
 
 .customer-message__action-btn--icon {
-  padding: 8px;
+  padding: 4px 4px;
   min-width: auto;
 }
 
@@ -399,7 +400,7 @@
 }
 
 .customer-message__message--own .customer-message__message-content {
-  background: #01a477;
+  background: #313131;
   color: white;
   border-bottom-right-radius: 6px;
 }
@@ -454,13 +455,13 @@
 }
 
 .customer-message__input-field:focus {
-  border-color: #01a477;
-  box-shadow: 0 0 0 3px rgba(1, 164, 119, 0.1);
+  border-color: #313131;
+  box-shadow: 0 0 0 3px rgba(49, 49, 49, 0.1);
 }
 
 .customer-message__send-button {
   padding: 10px;
-  background: #01a477;
+  background: #313131;
   border: none;
   color: white;
   border-radius: 50%;
@@ -474,7 +475,7 @@
 }
 
 .customer-message__send-button:hover:not(:disabled) {
-  background: #018a66;
+  background: #7ed957;
   transform: scale(1.05);
 }
 
@@ -545,13 +546,17 @@
   }
   
   .customer-message__chat-actions {
-    flex-direction: column;
-    gap: 4px;
+    flex-direction: row;
+    gap: 8px;
   }
   
   .customer-message__action-btn {
     font-size: 11px;
     padding: 6px 12px;
+  }
+  
+  .customer-message__action-btn--icon {
+    padding: 1px 1px;
   }
 }
 

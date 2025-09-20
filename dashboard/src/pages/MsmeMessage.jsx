@@ -1,19 +1,105 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MsmeSidebar from './MsmeSidebar';
+import SearchIcon from '@mui/icons-material/Search';
+import SendIcon from '@mui/icons-material/Send';
+import ClearIcon from '@mui/icons-material/Clear';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import '../css/MsmeMessage.css';
 
 const MsmeMessage = () => {
-  const [sidebarState, setSidebarState] = useState({ isOpen: true, isMobile: false });
+  const [sidebarState, setSidebarState] = useState({
+    isOpen: true,
+    isMobile: false,
+    isCollapsed: false
+  });
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [newMessage, setNewMessage] = useState('');
+  const navigate = useNavigate();
+
+  const conversations = [
+    {
+      id: 1,
+      name: "John Santos",
+      type: "Customer",
+      lastMessage: "Hi! I'm interested in your buko pie. How much does it cost?",
+      time: "5m ago",
+      unread: true,
+      avatar: "J"
+    },
+    {
+      id: 2,
+      name: "Maria Rodriguez",
+      type: "Customer",
+      lastMessage: "Thank you for the quick delivery!",
+      time: "2h ago",
+      unread: false,
+      avatar: "M"
+    },
+    {
+      id: 3,
+      name: "Carlos Mendoza",
+      type: "Customer",
+      lastMessage: "Is the bibingka still available?",
+      time: "1d ago",
+      unread: true,
+      avatar: "C"
+    }
+  ];
+
+  const messages = [
+    {
+      id: 1,
+      sender: "John Santos",
+      message: "Hi! I'm interested in your buko pie. How much does it cost?",
+      time: "2:30 PM",
+      isOwn: false
+    },
+    {
+      id: 2,
+      sender: "You",
+      message: "Hello! Our buko pie costs ₱250 each. Would you like to place an order?",
+      time: "2:32 PM",
+      isOwn: true
+    },
+    {
+      id: 3,
+      sender: "John Santos",
+      message: "Yes, I'd like to order 2 pieces. When can I pick them up?",
+      time: "2:33 PM",
+      isOwn: false
+    },
+    {
+      id: 4,
+      sender: "You",
+      message: "Perfect! Your total is ₱500. They'll be ready tomorrow at 3 PM.",
+      time: "2:35 PM",
+      isOwn: true
+    },
+    {
+      id: 5,
+      sender: "John Santos",
+      message: "Great! I'll pick them up tomorrow. Thank you!",
+      time: "2:37 PM",
+      isOwn: false
+    }
+  ];
 
   const handleSidebarToggle = (stateOrIsOpen, isMobile = false) => {
-    // Handle both object parameter (from MsmeSidebar) and separate parameters
     if (typeof stateOrIsOpen === 'object') {
       setSidebarState({ 
         isOpen: stateOrIsOpen.isOpen, 
-        isMobile: stateOrIsOpen.isMobile 
+        isMobile: stateOrIsOpen.isMobile,
+        isCollapsed: stateOrIsOpen.isCollapsed || false
       });
     } else {
-      setSidebarState({ isOpen: stateOrIsOpen, isMobile });
+      setSidebarState({ 
+        isOpen: stateOrIsOpen, 
+        isMobile,
+        isCollapsed: false
+      });
     }
   };
 
@@ -26,6 +112,33 @@ const MsmeMessage = () => {
       : 'msme-messages__content msme-messages__content--sidebar-collapsed';
   };
 
+  const handleChatSelect = (conversation) => {
+    setSelectedChat(conversation);
+  };
+
+  const handleSearchKeyPress = (e) => {
+    if (e.key === 'Escape') {
+      setSearchTerm('');
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (newMessage.trim()) {
+      console.log('Sending message:', newMessage);
+      setNewMessage('');
+    }
+  };
+
+  const handleViewCustomer = (customerId) => {
+    navigate(`/msme/customer/${customerId}`);
+  };
+
+  const filteredConversations = conversations.filter(conv =>
+    conv.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    conv.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    conv.lastMessage.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="msme-messages">
       <MsmeSidebar onSidebarToggle={handleSidebarToggle} />
@@ -33,105 +146,139 @@ const MsmeMessage = () => {
         <div className="msme-messages__header">
           <div className="msme-messages__header-content">
             <div className="msme-messages__header-text">
-              <h1>Messages</h1>
-              <p>Manage your customer conversations and inquiries.</p>
-            </div>
-            <div className="msme-messages__search">
-              <input 
-                type="text" 
-                placeholder="Search conversations..." 
-                className="msme-messages__search-input" 
-              />
+
             </div>
           </div>
         </div>
 
-        <div className="msme-messages__body">
-          <div className="msme-messages__conversation-panel">
-            <div className="msme-messages__conversation-header">
-              <h3>Conversations</h3>
-              <span className="msme-messages__conversation-count">3 active</span>
+        <div className="msme-messages__layout">
+          {/* Conversations List */}
+          <div className="msme-messages__conversations-panel">
+            <div className="msme-messages__conversations-header">
+              <h2 className="msme-messages__panel-title">Customer Messages</h2>
+              <div className="msme-messages__search-box">
+                <SearchIcon className="msme-messages__search-icon" />
+                <input
+                  type="text"
+                  className="msme-messages__search-input"
+                  placeholder="Search conversations..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={handleSearchKeyPress}
+                />
+                {searchTerm && (
+                  <button 
+                    className="msme-messages__clear-search" 
+                    onClick={() => setSearchTerm('')}
+                    title="Clear search"
+                  >
+                    <ClearIcon />
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="msme-messages__conversation-list">
-              <div className="msme-messages__conversation msme-messages__conversation--active">
-                <div className="msme-messages__conversation-avatar">MB</div>
-                <div className="msme-messages__conversation-content">
-                  <div className="msme-messages__conversation-header-info">
-                    <h4>Maria's Bakery</h4>
-                    <span className="msme-messages__conversation-time">2m ago</span>
+            <div className="msme-messages__conversations-list">
+              {filteredConversations.length > 0 ? (
+                filteredConversations.map((conversation) => (
+                  <div
+                    key={conversation.id}
+                    className={`msme-messages__conversation-item ${selectedChat?.id === conversation.id ? 'msme-messages__conversation-item--active' : ''} ${conversation.unread ? 'msme-messages__conversation-item--unread' : ''}`}
+                    onClick={() => handleChatSelect(conversation)}
+                  >
+                    <div className="msme-messages__conversation-avatar">
+                      {conversation.avatar}
+                    </div>
+                    <div className="msme-messages__conversation-info">
+                      <div className="msme-messages__conversation-header">
+                        <h4 className="msme-messages__conversation-name">{conversation.name}</h4>
+                        <span className="msme-messages__conversation-time">{conversation.time}</span>
+                        {conversation.unread && <div className="msme-messages__unread-indicator"></div>}
+                      </div>
+                      <p className="msme-messages__conversation-type">{conversation.type}</p>
+                      <p className="msme-messages__last-message">{conversation.lastMessage}</p>
+                    </div>
                   </div>
-                  <p>Thank you for your order! Your buko pie will be ready tomorrow.</p>
+                ))
+              ) : (
+                <div className="msme-messages__no-conversations">
+                  <p className="msme-messages__no-conversations-text">No conversations found</p>
+                  {searchTerm && (
+                    <p className="msme-messages__search-hint">Try adjusting your search terms</p>
+                  )}
                 </div>
-              </div>
-              <div className="msme-messages__conversation">
-                <div className="msme-messages__conversation-avatar">MC</div>
-                <div className="msme-messages__conversation-content">
-                  <div className="msme-messages__conversation-header-info">
-                    <h4>Mountain Brew Coffee</h4>
-                    <span className="msme-messages__conversation-time">1h ago</span>
-                  </div>
-                  <p>We have new arabica beans available!</p>
-                </div>
-              </div>
-              <div className="msme-messages__conversation">
-                <div className="msme-messages__conversation-avatar">ST</div>
-                <div className="msme-messages__conversation-content">
-                  <div className="msme-messages__conversation-header-info">
-                    <h4>Support Team</h4>
-                    <span className="msme-messages__conversation-time">1d ago</span>
-                  </div>
-                  <p>How can we help you today?</p>
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
+          {/* Chat Area */}
           <div className="msme-messages__chat-panel">
-            <div className="msme-messages__chat-header">
-              <div className="msme-messages__chat-user-info">
-                <div className="msme-messages__chat-avatar">MB</div>
-                <div className="msme-messages__chat-user-details">
-                  <h4>Maria's Bakery</h4>
-                  <span>Online</span>
+            {selectedChat ? (
+              <>
+                <div className="msme-messages__chat-header">
+                  <div className="msme-messages__chat-info">
+                    <div className="msme-messages__chat-avatar">
+                      {selectedChat.avatar}
+                    </div>
+                    <div className="msme-messages__chat-details">
+                      <h3 className="msme-messages__chat-name">{selectedChat.name}</h3>
+                      <p className="msme-messages__chat-type">{selectedChat.type}</p>
+                    </div>
+                  </div>
+                  <div className="msme-messages__chat-actions">
+                    <button 
+                      className="msme-messages__action-btn"
+                      onClick={() => handleViewCustomer(selectedChat.id)}
+                      title="View Customer"
+                    >
+                      View Customer
+                    </button>
+                    <button className="msme-messages__action-btn msme-messages__action-btn--icon">
+                      <MoreVertIcon />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </div>
-            
-            <div className="msme-messages__chat-messages">
-              <div className="msme-messages__message msme-messages__message--received">
-                <div className="msme-messages__message-content">
-                  <p>Hi! Thank you for your interest in our buko pie. How many would you like to order?</p>
-                  <span className="msme-messages__message-time">10:32 AM</span>
+                <div className="msme-messages__chat-messages">
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`msme-messages__message ${message.isOwn ? 'msme-messages__message--own' : 'msme-messages__message--other'}`}
+                    >
+                      <div className="msme-messages__message-content">
+                        {message.message}
+                      </div>
+                      <div className="msme-messages__message-time">
+                        {message.time}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-              <div className="msme-messages__message msme-messages__message--sent">
-                <div className="msme-messages__message-content">
-                  <p>I'd like to order 2 buko pies. When can I pick them up?</p>
-                  <span className="msme-messages__message-time">10:35 AM</span>
+                <div className="msme-messages__chat-input">
+                  <button className="msme-messages__attach-btn">
+                    <AttachFileIcon />
+                  </button>
+                  <input
+                    type="text"
+                    className="msme-messages__input-field"
+                    placeholder="Type your message..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  />
+                  <button 
+                    onClick={handleSendMessage} 
+                    className="msme-messages__send-button"
+                    disabled={!newMessage.trim()}
+                  >
+                    <SendIcon />
+                  </button>
                 </div>
+              </>
+            ) : (
+              <div className="msme-messages__no-chat-selected">
+                <h3 className="msme-messages__no-chat-title">Select a conversation to start messaging</h3>
+                <p className="msme-messages__no-chat-text">Choose from your existing conversations with customers</p>
               </div>
-              <div className="msme-messages__message msme-messages__message--received">
-                <div className="msme-messages__message-content">
-                  <p>Perfect! Your order for 2 buko pies is confirmed. They will be ready tomorrow at 2 PM. Total is ₱500.</p>
-                  <span className="msme-messages__message-time">10:37 AM</span>
-                </div>
-              </div>
-              <div className="msme-messages__message msme-messages__message--sent">
-                <div className="msme-messages__message-content">
-                  <p>Great! I'll pay upon pickup. Thank you!</p>
-                  <span className="msme-messages__message-time">10:40 AM</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="msme-messages__chat-input">
-              <input 
-                type="text" 
-                placeholder="Type your message..." 
-                className="msme-messages__input-field"
-              />
-              <button className="msme-messages__send-btn">Send</button>
-            </div>
+            )}
           </div>
         </div>
       </div>

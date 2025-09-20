@@ -72,7 +72,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  background: #01a477;
+  background: #313131;
   color: white;
   border: none;
   border-radius: 8px;
@@ -84,7 +84,7 @@
 }
 
 .customer-profile__edit-btn:hover {
-  background: #018a66;
+  background: #7ed957;
   transform: translateY(-1px);
 }
 
@@ -275,12 +275,12 @@
 }
 
 .customer-profile__save-btn {
-  background: #01a477;
+  background: #313131;
   color: white;
 }
 
 .customer-profile__save-btn:hover {
-  background: #018a66;
+  background: #7ed957;
   transform: translateY(-1px);
 }
 

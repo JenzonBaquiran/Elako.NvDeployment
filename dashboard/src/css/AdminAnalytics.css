@@ -44,7 +44,7 @@
 
 .admin-analytics__header h1 {
   font-size: 24px;
-  color: #333;
+  color: #313131;
   margin-bottom: 8px;
   font-family: 'Poppins', sans-serif;
 }
@@ -150,7 +150,7 @@
 
 .admin-analytics__chart-header h3 {
   font-size: 18px;
-  color: #333;
+  color: #313131;
   margin-bottom: 4px;
   font-weight: 600;
   font-family: 'Poppins', sans-serif;
@@ -185,7 +185,7 @@
 }
 
 .admin-analytics__legend-color--dark {
-  background-color: #333;
+  background-color: #313131;
 }
 
 .admin-analytics__legend-color--green {
@@ -193,7 +193,7 @@
 }
 
 .admin-analytics__legend-color--black {
-  background-color: #333;
+  background-color: #313131;
 }
 
 .admin-analytics__legend-color--light-green {
@@ -205,7 +205,7 @@
 }
 
 .admin-analytics__legend-color--blue {
-  background-color: #3b82f6;
+  background-color: #313131;
 }
 
 .admin-analytics__legend-color--orange {
@@ -213,7 +213,7 @@
 }
 
 .admin-analytics__legend-color--purple {
-  background-color: #8b5cf6;
+  background-color: #313131;
 }
 
 /* Bar Chart Styles */
@@ -252,7 +252,7 @@
 }
 
 .admin-analytics__bar--dark {
-  background-color: #333;
+  background-color: #313131;
 }
 
 .admin-analytics__bar--green {
@@ -315,7 +315,7 @@
 
 .admin-analytics__owners-title {
   font-size: 16px;
-  color: #333;
+  color: #313131;
   margin-bottom: 16px;
   font-weight: 600;
   font-family: 'Poppins', sans-serif;
@@ -352,7 +352,7 @@
 }
 
 .admin-analytics__owner-indicator--blue {
-  background-color: #3b82f6;
+  background-color: #313131;
 }
 
 .admin-analytics__owner-indicator--green {
@@ -364,7 +364,7 @@
 }
 
 .admin-analytics__owner-indicator--purple {
-  background-color: #8b5cf6;
+  background-color: #313131;
 }
 
 .admin-analytics__owner-info {
@@ -377,7 +377,7 @@
 .admin-analytics__owner-name {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: #313131;
   font-family: 'Poppins', sans-serif;
 }
 
@@ -427,7 +427,7 @@
 }
 
 .admin-analytics__msme-indicator--blue {
-  background-color: #3b82f6;
+  background-color: #313131;
 }
 
 .admin-analytics__msme-indicator--green {
@@ -439,7 +439,7 @@
 }
 
 .admin-analytics__msme-indicator--purple {
-  background-color: #8b5cf6;
+  background-color: #313131;
 }
 
 .admin-analytics__msme-details {
@@ -452,7 +452,7 @@
 .admin-analytics__msme-name {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: #313131;
   font-family: 'Poppins', sans-serif;
 }
 
@@ -486,7 +486,7 @@
 }
 
 .admin-analytics__growth-rate--steady {
-  color: #7c3aed;
+  color: #313131;
   background: #ede9fe;
 }
 
@@ -881,7 +881,7 @@
   width: 40px;
   text-align: right;
   font-size: 14px;
-  color: #333;
+  color: #313131;
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
 }
@@ -921,7 +921,7 @@
 .admin-analytics__growing-msmes h3,
 .admin-analytics__struggling-msmes h3 {
   font-size: 16px;
-  color: #333;
+  color: #313131;
   margin-bottom: 16px;
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
@@ -951,7 +951,7 @@
 .admin-analytics__msme-name {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: #313131;
   font-family: 'Poppins', sans-serif;
 }
 
@@ -988,7 +988,7 @@
 
 .admin-analytics__recommendations h3 {
   font-size: 16px;
-  color: #333;
+  color: #313131;
   margin-bottom: 16px;
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
@@ -1017,7 +1017,7 @@
 .admin-analytics__recommendation-content h4 {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: #313131;
   margin-bottom: 4px;
   font-family: 'Poppins', sans-serif;
 }
@@ -1035,7 +1035,7 @@
 
 .admin-analytics__section-header h2 {
   font-size: 18px;
-  color: #333;
+  color: #313131;
   margin-bottom: 8px;
   font-weight: 600;
   font-family: 'Poppins', sans-serif;
@@ -1102,7 +1102,7 @@
 }
 
 .admin-analytics__new-msmes-bar {
-  background-color: #3b82f6;
+  background-color: #313131;
   width: 60%;
 }
 
@@ -1112,7 +1112,7 @@
 }
 
 .admin-analytics__active-bar {
-  background-color: #6366f1;
+  background-color: #313131;
   width: 100%;
 }
 
@@ -1160,7 +1160,7 @@
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: #333;
+  color: #313131;
   font-weight: 500;
   font-family: 'Poppins', sans-serif;
 }
@@ -1172,7 +1172,7 @@
 }
 
 .admin-analytics__category-dot--food { 
-  background-color: #3b82f6; 
+  background-color: #313131; 
 }
 
 .admin-analytics__category-dot--clothing { 
@@ -1180,7 +1180,7 @@
 }
 
 .admin-analytics__category-dot--crafts { 
-  background-color: #6366f1; 
+  background-color: #313131; 
 }
 
 .admin-analytics__category-dot--accessories { 
@@ -1200,7 +1200,7 @@
   left: 0;
   top: 0;
   height: 100%;
-  background: #3b82f6;
+  background: #313131;
   border-radius: 4px;
   transition: width 0.3s ease;
 }
@@ -1210,7 +1210,7 @@
   right: -60px;
   top: -4px;
   font-size: 14px;
-  color: #333;
+  color: #313131;
   font-weight: 500;
   font-family: 'Poppins', sans-serif;
 }
@@ -1258,7 +1258,7 @@
 }
 
 .admin-analytics__insight-marker--revenue { 
-  background-color: #3b82f6; 
+  background-color: #313131; 
 }
 
 .admin-analytics__insight-marker--engagement { 
@@ -1270,12 +1270,12 @@
 }
 
 .admin-analytics__insight-marker--category { 
-  background-color: #6366f1; 
+  background-color: #313131; 
 }
 
 .admin-analytics__insight-content h4 {
   font-size: 15px;
-  color: #333;
+  color: #313131;
   margin-bottom: 6px;
   font-weight: 600;
   font-family: 'Poppins', sans-serif;

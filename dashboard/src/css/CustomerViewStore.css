@@ -400,7 +400,8 @@
   display: flex;
   gap: 12px;
   margin-top: 12px;
-  justify-content: space-between;
+  justify-content: center;
+  align-items: center;
   width: 100%;
 }
 
@@ -503,7 +504,8 @@
   }
 
   .customer-view-store-actions {
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
     gap: 10px;
   }
 

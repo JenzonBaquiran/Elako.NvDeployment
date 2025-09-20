@@ -108,12 +108,12 @@
 }
 
 .customer-favorites__tab-button:hover {
-  color: #374151;
+  color: #313131;
 }
 
 .customer-favorites__tab-button--active {
-  color: #01a477;
-  border-bottom-color: #01a477;
+  color: #7ed957;
+  border-bottom-color: #7ed957;
 }
 
 .customer-favorites__tab-icon {
@@ -197,6 +197,9 @@
   border: 1px solid #e5e7eb;
   transition: all 0.2s ease-in-out;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .customer-favorites__product-card:hover {
@@ -254,6 +257,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex-grow: 1;
 }
 
 .customer-favorites__product-name {
@@ -308,7 +312,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 16px;
+  margin-top: auto;
+  padding-top: 16px;
 }
 
 .customer-favorites__price-section {
@@ -340,7 +345,7 @@
 
 .customer-favorites__view-btn {
   padding: 8px 16px;
-  background-color: #01a477;
+  background-color: #313131;
   color: white;
   border: none;
   border-radius: 6px;
@@ -352,7 +357,7 @@
 }
 
 .customer-favorites__view-btn:hover {
-  background-color: #018a66;
+  background-color: #7ed957;
   transform: translateY(-1px);
 }
 
@@ -370,6 +375,9 @@
   border: 1px solid #e5e7eb;
   transition: all 0.2s ease-in-out;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .customer-favorites__store-card:hover {
@@ -399,6 +407,7 @@
 
 .customer-favorites__store-info {
   flex: 1;
+  text-align: left;
 }
 
 .customer-favorites__store-name {
@@ -407,6 +416,7 @@
   font-weight: 600;
   color: #1f2937;
   font-family: 'Poppins', sans-serif;
+  text-align: left;
 }
 
 .customer-favorites__store-category {
@@ -414,6 +424,7 @@
   font-size: 14px;
   color: #6b7280;
   font-family: 'Poppins', sans-serif;
+  text-align: left;
 }
 
 .customer-favorites__store-location {
@@ -461,6 +472,7 @@
 
 .customer-favorites__store-description {
   margin-bottom: 16px;
+  flex-grow: 1;
 }
 
 .customer-favorites__store-description p {
@@ -509,7 +521,7 @@
 .customer-favorites__visit-store-btn {
   width: 100%;
   padding: 12px;
-  background-color: #01a477;
+  background-color: #313131;
   color: white;
   border: none;
   border-radius: 8px;
@@ -521,7 +533,7 @@
 }
 
 .customer-favorites__visit-store-btn:hover {
-  background-color: #018a66;
+  background-color: #7ed957;
   transform: translateY(-1px);
 }
 

@@ -68,18 +68,18 @@ const AdminAnalytics = () => {
                     </defs>
                     <rect width="100%" height="100%" fill="url(#msme-grid)" />
                     
-                    {/* Maria's Kitchen line (blue) - High growth */}
+                    {/* Maria's Kitchen line (dark gray) - High growth */}
                     <polyline 
                       fill="none" 
-                      stroke="#3b82f6" 
+                      stroke="#313131" 
                       strokeWidth="3"
                       points="40,140 120,115 200,95 280,70 360,50"
                     />
-                    <circle cx="40" cy="140" r="4" fill="#3b82f6" stroke="white" strokeWidth="2"/>
-                    <circle cx="120" cy="115" r="4" fill="#3b82f6" stroke="white" strokeWidth="2"/>
-                    <circle cx="200" cy="95" r="4" fill="#3b82f6" stroke="white" strokeWidth="2"/>
-                    <circle cx="280" cy="70" r="4" fill="#3b82f6" stroke="white" strokeWidth="2"/>
-                    <circle cx="360" cy="50" r="4" fill="#3b82f6" stroke="white" strokeWidth="2"/>
+                    <circle cx="40" cy="140" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
+                    <circle cx="120" cy="115" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
+                    <circle cx="200" cy="95" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
+                    <circle cx="280" cy="70" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
+                    <circle cx="360" cy="50" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
                     
                     {/* Verde Crafts line (green) - Steady growth */}
                     <polyline 
@@ -107,18 +107,18 @@ const AdminAnalytics = () => {
                     <circle cx="280" cy="125" r="4" fill="#f59e0b" stroke="white" strokeWidth="2"/>
                     <circle cx="360" cy="115" r="4" fill="#f59e0b" stroke="white" strokeWidth="2"/>
                     
-                    {/* Fresh Harvest Co. line (purple) - Slow but steady */}
+                    {/* Fresh Harvest Co. line (dark gray) - Slow but steady */}
                     <polyline 
                       fill="none" 
-                      stroke="#8b5cf6" 
+                      stroke="#313131" 
                       strokeWidth="3"
                       points="40,170 120,165 200,155 280,150 360,140"
                     />
-                    <circle cx="40" cy="170" r="4" fill="#8b5cf6" stroke="white" strokeWidth="2"/>
-                    <circle cx="120" cy="165" r="4" fill="#8b5cf6" stroke="white" strokeWidth="2"/>
-                    <circle cx="200" cy="155" r="4" fill="#8b5cf6" stroke="white" strokeWidth="2"/>
-                    <circle cx="280" cy="150" r="4" fill="#8b5cf6" stroke="white" strokeWidth="2"/>
-                    <circle cx="360" cy="140" r="4" fill="#8b5cf6" stroke="white" strokeWidth="2"/>
+                    <circle cx="40" cy="170" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
+                    <circle cx="120" cy="165" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
+                    <circle cx="200" cy="155" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
+                    <circle cx="280" cy="150" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
+                    <circle cx="360" cy="140" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
                     
                     {/* Y-axis labels for growth metrics */}
                     <text x="15" y="60" fontSize="10" fill="#666" textAnchor="middle">High</text>
@@ -202,7 +202,7 @@ const AdminAnalytics = () => {
                       {/* Buko Pie - 35% (126 degrees) */}
                       <path 
                         d="M 0,-110 A 110,110 0 0,1 106.5,29.0 L 0,0 Z" 
-                        fill="#3b82f6" 
+                        fill="#313131" 
                         stroke="white" 
                         strokeWidth="3"
                       />
@@ -226,7 +226,7 @@ const AdminAnalytics = () => {
                       {/* Handmade Crafts - 15% (54 degrees) */}
                       <path 
                         d="M -85.8,70.4 A 110,110 0 0,1 0,-110 L 0,0 Z" 
-                        fill="#8b5cf6" 
+                        fill="#313131" 
                         stroke="white" 
                         strokeWidth="3"
                       />

@@ -159,7 +159,7 @@
 /* Content grid */
 .msme-dashboard__content-grid {
   display: grid;
-  grid-template-columns: 1.6fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
   margin-bottom: 32px;
 }
@@ -175,7 +175,16 @@
 
 /* Specific styling for compact cards like rating analysis */
 .msme-dashboard__card--compact {
-  padding: 12px;
+  padding: 20px;
+  min-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Full-width card styling for separated sections */
+.msme-dashboard__card--full-width {
+  margin-bottom: 32px;
+  padding: 24px;
 }
 
 .msme-dashboard__card:hover {
@@ -438,13 +447,16 @@
 /* Rating Analysis Styles */
 .msme-dashboard__rating-analysis {
   margin-top: 8px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .msme-dashboard__rating-summary {
-  margin-bottom: 12px;
-  padding: 12px;
+  margin-bottom: 20px;
+  padding: 20px;
   background: #f8f9fa;
-  border-radius: 8px;
+  border-radius: 12px;
   text-align: center;
 }
 
@@ -458,7 +470,7 @@
 .msme-dashboard__rating-value {
   font-size: 32px;
   font-weight: 700;
-  color: #333;
+  color: #313131;
   line-height: 1;
 }
 
@@ -483,20 +495,31 @@
 }
 
 .msme-dashboard__weekly-breakdown {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  flex: 1;
+  margin-top: 8px;
 }
 
 .msme-dashboard__week-item {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  padding: 8px 12px;
+  padding: 20px 16px;
   background: #fff;
   border: 1px solid #e9ecef;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  min-height: 80px;
+  text-align: center;
+}
+
+.msme-dashboard__week-item:hover {
+  background: #f8f9fa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .msme-dashboard__week-item:hover {
@@ -506,27 +529,28 @@
 .msme-dashboard__week-info {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .msme-dashboard__week-label {
   font-weight: 600;
-  color: #333;
-  font-size: 13px;
+  color: #666;
+  font-size: 14px;
 }
 
 .msme-dashboard__week-average {
-  font-size: 16px;
+  font-size: 24px;
   font-weight: 700;
-  color: #28a745;
+  color: #313131;
 }
 
 .msme-dashboard__week-details {
-  text-align: right;
+  text-align: center;
 }
 
 .msme-dashboard__week-count {
-  color: #666;
+  color: #999;
   font-size: 12px;
 }
 

@@ -12,6 +12,8 @@ const CustomerSchema = new mongoose.Schema(
     address: { type: String, required: true },
     password: { type: String, required: true },
     userType: { type: String, default: 'customer' },
+    favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'MSME' }],
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
   },

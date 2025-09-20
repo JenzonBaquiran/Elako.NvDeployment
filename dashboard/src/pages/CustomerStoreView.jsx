@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Header from './Navbar';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
+import FollowButton from '../components/FollowButton';
 import '../css/CustomerStoreView.css';
 import defaultStoreImg from '../assets/pic.jpg';
 import foodStoreImg from '../assets/shakshouka.jpg';
@@ -11,8 +12,9 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PhoneIcon from '@mui/icons-material/Phone';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import LanguageIcon from '@mui/icons-material/Language';
+import PersonIcon from '@mui/icons-material/Person';
 
 const CustomerStoreView = () => {
   const { storeId } = useParams();
@@ -24,12 +26,29 @@ const CustomerStoreView = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
-  const [isFavorited, setIsFavorited] = useState(false);
+  
+  // Rating modal state
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  
+  // Top rated products state
+  const [topRatedProducts, setTopRatedProducts] = useState([]);
+  
+  // Product feedbacks state
+  const [productFeedbacks, setProductFeedbacks] = useState([]);
 
   useEffect(() => {
     if (storeId) {
       fetchStoreDetails();
       fetchStoreProducts();
+      fetchTopRatedProducts();
+      fetchProductFeedbacks();
+      // Record page view when customer visits store
+      recordPageView();
     }
   }, [storeId]);
 
@@ -67,6 +86,83 @@ const CustomerStoreView = () => {
     }
   };
 
+  const fetchTopRatedProducts = async () => {
+    try {
+      const response = await fetch(`http://localhost:1337/api/msme/${storeId}/products/top-rated`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setTopRatedProducts(data.products || []);
+      }
+    } catch (error) {
+      console.error("Error fetching top rated products:", error);
+    }
+  };
+
+  const fetchProductFeedbacks = async () => {
+    try {
+      const response = await fetch(`http://localhost:1337/api/msme/${storeId}/products/feedbacks`);
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('Received feedbacks:', data.feedbacks);
+        setProductFeedbacks(data.feedbacks || []);
+      }
+    } catch (error) {
+      console.error("Error fetching product feedbacks:", error);
+    }
+  };
+
+  const submitStoreRating = async () => {
+    if (!user) {
+      showError('Please log in to rate this store', 'Login Required');
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError(null);
+    setSubmitSuccess(false);
+
+    try {
+      const userName = `${user.firstname} ${user.lastname}`.trim();
+      const userId = user.id || user._id;
+
+      const response = await fetch(`http://localhost:1337/api/stores/${storeId}/rating`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          rating, 
+          user: userName,
+          userId: userId
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Reset form
+        setRating(0);
+        setSubmitSuccess(true);
+        setShowRatingModal(false);
+        
+        // Refresh store details
+        fetchStoreDetails();
+        
+        showSuccess('Thank you for rating this store!', 'Rating Submitted');
+        
+        // Hide success message after 3 seconds
+        setTimeout(() => setSubmitSuccess(false), 3000);
+      } else {
+        setSubmitError(data.error || 'Failed to submit rating');
+      }
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      setSubmitError('Failed to submit rating. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleFollowToggle = async () => {
     if (!user) {
       showError('Please log in to follow stores', 'Login Required');
@@ -101,18 +197,32 @@ const CustomerStoreView = () => {
     }
   };
 
-  const handleFavoriteToggle = () => {
-    if (!user) {
-      showError('Please log in to favorite stores', 'Login Required');
+  const recordPageView = async () => {
+    // Only record page view for authenticated customers
+    if (!user || !user._id) {
       return;
     }
 
-    setIsFavorited(!isFavorited);
-    
-    if (!isFavorited) {
-      showSuccess(`Added ${store?.businessName || 'store'} to favorites`, 'Success');
-    } else {
-      showSuccess(`Removed ${store?.businessName || 'store'} from favorites`, 'Success');
+    try {
+      const response = await fetch(`http://localhost:1337/api/stores/${storeId}/view`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerId: user._id
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('Page view recorded:', data.message);
+      } else {
+        console.error('Failed to record page view:', data.error);
+      }
+    } catch (error) {
+      console.error('Error recording page view:', error);
     }
   };
 
@@ -236,11 +346,19 @@ const CustomerStoreView = () => {
             <div className="store-details">
               <h1 className="store-name">{store.businessName}</h1>
               
+              {/* Username */}
+              <div className="store-detail-row username-row">
+                <PersonIcon className="detail-icon username-icon" />
+                <span className="username-text">@{store.username}</span>
+              </div>
+              
+              {/* Description */}
               {dashboard.description && (
                 <p className="store-description">{dashboard.description}</p>
               )}
               
               <div className="store-meta">
+                {/* Location */}
                 {dashboard.location && (
                   <div className="store-detail-row">
                     <LocationOnIcon className="detail-icon location-icon" />
@@ -248,11 +366,20 @@ const CustomerStoreView = () => {
                   </div>
                 )}
                 
+                {/* Contact Number - prioritize dashboard contact number, fallback to store contact number */}
+                {(dashboard.contactNumber || store.contactNumber) && (
+                  <div className="store-detail-row">
+                    <PhoneIcon className="detail-icon contact-icon" />
+                    <span>{dashboard.contactNumber || store.contactNumber}</span>
+                  </div>
+                )}
+                
+                {/* Social Media Links */}
                 {dashboard.socialLinks?.facebook && (
                   <div className="store-detail-row">
                     <FacebookIcon className="detail-icon facebook-icon" />
                     <a href={dashboard.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="social-link">
-                      {dashboard.socialLinks.facebook}
+                      Facebook
                     </a>
                   </div>
                 )}
@@ -261,40 +388,46 @@ const CustomerStoreView = () => {
                   <div className="store-detail-row">
                     <InstagramIcon className="detail-icon instagram-icon" />
                     <a href={dashboard.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="social-link">
-                      {dashboard.socialLinks.instagram}
+                      Instagram
                     </a>
                   </div>
                 )}
                 
-                {store.contactNumber && (
+                {dashboard.socialLinks?.twitter && (
                   <div className="store-detail-row">
-                    <PhoneIcon className="detail-icon contact-icon" />
-                    <span>{store.contactNumber}</span>
+                    <TwitterIcon className="detail-icon twitter-icon" />
+                    <a href={dashboard.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="social-link">
+                      Twitter
+                    </a>
                   </div>
                 )}
                 
-                {dashboard.rating && (
-                  <div className="store-rating">
-                    {renderStarRating(dashboard.rating)}
+                {dashboard.socialLinks?.website && (
+                  <div className="store-detail-row">
+                    <LanguageIcon className="detail-icon website-icon" />
+                    <a href={dashboard.socialLinks.website} target="_blank" rel="noopener noreferrer" className="social-link">
+                      Website
+                    </a>
                   </div>
                 )}
+                
+                {/* Store Rating */}
+                <div className="store-rating">
+                  {renderStarRating(store.averageRating || 0)}
+                  {store.totalRatings > 0 && (
+                    <span className="total-ratings">({store.totalRatings} review{store.totalRatings !== 1 ? 's' : ''})</span>
+                  )}
+                </div>
               </div>
               
               <div className="store-actions">
-                <button 
-                  className={`follow-btn ${isFollowing ? 'following' : ''}`}
-                  onClick={handleFollowToggle}
-                >
-                  {isFollowing ? '✓ Following' : '+ Follow'}
-                </button>
-                
-                <button 
-                  className={`favorite-heart-btn ${isFavorited ? 'favorited' : ''}`}
-                  onClick={handleFavoriteToggle}
-                  title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
-                >
-                  {isFavorited ? <FavoriteIcon /> : <FavoriteBorderIcon />}
-                </button>
+                <FollowButton 
+                  storeId={storeId} 
+                  storeName={store?.businessName}
+                  onFollowChange={(isFollowing) => {
+                    setIsFollowing(isFollowing);
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -335,54 +468,144 @@ const CustomerStoreView = () => {
 
         {/* Reviews Section */}
         <div className="store-reviews">
-          <div className="sample-review">
-            <div className="reviewer-info">
-              <div className="reviewer-avatar">👤</div>
-              <div className="reviewer-details">
-                <strong>Shakyry Baldy</strong>
-                <span className="review-date">August 3, 2023</span>
+          {/* Top Rated Products Section */}
+          {topRatedProducts.length > 0 && (
+            <div className="top-reviews-section">
+              <h3>Top Rated Products</h3>
+              <div className="top-products-grid">
+                {topRatedProducts.slice(0, 3).map((product, index) => (
+                  <div 
+                    key={product._id} 
+                    className="top-product-card"
+                    onClick={() => navigate(`/product/${product._id}`)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <img 
+                      src={getProductImageUrl(product)} 
+                      alt={product.productName}
+                      className="top-product-image"
+                    />
+                    <div className="top-product-info">
+                      <h4 className="top-product-name">{product.productName}</h4>
+                      <div className="top-product-rating">
+                        <div className="stars">
+                          {'★'.repeat(Math.floor(product.rating || 0))}{'☆'.repeat(5 - Math.floor(product.rating || 0))}
+                        </div>
+                        <span className="rating-text">({product.rating ? product.rating.toFixed(1) : '0.0'})</span>
+                      </div>
+                      <div className="top-product-price">₱{product.price}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="review-rating">
-              <div className="stars">
-                <span className="star filled">★</span>
-                <span className="star filled">★</span>
-                <span className="star filled">★</span>
-                <span className="star empty">☆</span>
-                <span className="star empty">☆</span>
+          )}
+
+          {/* Product Feedbacks Section */}
+          <div className="product-feedbacks-section">
+            <h3>Customer Reviews</h3>
+            {productFeedbacks.length > 0 ? (
+              <div className="feedbacks-list">
+                {productFeedbacks.map((feedback, index) => (
+                  <div key={index} className="feedback-item">
+                    <div className="feedback-header">
+                      <div className="reviewer-info">
+                        <div className="reviewer-avatar">
+                          {(feedback.userName || 'A').charAt(0).toUpperCase()}
+                        </div>
+                        <div className="reviewer-details">
+                          <strong>{feedback.userName || 'Anonymous'}</strong>
+                          <span className="review-date">
+                            {new Date(feedback.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="review-rating">
+                        <div className="stars">
+                          {'★'.repeat(feedback.rating)}{'☆'.repeat(5 - feedback.rating)}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Review text */}
+                    <p className="review-text">"{feedback.feedback}"</p>
+                    
+                    {/* Product name */}
+                    <div className="reviewed-product-name">
+                      <span className="product-label">Product: </span>
+                      <span className="product-name-text">{feedback.productName}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-            <p className="review-text">
-              "This buko pie is absolutely delicious! The crust is golden, buttery, and flaky, complementing the soft and tender coconut filling inside. The filling has just the right level of sweetness, creamy but not overwhelming, which really lets the natural flavor of the young coconut shine through. Every bite feels comforting and homemade, like a true taste of Filipino tradition. Perfect for dessert, snacks, or even pasalubong, this buko pie is definitely worth recommending to anyone who loves classic Filipino treats."
-            </p>
-          </div>
-          
-          <div className="sample-review">
-            <div className="reviewer-info">
-              <div className="reviewer-avatar">👤</div>
-              <div className="reviewer-details">
-                <strong>Shakyry Baldy</strong>
-                <span className="review-date">August 3, 2023</span>
+            ) : (
+              <div className="no-reviews">
+                <p>No product reviews yet. Be the first to review a product from this store!</p>
               </div>
-            </div>
-            <div className="review-rating">
-              <div className="stars">
-                <span className="star filled">★</span>
-                <span className="star filled">★</span>
-                <span className="star filled">★</span>
-                <span className="star empty">☆</span>
-                <span className="star empty">☆</span>
-              </div>
-            </div>
-            <p className="review-text">
-              "This buko pie is absolutely delicious! The crust is golden, buttery, and flaky, complementing the soft and tender coconut filling inside. The filling has just the right level of sweetness, creamy but not overwhelming, which really lets the natural flavor of the young coconut shine through. Every bite feels comforting and homemade, like a true taste of Filipino tradition. Perfect for dessert, snacks, or even pasalubong, this buko pie is definitely worth recommending to anyone who loves classic Filipino treats."
-            </p>
+            )}
           </div>
         </div>
 
+        {/* Rating Modal - Simplified to stars only */}
+        {showRatingModal && (
+          <div className="rating-modal-overlay" onClick={() => setShowRatingModal(false)}>
+            <div className="rating-modal-content" onClick={(e) => e.stopPropagation()}>
+              <button 
+                className="rating-modal-close"
+                onClick={() => setShowRatingModal(false)}
+              >
+                ×
+              </button>
+              
+              <h3>Rate {store?.businessName}</h3>
+              
+              {!user ? (
+                <div className="auth-message">
+                  <p>Please log in to rate this store.</p>
+                </div>
+              ) : (
+                <div className="modal-rating-section">
+                  <div className="rating-input">
+                    {[1,2,3,4,5].map(star => (
+                      <span
+                        key={star}
+                        className={`star-input ${(hoverRating || rating) >= star ? 'active' : ''}`}
+                        onMouseEnter={() => setHoverRating(star)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        onClick={() => setRating(star)}
+                      >★</span>
+                    ))}
+                    {rating > 0 && <span className="rating-label">{rating} Star{rating > 1 ? 's' : ''}</span>}
+                  </div>
+                  
+                  <button
+                    onClick={submitStoreRating}
+                    disabled={submitting || rating === 0}
+                    className="submit-rating-button"
+                  >
+                    {submitting ? 'Submitting...' : 'Submit Rating'}
+                  </button>
+                  
+                  {submitError && <div className="error-message">{submitError}</div>}
+                  {submitSuccess && <div className="success-message">Rating submitted successfully!</div>}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="bottom-actions">
-          <button className="rate-btn">RATE</button>
+          <button 
+            className="rate-btn"
+            onClick={() => setShowRatingModal(true)}
+          >
+            RATE
+          </button>
           <button className="chat-btn">CHAT</button>
         </div>
       </div>

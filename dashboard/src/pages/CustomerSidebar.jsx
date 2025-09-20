@@ -147,12 +147,7 @@ const CustomerSidebar = ({ onSidebarToggle }) => {
                 <span className="customer-sidebar__text">Home</span>
               </Link>
             </li>
-            <li className="customer-sidebar__nav-item">
-              <Link to="/customer-dashboard" className={`customer-sidebar__nav-link ${location.pathname === '/customer-dashboard' ? 'customer-sidebar__nav-link--active' : ''}`} title="Dashboard" onClick={handleIconClick}>
-                <DashboardIcon className="customer-sidebar__icon" />
-                <span className="customer-sidebar__text">Browse Products</span>
-              </Link>
-            </li>
+           
             <li className="customer-sidebar__nav-item">
               <Link to="/customer-favorites" className={`customer-sidebar__nav-link ${location.pathname === '/customer-favorites' ? 'customer-sidebar__nav-link--active' : ''}`} title="Favorites" onClick={handleIconClick}>
                 <ShoppingCartIcon className="customer-sidebar__icon" />

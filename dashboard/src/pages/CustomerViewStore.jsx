@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import Header from './Navbar';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
+import FollowButton from '../components/FollowButton';
+import StoreImage from '../components/StoreImage';
 import '../css/CustomerViewStore.css';
+import '../components/StoreImage.css';
 import defaultStoreImg from '../assets/pic.jpg';
 import foodStoreImg from '../assets/shakshouka.jpg';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -57,27 +60,6 @@ const CustomerViewStore = () => {
     
     return matchesSearch && matchesCategory;
   });
-
-  const getStoreImageUrl = (store) => {
-    // Priority: storeLogo > coverPhoto > category fallback
-    if (store.dashboard?.storeLogo) {
-      return `http://localhost:1337/uploads/${store.dashboard.storeLogo}`;
-    }
-    
-    if (store.dashboard?.coverPhoto) {
-      return `http://localhost:1337/uploads/${store.dashboard.coverPhoto}`;
-    }
-    
-    // Fallback to category-specific default images
-    if (store.category === 'food') {
-      return foodStoreImg;
-    } else if (store.category === 'artisan') {
-      return defaultStoreImg;
-    }
-    
-    // Final fallback
-    return defaultStoreImg;
-  };
 
   const getStoreBadgeClass = (category) => {
     switch (category) {
@@ -167,6 +149,27 @@ const CustomerViewStore = () => {
     setFavoritedStores(newFavoritedStores);
   };
 
+  const recordPageView = async (storeId) => {
+    // Only record page view for authenticated customers
+    if (!user || !user._id) {
+      return;
+    }
+
+    try {
+      await fetch(`http://localhost:1337/api/stores/${storeId}/view`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerId: user._id
+        })
+      });
+    } catch (error) {
+      console.error('Error recording page view:', error);
+    }
+  };
+
   const renderStarRating = (rating) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -251,13 +254,10 @@ const CustomerViewStore = () => {
                     {isNew && <span className="new-badge">NEW</span>}
                   </div>
                   
-                  <img 
-                    src={getStoreImageUrl(store)} 
-                    alt={store.businessName} 
+                  <StoreImage 
+                    store={store}
                     className="customer-view-store-image"
-                    onError={(e) => {
-                      e.target.src = store.category === 'food' ? foodStoreImg : defaultStoreImg;
-                    }}
+                    alt={store.businessName}
                   />
                   
                   <div className="customer-view-store-info">
@@ -280,10 +280,10 @@ const CustomerViewStore = () => {
                       {/* Store Details with Icons */}
                       <div className="store-details-section">
                         {/* Location */}
-                        {dashboard.location && (
+                        {(dashboard.location || store.address) && (
                           <div className="store-detail-item">
                             <LocationOnIcon className="detail-icon" />
-                            <span>{dashboard.location}</span>
+                            <span>{dashboard.location || store.address || 'Location not specified'}</span>
                           </div>
                         )}
                         
@@ -301,17 +301,26 @@ const CustomerViewStore = () => {
                         <button 
                           className="customer-view-store-visit-btn"
                           onClick={() => {
+                            // Record page view before navigating
+                            recordPageView(store._id);
                             navigate(`/customer/store/${store._id}`);
                           }}
                         >
                           Visit Store
                         </button>
-                        <button 
-                          className={`customer-view-store-follow-btn ${followedStores.has(store._id) ? 'following' : ''}`}
-                          onClick={() => handleFollowToggle(store)}
-                        >
-                          {followedStores.has(store._id) ? '✓ Following' : '+ Follow'}
-                        </button>
+                        <FollowButton 
+                          storeId={store._id} 
+                          storeName={store.businessName}
+                          onFollowChange={(isFollowing) => {
+                            const newFollowedStores = new Set(followedStores);
+                            if (isFollowing) {
+                              newFollowedStores.add(store._id);
+                            } else {
+                              newFollowedStores.delete(store._id);
+                            }
+                            setFollowedStores(newFollowedStores);
+                          }}
+                        />
                       </div>
                     </div>
                   </div>

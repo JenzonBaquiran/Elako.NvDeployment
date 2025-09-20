@@ -1,0 +1,185 @@
+/* FavoriteButton.css */
+
+.favorite-button {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: #9ca3af;
+  position: relative;
+  overflow: hidden;
+}
+
+.favorite-button:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.favorite-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+.favorite-button:disabled:hover {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Size variants */
+.favorite-button--small {
+  width: 28px;
+  height: 28px;
+  padding: 4px;
+}
+
+.favorite-button--small .favorite-button__icon {
+  font-size: 16px;
+}
+
+.favorite-button--medium {
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+}
+
+.favorite-button--medium .favorite-button__icon {
+  font-size: 20px;
+}
+
+.favorite-button--large {
+  width: 44px;
+  height: 44px;
+  padding: 8px;
+}
+
+.favorite-button--large .favorite-button__icon {
+  font-size: 24px;
+}
+
+/* Style variants */
+.favorite-button--default {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.favorite-button--overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  z-index: 10;
+}
+
+.favorite-button--inline {
+  position: relative;
+  background: transparent;
+  box-shadow: none;
+  margin: 0;
+}
+
+.favorite-button--inline:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Active state (favorited) */
+.favorite-button--active {
+  color: #ef4444;
+  animation: heartbeat 0.6s ease-in-out;
+}
+
+.favorite-button--active:hover {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Loading state */
+.favorite-button--loading {
+  pointer-events: none;
+}
+
+.favorite-button--loading .favorite-button__icon {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Icon styles */
+.favorite-button__icon {
+  transition: all 0.2s ease;
+  display: block;
+}
+
+/* Animations */
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.2);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Accessibility */
+.favorite-button:focus {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
+}
+
+.favorite-button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .favorite-button--overlay {
+    top: 6px;
+    right: 6px;
+  }
+  
+  .favorite-button--small {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .favorite-button--medium {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .favorite-button--large {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .favorite-button--default {
+    background: rgba(55, 65, 81, 0.9);
+    color: #9ca3af;
+  }
+  
+  .favorite-button--default:hover {
+    background: rgba(55, 65, 81, 1);
+  }
+}

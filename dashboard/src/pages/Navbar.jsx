@@ -10,6 +10,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNotification } from "../components/NotificationProvider";
 import { useAuth } from "../contexts/AuthContext";
+import NotificationIcon from "../components/NotificationIcon";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -112,9 +113,16 @@ function Header() {
               </>
             )}
             
-            <button className="nav-button nav-button-ghost">
-              <NotificationsIcon fontSize="medium" />
-            </button>
+            {/* Show notification icon only for MSME users */}
+            {userType === 'msme' && user ? (
+              <div className="nav-notification-wrapper">
+                <NotificationIcon storeId={user._id} />
+              </div>
+            ) : (
+              <button className="nav-button nav-button-ghost">
+                <NotificationsIcon fontSize="medium" />
+              </button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -143,10 +151,17 @@ function Header() {
         {/* Mobile Menu */}
         <div className={`mobile-menu ${isMenuOpen ? "open" : ""}`}>
           <div className="mobile-menu-content">
-            <button className="nav-button nav-button-ghost mobile-menu-button">
-              <NotificationsIcon fontSize="small" />
-              Notifications
-            </button>
+            {/* Show notification icon only for MSME users */}
+            {userType === 'msme' && user ? (
+              <div className="mobile-notification-wrapper">
+                <NotificationIcon storeId={user._id} />
+              </div>
+            ) : (
+              <button className="nav-button nav-button-ghost mobile-menu-button">
+                <NotificationsIcon fontSize="small" />
+                Notifications
+              </button>
+            )}
            
             {user ? (
               <>

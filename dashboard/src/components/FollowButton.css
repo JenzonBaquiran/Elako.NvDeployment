@@ -1,0 +1,157 @@
+/* FollowButton.css */
+
+.follow-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 100px;
+  height: 36px;
+  font-family: inherit;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Not Following State */
+.follow-button.not-following {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.follow-button.not-following:hover {
+  background-color: #e0e0e0;
+  border-color: #ccc;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Following State - Green Design */
+.follow-button.following {
+  background-color: #4CAF50;
+  color: white;
+  border: 1px solid #4CAF50;
+  box-shadow: 0 2px 6px rgba(76, 175, 80, 0.2);
+}
+
+.follow-button.following:hover {
+  background-color: #45a049;
+  border-color: #45a049;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+/* Loading State */
+.follow-button.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Icons */
+.follow-button .checkmark {
+  font-size: 16px;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.follow-button .plus-icon {
+  font-size: 16px;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.follow-button .button-text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Active/Press States */
+.follow-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.follow-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+.follow-button.not-following:focus {
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Disabled State */
+.follow-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .follow-button {
+    padding: 6px 12px;
+    font-size: 13px;
+    min-width: 85px;
+    height: 32px;
+  }
+  
+  .follow-button .checkmark,
+  .follow-button .plus-icon {
+    font-size: 14px;
+  }
+  
+  .follow-button .button-text {
+    font-size: 13px;
+  }
+}
+
+/* Animation for state changes */
+.follow-button * {
+  transition: all 0.2s ease;
+}
+
+/* Hover effect for unfollowing */
+.follow-button.following:hover {
+  background-color: #d32f2f;
+  border-color: #d32f2f;
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+}
+
+/* Notification styles (inline styles in component, but can be overridden here) */
+.follow-notification {
+  animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

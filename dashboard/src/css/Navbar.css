@@ -284,3 +284,51 @@ body {
 .search-input::placeholder {
   color: #ccc;
 }
+
+/* Notification wrapper styles */
+.nav-notification-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.nav-notification-wrapper .notification-icon-button {
+  color: #fff !important;
+  padding: 8px;
+}
+
+.nav-notification-wrapper .notification-icon-button:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.nav-notification-wrapper .MuiIconButton-root {
+  color: #fff !important;
+}
+
+.nav-notification-wrapper .MuiIconButton-root:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.mobile-notification-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 8px;
+}
+
+.mobile-notification-wrapper .notification-icon-button {
+  color: #fff !important;
+}
+
+.mobile-notification-wrapper .notification-icon-button:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.mobile-notification-wrapper .MuiIconButton-root {
+  color: #fff !important;
+}
+
+.mobile-notification-wrapper .MuiIconButton-root:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}

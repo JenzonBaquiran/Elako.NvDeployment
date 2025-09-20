@@ -1,11 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MsmeSidebar from './MsmeSidebar';
+import { useAuth } from '../contexts/AuthContext';
+import { useNotification } from '../components/NotificationProvider';
 import '../css/MsmeAnalytics.css';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { LineChart } from '@mui/x-charts/LineChart';
 
 const MsmeAnalytics = () => {
+  const { user } = useAuth();
+  const { showError } = useNotification();
   const [sidebarState, setSidebarState] = useState({ isOpen: true, isMobile: false });
+  const [analytics, setAnalytics] = useState({
+    pageViews: {
+      today: 0,
+      weekly: 0,
+      monthly: 0,
+      total: 0,
+      dailyBreakdown: []
+    },
+    followers: 0,
+    ratings: {
+      currentAverage: 0,
+      totalRatings: 0,
+      weeklyBreakdown: [],
+      trend: 0
+    }
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user && user._id) {
+      fetchAnalytics();
+    }
+  }, [user]);
+
+  const fetchAnalytics = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:1337/api/stores/${user._id}/analytics`);
+      const data = await response.json();
+
+      if (data.success) {
+        setAnalytics(data.analytics);
+      } else {
+        showError('Failed to load analytics data', 'Error');
+      }
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+      showError('Failed to load analytics data', 'Error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSidebarToggle = (stateOrIsOpen, isMobile = false) => {
     // Handle both object parameter (from MsmeSidebar) and separate parameters
@@ -47,32 +93,40 @@ const MsmeAnalytics = () => {
 
         <div className="msme-analytics__stats">
           <div className="msme-analytics__stat-box">
-            <div className="msme-analytics__stat-value">1,847</div>
-            <div className="msme-analytics__stat-label">Profile Views</div>
-            <div className="msme-analytics__stat-change positive">+12% This week</div>
+            <div className="msme-analytics__stat-value">
+              {loading ? '...' : analytics.pageViews.total.toLocaleString()}
+            </div>
+            <div className="msme-analytics__stat-label">Total Profile Views</div>
+            <div className="msme-analytics__stat-change positive">+{analytics.pageViews.monthly} this month</div>
           </div>
           <div className="msme-analytics__stat-box">
-            <div className="msme-analytics__stat-value">456</div>
+            <div className="msme-analytics__stat-value">
+              {loading ? '...' : analytics.pageViews.today}
+            </div>
+            <div className="msme-analytics__stat-label">Today's Views</div>
+            <div className="msme-analytics__stat-change positive">+{analytics.pageViews.weekly} this week</div>
+          </div>
+          <div className="msme-analytics__stat-box">
+            <div className="msme-analytics__stat-value">
+              {loading ? '...' : analytics.followers}
+            </div>
             <div className="msme-analytics__stat-label">Followers</div>
-            <div className="msme-analytics__stat-change positive">+5% New followers</div>
+            <div className="msme-analytics__stat-change positive">Total followers</div>
           </div>
           <div className="msme-analytics__stat-box">
-            <div className="msme-analytics__stat-value">4.8</div>
-            <div className="msme-analytics__stat-label">Avg Rating</div>
-            <div className="msme-analytics__stat-change positive">+0.2 improvement</div>
-          </div>
-          <div className="msme-analytics__stat-box">
-            <div className="msme-analytics__stat-value">89%</div>
-            <div className="msme-analytics__stat-label">Customer Satisfaction</div>
-            <div className="msme-analytics__stat-change positive">+3% This month</div>
+            <div className="msme-analytics__stat-value">
+              {loading ? '...' : Math.round((analytics.pageViews.weekly / 7) * 10) / 10}
+            </div>
+            <div className="msme-analytics__stat-label">Daily Average</div>
+            <div className="msme-analytics__stat-change positive">Last 7 days</div>
           </div>
         </div>
 
         <div className="msme-analytics__charts-grid">
           <div className="msme-analytics__chart-card">
             <div className="msme-analytics__chart-header">
-              <h3>Monthly Performance Trends</h3>
-              <p>Track your business metrics over time</p>
+              <h3>Daily Page Views</h3>
+              <p>Track your store profile views over the past week</p>
             </div>
             <div className="msme-analytics__chart-container">
               <BarChart
@@ -80,19 +134,19 @@ const MsmeAnalytics = () => {
                 height={300}
                 series={[
                   {
-                    data: [1200, 1350, 1500, 1650, 1750, 1847],
-                    label: 'Profile Views',
+                    data: loading ? [0, 0, 0, 0, 0, 0, 0] : 
+                      analytics.pageViews.dailyBreakdown.map(day => day.count),
+                    label: 'Daily Views',
                     color: '#313131',
-                  },
-                  {
-                    data: [320, 350, 380, 410, 430, 456],
-                    label: 'Followers',
-                    color: '#7ed957',
-                  },
+                  }
                 ]}
                 xAxis={[
                   {
-                    data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    data: loading ? ['...', '...', '...', '...', '...', '...', '...'] :
+                      analytics.pageViews.dailyBreakdown.map(day => {
+                        const date = new Date(day._id);
+                        return date.toLocaleDateString('en-US', { weekday: 'short' });
+                      }),
                     scaleType: 'band',
                   },
                 ]}

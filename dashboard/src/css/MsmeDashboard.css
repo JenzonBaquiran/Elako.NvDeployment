@@ -63,6 +63,12 @@
   margin: 0;
 }
 
+.msme-dashboard__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .msme-dashboard__customize-btn {
   background: #313131;
   color: white;
@@ -153,7 +159,7 @@
 /* Content grid */
 .msme-dashboard__content-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.6fr 1fr;
   gap: 24px;
   margin-bottom: 32px;
 }
@@ -165,6 +171,11 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   border: 2px solid #f0f0f0;
   transition: all 0.3s ease;
+}
+
+/* Specific styling for compact cards like rating analysis */
+.msme-dashboard__card--compact {
+  padding: 12px;
 }
 
 .msme-dashboard__card:hover {
@@ -422,4 +433,123 @@
     padding: 14px 16px;
     font-size: 13px;
   }
+}
+
+/* Rating Analysis Styles */
+.msme-dashboard__rating-analysis {
+  margin-top: 8px;
+}
+
+.msme-dashboard__rating-summary {
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.msme-dashboard__rating-overall {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.msme-dashboard__rating-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1;
+}
+
+.msme-dashboard__rating-stars {
+  display: flex;
+  gap: 3px;
+}
+
+.msme-dashboard__star {
+  font-size: 20px;
+  color: #ddd;
+  transition: color 0.2s ease;
+}
+
+.msme-dashboard__star.filled {
+  color: #ffc107;
+}
+
+.msme-dashboard__rating-count {
+  color: #666;
+  font-size: 13px;
+}
+
+.msme-dashboard__weekly-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.msme-dashboard__week-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.msme-dashboard__week-item:hover {
+  background: #f8f9fa;
+}
+
+.msme-dashboard__week-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.msme-dashboard__week-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 13px;
+}
+
+.msme-dashboard__week-average {
+  font-size: 16px;
+  font-weight: 700;
+  color: #28a745;
+}
+
+.msme-dashboard__week-details {
+  text-align: right;
+}
+
+.msme-dashboard__week-count {
+  color: #666;
+  font-size: 12px;
+}
+
+.msme-dashboard__no-ratings {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.msme-dashboard__no-ratings p {
+  margin: 0;
+  font-style: italic;
+}
+
+/* Stat change color classes */
+.msme-dashboard__stat-change.positive {
+  color: #28a745;
+}
+
+.msme-dashboard__stat-change.negative {
+  color: #dc3545;
+}
+
+.msme-dashboard__stat-change.neutral {
+  color: #666;
 }

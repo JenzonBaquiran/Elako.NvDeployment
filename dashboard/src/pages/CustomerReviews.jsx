@@ -14,7 +14,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 
 const CustomerReviews = () => {
   const { user, userType, isAuthenticated } = useAuth();
-  const { showSuccess, showError } = useNotification();
+  const { showSuccess, showError, showConfirm } = useNotification();
   const navigate = useNavigate();
   
   const [sidebarState, setSidebarState] = useState({
@@ -149,7 +149,13 @@ const CustomerReviews = () => {
   };
 
   const handleDeleteReview = async (reviewId) => {
-    if (!window.confirm('Are you sure you want to delete this review? This action cannot be undone.')) {
+    // Show confirmation notification
+    const confirmed = await showConfirm(
+      'Are you sure you want to delete this review? This action cannot be undone.',
+      'Delete Review'
+    );
+
+    if (!confirmed) {
       return;
     }
 

@@ -11,6 +11,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNotification } from "../components/NotificationProvider";
 import { useAuth } from "../contexts/AuthContext";
 import NotificationIcon from "../components/NotificationIcon";
+import CustomerNotificationIcon from "../components/CustomerNotificationIcon";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -33,7 +34,7 @@ function Header() {
     
     switch (userType) {
       case "customer":
-        navigate("/customer-sidebar")
+        navigate("/customer-favorites")
         break
       case "admin":
         navigate("/admin-overview")
@@ -113,14 +114,18 @@ function Header() {
               </>
             )}
             
-            {/* Show notification icon only for MSME users */}
+            {/* Show notification icon for MSME and Customer users */}
             {userType === 'msme' && user ? (
               <div className="nav-notification-wrapper">
                 <NotificationIcon storeId={user._id} />
               </div>
+            ) : userType === 'customer' && user ? (
+              <div className="nav-notification-wrapper">
+                <CustomerNotificationIcon />
+              </div>
             ) : (
               <button className="nav-button nav-button-ghost">
-                <NotificationsIcon fontSize="medium" />
+                {/* <NotificationsIcon fontSize="medium" /> */}
               </button>
             )}
           </div>
@@ -151,10 +156,16 @@ function Header() {
         {/* Mobile Menu */}
         <div className={`mobile-menu ${isMenuOpen ? "open" : ""}`}>
           <div className="mobile-menu-content">
-            {/* Show notification icon only for MSME users */}
+            {/* Show notification icon for MSME and Customer users */}
             {userType === 'msme' && user ? (
               <div className="mobile-notification-wrapper">
                 <NotificationIcon storeId={user._id} />
+                <span className="mobile-notification-text">Notifications</span>
+              </div>
+            ) : userType === 'customer' && user ? (
+              <div className="mobile-notification-wrapper">
+                <CustomerNotificationIcon />
+                <span className="mobile-notification-text">Notifications</span>
               </div>
             ) : (
               <button className="nav-button nav-button-ghost mobile-menu-button">

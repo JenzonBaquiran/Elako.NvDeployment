@@ -1,6 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { NotificationsNone, NotificationsActive } from '@mui/icons-material';
-import { Badge, IconButton, Menu, MenuItem, Typography, Box, Divider } from '@mui/material';
+import { 
+  IconButton, 
+  Badge,
+  Menu, 
+  MenuItem, 
+  Typography, 
+  Divider, 
+  Box,
+  Button,
+  Avatar
+} from '@mui/material';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import PersonIcon from '@mui/icons-material/Person';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import { formatDistanceToNow } from 'date-fns';
 import './NotificationIcon.css';
 
@@ -44,6 +57,8 @@ const NotificationIcon = ({ storeId }) => {
       };
     }
   }, [storeId]);
+
+  console.log('MSME NotificationIcon - unreadCount:', unreadCount);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -93,11 +108,11 @@ const NotificationIcon = ({ storeId }) => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'store_follow':
-        return '👤';
+        return <PersonIcon className="msme-notification-icon__type-icon" />;
       case 'product_favorite':
-        return '❤️';
+        return <FavoriteIcon className="msme-notification-icon__type-icon" />;
       default:
-        return '📢';
+        return <NotificationsIcon className="msme-notification-icon__type-icon" />;
     }
   };
 
@@ -119,24 +134,26 @@ const NotificationIcon = ({ storeId }) => {
           }
         }}
       >
-        <NotificationsNone />
+        <NotificationsNoneIcon />
       </IconButton>
     );
   }
 
   return (
-    <>
-      <IconButton 
+    <div className="msme-notification-icon">
+      <IconButton
+        className="msme-notification-icon__button"
         onClick={handleClick}
-        sx={{ 
-          color: 'white',
-          '&:hover': {
-            backgroundColor: 'rgba(255, 255, 255, 0.1)'
-          }
-        }}
+        size="medium"
+        aria-label={`${unreadCount} unread notifications`}
       >
-        <Badge badgeContent={unreadCount} color="error" max={99}>
-          {unreadCount > 0 ? <NotificationsActive /> : <NotificationsNone />}
+        <Badge 
+          badgeContent={unreadCount > 0 ? unreadCount : null}
+          color="error" 
+          max={99}
+          invisible={unreadCount === 0}
+        >
+          <NotificationsNoneIcon className="msme-notification-icon__bell" />
         </Badge>
       </IconButton>
 
@@ -144,77 +161,94 @@ const NotificationIcon = ({ storeId }) => {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleClose}
-        className="notification-menu"
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
+        className="msme-notification-icon__menu"
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         PaperProps={{
-          style: {
-            maxHeight: 450,
-            width: 380,
-          },
+          className: 'msme-notification-icon__menu-paper'
         }}
       >
-        <Box className="notification-header">
-          <Typography variant="h6" className="notification-title">
+        <div className="msme-notification-icon__header">
+          <Typography variant="h6" className="msme-notification-icon__title">
             Notifications
           </Typography>
           {unreadCount > 0 && (
-            <Typography 
-              variant="caption" 
-              className="mark-all-read"
+            <Button
+              size="small"
               onClick={markAllAsRead}
+              className="msme-notification-icon__mark-all-btn"
             >
               Mark all as read
-            </Typography>
+            </Button>
           )}
-        </Box>
-        
+        </div>
         <Divider />
-        
-        {notifications.length === 0 ? (
+
+        {loading ? (
           <MenuItem disabled>
-            <Typography variant="body2" color="textSecondary">
-              No notifications yet
-            </Typography>
+            <Typography variant="body2">Loading...</Typography>
+          </MenuItem>
+        ) : notifications.length === 0 ? (
+          <MenuItem disabled className="msme-notification-icon__empty">
+            <Box textAlign="center" py={2}>
+              <NotificationsNoneIcon className="msme-notification-icon__empty-icon" />
+              <Typography variant="body2" color="textSecondary">
+                No notifications yet
+              </Typography>
+              <Typography variant="caption" color="textSecondary">
+                You'll be notified when customers follow your store or favorite your products
+              </Typography>
+            </Box>
           </MenuItem>
         ) : (
           notifications.map((notification) => (
-            <MenuItem 
+            <MenuItem
               key={notification._id}
               onClick={() => {
                 if (!notification.isRead) {
                   markAsRead(notification._id);
                 }
+                handleClose();
               }}
-              className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
+              className={`msme-notification-icon__item ${
+                !notification.isRead ? 'msme-notification-icon__item--unread' : ''
+              }`}
             >
-              <Box className="notification-content">
-                <Box className="notification-icon">
-                  {getNotificationIcon(notification.type)}
-                </Box>
-                <Box className="notification-text">
-                  <Typography variant="body2" className="notification-message">
-                    {notification.message}
-                  </Typography>
-                  <Typography variant="caption" color="textSecondary">
-                    {formatTime(notification.createdAt)}
-                  </Typography>
-                </Box>
+              <div className="msme-notification-icon__item-content">
+                <div className="msme-notification-icon__item-header">
+                  <div className="msme-notification-icon__item-icon">
+                    {getNotificationIcon(notification.type)}
+                  </div>
+                  <div className="msme-notification-icon__item-info">
+                    <Typography variant="subtitle2" className="msme-notification-icon__item-title">
+                      {notification.type === 'store_follow' ? 'New Follower!' : 'Product Favorited!'}
+                    </Typography>
+                    <Typography variant="body2" className="msme-notification-icon__item-message">
+                      {notification.message}
+                    </Typography>
+                    <Typography variant="caption" className="msme-notification-icon__item-time">
+                      {formatTime(notification.createdAt)}
+                    </Typography>
+                  </div>
+                </div>
                 {!notification.isRead && (
-                  <Box className="unread-indicator" />
+                  <div className="msme-notification-icon__unread-dot"></div>
                 )}
-              </Box>
+              </div>
             </MenuItem>
           ))
         )}
+
+        {notifications.length > 0 && [
+          <Divider key="divider" />,
+          <MenuItem key="view-all" className="msme-notification-icon__view-all">
+            <Typography variant="body2" color="primary" align="center" width="100%">
+              View All Notifications
+            </Typography>
+          </MenuItem>
+        ]}
       </Menu>
-    </>
+    </div>
   );
 };
 

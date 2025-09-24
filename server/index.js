@@ -13,6 +13,10 @@ const Product = require("./models/product.model");
 const Dashboard = require("./models/dashboard.model");
 const PageView = require("./models/pageview.model");
 const Notification = require("./models/notification.model");
+const CustomerNotification = require("./models/customerNotification.model");
+
+// Import Services
+const CustomerNotificationService = require("./services/customerNotificationService");
 
 
 const app = express();
@@ -799,6 +803,14 @@ app.post("/api/products", upload.single('picture'), async (req, res) => {
     });
 
     await newProduct.save();
+
+    // Notify followers of the store about the new product
+    try {
+      await CustomerNotificationService.notifyFollowersOfNewProduct(msmeId, newProduct._id);
+    } catch (notificationError) {
+      console.error("Error sending customer notifications:", notificationError);
+      // Continue with product creation even if notifications fail
+    }
 
     res.status(201).json({ 
       success: true, 
@@ -2580,6 +2592,131 @@ app.get("/api/debug/dashboards", async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Error fetching dashboard data"
+    });
+  }
+});
+
+// --- Customer Notification Routes ---
+
+// Get notifications for a customer
+app.get("/api/customer-notifications/:customerId", async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    const { limit = 20, offset = 0 } = req.query;
+
+    const notifications = await CustomerNotificationService.getCustomerNotifications(
+      customerId, 
+      parseInt(limit), 
+      parseInt(offset)
+    );
+
+    const unreadCount = await CustomerNotificationService.getUnreadCount(customerId);
+
+    res.json({
+      success: true,
+      notifications,
+      unreadCount
+    });
+  } catch (error) {
+    console.error("Error fetching customer notifications:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching notifications"
+    });
+  }
+});
+
+// Get unread notification count for a customer
+app.get("/api/customer-notifications/:customerId/unread-count", async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    const unreadCount = await CustomerNotificationService.getUnreadCount(customerId);
+
+    res.json({
+      success: true,
+      unreadCount
+    });
+  } catch (error) {
+    console.error("Error fetching unread count:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching unread count"
+    });
+  }
+});
+
+// Mark customer notification as read
+app.put("/api/customer-notifications/:notificationId/read", async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+    const { customerId } = req.body;
+
+    if (!customerId) {
+      return res.status(400).json({
+        success: false,
+        error: "Customer ID is required"
+      });
+    }
+
+    await CustomerNotificationService.markAsRead(notificationId, customerId);
+
+    res.json({
+      success: true,
+      message: "Notification marked as read"
+    });
+  } catch (error) {
+    console.error("Error marking customer notification as read:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error marking notification as read"
+    });
+  }
+});
+
+// Mark all customer notifications as read
+app.put("/api/customer-notifications/:customerId/read-all", async (req, res) => {
+  try {
+    const { customerId } = req.params;
+
+    await CustomerNotificationService.markAllAsRead(customerId);
+
+    res.json({
+      success: true,
+      message: "All notifications marked as read"
+    });
+  } catch (error) {
+    console.error("Error marking all customer notifications as read:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error marking all notifications as read"
+    });
+  }
+});
+
+// Delete a customer notification
+app.delete("/api/customer-notifications/:notificationId", async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+    const { customerId } = req.body;
+
+    if (!customerId) {
+      return res.status(400).json({
+        success: false,
+        error: "Customer ID is required"
+      });
+    }
+
+    await CustomerNotificationService.deleteNotification(notificationId, customerId);
+
+    res.json({
+      success: true,
+      message: "Notification deleted successfully"
+    });
+  } catch (error) {
+    console.error("Error deleting customer notification:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error deleting notification"
     });
   }
 });

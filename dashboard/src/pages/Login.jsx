@@ -34,7 +34,7 @@ function Login() {
       case 'msme':
         return '/msme-dashboard';
       case 'customer':
-        return '/customer-sidebar';
+        return '/';
       default:
         return '/';
     }

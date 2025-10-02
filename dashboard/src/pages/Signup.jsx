@@ -130,7 +130,7 @@ function Signup() {
                 >
                   <PersonOutline fontSize="large" />
                 </IconButton>
-                <span className="signup-tab-label">Customer</span>
+                <span className="signup-tab-label">CUSTOMER</span>
               </div>
               <div className={`signup-tab-col ${activeTab === "msme" ? "active" : ""}`}>
                 <IconButton

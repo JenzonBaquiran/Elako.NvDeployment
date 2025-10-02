@@ -5,15 +5,15 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 10px 16px;
   border: none;
-  border-radius: 20px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   min-width: 100px;
-  height: 36px;
+  height: auto;
   font-family: inherit;
   position: relative;
   overflow: hidden;
@@ -112,10 +112,10 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .follow-button {
-    padding: 6px 12px;
+    padding: 8px 12px;
     font-size: 13px;
     min-width: 85px;
-    height: 32px;
+    height: auto;
   }
   
   .follow-button .checkmark,

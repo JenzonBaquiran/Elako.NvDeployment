@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
 import { useAuth } from "../contexts/AuthContext";
 import "../css/Login.css";
-import logo from "../logos/Icon on dark with text.png";
+import logo from "../logos/Icon on bright with text.png";
 
 function Login() {
   const { showError, showSuccess } = useNotification();

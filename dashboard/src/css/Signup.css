@@ -1,21 +1,49 @@
 /* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
 
-/* Full background image */
+/* Full background image with rotating backgrounds */
 .signup-bg {
   position: fixed;
   inset: 0;
   width: 100vw;
   height: 150vh;
-  background: url('../pictures/blog_184.png') center center/cover no-repeat;
+  background: url('../pictures/BUKO PIE.png') center center/cover no-repeat;
+  animation: rotateBackground 20s infinite;
+}
+
+@keyframes rotateBackground {
+  0% { 
+    background-image: url('../pictures/BUKO PIE.png');
+    opacity: 1;
+  }
+  24% { opacity: 1; }
+  25% { 
+    background-image: url('../pictures/CRAFTS1.png');
+    opacity: 1;
+  }
+  49% { opacity: 1; }
+  50% { 
+    background-image: url('../pictures/PAINTINGS.png');
+    opacity: 1;
+  }
+  74% { opacity: 1; }
+  75% { 
+    background-image: url('../pictures/WEAVING.png');
+    opacity: 1;
+  }
+  99% { opacity: 1; }
+  100% { 
+    background-image: url('../pictures/BUKO PIE.png');
+    opacity: 1;
+  }
 }
 
 .text {
-  color: #ffffff;
+  color: #333333;
   margin-bottom: 0px;
   margin-top: -8px; /* Move text closer to logo */
   text-align: center;
-
+  font-size: 0.9rem;
 }
 .signup-container {
   display: flex;
@@ -23,54 +51,96 @@
   width: 100vw;
   position: relative;
   z-index: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 0;
+  background: rgba(0, 0, 0, 0.6); /* Dark overlay covering entire background */
+  animation: fadeInOverlay 0.8s ease-out;
+}
+
+@keyframes fadeInOverlay {
+  from {
+    background: rgba(0, 0, 0, 0);
+  }
+  to {
+    background: rgba(0, 0, 0, 0.6);
+  }
 }
 
 .signup-form {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  background:   rgba(31, 31, 31, 0.7); /* semi-transparent overlay */
-  min-width: 400px;
-  max-width: 50vw;
-  margin-left: auto;
-  height: 100vh;
-  box-shadow: -10px 0 30px 0 rgba(0,0,0,0.2);
+  background: rgba(255, 255, 255, 0.95); /* Light card background */
+  min-width: 420px;
+  max-width: 520px;
+  width: 90vw;
+  height: auto;
+  min-height: 650px;
+  border-radius: 20px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+  padding: 35px 40px;
+  backdrop-filter: blur(10px);
+  animation: slideInUp 0.8s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .signup-form-content {
   width: 100%;
-  max-width: 450px;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
   z-index: 2;
+  animation: fadeInContent 1s ease-out 0.3s both;
+}
+
+@keyframes fadeInContent {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .logo-container {
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   text-align: center;
 }
 
 .brand-logo {
-  width: 250px;
+  width: 220px;
   max-width: 100%;
-  margin: 0 auto 20px;
+  margin: 0 auto 15px;
   display: block;
 }
 
 .signup-input {
-  margin-bottom: 10px !important;
+  margin-bottom: 8px !important;
 }
 
 .signup-input .MuiOutlinedInput-root {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .signup-input .MuiInputBase-input {
-  color: #fff !important;
-  padding: 15px !important;
+  color: #333 !important;
+  padding: 12px 15px !important;
 }
 
 /* Hide browser-generated password visibility icons */
@@ -90,11 +160,19 @@
 }
 
 .signup-input .MuiOutlinedInput-notchedOutline {
-  border-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
 }
 
 .input-outline {
-  border-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.signup-input .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #1a1a1a !important;
+}
+
+.signup-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #1a1a1a !important;
 }
 
 .signup-links {
@@ -125,20 +203,24 @@
 }
 
 .signup-btn {
-  background: #1a1a1a !important;
+  background: #313131 !important;
   color: #fff !important;
   border-radius: 10px !important;
-  font-weight: 700 !important;         /* Match login button font weight */
+  font-weight: 700 !important;
   font-size: 1rem !important;
-  padding: 15px 0 !important;          /* Match login button padding */
+  padding: 15px 0 !important;
   text-transform: uppercase !important;
-  box-shadow: none !important;
-  width: 50% !important;               /* Match login button width */
-  margin: 0 auto !important;           /* Center the button */
+  box-shadow: 0 4px 15px rgba(49, 49, 49, 0.3) !important;
+  width: 60% !important;
+  margin: 0 auto !important;
+  transition: all 0.3s ease !important;
 }
 
 .signup-btn:hover {
-  background: #7ed957 !important;      /* Match login button hover color */
+  background: #7ed957 !important;
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(126, 217, 87, 0.4) !important;
 }
 
 /* Hide any default MUI password visibility toggle if present */
@@ -151,7 +233,7 @@ input[type="password"] + .MuiInputAdornment-root .MuiButtonBase-root:not(:last-c
   display: flex;
   gap: 48px;
   justify-content: center;
-  margin-bottom: 8px;
+  margin-bottom: 15px;
 }
 
 .signup-tab-col {
@@ -162,27 +244,30 @@ input[type="password"] + .MuiInputAdornment-root .MuiButtonBase-root:not(:last-c
 
 .signup-tab-btn {
   background: none !important;
-  color: #fff !important;
+  color: #666 !important;
   border-bottom: 2px solid transparent;
   border-radius: 0 !important;
   font-size: 28px !important;
-  transition: border-bottom 0.2s;
+  transition: all 0.3s ease;
 }
 
 .signup-tab-btn.active {
-  border-bottom: 2px solid #fff !important;
+  border-bottom: 2px solid #1a1a1a !important;
+  color: #1a1a1a !important;
 }
 
 .signup-tab-label {
-  color: #fff;
+  color: #666;
   font-size: 1rem;
   margin-top: 2px;
   letter-spacing: 0.5px;
   font-weight: normal;
+  transition: all 0.3s ease;
 }
 
 .signup-tab-col.active .signup-tab-label {
   font-weight: bold;
+  color: #1a1a1a;
 }
 
 /* Align category to end */
@@ -206,47 +291,43 @@ input[type="password"] + .MuiInputAdornment-root .MuiButtonBase-root:not(:last-c
 /* Category dropdown font color */
 .category-box .MuiInputBase-input,
 .category-box .MuiSelect-select {
-  color: #fff !important;
+  color: #333 !important;
 }
 
 .category-box .MuiInputLabel-root {
-  color: #fff !important;
+  color: #666 !important;
   opacity: 0.9;
 }
 
 .category-box .MuiOutlinedInput-notchedOutline {
-  border-color: rgba(255,255,255,0.2) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
 }
 
 .category-box .MuiSelect-icon {
-  color: #fff !important;
+  color: #333 !important;
 }
 
 .category-box .Mui-selected {
-  color: #fff !important;
+  color: #333 !important;
 }
 
-/* Make category dropdown font color white, including selected value */
+/* Make category dropdown font color dark, including selected value */
 .signup-input .MuiInputBase-input,
 .signup-input .MuiSelect-select {
-  color: #fff !important;
+  color: #333 !important;
 }
 
 .signup-input .MuiInputLabel-root {
-  color: #fff !important;
+  color: #666 !important;
   opacity: 0.9;
 }
 
-.signup-input .MuiOutlinedInput-notchedOutline {
-  border-color: rgba(255,255,255,0.2) !important;
-}
-
 .signup-input .MuiSelect-icon {
-  color: #fff !important;
+  color: #333 !important;
 }
 
 .signup-input .Mui-selected {
-  color: #fff !important;
+  color: #333 !important;
 }
 
 /* Add padding-bottom to all input boxes */
@@ -308,29 +389,54 @@ body,
 
 /* Link styles */
 .link {
-  color: #fff !important;
+  color: #666 !important;
   text-decoration: none !important;
   font-weight: 600;
-  transition: background 0.2s, color 0.2s;
+  transition: all 0.3s ease;
   padding: 4px 8px;
   border-radius: 4px;
 }
 
 .link:hover {
-  background: #7ed957 !important;
+  background: transparent !important;
   color: #1a1a1a !important;
- 
+  font-weight: 700 !important;
 }
 
 /* Responsive for signup form */
-@media (max-width: 900px) {
+@media (max-width: 768px) {
+  .signup-container {
+    padding: 10px 0;
+  }
   .signup-form {
-    max-width: 100vw;
-    min-width: unset;
+    max-width: 95vw;
+    min-width: 320px;
+    margin: 10px;
+    padding: 30px 20px;
+    border-radius: 15px;
+    min-height: 600px;
   }
   .signup-form-content {
-    width: 90vw;
-    max-width: 100vw;
+    width: 100%;
+    max-width: 100%;
+    gap: 15px;
+  }
+  .brand-logo {
+    width: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .signup-form {
+    margin: 5px;
+    padding: 25px 10px;
+    min-height: 550px;
+  }
+  .brand-logo {
+    width: 160px;
+  }
+  .signup-tabs {
+    gap: 30px;
   }
 }
 
@@ -346,11 +452,14 @@ body,
     min-width: 0 !important;
   }
   .signup-btn {
-    width: 100% !important;
+    width: 70% !important;
     min-width: 0 !important;
     max-width: 100% !important;
     font-size: 0.95rem !important;
     padding: 16px 0 !important;
+  }
+  .login-btn {
+    width: 70% !important;
   }
 }
 

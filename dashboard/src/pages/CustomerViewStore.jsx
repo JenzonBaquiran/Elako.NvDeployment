@@ -28,6 +28,8 @@ const CustomerViewStore = () => {
   // Fetch stores on component mount
   useEffect(() => {
     fetchStores();
+    // Scroll to top when component mounts
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   // API Functions

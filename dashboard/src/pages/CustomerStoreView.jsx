@@ -15,6 +15,10 @@ import InstagramIcon from '@mui/icons-material/Instagram';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import LanguageIcon from '@mui/icons-material/Language';
 import PersonIcon from '@mui/icons-material/Person';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import ChatIcon from '@mui/icons-material/Chat';
+import RateReviewIcon from '@mui/icons-material/RateReview';
 
 const CustomerStoreView = () => {
   const { storeId } = useParams();
@@ -34,6 +38,8 @@ const CustomerStoreView = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [hasExistingRating, setHasExistingRating] = useState(false);
+  const [loadingExistingRating, setLoadingExistingRating] = useState(false);
   
   // Top rated products state
   const [topRatedProducts, setTopRatedProducts] = useState([]);
@@ -49,6 +55,8 @@ const CustomerStoreView = () => {
       fetchProductFeedbacks();
       // Record page view when customer visits store
       recordPageView();
+      // Scroll to top when component mounts or storeId changes
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [storeId]);
 
@@ -113,6 +121,31 @@ const CustomerStoreView = () => {
     }
   };
 
+  const fetchExistingRating = async () => {
+    if (!user) return;
+
+    setLoadingExistingRating(true);
+    try {
+      const userId = user.id || user._id;
+      const response = await fetch(`http://localhost:1337/api/stores/${storeId}/rating/${userId}`);
+      const data = await response.json();
+
+      if (data.success) {
+        if (data.hasRated) {
+          setRating(data.rating);
+          setHasExistingRating(true);
+        } else {
+          setRating(0);
+          setHasExistingRating(false);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching existing rating:', error);
+    } finally {
+      setLoadingExistingRating(false);
+    }
+  };
+
   const submitStoreRating = async () => {
     if (!user) {
       showError('Please log in to rate this store', 'Login Required');
@@ -140,15 +173,17 @@ const CustomerStoreView = () => {
       const data = await response.json();
 
       if (data.success) {
-        // Reset form
-        setRating(0);
+        // Update state to reflect that user has now rated
+        setHasExistingRating(true);
         setSubmitSuccess(true);
         setShowRatingModal(false);
         
         // Refresh store details
         fetchStoreDetails();
         
-        showSuccess('Thank you for rating this store!', 'Rating Submitted');
+        // Show appropriate notification message
+        const actionMessage = hasExistingRating ? 'updated' : 'rated';
+        showSuccess(`You ${actionMessage} ${store.businessName} with ${rating} star${rating > 1 ? 's' : ''}!`, 'Rating Submitted');
         
         // Hide success message after 3 seconds
         setTimeout(() => setSubmitSuccess(false), 3000);
@@ -161,6 +196,20 @@ const CustomerStoreView = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleChatClick = () => {
+    if (!user) {
+      showError('Please log in to chat with this store', 'Login Required');
+      return;
+    }
+    // Navigate to chat page with store info
+    navigate(`/customer/chat/${storeId}`, { 
+      state: { 
+        storeName: store.businessName,
+        storeId: storeId 
+      } 
+    });
   };
 
   const handleFollowToggle = async () => {
@@ -415,7 +464,7 @@ const CustomerStoreView = () => {
                 <div className="store-rating">
                   {renderStarRating(store.averageRating || 0)}
                   {store.totalRatings > 0 && (
-                    <span className="total-ratings">({store.totalRatings} review{store.totalRatings !== 1 ? 's' : ''})</span>
+                    <span className="total-ratings">({store.totalRatings} rating{store.totalRatings !== 1 ? 's' : ''})</span>
                   )}
                 </div>
               </div>
@@ -428,6 +477,25 @@ const CustomerStoreView = () => {
                     setIsFollowing(isFollowing);
                   }}
                 />
+                <button 
+                  className="rate-btn-header"
+                  onClick={() => {
+                    setShowRatingModal(true);
+                    fetchExistingRating();
+                  }}
+                  title="Rate this store"
+                >
+                  <RateReviewIcon />
+                  RATE
+                </button>
+                <button 
+                  className="chat-btn-header"
+                  onClick={handleChatClick}
+                  title="Chat with store"
+                >
+                  <ChatIcon />
+                  CHAT
+                </button>
               </div>
             </div>
           </div>
@@ -552,32 +620,71 @@ const CustomerStoreView = () => {
 
         {/* Rating Modal - Simplified to stars only */}
         {showRatingModal && (
-          <div className="rating-modal-overlay" onClick={() => setShowRatingModal(false)}>
+          <div className="rating-modal-overlay" onClick={() => {
+            setShowRatingModal(false);
+            // Reset modal state
+            setRating(0);
+            setHoverRating(0);
+            setHasExistingRating(false);
+            setSubmitError(null);
+            setSubmitSuccess(false);
+          }}>
             <div className="rating-modal-content" onClick={(e) => e.stopPropagation()}>
               <button 
                 className="rating-modal-close"
-                onClick={() => setShowRatingModal(false)}
+                onClick={() => {
+                  setShowRatingModal(false);
+                  // Reset modal state
+                  setRating(0);
+                  setHoverRating(0);
+                  setHasExistingRating(false);
+                  setSubmitError(null);
+                  setSubmitSuccess(false);
+                }}
               >
                 ×
               </button>
               
-              <h3>Rate {store?.businessName}</h3>
+              <h3>
+                {loadingExistingRating 
+                  ? `Loading rating for ${store?.businessName}...` 
+                  : hasExistingRating 
+                    ? `Update your rating for ${store?.businessName}` 
+                    : `Rate ${store?.businessName}`
+                }
+              </h3>
               
               {!user ? (
                 <div className="auth-message">
                   <p>Please log in to rate this store.</p>
                 </div>
+              ) : loadingExistingRating ? (
+                <div className="loading-rating">
+                  <p>Loading your previous rating...</p>
+                </div>
               ) : (
                 <div className="modal-rating-section">
+                  {hasExistingRating && (
+                    <div className="existing-rating-info">
+                      <p>You previously rated this store {rating} star{rating > 1 ? 's' : ''}. You can update your rating below.</p>
+                    </div>
+                  )}
+                  
                   <div className="rating-input">
                     {[1,2,3,4,5].map(star => (
                       <span
                         key={star}
-                        className={`star-input ${(hoverRating || rating) >= star ? 'active' : ''}`}
+                        className={`star-input ${(hoverRating || rating) >= star ? 'filled' : 'empty'}`}
                         onMouseEnter={() => setHoverRating(star)}
                         onMouseLeave={() => setHoverRating(0)}
                         onClick={() => setRating(star)}
-                      >★</span>
+                      >
+                        {(hoverRating || rating) >= star ? (
+                          <StarIcon className="star-icon filled" />
+                        ) : (
+                          <StarBorderIcon className="star-icon empty" />
+                        )}
+                      </span>
                     ))}
                     {rating > 0 && <span className="rating-label">{rating} Star{rating > 1 ? 's' : ''}</span>}
                   </div>
@@ -587,7 +694,12 @@ const CustomerStoreView = () => {
                     disabled={submitting || rating === 0}
                     className="submit-rating-button"
                   >
-                    {submitting ? 'Submitting...' : 'Submit Rating'}
+                    {submitting 
+                      ? 'Submitting...' 
+                      : hasExistingRating 
+                        ? 'Update Rating' 
+                        : 'Submit Rating'
+                    }
                   </button>
                   
                   {submitError && <div className="error-message">{submitError}</div>}
@@ -598,16 +710,7 @@ const CustomerStoreView = () => {
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="bottom-actions">
-          <button 
-            className="rate-btn"
-            onClick={() => setShowRatingModal(true)}
-          >
-            RATE
-          </button>
-          <button className="chat-btn">CHAT</button>
-        </div>
+
       </div>
     </div>
   );

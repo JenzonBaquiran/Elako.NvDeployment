@@ -291,6 +291,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .follow-btn {
@@ -304,6 +305,58 @@
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: 'Poppins', sans-serif;
+}
+
+/* Rate Button Header */
+.rate-btn-header {
+  background: #f39c12;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rate-btn-header:hover {
+  background: #e67e22;
+  transform: translateY(-1px);
+}
+
+.rate-btn-header:active {
+  transform: translateY(0);
+}
+
+/* Chat Button Header */
+.chat-btn-header {
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chat-btn-header:hover {
+  background: #2980b9;
+  transform: translateY(-1px);
+}
+
+.chat-btn-header:active {
+  transform: translateY(0);
 }
 
 .follow-btn:hover {
@@ -749,20 +802,30 @@
 }
 
 .star-input {
-  font-size: 32px;
-  color: #ddd;
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .star-input:hover {
   transform: scale(1.1);
 }
 
-.star-input.active {
-  color: #7ed957;
-  text-shadow: 0 0 8px rgba(126, 217, 87, 0.4);
+.star-input.filled .star-icon {
+  color: #f39c12;
+  font-size: 32px;
+}
+
+.star-input.empty .star-icon {
+  color: #ddd;
+  font-size: 32px;
+}
+
+.star-input:hover .star-icon {
+  color: #f39c12;
 }
 
 .rating-label {
@@ -806,6 +869,28 @@
   background: #f8f9fa;
   border-radius: 12px;
   color: #666;
+}
+
+.loading-rating {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.existing-rating-info {
+  background: #e8f4f8;
+  border: 1px solid #b8e6ff;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.existing-rating-info p {
+  margin: 0;
+  color: #0369a1;
+  font-size: 14px;
+  line-height: 1.4;
 }
 
 .error-message {
@@ -912,6 +997,15 @@
 
   .store-actions {
     align-self: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .rate-btn-header,
+  .chat-btn-header {
+    padding: 8px 12px;
+    font-size: 13px;
   }
 
   .products-grid {

@@ -27,6 +27,7 @@ const MsmeDashboard = () => {
       trend: 0
     }
   });
+  const [topProducts, setTopProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -54,8 +55,9 @@ const MsmeDashboard = () => {
 
     fetchBusinessName();
     
-    // Fetch analytics data
+    // Fetch analytics data and top products
     fetchAnalytics();
+    fetchTopProducts();
   }, [user]);
 
   const fetchAnalytics = async () => {
@@ -86,6 +88,42 @@ const MsmeDashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchTopProducts = async () => {
+    if (!user || !user._id) return;
+    
+    try {
+      const response = await fetch(`http://localhost:1337/api/msme/${user._id}/products/top-rated`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.products) {
+          setTopProducts(data.products);
+        } else {
+          console.log('No top-rated products found');
+          setTopProducts([]);
+        }
+      } else {
+        console.error('Failed to fetch top products');
+        setTopProducts([]);
+      }
+    } catch (error) {
+      console.error('Error fetching top products:', error);
+      setTopProducts([]);
+    }
+  };
+
+  const getProductImageUrl = (product) => {
+    if (product.picture) {
+      return `http://localhost:1337/uploads/${product.picture}`;
+    }
+    return '/default-product.jpg';
   };
 
   const handleSidebarToggle = (stateOrIsOpen, isMobile = false) => {
@@ -172,28 +210,49 @@ const MsmeDashboard = () => {
 
         <div className="msme-dashboard__content-grid">
           <div className="msme-dashboard__card">
-            <h3>Top Products by Rating</h3>
+            <div className="msme-dashboard__card-header">
+              <h3>Top Products by Rating</h3>
+              <p className="msme-dashboard__card-subtitle">Your highest-rated products based on customer reviews</p>
+            </div>
             <div className="msme-dashboard__products-list">
-              <div className="msme-dashboard__product-item">
-                <span className="msme-dashboard__product-rank">#1</span>
-                <span className="msme-dashboard__product-name">Buko Pie</span>
-                <span className="msme-dashboard__product-rating">4.9</span>
-              </div>
-              <div className="msme-dashboard__product-item">
-                <span className="msme-dashboard__product-rank">#2</span>
-                <span className="msme-dashboard__product-name">Coffee Beans</span>
-                <span className="msme-dashboard__product-rating">4.8</span>
-              </div>
-              <div className="msme-dashboard__product-item">
-                <span className="msme-dashboard__product-rank">#3</span>
-                <span className="msme-dashboard__product-name">Shakshuka Breakfast</span>
-                <span className="msme-dashboard__product-rating">4.7</span>
-              </div>
-              <div className="msme-dashboard__product-item">
-                <span className="msme-dashboard__product-rank">#4</span>
-                <span className="msme-dashboard__product-name">Banana Chips</span>
-                <span className="msme-dashboard__product-rating">4.6</span>
-              </div>
+              {loading ? (
+                <div className="msme-dashboard__loading">Loading top products...</div>
+              ) : topProducts.length > 0 ? (
+                topProducts.map((product, index) => (
+                  <div key={product._id} className="msme-dashboard__product-item">
+                    <div className="msme-dashboard__product-left">
+                      <span className="msme-dashboard__product-rank">#{index + 1}</span>
+                      <div className="msme-dashboard__product-image">
+                        <img 
+                          src={getProductImageUrl(product)} 
+                          alt={product.productName}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.parentElement.innerHTML = '<div class="msme-dashboard__product-image-placeholder">📦</div>';
+                          }}
+                        />
+                      </div>
+                      <div className="msme-dashboard__product-info">
+                        <span className="msme-dashboard__product-name">{product.productName}</span>
+                        <span className="msme-dashboard__product-price">₱{product.price || '0.00'}</span>
+                      </div>
+                    </div>
+                    <div className="msme-dashboard__product-right">
+                      <div className="msme-dashboard__product-rating-container">
+                        <span className="msme-dashboard__product-rating">{product.rating.toFixed(1)}</span>
+                        <span className="msme-dashboard__product-star">★</span>
+                      </div>
+                      <span className="msme-dashboard__product-reviews">
+                        ({product.feedbackCount} review{product.feedbackCount !== 1 ? 's' : ''})
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="msme-dashboard__no-products">
+                  <p>No rated products yet. Encourage customers to rate your products!</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -246,14 +305,28 @@ const MsmeDashboard = () => {
                     <div key={index} className="msme-dashboard__week-item">
                       <div className="msme-dashboard__week-info">
                         <span className="msme-dashboard__week-label">{week.week}</span>
-                        <span className="msme-dashboard__week-average">
-                          {week.average > 0 ? week.average.toFixed(1) : 'No ratings'}
-                        </span>
+                        <div className="msme-dashboard__week-metrics">
+                          <span className="msme-dashboard__week-average">
+                            {week.average > 0 ? `${week.average.toFixed(1)} ★` : 'No ratings'}
+                          </span>
+                          <span className="msme-dashboard__week-count">
+                            ({week.count} rating{week.count !== 1 ? 's' : ''})
+                          </span>
+                        </div>
                       </div>
                       <div className="msme-dashboard__week-details">
-                        <span className="msme-dashboard__week-count">
-                          {week.count} rating{week.count !== 1 ? 's' : ''}
-                        </span>
+                        {week.average > 0 && (
+                          <div className="msme-dashboard__week-stars">
+                            {[1, 2, 3, 4, 5].map(star => (
+                              <span 
+                                key={star} 
+                                className={`msme-dashboard__star ${star <= Math.round(week.average) ? 'filled' : ''}`}
+                              >
+                                ★
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}

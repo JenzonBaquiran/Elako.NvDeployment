@@ -220,7 +220,7 @@
   text-transform: uppercase !important;
   box-shadow: 0 4px 15px rgba(49, 49, 49, 0.3) !important;
   width: 60% !important;
-  margin: 0 auto !important;
+  margin: 20px auto !important;
   transition: all 0.3s ease !important;
 }
 

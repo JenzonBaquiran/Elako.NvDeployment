@@ -37,6 +37,7 @@ const AdminUserManagement = () => {
     username: '',
     password: '',
     businessName: '',
+    email: '',
     category: '',
     address: '',
     contactNumber: '',
@@ -643,6 +644,7 @@ const AdminUserManagement = () => {
       username: '',
       password: '',
       businessName: '',
+      email: '',
       category: '',
       address: '',
       contactNumber: '',
@@ -993,6 +995,18 @@ const AdminUserManagement = () => {
               />
             </div>
 
+            <div className="admin-user-management__form-field">
+              <label className="admin-user-management__form-label">Email *</label>
+              <input
+                type="email"
+                name="email"
+                value={msmeFormData.email}
+                onChange={handleMsmeFormChange}
+                className="admin-user-management__form-input"
+                required
+              />
+            </div>
+
             <div className="admin-user-management__form-row">
               <div className="admin-user-management__form-field">
                 <label className="admin-user-management__form-label">Username *</label>
@@ -1259,6 +1273,18 @@ const AdminUserManagement = () => {
                       type="text"
                       name="businessName"
                       value={editUserFormData.businessName}
+                      onChange={handleEditUserFormChange}
+                      className="admin-user-management__form-input"
+                      required
+                    />
+                  </div>
+
+                  <div className="admin-user-management__form-field">
+                    <label className="admin-user-management__form-label">Email *</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={editUserFormData.email}
                       onChange={handleEditUserFormChange}
                       className="admin-user-management__form-input"
                       required

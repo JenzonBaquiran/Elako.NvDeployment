@@ -3,12 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import FloatingMessageIcon from '../components/FloatingMessageIcon';
+import { useAuth } from '../contexts/AuthContext';
+import { recordStoreView } from '../utils/storeViewTracker';
 import heroPic from '../pictures/IMG_6125.jpg';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import '../css/Home.css';
 
 function Home() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [newStores, setNewStores] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -19,41 +22,17 @@ function Home() {
 
   const fetchNewStores = async () => {
     try {
-      // Fetch MSME stores
-      const msmeResponse = await fetch('http://localhost:1337/api/msme');
-      const msmeData = await msmeResponse.json();
+      // Use the stores endpoint that properly filters for approved and visible stores
+      const storesResponse = await fetch('http://localhost:1337/api/stores');
+      const storesData = await storesResponse.json();
       
-      if (msmeResponse.ok) {
-        // Filter out hidden MSMEs (only show visible ones)
-        const visibleStores = msmeData.filter(store => store.isVisible !== false);
-        
+      if (storesData.success) {
         // Sort by creation date (newest first) and take first 6
-        const sortedStores = visibleStores.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6);
+        const sortedStores = storesData.stores.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6);
         
-        // Fetch dashboard information for each store
-        const storesWithDashboards = await Promise.all(
-          sortedStores.map(async (store) => {
-            try {
-              const dashboardResponse = await fetch(`http://localhost:1337/api/msme/${store._id}/dashboard`);
-              const dashboardData = await dashboardResponse.json();
-              
-              return {
-                ...store,
-                dashboard: dashboardData.success ? dashboardData.dashboard : null
-              };
-            } catch (error) {
-              console.error(`Error fetching dashboard for ${store.businessName}:`, error);
-              return {
-                ...store,
-                dashboard: null
-              };
-            }
-          })
-        );
-        
-        setNewStores(storesWithDashboards);
+        setNewStores(sortedStores);
       } else {
-        console.error('Failed to fetch stores:', msmeData.error);
+        console.error('Failed to fetch stores:', storesData.error);
       }
     } catch (error) {
       console.error('Error fetching stores:', error);
@@ -360,7 +339,7 @@ function Home() {
               <button 
                 className="store-learn-btn"
                 onClick={() => {
-                  navigate(`/customer/store/${store._id}`);
+                  recordStoreView(store._id, user?._id, navigate);
                 }}
               >
                 Visit Store

@@ -32,6 +32,7 @@ function Signup() {
     clientProfilingNumber: "",
     category: "",
     businessName: "",
+    email: "",
     username: "",
     password: "",
     confirmPassword: ""
@@ -329,6 +330,17 @@ function Signup() {
                   placeholder="Business Name"
                   value={msmeData.businessName}
                   onChange={(e) => handleMsmeChange("businessName", e.target.value)}
+                  fullWidth
+                  className="signup-input"
+                  required
+                  disabled={loading}
+                />
+                <TextField
+                  variant="outlined"
+                  placeholder="Email"
+                  type="email"
+                  value={msmeData.email}
+                  onChange={(e) => handleMsmeChange("email", e.target.value)}
                   fullWidth
                   className="signup-input"
                   required

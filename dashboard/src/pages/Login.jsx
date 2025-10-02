@@ -222,7 +222,7 @@ function Login() {
                   alignItems: 'center', 
                   marginBottom: '10px'
                 }}>
-                  <CircularProgress size={30} style={{ color: '#ffffff' }} />
+                  <CircularProgress size={30} style={{ color: '#313131' }} />
                 </div>
               )}
               

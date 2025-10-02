@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const CustomerSchema = new mongoose.Schema(
   {
@@ -10,14 +10,15 @@ const CustomerSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     contactNumber: { type: String, required: true },
     address: { type: String, required: true },
+    bio: { type: String, default: "" },
     password: { type: String, required: true },
-    userType: { type: String, default: 'customer' },
-    favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
-    following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'MSME' }],
+    userType: { type: String, default: "customer" },
+    favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "MSME" }],
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
+    updatedAt: { type: Date, default: Date.now },
   },
-  { collection: 'customers' }
+  { collection: "customers" }
 );
 
-module.exports = mongoose.model('Customer', CustomerSchema);
+module.exports = mongoose.model("Customer", CustomerSchema);

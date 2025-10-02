@@ -53,8 +53,6 @@ const CustomerStoreView = () => {
       fetchStoreProducts();
       fetchTopRatedProducts();
       fetchProductFeedbacks();
-      // Record page view when customer visits store
-      recordPageView();
       // Scroll to top when component mounts or storeId changes
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -246,34 +244,7 @@ const CustomerStoreView = () => {
     }
   };
 
-  const recordPageView = async () => {
-    // Only record page view for authenticated customers
-    if (!user || !user._id) {
-      return;
-    }
 
-    try {
-      const response = await fetch(`http://localhost:1337/api/stores/${storeId}/view`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          customerId: user._id
-        })
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log('Page view recorded:', data.message);
-      } else {
-        console.error('Failed to record page view:', data.error);
-      }
-    } catch (error) {
-      console.error('Error recording page view:', error);
-    }
-  };
 
   const getStoreImageUrl = (store) => {
     if (store?.dashboard?.storeLogo) {

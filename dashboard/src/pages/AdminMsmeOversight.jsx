@@ -13,7 +13,6 @@ const AdminMsmeOversight = () => {
     isCollapsed: false
   });
   const [msmeData, setMsmeData] = useState([]);
-  const [productsData, setProductsData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
@@ -66,30 +65,35 @@ const AdminMsmeOversight = () => {
     }
   };
 
-  // Fetch products to get total count and individual MSME product counts
-  const fetchProducts = async () => {
+
+
+  // Fetch MSME statistics (products, rating, followers)
+  const fetchMsmeStatistics = async () => {
     try {
-      const response = await fetch('http://localhost:1337/api/products');
+      const response = await fetch('http://localhost:1337/api/admin/msme-statistics');
       const data = await response.json();
       
-      if (data.success && data.products) {
-        setProductsData(data.products);
-        return data.products;
+      if (data.success && data.statistics) {
+        return data.statistics;
+      } else {
+        console.error('Failed to fetch MSME statistics:', data.error);
+        return [];
       }
     } catch (error) {
-      console.error('Error fetching products:', error);
-      setProductsData([]);
+      console.error('Error fetching MSME statistics:', error);
       return [];
     }
   };
 
-  // Update MSME data with product counts
-  const updateMsmeWithProductCounts = (msmes, products) => {
+  // Update MSME data with real statistics
+  const updateMsmeWithStatistics = (msmes, statistics) => {
     return msmes.map(msme => {
-      const msmeProducts = products.filter(product => product.msmeId === msme._id);
+      const stats = statistics.find(stat => stat.msmeId === msme._id);
       return {
         ...msme,
-        products: msmeProducts.length
+        products: stats ? stats.products : 0,
+        rating: stats ? stats.rating : 0,
+        followers: stats ? stats.followers : 0
       };
     });
   };
@@ -99,13 +103,13 @@ const AdminMsmeOversight = () => {
     const fetchAllData = async () => {
       setLoading(true);
       try {
-        const [msmes, products] = await Promise.all([
+        const [msmes, statistics] = await Promise.all([
           fetchMsmes(),
-          fetchProducts()
+          fetchMsmeStatistics()
         ]);
         
-        // Update MSMEs with product counts
-        const updatedMsmes = updateMsmeWithProductCounts(msmes, products);
+        // Update MSMEs with real statistics
+        const updatedMsmes = updateMsmeWithStatistics(msmes, statistics);
         setMsmeData(updatedMsmes);
         setFilteredData(updatedMsmes);
       } catch (error) {
@@ -235,11 +239,11 @@ const AdminMsmeOversight = () => {
   const stats = {
     total: msmeData.length,
     verified: msmeData.filter(m => m.status === 'approved' || m.status === 'verified').length,
-    totalProducts: productsData.length, // Use actual products count
+    totalProducts: msmeData.reduce((sum, msme) => sum + (msme.products || 0), 0), // Sum all products from all MSMEs
     avgRating: msmeData.length > 0 ? 
-      (msmeData.reduce((sum, m) => sum + m.rating, 0) / msmeData.length) : 0,
+      Math.round((msmeData.reduce((sum, m) => sum + (m.rating || 0), 0) / msmeData.length) * 10) / 10 : 0,
     pending: msmeData.filter(m => m.status === 'pending').length,
-    topPerformers: msmeData.filter(m => m.rating >= 4.5).length
+    topPerformers: msmeData.filter(m => (m.rating || 0) >= 4.5).length
   };
 
   return (

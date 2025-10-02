@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
 import FavoriteButton from '../components/FavoriteButton';
 import FollowButton from '../components/FollowButton';
+import { recordStoreView } from '../utils/storeViewTracker';
 import '../css/CustomerFavorites.css';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -103,7 +104,7 @@ const CustomerFavorites = () => {
   };
 
   const handleViewStore = (storeId) => {
-    navigate(`/customer/store/${storeId}`);
+    recordStoreView(storeId, user?._id, navigate);
   };
 
   const handleStoreUnfollowed = (storeId) => {

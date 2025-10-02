@@ -87,15 +87,54 @@ const CustomerNotificationIcon = () => {
         setUnreadCount(prev => Math.max(0, prev - 1));
       }
 
-      // Navigate to product if it exists
-      if (notification.productId?._id) {
-        navigate(`/product/${notification.productId._id}`);
-      }
+      // Handle navigation based on notification type and action
+      handleNotificationNavigation(notification);
     } catch (error) {
       console.error('Error handling notification click:', error);
     }
 
     handleClose();
+  };
+
+  const handleNotificationNavigation = (notification) => {
+    const { type, actionType, actionUrl, productId, storeId } = notification;
+
+    switch (actionType) {
+      case 'product_detail':
+        if (productId?._id) {
+          navigate(`/product/${productId._id}`);
+        }
+        break;
+      
+      case 'store_detail':
+        if (storeId?._id) {
+          navigate(`/customer/store/${storeId._id}`);
+        }
+        break;
+      
+      case 'custom_url':
+        if (actionUrl) {
+          // Handle both internal and external URLs
+          if (actionUrl.startsWith('http')) {
+            window.open(actionUrl, '_blank');
+          } else {
+            navigate(actionUrl);
+          }
+        }
+        break;
+      
+      case 'none':
+      default:
+        // For 'new_product', 'price_drop', 'stock_alert' - navigate to product
+        if (['new_product', 'price_drop', 'stock_alert'].includes(type) && productId?._id) {
+          navigate(`/product/${productId._id}`);
+        }
+        // For 'store_promotion' - navigate to store
+        else if (type === 'store_promotion' && storeId?._id) {
+          navigate(`/customer/store/${storeId._id}`);
+        }
+        break;
+    }
   };
 
   const handleMarkAllAsRead = async () => {
@@ -119,6 +158,30 @@ const CustomerNotificationIcon = () => {
     switch (type) {
       case 'new_product':
         return <ShoppingBagIcon className="customer-notification-icon__type-icon" />;
+      case 'price_drop':
+        return (
+          <span className="customer-notification-icon__type-icon price-drop">
+            💰
+          </span>
+        );
+      case 'stock_alert':
+        return (
+          <span className="customer-notification-icon__type-icon stock-alert">
+            📦
+          </span>
+        );
+      case 'store_promotion':
+        return (
+          <span className="customer-notification-icon__type-icon promotion">
+            🎉
+          </span>
+        );
+      case 'order_status':
+        return (
+          <span className="customer-notification-icon__type-icon order">
+            📋
+          </span>
+        );
       default:
         return <ShoppingBagIcon className="customer-notification-icon__type-icon" />;
     }
@@ -204,7 +267,7 @@ const CustomerNotificationIcon = () => {
               onClick={() => handleNotificationClick(notification)}
               className={`customer-notification-icon__item ${
                 !notification.isRead ? 'customer-notification-icon__item--unread' : ''
-              }`}
+              } ${notification.type ? `customer-notification-icon__item--${notification.type.replace('_', '-')}` : ''}`}
             >
               <div className="customer-notification-icon__item-content">
                 <div className="customer-notification-icon__item-header">
@@ -217,6 +280,11 @@ const CustomerNotificationIcon = () => {
                     </Typography>
                     <Typography variant="body2" className="customer-notification-icon__item-message">
                       {notification.message}
+                      {notification.type === 'price_drop' && notification.metadata?.discountPercentage && (
+                        <span className="customer-notification-icon__discount-badge">
+                          {notification.metadata.discountPercentage}% OFF
+                        </span>
+                      )}
                     </Typography>
                     {notification.productId && (
                       <div className="customer-notification-icon__product-info">

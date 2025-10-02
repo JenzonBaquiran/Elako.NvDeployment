@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import CustomerSidebar from './CustomerSidebar';
 import '../css/CustomerProfile.css';
 import EditIcon from '@mui/icons-material/Edit';
@@ -14,6 +15,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 const CustomerProfile = () => {
   const [sidebarState, setSidebarState] = useState({
@@ -22,14 +24,141 @@ const CustomerProfile = () => {
     isCollapsed: false
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [profileData, setProfileData] = useState({
-    fullName: 'John Customer',
-    email: 'loaejohnpersonal@gmail.com',
-    phoneNumber: '+63 912 345 6789',
-    address: '123 Main Street, Makati City',
-    bio: 'Love discovering unique products from local MSMEs!'
+    id: '',
+    fullName: '',
+    firstname: '',
+    lastname: '',
+    email: '',
+    contactNumber: '',
+    address: '',
+    bio: '',
+    username: ''
   });
+  const [statsData, setStatsData] = useState([
+    { label: 'Reviews Given', value: '0' },
+    { label: 'Followed Stores', value: '0' },
+    { label: 'Favorite Products', value: '0' },
+    { label: 'Member Since', value: '2024' }
+  ]);
   const navigate = useNavigate();
+  const { user, userType } = useAuth();
+
+  // Fetch customer profile on component mount
+  useEffect(() => {
+    if (user && userType === 'customer') {
+      fetchCustomerProfile();
+    }
+  }, [user, userType]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showMenu && !event.target.closest('.customer-profile__menu-container')) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
+
+  const fetchCustomerProfile = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:1337/api/customers/${user.id}/profile`);
+      const data = await response.json();
+
+      if (data.success) {
+        setProfileData({
+          id: data.profile.id,
+          fullName: data.profile.fullName,
+          firstname: data.profile.firstname,
+          lastname: data.profile.lastname,
+          email: data.profile.email,
+          contactNumber: data.profile.contactNumber,
+          address: data.profile.address,
+          bio: data.profile.bio,
+          username: data.profile.username
+        });
+
+        // Update stats data
+        setStatsData([
+          { label: 'Reviews Given', value: data.profile.stats.reviewsGiven.toString() },
+          { label: 'Followed Stores', value: data.profile.stats.followedStores.toString() },
+          { label: 'Favorite Products', value: data.profile.stats.favoriteProducts.toString() },
+          { label: 'Member Since', value: data.profile.stats.memberSince.toString() }
+        ]);
+      } else {
+        console.error('Failed to fetch profile:', data.error);
+        // Handle error - maybe show toast notification
+      }
+    } catch (error) {
+      console.error('Error fetching customer profile:', error);
+      // Handle error - maybe show toast notification
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Utility function to fetch detailed favorite products (for future use)
+  const fetchFavoriteProducts = async () => {
+    try {
+      const response = await fetch(`http://localhost:1337/api/customers/${user.id}/favorite-products`);
+      const data = await response.json();
+      
+      if (data.success) {
+        return data.favoriteProducts;
+      } else {
+        console.error('Failed to fetch favorite products:', data.error);
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching favorite products:', error);
+      return [];
+    }
+  };
+
+  // Utility function to fetch detailed followed stores (for future use)
+  const fetchFollowedStores = async () => {
+    try {
+      const response = await fetch(`http://localhost:1337/api/customers/${user.id}/followed-stores`);
+      const data = await response.json();
+      
+      if (data.success) {
+        return data.followedStores;
+      } else {
+        console.error('Failed to fetch followed stores:', data.error);
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching followed stores:', error);
+      return [];
+    }
+  };
+
+  // Utility function to fetch detailed review statistics (for future use)
+  const fetchReviewStatistics = async () => {
+    try {
+      const response = await fetch(`http://localhost:1337/api/customers/${user.id}/review-stats`);
+      const data = await response.json();
+      
+      if (data.success) {
+        return data.reviewStats;
+      } else {
+        console.error('Failed to fetch review statistics:', data.error);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching review statistics:', error);
+      return null;
+    }
+  };
 
   const handleSidebarToggle = (state) => {
     setSidebarState(state);
@@ -46,6 +175,11 @@ const CustomerProfile = () => {
 
   const handleEditProfile = () => {
     setIsEditing(!isEditing);
+    setShowMenu(false); // Close menu when edit is clicked
+  };
+
+  const toggleMenu = () => {
+    setShowMenu(!showMenu);
   };
 
   const handleInputChange = (field, value) => {
@@ -55,20 +189,59 @@ const CustomerProfile = () => {
     }));
   };
 
-  const handleSaveProfile = () => {
-    // Handle save profile logic here
-    console.log('Saving profile:', profileData);
-    setIsEditing(false);
+  const handleSaveProfile = async () => {
+    try {
+      setSaving(true);
+      
+      const response = await fetch(`http://localhost:1337/api/customers/${profileData.id}/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstname: profileData.firstname,
+          lastname: profileData.lastname,
+          email: profileData.email,
+          contactNumber: profileData.contactNumber,
+          address: profileData.address,
+          bio: profileData.bio
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update profile data with response
+        setProfileData(prev => ({
+          ...prev,
+          fullName: data.profile.fullName,
+          firstname: data.profile.firstname,
+          lastname: data.profile.lastname,
+          email: data.profile.email,
+          contactNumber: data.profile.contactNumber,
+          address: data.profile.address,
+          bio: data.profile.bio
+        }));
+        
+        setIsEditing(false);
+        // You can add a success toast notification here
+        console.log('Profile updated successfully');
+      } else {
+        // Handle error - show error message
+        console.error('Failed to update profile:', data.error);
+        alert(data.error || 'Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Network error. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleChangePassword = () => {
     // Navigate to change password or show modal
     console.log('Change password');
-  };
-
-  const handlePrivacySettings = () => {
-    // Navigate to privacy settings
-    console.log('Privacy settings');
   };
 
   const handleNotificationSettings = () => {
@@ -83,31 +256,21 @@ const CustomerProfile = () => {
     }
   };
 
-  const statsData = [
-    { label: 'Reviews Given', value: '18' },
-    { label: 'Favorite MSMEs', value: '7' },
-    { label: 'Orders Placed', value: '25' },
-    { label: 'Member Since', value: '2024' }
-  ];
+
 
   const accountSettings = [
     { 
       title: 'Change Password', 
       icon: <SecurityIcon />, 
       action: handleChangePassword,
-      color: '#01a477'
+      color: '#7ed957'
     },
-    { 
-      title: 'Privacy Settings', 
-      icon: <PrivacyTipIcon />, 
-      action: handlePrivacySettings,
-      color: '#01a477'
-    },
+
     { 
       title: 'Notification Preferences', 
       icon: <NotificationsIcon />, 
       action: handleNotificationSettings,
-      color: '#01a477'
+      color: '#7ed957'
     },
     { 
       title: 'Delete Account', 
@@ -116,6 +279,26 @@ const CustomerProfile = () => {
       color: '#dc3545'
     }
   ];
+
+  if (loading) {
+    return (
+      <div className="customer-profile">
+        <CustomerSidebar onSidebarToggle={handleSidebarToggle} />
+        <div className={getContentClass()}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            height: '50vh',
+            fontSize: '18px',
+            color: '#666'
+          }}>
+            Loading profile...
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="customer-profile">
@@ -126,13 +309,6 @@ const CustomerProfile = () => {
             <div className="customer-profile__header-text">
   
             </div>
-            <button 
-              className={`customer-profile__edit-btn ${isEditing ? 'customer-profile__edit-btn--active' : ''}`}
-              onClick={handleEditProfile}
-            >
-              <EditIcon />
-              {isEditing ? 'Cancel Edit' : 'Edit Profile'}
-            </button>
           </div>
         </div>
 
@@ -141,6 +317,25 @@ const CustomerProfile = () => {
           <div className="customer-profile__section customer-profile__section--personal-info">
             <div className="customer-profile__section-header">
               <h2 className="customer-profile__section-title">Personal Information</h2>
+              <div className="customer-profile__menu-container">
+                <button 
+                  className="customer-profile__menu-button"
+                  onClick={toggleMenu}
+                >
+                  <MoreVertIcon className="customer-profile__menu-icon" />
+                </button>
+                {showMenu && (
+                  <div className="customer-profile__dropdown-menu">
+                    <button 
+                      className="customer-profile__dropdown-item"
+                      onClick={handleEditProfile}
+                    >
+                      <EditIcon className="customer-profile__dropdown-icon" />
+                      {isEditing ? 'Cancel Edit' : 'Edit Profile'}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
             
             <div className="customer-profile__card">
@@ -159,17 +354,42 @@ const CustomerProfile = () => {
                 <div className="customer-profile__detail-row">
                   <label className="customer-profile__label">
                     <PersonIcon className="customer-profile__field-icon" />
-                    Full Name
+                    First Name
                   </label>
                   {isEditing ? (
                     <input
                       type="text"
-                      value={profileData.fullName}
-                      onChange={(e) => handleInputChange('fullName', e.target.value)}
+                      value={profileData.firstname}
+                      onChange={(e) => {
+                        handleInputChange('firstname', e.target.value);
+                        // Update full name when first name changes
+                        handleInputChange('fullName', `${e.target.value} ${profileData.lastname}`.trim());
+                      }}
                       className="customer-profile__edit-input"
                     />
                   ) : (
-                    <span className="customer-profile__value">{profileData.fullName}</span>
+                    <span className="customer-profile__value">{profileData.firstname}</span>
+                  )}
+                </div>
+
+                <div className="customer-profile__detail-row">
+                  <label className="customer-profile__label">
+                    <PersonIcon className="customer-profile__field-icon" />
+                    Last Name
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={profileData.lastname}
+                      onChange={(e) => {
+                        handleInputChange('lastname', e.target.value);
+                        // Update full name when last name changes
+                        handleInputChange('fullName', `${profileData.firstname} ${e.target.value}`.trim());
+                      }}
+                      className="customer-profile__edit-input"
+                    />
+                  ) : (
+                    <span className="customer-profile__value">{profileData.lastname}</span>
                   )}
                 </div>
 
@@ -198,12 +418,12 @@ const CustomerProfile = () => {
                   {isEditing ? (
                     <input
                       type="tel"
-                      value={profileData.phoneNumber}
-                      onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                      value={profileData.contactNumber}
+                      onChange={(e) => handleInputChange('contactNumber', e.target.value)}
                       className="customer-profile__edit-input"
                     />
                   ) : (
-                    <span className="customer-profile__value">{profileData.phoneNumber}</span>
+                    <span className="customer-profile__value">{profileData.contactNumber}</span>
                   )}
                 </div>
 
@@ -246,13 +466,15 @@ const CustomerProfile = () => {
                     <button 
                       className="customer-profile__save-btn"
                       onClick={handleSaveProfile}
+                      disabled={saving}
                     >
                       <SaveIcon />
-                      Save Changes
+                      {saving ? 'Saving...' : 'Save Changes'}
                     </button>
                     <button 
                       className="customer-profile__cancel-btn"
                       onClick={() => setIsEditing(false)}
+                      disabled={saving}
                     >
                       <CancelIcon />
                       Cancel

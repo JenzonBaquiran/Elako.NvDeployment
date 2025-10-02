@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomerSidebar from './CustomerSidebar';
+import { useAuth } from '../contexts/AuthContext';
+import { recordStoreView } from '../utils/storeViewTracker';
 import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -9,6 +11,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import '../css/CustomerMessage.css';
 
 const CustomerMessage = () => {
+  const { user } = useAuth();
   const [sidebarState, setSidebarState] = useState({
     isOpen: true,
     isMobile: false,
@@ -119,7 +122,7 @@ const CustomerMessage = () => {
   };
 
   const handleViewStore = (storeId) => {
-    navigate(`/customer/store/${storeId}`);
+    recordStoreView(storeId, user?._id, navigate);
   };
 
   const filteredConversations = conversations.filter(conv =>

@@ -123,6 +123,48 @@
   font-size: 1.2rem !important;
 }
 
+/* Specific styles for different notification types */
+.customer-notification-icon__type-icon.price-drop,
+.customer-notification-icon__type-icon.stock-alert,
+.customer-notification-icon__type-icon.promotion,
+.customer-notification-icon__type-icon.order {
+  font-size: 1.1rem !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Different background colors for notification types */
+.customer-notification-icon__item--price-drop .customer-notification-icon__item-icon {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+}
+
+.customer-notification-icon__item--stock-alert .customer-notification-icon__item-icon {
+  background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+}
+
+.customer-notification-icon__item--promotion .customer-notification-icon__item-icon {
+  background: linear-gradient(135deg, #9c27b0 0%, #e91e63 100%);
+}
+
+.customer-notification-icon__item--order .customer-notification-icon__item-icon {
+  background: linear-gradient(135deg, #607d8b 0%, #455a64 100%);
+}
+
+/* Discount badge for price drop notifications */
+.customer-notification-icon__discount-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  font-size: 0.6rem !important;
+  font-weight: 600 !important;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .customer-notification-icon__item-info {
   flex: 1;
   min-width: 0;

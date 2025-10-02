@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
 import FollowButton from '../components/FollowButton';
 import StoreImage from '../components/StoreImage';
+import { recordStoreView } from '../utils/storeViewTracker';
 import '../css/CustomerViewStore.css';
 import '../components/StoreImage.css';
 import defaultStoreImg from '../assets/pic.jpg';
@@ -151,26 +152,7 @@ const CustomerViewStore = () => {
     setFavoritedStores(newFavoritedStores);
   };
 
-  const recordPageView = async (storeId) => {
-    // Only record page view for authenticated customers
-    if (!user || !user._id) {
-      return;
-    }
 
-    try {
-      await fetch(`http://localhost:1337/api/stores/${storeId}/view`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          customerId: user._id
-        })
-      });
-    } catch (error) {
-      console.error('Error recording page view:', error);
-    }
-  };
 
   const renderStarRating = (rating) => {
     const stars = [];
@@ -303,9 +285,8 @@ const CustomerViewStore = () => {
                         <button 
                           className="customer-view-store-visit-btn"
                           onClick={() => {
-                            // Record page view before navigating
-                            recordPageView(store._id);
-                            navigate(`/customer/store/${store._id}`);
+                            // Record page view and navigate using the utility function
+                            recordStoreView(store._id, user?._id, navigate);
                           }}
                         >
                           Visit Store

@@ -87,12 +87,23 @@ function validateMSMEInput(data) {
     errors.push("Business name is required.");
   if (!data.username || typeof data.username !== "string")
     errors.push("Username is required.");
+  if (!data.email || typeof data.email !== "string")
+    errors.push("Email is required.");
   if (
     !data.password ||
     typeof data.password !== "string" ||
     data.password.length < 6
   )
     errors.push("Password must be at least 6 characters.");
+
+  // Validate email format
+  if (data.email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+      errors.push("Invalid email format.");
+    }
+  }
+
   return errors;
 }
 
@@ -166,6 +177,403 @@ app.post("/api/customers/login", async (req, res) => {
   }
 });
 
+// Get customer profile by ID
+app.get("/api/customers/:id/profile", async (req, res) => {
+  try {
+    const customer = await Customer.findOne(
+      { id: req.params.id },
+      { password: 0 }
+    );
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        error: "Customer not found",
+      });
+    }
+
+    // Calculate reviews given by the customer
+    const customerName = `${customer.firstname} ${customer.lastname}`.trim();
+
+    // Count all feedback/reviews given by this customer across all products
+    const reviewCount = await Product.aggregate([
+      {
+        $match: {
+          $or: [
+            { "feedback.userId": customer._id.toString() },
+            { "feedback.userId": customer.id },
+            { "feedback.user": customerName },
+          ],
+        },
+      },
+      {
+        $unwind: "$feedback",
+      },
+      {
+        $match: {
+          $or: [
+            { "feedback.userId": customer._id.toString() },
+            { "feedback.userId": customer.id },
+            { "feedback.user": customerName },
+          ],
+        },
+      },
+      {
+        $count: "totalReviews",
+      },
+    ]);
+
+    const reviewsGiven =
+      reviewCount.length > 0 ? reviewCount[0].totalReviews : 0;
+
+    // Calculate additional profile statistics
+    const stats = {
+      reviewsGiven: reviewsGiven,
+      followedStores: customer.following ? customer.following.length : 0,
+      favoriteProducts: customer.favorites ? customer.favorites.length : 0,
+      memberSince: customer.createdAt
+        ? new Date(customer.createdAt).getFullYear()
+        : new Date().getFullYear(),
+    };
+
+    res.json({
+      success: true,
+      profile: {
+        id: customer.id,
+        username: customer.username,
+        fullName: `${customer.firstname} ${customer.lastname}`.trim(),
+        firstname: customer.firstname,
+        lastname: customer.lastname,
+        email: customer.email,
+        contactNumber: customer.contactNumber || "",
+        address: customer.address || "",
+        bio:
+          customer.bio || "Love discovering unique products from local MSMEs!",
+        createdAt: customer.createdAt,
+        updatedAt: customer.updatedAt,
+        stats: stats,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching customer profile:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching profile",
+    });
+  }
+});
+
+// Update customer profile (by customer themselves)
+app.put("/api/customers/:id/profile", async (req, res) => {
+  try {
+    const { firstname, lastname, email, contactNumber, address, bio } =
+      req.body;
+
+    // Validate required fields
+    if (!firstname || !lastname || !email) {
+      return res.status(400).json({
+        success: false,
+        error: "First name, last name, and email are required",
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid email format",
+      });
+    }
+
+    // Check if email is already taken by another customer
+    const existingCustomer = await Customer.findOne({
+      email: email,
+      id: { $ne: req.params.id },
+    });
+
+    if (existingCustomer) {
+      return res.status(400).json({
+        success: false,
+        error: "Email is already taken by another customer",
+      });
+    }
+
+    const updatedCustomer = await Customer.findOneAndUpdate(
+      { id: req.params.id },
+      {
+        firstname,
+        lastname,
+        email,
+        contactNumber: contactNumber || "",
+        address: address || "",
+        bio: bio || "",
+        updatedAt: new Date(),
+      },
+      { new: true, select: "-password" }
+    );
+
+    if (!updatedCustomer) {
+      return res.status(404).json({
+        success: false,
+        error: "Customer not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      profile: {
+        id: updatedCustomer.id,
+        username: updatedCustomer.username,
+        fullName:
+          `${updatedCustomer.firstname} ${updatedCustomer.lastname}`.trim(),
+        firstname: updatedCustomer.firstname,
+        lastname: updatedCustomer.lastname,
+        email: updatedCustomer.email,
+        contactNumber: updatedCustomer.contactNumber,
+        address: updatedCustomer.address,
+        bio: updatedCustomer.bio,
+        createdAt: updatedCustomer.createdAt,
+        updatedAt: updatedCustomer.updatedAt,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating customer profile:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error updating profile",
+    });
+  }
+});
+
+// Change customer password
+app.put("/api/customers/:id/change-password", async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        error: "Current password and new password are required",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        error: "New password must be at least 6 characters long",
+      });
+    }
+
+    const customer = await Customer.findOne({ id: req.params.id });
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        error: "Customer not found",
+      });
+    }
+
+    // Verify current password
+    if (customer.password !== currentPassword) {
+      return res.status(400).json({
+        success: false,
+        error: "Current password is incorrect",
+      });
+    }
+
+    // Update password
+    await Customer.findOneAndUpdate(
+      { id: req.params.id },
+      {
+        password: newPassword,
+        updatedAt: new Date(),
+      }
+    );
+
+    res.json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    console.error("Error changing customer password:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error changing password",
+    });
+  }
+});
+
+// Get customer's favorite products with details
+app.get("/api/customers/:id/favorite-products", async (req, res) => {
+  try {
+    const customer = await Customer.findOne({ id: req.params.id }).populate({
+      path: "favorites",
+      populate: {
+        path: "msmeId",
+        select: "businessName",
+      },
+    });
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        error: "Customer not found",
+      });
+    }
+
+    const favoriteProducts = customer.favorites.map((product) => ({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image:
+        product.images && product.images.length > 0 ? product.images[0] : null,
+      businessName: product.msmeId ? product.msmeId.businessName : "Unknown",
+      addedAt: product.createdAt,
+    }));
+
+    res.json({
+      success: true,
+      favoriteProducts: favoriteProducts,
+      total: favoriteProducts.length,
+    });
+  } catch (error) {
+    console.error("Error fetching favorite products:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching favorite products",
+    });
+  }
+});
+
+// Get customer's followed stores with details
+app.get("/api/customers/:id/followed-stores", async (req, res) => {
+  try {
+    const customer = await Customer.findOne({ id: req.params.id }).populate({
+      path: "following",
+      select: "id businessName category address contactNumber createdAt",
+    });
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        error: "Customer not found",
+      });
+    }
+
+    const followedStores = customer.following.map((msme) => ({
+      id: msme.id,
+      businessName: msme.businessName,
+      category: msme.category,
+      address: msme.address,
+      contactNumber: msme.contactNumber,
+      followedAt: msme.createdAt,
+    }));
+
+    res.json({
+      success: true,
+      followedStores: followedStores,
+      total: followedStores.length,
+    });
+  } catch (error) {
+    console.error("Error fetching followed stores:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching followed stores",
+    });
+  }
+});
+
+// Get customer's review statistics
+app.get("/api/customers/:id/review-stats", async (req, res) => {
+  try {
+    const customer = await Customer.findOne({ id: req.params.id });
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        error: "Customer not found",
+      });
+    }
+
+    const customerName = `${customer.firstname} ${customer.lastname}`.trim();
+
+    // Get detailed review statistics
+    const reviewStats = await Product.aggregate([
+      {
+        $match: {
+          $or: [
+            { "feedback.userId": customer._id.toString() },
+            { "feedback.userId": customer.id },
+            { "feedback.user": customerName },
+          ],
+        },
+      },
+      {
+        $unwind: "$feedback",
+      },
+      {
+        $match: {
+          $or: [
+            { "feedback.userId": customer._id.toString() },
+            { "feedback.userId": customer.id },
+            { "feedback.user": customerName },
+          ],
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalReviews: { $sum: 1 },
+          averageRating: { $avg: "$feedback.rating" },
+          ratingDistribution: {
+            $push: "$feedback.rating",
+          },
+          latestReview: { $max: "$feedback.createdAt" },
+        },
+      },
+    ]);
+
+    const stats =
+      reviewStats.length > 0
+        ? {
+            totalReviews: reviewStats[0].totalReviews,
+            averageRating: Math.round(reviewStats[0].averageRating * 10) / 10,
+            latestReview: reviewStats[0].latestReview,
+            ratingDistribution: {
+              1: reviewStats[0].ratingDistribution.filter((r) => r === 1)
+                .length,
+              2: reviewStats[0].ratingDistribution.filter((r) => r === 2)
+                .length,
+              3: reviewStats[0].ratingDistribution.filter((r) => r === 3)
+                .length,
+              4: reviewStats[0].ratingDistribution.filter((r) => r === 4)
+                .length,
+              5: reviewStats[0].ratingDistribution.filter((r) => r === 5)
+                .length,
+            },
+          }
+        : {
+            totalReviews: 0,
+            averageRating: 0,
+            latestReview: null,
+            ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+          };
+
+    res.json({
+      success: true,
+      reviewStats: stats,
+    });
+  } catch (error) {
+    console.error("Error fetching review statistics:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching review statistics",
+    });
+  }
+});
+
 // --- MSME Routes ---
 app.post("/api/msme/register", async (req, res) => {
   const errors = validateMSMEInput(req.body);
@@ -174,6 +582,25 @@ app.post("/api/msme/register", async (req, res) => {
   }
 
   try {
+    // Check if email is already taken
+    const existingEmailMsme = await MSME.findOne({ email: req.body.email });
+    if (existingEmailMsme) {
+      return res.status(400).json({
+        error:
+          "Email is already registered. Please use a different email address.",
+      });
+    }
+
+    // Check if username is already taken
+    const existingUsernameMsme = await MSME.findOne({
+      username: req.body.username,
+    });
+    if (existingUsernameMsme) {
+      return res.status(400).json({
+        error: "Username is already taken. Please choose a different username.",
+      });
+    }
+
     // Generate unique ID
     const id = `MSME_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -190,9 +617,9 @@ app.post("/api/msme/register", async (req, res) => {
     });
   } catch (err) {
     if (err.code === 11000) {
-      return res
-        .status(400)
-        .json({ error: "Client profiling number or username already exists" });
+      return res.status(400).json({
+        error: "Client profiling number, email, or username already exists",
+      });
     }
     res.status(400).json({ error: err.message });
   }
@@ -269,6 +696,277 @@ app.put("/api/msme/:id/status", async (req, res) => {
     });
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+// Get MSME profile by ID
+app.get("/api/msme/:id/profile", async (req, res) => {
+  try {
+    const msme = await MSME.findOne({ id: req.params.id }, { password: 0 });
+
+    if (!msme) {
+      return res.status(404).json({
+        success: false,
+        error: "MSME not found",
+      });
+    }
+
+    // Get dashboard information for this MSME
+    const dashboard = await Dashboard.findOne({ msmeId: msme._id });
+
+    // Get profile views count
+    const profileViews = await PageView.countDocuments({ storeId: msme._id });
+
+    // Get followers count
+    const followersCount = await Customer.countDocuments({
+      following: msme._id,
+    });
+
+    // Merge data from MSME model and Dashboard model
+    const businessName = dashboard?.businessName || msme.businessName || "";
+    const businessDescription =
+      dashboard?.description || msme.businessDescription || "";
+    const contactNumber = dashboard?.contactNumber || msme.contactNumber || "";
+    const address = dashboard?.location || msme.address || "";
+    const website = dashboard?.socialLinks?.website || msme.website || "";
+
+    // Calculate profile completeness based on combined data
+    const requiredFields = [
+      businessName,
+      contactNumber,
+      address,
+      msme.category,
+    ];
+    const optionalFields = [
+      businessDescription,
+      msme.operatingHours,
+      website,
+      msme.specialties,
+      msme.established,
+    ];
+
+    let completedRequired = 0;
+    let completedOptional = 0;
+
+    requiredFields.forEach((field) => {
+      if (field && field.toString().trim() !== "") {
+        completedRequired++;
+      }
+    });
+
+    optionalFields.forEach((field) => {
+      if (
+        field &&
+        ((Array.isArray(field) && field.length > 0) ||
+          (!Array.isArray(field) && field.toString().trim() !== ""))
+      ) {
+        completedOptional++;
+      }
+    });
+
+    const profileComplete = Math.round(
+      (completedRequired / requiredFields.length) * 70 +
+        (completedOptional / optionalFields.length) * 30
+    );
+
+    const stats = {
+      profileViews: profileViews,
+      followers: followersCount,
+      rating: dashboard?.rating || msme.averageRating || 0,
+      profileComplete: profileComplete,
+    };
+
+    res.json({
+      success: true,
+      profile: {
+        id: msme.id,
+        businessName: businessName,
+        username: msme.username,
+        email: msme.email || "", // Email from MSME signup
+        contactNumber: contactNumber,
+        address: address,
+        businessDescription: businessDescription,
+        category: msme.category,
+        operatingHours: msme.operatingHours || "",
+        website: website,
+        specialties: msme.specialties || [],
+        established: msme.established || "",
+        createdAt: msme.createdAt,
+        updatedAt: msme.updatedAt,
+      },
+      stats: stats,
+    });
+  } catch (error) {
+    console.error("Error fetching MSME profile:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching profile",
+    });
+  }
+});
+
+// Update MSME personal information
+app.put("/api/msme/:id/profile/personal", async (req, res) => {
+  try {
+    const { businessName, email, contactNumber, address, businessDescription } =
+      req.body;
+
+    // Validate required fields
+    if (!businessName) {
+      return res.status(400).json({
+        success: false,
+        error: "Business name is required",
+      });
+    }
+
+    // Validate email format if provided
+    if (email && email.trim() !== "") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid email format",
+        });
+      }
+    }
+
+    // Find the MSME first
+    const msme = await MSME.findOne({ id: req.params.id });
+    if (!msme) {
+      return res.status(404).json({
+        success: false,
+        error: "MSME not found",
+      });
+    }
+
+    // Update MSME model (for email which is stored there)
+    const updatedMsme = await MSME.findOneAndUpdate(
+      { id: req.params.id },
+      {
+        email: email || "",
+        updatedAt: new Date(),
+      },
+      { new: true, select: "-password" }
+    );
+
+    // Update or create Dashboard model (for business info)
+    const dashboardUpdate = {
+      businessName,
+      contactNumber: contactNumber || "",
+      location: address || "",
+      description: businessDescription || "",
+      updatedAt: new Date(),
+    };
+
+    const dashboard = await Dashboard.findOneAndUpdate(
+      { msmeId: msme._id },
+      dashboardUpdate,
+      {
+        new: true,
+        upsert: true, // Create if doesn't exist
+        setDefaultsOnInsert: true,
+      }
+    );
+
+    res.json({
+      success: true,
+      message: "Personal information updated successfully",
+      profile: {
+        businessName: dashboard.businessName,
+        email: updatedMsme.email,
+        contactNumber: dashboard.contactNumber,
+        address: dashboard.location,
+        businessDescription: dashboard.description,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating MSME personal information:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error updating personal information",
+    });
+  }
+});
+
+// Update MSME business information
+app.put("/api/msme/:id/profile/business", async (req, res) => {
+  try {
+    const { category, established, operatingHours, website, specialties } =
+      req.body;
+
+    // Validate category if provided
+    if (category && !["food", "artisan"].includes(category)) {
+      return res.status(400).json({
+        success: false,
+        error: "Category must be 'food' or 'artisan'",
+      });
+    }
+
+    // Validate website URL if provided
+    if (website && website.trim() !== "") {
+      try {
+        new URL(website);
+      } catch (e) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid website URL format",
+        });
+      }
+    }
+
+    // Find the MSME first
+    const msme = await MSME.findOne({ id: req.params.id });
+    if (!msme) {
+      return res.status(404).json({
+        success: false,
+        error: "MSME not found",
+      });
+    }
+
+    // Update MSME model (for category, established, operating hours, specialties)
+    const updatedMsme = await MSME.findOneAndUpdate(
+      { id: req.params.id },
+      {
+        category: category || msme.category,
+        established: established || "",
+        operatingHours: operatingHours || "",
+        specialties: Array.isArray(specialties) ? specialties : [],
+        updatedAt: new Date(),
+      },
+      { new: true, select: "-password" }
+    );
+
+    // Update Dashboard model (for website)
+    const dashboard = await Dashboard.findOneAndUpdate(
+      { msmeId: msme._id },
+      {
+        "socialLinks.website": website || "",
+        updatedAt: new Date(),
+      },
+      {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true,
+      }
+    );
+
+    res.json({
+      success: true,
+      message: "Business information updated successfully",
+      profile: {
+        category: updatedMsme.category,
+        established: updatedMsme.established,
+        operatingHours: updatedMsme.operatingHours,
+        website: dashboard.socialLinks.website,
+        specialties: updatedMsme.specialties,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating MSME business information:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error updating business information",
+    });
   }
 });
 
@@ -502,17 +1200,30 @@ app.put("/api/admin/msme/:id/update", async (req, res) => {
     const {
       username,
       businessName,
+      email,
       category,
       address,
       contactNumber,
       clientProfilingNumber,
     } = req.body;
 
+    // Validate email format if provided
+    if (email && email.trim() !== "") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid email format",
+        });
+      }
+    }
+
     const updatedMSME = await MSME.findOneAndUpdate(
       { id: req.params.id },
       {
         username,
         businessName,
+        email: email || "",
         category,
         address,
         contactNumber,
@@ -605,6 +1316,7 @@ app.post("/api/admin/msme/create", async (req, res) => {
       username,
       password,
       businessName,
+      email,
       category,
       address,
       contactNumber,
@@ -612,10 +1324,20 @@ app.post("/api/admin/msme/create", async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    if (!username || !password || !businessName || !category) {
+    if (!username || !password || !businessName || !email || !category) {
       return res.status(400).json({
         success: false,
-        error: "Username, password, business name, and category are required",
+        error:
+          "Username, password, business name, email, and category are required",
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid email format",
       });
     }
 
@@ -627,13 +1349,15 @@ app.post("/api/admin/msme/create", async (req, res) => {
       });
     }
 
-    // Check if MSME already exists
-    const existingMSME = await MSME.findOne({ username });
+    // Check if MSME already exists by username or email
+    const existingMSME = await MSME.findOne({
+      $or: [{ username }, { email }],
+    });
 
     if (existingMSME) {
       return res.status(400).json({
         success: false,
-        error: "MSME with this username already exists",
+        error: "MSME with this username or email already exists",
       });
     }
 
@@ -662,6 +1386,7 @@ app.post("/api/admin/msme/create", async (req, res) => {
       username,
       password: hashedPassword,
       businessName,
+      email,
       category,
       address: address || "",
       contactNumber: contactNumber || "",
@@ -677,6 +1402,7 @@ app.post("/api/admin/msme/create", async (req, res) => {
       _id: newMSME._id,
       username: newMSME.username,
       businessName: newMSME.businessName,
+      email: newMSME.email,
       category: newMSME.category,
       address: newMSME.address,
       contactNumber: newMSME.contactNumber,
@@ -2295,6 +3021,48 @@ app.get("/api/dashboard/public/:msmeId", async (req, res) => {
   }
 });
 
+// Get MSME statistics (products count, rating, followers count)
+app.get("/api/admin/msme-statistics", async (req, res) => {
+  try {
+    // Get all MSMEs
+    const msmes = await MSME.find({});
+
+    // Get statistics for each MSME
+    const msmeStats = await Promise.all(
+      msmes.map(async (msme) => {
+        // Count products for this MSME
+        const productCount = await Product.countDocuments({ msmeId: msme._id });
+
+        // Get store rating directly from MSME model (not product ratings)
+        const storeRating = msme.averageRating || 0;
+
+        // Count followers (customers who follow this MSME)
+        const followerCount = await Customer.countDocuments({
+          following: msme._id,
+        });
+
+        return {
+          msmeId: msme._id,
+          products: productCount,
+          rating: storeRating,
+          followers: followerCount,
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      statistics: msmeStats,
+    });
+  } catch (error) {
+    console.error("Error fetching MSME statistics:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching MSME statistics",
+    });
+  }
+});
+
 // Get customer's reviews/feedback
 app.get("/api/customers/:customerId/reviews", async (req, res) => {
   try {
@@ -3004,6 +3772,148 @@ app.delete("/api/customer-notifications/:notificationId", async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Error deleting notification",
+    });
+  }
+});
+
+// Create price drop notification
+app.post("/api/customer-notifications/price-drop", async (req, res) => {
+  try {
+    const { storeId, productId, oldPrice, newPrice } = req.body;
+
+    if (!storeId || !productId || !oldPrice || !newPrice) {
+      return res.status(400).json({
+        success: false,
+        error: "Store ID, Product ID, old price, and new price are required",
+      });
+    }
+
+    const result = await CustomerNotificationService.notifyFollowersOfPriceDrop(
+      storeId,
+      productId,
+      oldPrice,
+      newPrice
+    );
+
+    res.json({
+      success: true,
+      message: "Price drop notifications sent successfully",
+      notificationsCreated: result.length,
+    });
+  } catch (error) {
+    console.error("Error creating price drop notifications:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error creating price drop notifications",
+    });
+  }
+});
+
+// Create stock alert notification
+app.post("/api/customer-notifications/stock-alert", async (req, res) => {
+  try {
+    const { storeId, productId, stockLevel } = req.body;
+
+    if (!storeId || !productId || stockLevel === undefined) {
+      return res.status(400).json({
+        success: false,
+        error: "Store ID, Product ID, and stock level are required",
+      });
+    }
+
+    const result =
+      await CustomerNotificationService.notifyFollowersOfStockAlert(
+        storeId,
+        productId,
+        stockLevel
+      );
+
+    res.json({
+      success: true,
+      message: "Stock alert notifications sent successfully",
+      notificationsCreated: result.length,
+    });
+  } catch (error) {
+    console.error("Error creating stock alert notifications:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error creating stock alert notifications",
+    });
+  }
+});
+
+// Create store promotion notification
+app.post("/api/customer-notifications/promotion", async (req, res) => {
+  try {
+    const { storeId, title, message, actionUrl } = req.body;
+
+    if (!storeId || !title || !message) {
+      return res.status(400).json({
+        success: false,
+        error: "Store ID, title, and message are required",
+      });
+    }
+
+    const result = await CustomerNotificationService.notifyFollowersOfPromotion(
+      storeId,
+      title,
+      message,
+      actionUrl
+    );
+
+    res.json({
+      success: true,
+      message: "Promotion notifications sent successfully",
+      notificationsCreated: result.length,
+    });
+  } catch (error) {
+    console.error("Error creating promotion notifications:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error creating promotion notifications",
+    });
+  }
+});
+
+// Create custom notification
+app.post("/api/customer-notifications/custom", async (req, res) => {
+  try {
+    const { customerIds, storeId, notificationData } = req.body;
+
+    if (
+      !customerIds ||
+      !Array.isArray(customerIds) ||
+      customerIds.length === 0
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: "Customer IDs array is required",
+      });
+    }
+
+    if (!storeId || !notificationData) {
+      return res.status(400).json({
+        success: false,
+        error: "Store ID and notification data are required",
+      });
+    }
+
+    const result = await CustomerNotificationService.createCustomNotification(
+      customerIds,
+      storeId,
+      notificationData
+    );
+
+    res.json({
+      success: true,
+      message: "Custom notifications sent successfully",
+      notificationsCreated: result.length,
+    });
+  } catch (error) {
+    console.error("Error creating custom notifications:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error creating custom notifications",
     });
   }
 });

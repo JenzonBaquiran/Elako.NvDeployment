@@ -311,6 +311,82 @@
   color: white;
 }
 
+/* Edit form styles */
+.msme-profile__edit-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  background: white;
+  transition: border-color 0.2s ease;
+}
+
+.msme-profile__edit-input:focus {
+  outline: none;
+  border-color: #7ed957;
+}
+
+.msme-profile__edit-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  background: white;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color 0.2s ease;
+}
+
+.msme-profile__edit-textarea:focus {
+  outline: none;
+  border-color: #7ed957;
+}
+
+.msme-profile__edit-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+}
+
+.msme-profile__save-btn {
+  background: #7ed957;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-profile__save-btn:hover {
+  background: #6bc547;
+  transform: translateY(-1px);
+}
+
+.msme-profile__save-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Loading state */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 18px;
+  color: #666;
+  font-family: 'Poppins', sans-serif;
+}
+
 /* Account settings */
 .msme-profile__account-settings {
   margin-bottom: 32px;

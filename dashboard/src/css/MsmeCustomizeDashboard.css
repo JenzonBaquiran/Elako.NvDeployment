@@ -168,9 +168,9 @@
 .cover-photo-upload,
 .cover-photo-display {
   position: relative;
-  height: 250px;
+  height: 200px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 8px;
+  border-radius: 25px;
   overflow: hidden;
 }
 

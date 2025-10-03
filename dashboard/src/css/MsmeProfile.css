@@ -43,9 +43,10 @@
 
 .msme-profile__header-content {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 24px;
+  text-align: center;
 }
 
 .msme-profile__header-text h1 {

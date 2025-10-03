@@ -791,6 +791,7 @@ app.get("/api/msme/:id/profile", async (req, res) => {
         website: website,
         specialties: msme.specialties || [],
         established: msme.established || "",
+        storeLogo: dashboard?.storeLogo || null,
         createdAt: msme.createdAt,
         updatedAt: msme.updatedAt,
       },
@@ -2960,6 +2961,63 @@ app.post(
       res.status(500).json({
         success: false,
         error: "Error updating dashboard",
+      });
+    }
+  }
+);
+
+// Update store logo only
+app.put(
+  "/api/msme/:id/profile/storeLogo",
+  upload.single("storeLogo"),
+  async (req, res) => {
+    try {
+      const msmeId = req.params.id;
+
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          error: "No image file provided",
+        });
+      }
+
+      // Find the MSME to get the ObjectId
+      const msme = await MSME.findOne({ id: msmeId });
+      if (!msme) {
+        return res.status(404).json({
+          success: false,
+          error: "MSME not found",
+        });
+      }
+
+      // Update or create dashboard with new store logo
+      let dashboard = await Dashboard.findOne({ msmeId: msme._id });
+
+      if (dashboard) {
+        // Update existing dashboard
+        dashboard.storeLogo = req.file.filename;
+        await dashboard.save();
+      } else {
+        // Create new dashboard with basic info
+        dashboard = new Dashboard({
+          msmeId: msme._id,
+          businessName: msme.businessName,
+          storeLogo: req.file.filename,
+          rating: 4.0,
+        });
+        await dashboard.save();
+      }
+
+      res.json({
+        success: true,
+        message: "Store logo updated successfully",
+        storeLogo: req.file.filename,
+      });
+    } catch (error) {
+      console.error("Error updating store logo:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error updating store logo",
       });
     }
   }

@@ -10,6 +10,7 @@ const MsmeProfile = () => {
   const [isEditingBusiness, setIsEditingBusiness] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [profileData, setProfileData] = useState({
     id: '',
     businessName: '',
@@ -21,7 +22,8 @@ const MsmeProfile = () => {
     operatingHours: '',
     website: '',
     specialties: [],
-    established: ''
+    established: '',
+    storeLogo: null
   });
   const [stats, setStats] = useState({
     profileViews: 0,
@@ -156,6 +158,56 @@ const MsmeProfile = () => {
     }
   };
 
+  const handleLogoUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB');
+      return;
+    }
+
+    try {
+      setUploadingLogo(true);
+
+      const formData = new FormData();
+      formData.append('storeLogo', file);
+
+      const response = await fetch(`http://localhost:1337/api/msme/${user.id}/profile/storeLogo`, {
+        method: 'PUT',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setProfileData(prev => ({
+          ...prev,
+          storeLogo: data.storeLogo
+        }));
+        console.log('Store logo updated successfully');
+        alert('Store logo updated successfully!');
+      } else {
+        console.error('Failed to update store logo:', data.error);
+        alert(data.error || 'Failed to update store logo');
+      }
+    } catch (error) {
+      console.error('Error uploading store logo:', error);
+      alert('Network error. Please try again.');
+    } finally {
+      setUploadingLogo(false);
+      // Clear the file input
+      event.target.value = '';
+    }
+  };
+
   const getContentClass = () => {
     if (sidebarState.isMobile) {
       return 'msme-profile__content msme-profile__content--mobile';
@@ -185,10 +237,6 @@ const MsmeProfile = () => {
             <div className="msme-profile__header-text">
               <h1>Profile Settings</h1>
               <p>Manage your business profile and account settings.</p>
-            </div>
-            <div className="msme-profile__actions">
-              <button className="msme-profile__save-btn">Save Changes</button>
-              <button className="msme-profile__preview-btn">Preview Profile</button>
             </div>
           </div>
         </div>
@@ -226,9 +274,28 @@ const MsmeProfile = () => {
             <div className="msme-profile__info-content">
               <div className="msme-profile__avatar-section">
                 <div className="msme-profile__avatar">
-                  <img src={profileImg} alt="Profile" />
+                  <img 
+                    src={profileData.storeLogo ? `http://localhost:1337/uploads/${profileData.storeLogo}` : profileImg} 
+                    alt="Store Logo" 
+                    onError={(e) => {
+                      e.target.src = profileImg;
+                    }}
+                  />
                 </div>
-                <button className="msme-profile__upload-btn">Upload Photo</button>
+                <input
+                  type="file"
+                  id="storeLogo"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  style={{ display: 'none' }}
+                />
+                <button 
+                  className="msme-profile__upload-btn"
+                  onClick={() => document.getElementById('storeLogo').click()}
+                  disabled={uploadingLogo}
+                >
+                  {uploadingLogo ? 'Uploading...' : 'Upload Photo'}
+                </button>
               </div>
               <div className="msme-profile__info-fields">
                 <div className="msme-profile__field">

@@ -14,6 +14,7 @@ const Dashboard = require("./models/dashboard.model");
 const PageView = require("./models/pageview.model");
 const Notification = require("./models/notification.model");
 const CustomerNotification = require("./models/customerNotification.model");
+const BlogPost = require("./models/blogPost.model");
 
 // Import Services
 const CustomerNotificationService = require("./services/customerNotificationService");
@@ -38,7 +39,23 @@ const storage = multer.diskStorage({
     cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    // Allow images and videos
+    if (
+      file.mimetype.startsWith("image/") ||
+      file.mimetype.startsWith("video/")
+    ) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image and video files are allowed!"), false);
+    }
+  },
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB limit
+  },
+});
 
 // MongoDB Connection
 mongoose.connect("mongodb://127.0.0.1:27017/ElakoNv", {});
@@ -3611,6 +3628,88 @@ app.put("/api/notifications/:storeId/read-all", async (req, res) => {
   }
 });
 
+// Delete single notification
+app.delete("/api/notifications/:notificationId", async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+
+    const deletedNotification = await Notification.findByIdAndDelete(
+      notificationId
+    );
+
+    if (!deletedNotification) {
+      return res.status(404).json({
+        success: false,
+        error: "Notification not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Notification deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting notification:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error deleting notification",
+    });
+  }
+});
+
+// Delete multiple notifications
+app.delete("/api/notifications/delete-multiple", async (req, res) => {
+  try {
+    const { notificationIds, storeId } = req.body;
+
+    if (!notificationIds || !Array.isArray(notificationIds)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid notification IDs provided",
+      });
+    }
+
+    // Delete notifications that belong to the store
+    const result = await Notification.deleteMany({
+      _id: { $in: notificationIds },
+      storeId: storeId,
+    });
+
+    res.json({
+      success: true,
+      message: `${result.deletedCount} notifications deleted successfully`,
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.error("Error deleting multiple notifications:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error deleting notifications",
+    });
+  }
+});
+
+// Delete all notifications for a store
+app.delete("/api/notifications/:storeId/delete-all", async (req, res) => {
+  try {
+    const { storeId } = req.params;
+
+    const result = await Notification.deleteMany({ storeId });
+
+    res.json({
+      success: true,
+      message: `All ${result.deletedCount} notifications deleted successfully`,
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.error("Error deleting all notifications:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error deleting all notifications",
+    });
+  }
+});
+
 // Create notification (internal helper function)
 async function createNotification(storeId, customerId, type, productId = null) {
   try {
@@ -3834,6 +3933,79 @@ app.delete("/api/customer-notifications/:notificationId", async (req, res) => {
   }
 });
 
+// Delete multiple customer notifications
+app.delete("/api/customer-notifications/delete-multiple", async (req, res) => {
+  try {
+    const { notificationIds, customerId } = req.body;
+
+    if (!customerId || !notificationIds || !Array.isArray(notificationIds)) {
+      return res.status(400).json({
+        success: false,
+        error: "Customer ID and notification IDs array are required",
+      });
+    }
+
+    if (notificationIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "At least one notification ID is required",
+      });
+    }
+
+    // Delete multiple notifications
+    const result = await CustomerNotification.deleteMany({
+      _id: { $in: notificationIds },
+      customerId: customerId,
+    });
+
+    res.json({
+      success: true,
+      message: `${result.deletedCount} notifications deleted successfully`,
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.error("Error deleting multiple customer notifications:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error deleting notifications",
+    });
+  }
+});
+
+// Delete all customer notifications
+app.delete(
+  "/api/customer-notifications/:customerId/delete-all",
+  async (req, res) => {
+    try {
+      const { customerId } = req.params;
+
+      if (!customerId) {
+        return res.status(400).json({
+          success: false,
+          error: "Customer ID is required",
+        });
+      }
+
+      // Delete all notifications for the customer
+      const result = await CustomerNotification.deleteMany({
+        customerId: customerId,
+      });
+
+      res.json({
+        success: true,
+        message: `All ${result.deletedCount} notifications deleted successfully`,
+        deletedCount: result.deletedCount,
+      });
+    } catch (error) {
+      console.error("Error deleting all customer notifications:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error deleting all notifications",
+      });
+    }
+  }
+);
+
 // Create price drop notification
 app.post("/api/customer-notifications/price-drop", async (req, res) => {
   try {
@@ -3972,6 +4144,156 @@ app.post("/api/customer-notifications/custom", async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Error creating custom notifications",
+    });
+  }
+});
+
+// --- Upload Route ---
+app.post("/api/upload", upload.single("media"), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: "No file uploaded",
+      });
+    }
+
+    res.json({
+      success: true,
+      filename: req.file.filename,
+      originalName: req.file.originalname,
+      size: req.file.size,
+      mimetype: req.file.mimetype,
+    });
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error uploading file",
+    });
+  }
+});
+
+// --- Blog Post Routes ---
+// Get all blog posts
+app.get("/api/blog-posts", async (req, res) => {
+  try {
+    const { status } = req.query;
+    let query = {};
+
+    if (status) {
+      query.status = status;
+    }
+
+    const posts = await BlogPost.find(query).sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      posts: posts,
+    });
+  } catch (error) {
+    console.error("Error fetching blog posts:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching blog posts",
+    });
+  }
+});
+
+// Get published blog posts for frontend
+app.get("/api/blog-posts/published", async (req, res) => {
+  try {
+    const posts = await BlogPost.find({ status: "published" }).sort({
+      featured: -1,
+      createdAt: -1,
+    });
+
+    res.json({
+      success: true,
+      posts: posts,
+    });
+  } catch (error) {
+    console.error("Error fetching published blog posts:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching published blog posts",
+    });
+  }
+});
+
+// Create new blog post
+app.post("/api/blog-posts", async (req, res) => {
+  try {
+    const blogPost = new BlogPost(req.body);
+    await blogPost.save();
+
+    res.json({
+      success: true,
+      post: blogPost,
+      message: "Blog post created successfully",
+    });
+  } catch (error) {
+    console.error("Error creating blog post:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error creating blog post",
+    });
+  }
+});
+
+// Update blog post
+app.put("/api/blog-posts/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedPost = await BlogPost.findByIdAndUpdate(
+      id,
+      { ...req.body, updatedAt: new Date() },
+      { new: true }
+    );
+
+    if (!updatedPost) {
+      return res.status(404).json({
+        success: false,
+        error: "Blog post not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      post: updatedPost,
+      message: "Blog post updated successfully",
+    });
+  } catch (error) {
+    console.error("Error updating blog post:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error updating blog post",
+    });
+  }
+});
+
+// Delete blog post
+app.delete("/api/blog-posts/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedPost = await BlogPost.findByIdAndDelete(id);
+
+    if (!deletedPost) {
+      return res.status(404).json({
+        success: false,
+        error: "Blog post not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Blog post deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting blog post:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error deleting blog post",
     });
   }
 });

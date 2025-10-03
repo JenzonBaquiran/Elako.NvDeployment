@@ -351,3 +351,429 @@
 .customer-notification-icon__button .MuiBadge-badge {
   animation: notificationPulse 2s infinite;
 }
+
+/* Drawer Styles */
+.customer-notification-icon__drawer .MuiDrawer-paper {
+  width: 450px !important;
+  max-width: 90vw !important;
+  z-index: 1300 !important;
+}
+
+.customer-notification-icon__drawer-paper {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+.customer-notification-icon__drawer-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.customer-notification-icon__drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #7ed957 0%, #6bc144 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.customer-notification-icon__drawer-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 1.2rem !important;
+  color: white !important;
+}
+
+.customer-notification-icon__drawer-actions {
+  padding: 16px 24px;
+  background: rgba(126, 217, 87, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.customer-notification-icon__drawer-mark-all-btn {
+  color: #7ed957 !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 0.85rem !important;
+  text-transform: none !important;
+  border: 1px solid #7ed957 !important;
+  border-radius: 20px !important;
+  padding: 6px 16px !important;
+  background: rgba(126, 217, 87, 0.05) !important;
+  min-width: auto !important;
+}
+
+.customer-notification-icon__drawer-mark-all-btn:hover {
+  background: rgba(126, 217, 87, 0.1) !important;
+  border-color: #7ed957 !important;
+  color: #7ed957 !important;
+}
+
+/* Action Buttons */
+.customer-notification-icon__drawer-action-btn {
+  color: #2196f3 !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 0.85rem !important;
+  text-transform: none !important;
+  border: 1px solid #2196f3 !important;
+  border-radius: 20px !important;
+  padding: 6px 16px !important;
+  background: rgba(33, 150, 243, 0.05) !important;
+  min-width: auto !important;
+}
+
+.customer-notification-icon__drawer-action-btn:hover {
+  background: rgba(33, 150, 243, 0.1) !important;
+  border-color: #2196f3 !important;
+  color: #2196f3 !important;
+}
+
+.customer-notification-icon__drawer-action-btn .MuiButton-startIcon {
+  color: #2196f3 !important;
+}
+
+.customer-notification-icon__drawer-delete-btn {
+  color: #f44336 !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 0.85rem !important;
+  text-transform: none !important;
+  border: 1px solid #f44336 !important;
+  border-radius: 20px !important;
+  padding: 6px 16px !important;
+  background: rgba(244, 67, 54, 0.05) !important;
+  min-width: auto !important;
+}
+
+.customer-notification-icon__drawer-delete-btn:hover {
+  background: rgba(244, 67, 54, 0.1) !important;
+  border-color: #f44336 !important;
+  color: #f44336 !important;
+}
+
+.customer-notification-icon__drawer-delete-btn .MuiButton-startIcon {
+  color: #f44336 !important;
+}
+
+.customer-notification-icon__drawer-delete-btn:disabled {
+  color: #ccc !important;
+  border-color: rgba(204, 204, 204, 0.3) !important;
+  background: rgba(204, 204, 204, 0.05) !important;
+}
+
+.customer-notification-icon__drawer-delete-btn:disabled .MuiButton-startIcon {
+  color: #ccc !important;
+}
+
+.customer-notification-icon__drawer-delete-all-btn {
+  color: #ff5722 !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 0.85rem !important;
+  text-transform: none !important;
+  border: 1px solid #ff5722 !important;
+  border-radius: 20px !important;
+  padding: 6px 16px !important;
+  background: rgba(255, 87, 34, 0.05) !important;
+  min-width: auto !important;
+}
+
+.customer-notification-icon__drawer-delete-all-btn:hover {
+  background: rgba(255, 87, 34, 0.1) !important;
+  border-color: #ff5722 !important;
+  color: #ff5722 !important;
+}
+
+.customer-notification-icon__drawer-delete-all-btn .MuiButton-startIcon {
+  color: #ff5722 !important;
+}
+
+.customer-notification-icon__drawer-cancel-btn {
+  color: #666 !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 0.85rem !important;
+  text-transform: none !important;
+  border: 1px solid #666 !important;
+  border-radius: 20px !important;
+  padding: 6px 16px !important;
+  background: rgba(102, 102, 102, 0.05) !important;
+  min-width: auto !important;
+}
+
+.customer-notification-icon__drawer-cancel-btn:hover {
+  background: rgba(102, 102, 102, 0.1) !important;
+  border-color: #666 !important;
+  color: #666 !important;
+}
+
+.customer-notification-icon__drawer-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.customer-notification-icon__drawer-loading,
+.customer-notification-icon__drawer-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.customer-notification-icon__drawer-empty-icon {
+  font-size: 4rem !important;
+  color: #ccc !important;
+  margin-bottom: 16px !important;
+}
+
+.customer-notification-icon__drawer-list {
+  padding: 0 !important;
+}
+
+.customer-notification-icon__drawer-item {
+  padding: 16px 24px !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+  align-items: flex-start !important;
+  transition: background-color 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.customer-notification-icon__drawer-item:hover {
+  background-color: rgba(126, 217, 87, 0.05) !important;
+}
+
+.customer-notification-icon__drawer-item--unread {
+  background-color: rgba(126, 217, 87, 0.08) !important;
+  border-left: 4px solid #7ed957 !important;
+}
+
+.customer-notification-icon__drawer-item--unread:hover {
+  background-color: rgba(126, 217, 87, 0.12) !important;
+}
+
+.customer-notification-icon__drawer-item--selection-mode {
+  padding-left: 16px !important;
+}
+
+.customer-notification-icon__drawer-checkbox {
+  color: #7ed957 !important;
+}
+
+.customer-notification-icon__drawer-checkbox.Mui-checked {
+  color: #7ed957 !important;
+}
+
+.customer-notification-icon__drawer-avatar {
+  background: linear-gradient(135deg, #7ed957 0%, #6bc144 100%) !important;
+  font-size: 1.2rem !important;
+  width: 48px !important;
+  height: 48px !important;
+}
+
+.customer-notification-icon__drawer-item-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  color: #313131 !important;
+  margin-bottom: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.customer-notification-icon__drawer-unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7ed957;
+  flex-shrink: 0;
+  margin-left: 8px;
+  box-shadow: 0 0 8px rgba(126, 217, 87, 0.4);
+}
+
+.customer-notification-icon__drawer-new-chip {
+  font-size: 0.6rem !important;
+  height: 18px !important;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.customer-notification-icon__drawer-item-message {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 0.85rem !important;
+  color: #666 !important;
+  margin-bottom: 12px !important;
+  line-height: 1.5 !important;
+}
+
+.customer-notification-icon__drawer-product-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+  padding: 12px;
+  background: rgba(126, 217, 87, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(126, 217, 87, 0.1);
+}
+
+.customer-notification-icon__drawer-product-image {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 8px !important;
+  border: 2px solid rgba(126, 217, 87, 0.2) !important;
+  object-fit: cover;
+}
+
+.customer-notification-icon__drawer-product-name {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 500 !important;
+  font-size: 0.8rem !important;
+  color: #313131 !important;
+  display: block !important;
+  line-height: 1.3 !important;
+}
+
+.customer-notification-icon__drawer-product-price {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+  color: #7ed957 !important;
+  display: block !important;
+  margin-top: 2px !important;
+}
+
+.customer-notification-icon__drawer-item-time {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 0.72rem !important;
+  color: #999 !important;
+  display: block !important;
+  margin-top: 8px !important;
+}
+
+/* Mobile Responsive for Drawer */
+@media (max-width: 768px) {
+  .customer-notification-icon__drawer .MuiDrawer-paper {
+    width: 100vw !important;
+  }
+
+  .customer-notification-icon__drawer-header {
+    padding: 16px 20px;
+  }
+
+  .customer-notification-icon__drawer-actions {
+    padding: 12px 20px;
+  }
+
+  .customer-notification-icon__drawer-actions > div {
+    gap: 6px !important;
+  }
+
+  .customer-notification-icon__drawer-action-btn,
+  .customer-notification-icon__drawer-delete-btn,
+  .customer-notification-icon__drawer-delete-all-btn,
+  .customer-notification-icon__drawer-cancel-btn,
+  .customer-notification-icon__drawer-mark-all-btn {
+    font-size: 0.8rem !important;
+    padding: 4px 12px !important;
+  }
+
+  .customer-notification-icon__drawer-item {
+    padding: 12px 20px !important;
+  }
+
+  .customer-notification-icon__drawer-product-info {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .customer-notification-icon__drawer-product-image {
+    width: 36px !important;
+    height: 36px !important;
+  }
+}
+
+/* Smooth scrolling for drawer */
+.customer-notification-icon__drawer-content {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(126, 217, 87, 0.3) transparent;
+}
+
+.customer-notification-icon__drawer-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.customer-notification-icon__drawer-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.customer-notification-icon__drawer-content::-webkit-scrollbar-thumb {
+  background: rgba(126, 217, 87, 0.3);
+  border-radius: 3px;
+}
+
+.customer-notification-icon__drawer-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(126, 217, 87, 0.5);
+}
+
+/* Swipe to Delete Styles */
+.customer-notification-icon__drawer-item-wrapper {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
+  transform-origin: left center;
+}
+
+.customer-notification-icon__drawer-item-wrapper .customer-notification-icon__drawer-item {
+  flex: 1;
+  min-width: 0;
+}
+
+
+
+
+
+/* Disable text selection during swipe */
+.customer-notification-icon__drawer-item-wrapper {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Smooth animations */
+.customer-notification-icon__drawer-item {
+  will-change: transform;
+}
+
+.customer-notification-icon__drawer-delete-reveal {
+  will-change: right;
+}
+
+/* Swipe hint animation for the first notification */
+.customer-notification-icon__drawer-item-wrapper:first-child {
+  animation: swipeHint 4s ease-in-out 1s 3;
+}
+
+@keyframes swipeHint {
+  0%, 85%, 100% {
+    transform: translateX(0);
+  }
+  10%, 25% {
+    transform: translateX(-25px);
+  }
+  35%, 50% {
+    transform: translateX(0);
+  }
+}
+
+/* Disable hint animation on mobile if user has already interacted */
+@media (hover: hover) and (pointer: fine) {
+  .customer-notification-icon__drawer-item-wrapper:first-child:hover {
+    animation: none;
+  }
+}
+

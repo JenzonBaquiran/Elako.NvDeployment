@@ -243,3 +243,329 @@
 .msme-notification-icon__button .MuiBadge-badge {
   animation: notificationPulse 2s infinite;
 }
+
+/* Drawer Styles */
+.msme-notification-icon__drawer .MuiDrawer-paper {
+  width: 450px !important;
+  max-width: 90vw !important;
+  z-index: 1300 !important;
+}
+
+.msme-notification-icon__drawer-paper {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
+
+.msme-notification-icon__drawer-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.msme-notification-icon__drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #7ed957 0%, #6bc144 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.msme-notification-icon__drawer-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 1.2rem !important;
+  color: white !important;
+}
+
+.msme-notification-icon__drawer-actions {
+  padding: 16px 24px;
+  background: rgba(126, 217, 87, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.msme-notification-icon__drawer-mark-all-btn {
+  color: #7ed957 !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 0.85rem !important;
+  text-transform: none !important;
+  border: 1px solid #7ed957 !important;
+  border-radius: 20px !important;
+  padding: 6px 16px !important;
+  background: rgba(126, 217, 87, 0.05) !important;
+  min-width: auto !important;
+}
+
+.msme-notification-icon__drawer-mark-all-btn:hover {
+  background: rgba(126, 217, 87, 0.1) !important;
+  border-color: #7ed957 !important;
+  color: #7ed957 !important;
+}
+
+.msme-notification-icon__drawer-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.msme-notification-icon__drawer-loading,
+.msme-notification-icon__drawer-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.msme-notification-icon__drawer-empty-icon {
+  font-size: 4rem !important;
+  color: #ccc !important;
+  margin-bottom: 16px !important;
+}
+
+.msme-notification-icon__drawer-list {
+  padding: 0 !important;
+}
+
+.msme-notification-icon__drawer-item {
+  padding: 16px 24px !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+  align-items: flex-start !important;
+  transition: background-color 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.msme-notification-icon__drawer-item:hover {
+  background-color: rgba(126, 217, 87, 0.05) !important;
+}
+
+.msme-notification-icon__drawer-item--unread {
+  background-color: rgba(126, 217, 87, 0.08) !important;
+  border-left: 4px solid #7ed957 !important;
+}
+
+.msme-notification-icon__drawer-item--unread:hover {
+  background-color: rgba(126, 217, 87, 0.12) !important;
+}
+
+.msme-notification-icon__drawer-avatar {
+  background: linear-gradient(135deg, #7ed957 0%, #6bc144 100%) !important;
+  font-size: 1.2rem !important;
+  width: 48px !important;
+  height: 48px !important;
+}
+
+.msme-notification-icon__drawer-item-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  color: #313131 !important;
+  margin-bottom: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.msme-notification-icon__drawer-item-message {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 0.85rem !important;
+  color: #666 !important;
+  margin-bottom: 12px !important;
+  line-height: 1.5 !important;
+}
+
+.msme-notification-icon__drawer-item-time {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 0.72rem !important;
+  color: #999 !important;
+  display: block !important;
+  margin-top: 8px !important;
+}
+
+.msme-notification-icon__drawer-unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7ed957;
+  flex-shrink: 0;
+  margin-left: 8px;
+  box-shadow: 0 0 8px rgba(126, 217, 87, 0.4);
+}
+
+/* Mobile Responsive for Drawer */
+@media (max-width: 768px) {
+  .msme-notification-icon__drawer .MuiDrawer-paper {
+    width: 100vw !important;
+  }
+
+  .msme-notification-icon__drawer-header {
+    padding: 16px 20px;
+  }
+
+  .msme-notification-icon__drawer-actions {
+    padding: 12px 20px;
+  }
+
+  .msme-notification-icon__drawer-item {
+    padding: 12px 20px !important;
+  }
+}
+
+/* Action Buttons */
+.msme-notification-icon__drawer-action-btn {
+  color: #2196f3 !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 0.85rem !important;
+  text-transform: none !important;
+  border: 1px solid #2196f3 !important;
+  border-radius: 20px !important;
+  padding: 6px 16px !important;
+  background: rgba(33, 150, 243, 0.05) !important;
+  min-width: auto !important;
+}
+
+.msme-notification-icon__drawer-action-btn:hover {
+  background: rgba(33, 150, 243, 0.1) !important;
+  border-color: #2196f3 !important;
+  color: #2196f3 !important;
+}
+
+.msme-notification-icon__drawer-action-btn .MuiButton-startIcon {
+  color: #2196f3 !important;
+}
+
+.msme-notification-icon__drawer-delete-btn {
+  color: #f44336 !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 0.85rem !important;
+  text-transform: none !important;
+  border: 1px solid #f44336 !important;
+  border-radius: 20px !important;
+  padding: 6px 16px !important;
+  background: rgba(244, 67, 54, 0.05) !important;
+  min-width: auto !important;
+}
+
+.msme-notification-icon__drawer-delete-btn:hover {
+  background: rgba(244, 67, 54, 0.1) !important;
+  border-color: #f44336 !important;
+  color: #f44336 !important;
+}
+
+.msme-notification-icon__drawer-delete-btn:disabled {
+  color: #ccc !important;
+  border-color: rgba(204, 204, 204, 0.3) !important;
+  background: rgba(204, 204, 204, 0.05) !important;
+}
+
+.msme-notification-icon__drawer-delete-btn .MuiButton-startIcon {
+  color: #f44336 !important;
+}
+
+.msme-notification-icon__drawer-delete-btn:disabled .MuiButton-startIcon {
+  color: #ccc !important;
+}
+
+.msme-notification-icon__drawer-delete-all-btn {
+  color: #ff5722 !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 0.85rem !important;
+  text-transform: none !important;
+  border: 1px solid #ff5722 !important;
+  border-radius: 20px !important;
+  padding: 6px 16px !important;
+  background: rgba(255, 87, 34, 0.05) !important;
+  min-width: auto !important;
+}
+
+.msme-notification-icon__drawer-delete-all-btn:hover {
+  background: rgba(255, 87, 34, 0.1) !important;
+  border-color: #ff5722 !important;
+  color: #ff5722 !important;
+}
+
+.msme-notification-icon__drawer-delete-all-btn .MuiButton-startIcon {
+  color: #ff5722 !important;
+}
+
+.msme-notification-icon__drawer-cancel-btn {
+  color: #666 !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 0.85rem !important;
+  text-transform: none !important;
+  border: 1px solid #666 !important;
+  border-radius: 20px !important;
+  padding: 6px 16px !important;
+  background: rgba(102, 102, 102, 0.05) !important;
+  min-width: auto !important;
+}
+
+.msme-notification-icon__drawer-cancel-btn:hover {
+  background: rgba(102, 102, 102, 0.1) !important;
+  border-color: #666 !important;
+  color: #666 !important;
+}
+
+.msme-notification-icon__drawer-item--selection-mode {
+  padding-left: 16px !important;
+}
+
+.msme-notification-icon__drawer-checkbox {
+  color: #7ed957 !important;
+}
+
+.msme-notification-icon__drawer-checkbox.Mui-checked {
+  color: #7ed957 !important;
+}
+
+/* Swipe to Delete Styles */
+.msme-notification-icon__drawer-item-wrapper {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
+  transform-origin: left center;
+}
+
+.msme-notification-icon__drawer-item-wrapper .msme-notification-icon__drawer-item {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Disable text selection during swipe */
+.msme-notification-icon__drawer-item-wrapper {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Smooth animations */
+.msme-notification-icon__drawer-item {
+  will-change: transform;
+}
+
+/* Swipe hint animation for the first notification */
+.msme-notification-icon__drawer-item-wrapper:first-child {
+  animation: swipeHint 4s ease-in-out 1s 3;
+}
+
+@keyframes swipeHint {
+  0%, 85%, 100% {
+    transform: translateX(0);
+  }
+  10%, 25% {
+    transform: translateX(-25px);
+  }
+  35%, 50% {
+    transform: translateX(0);
+  }
+}
+
+/* Disable hint animation on mobile if user has already interacted */
+@media (hover: hover) and (pointer: fine) {
+  .msme-notification-icon__drawer-item-wrapper:first-child:hover {
+    animation: none;
+  }
+}

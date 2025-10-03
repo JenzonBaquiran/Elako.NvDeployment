@@ -12,6 +12,7 @@ import { useNotification } from "../components/NotificationProvider";
 import { useAuth } from "../contexts/AuthContext";
 import NotificationIcon from "../components/NotificationIcon";
 import CustomerNotificationIcon from "../components/CustomerNotificationIcon";
+import NavbarNotificationPanel from "../components/NavbarNotificationPanel";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -114,7 +115,7 @@ function Header() {
               </>
             )}
             
-            {/* Show notification icon for MSME and Customer users */}
+            {/* Show integrated notification panel for MSME and Customer users */}
             {userType === 'msme' && user ? (
               <div className="nav-notification-wrapper">
                 <NotificationIcon storeId={user._id} />

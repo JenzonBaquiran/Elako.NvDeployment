@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import FloatingMessageIcon from '../components/FloatingMessageIcon';
+import BlogHero from '../components/BlogHero';
 import { useAuth } from '../contexts/AuthContext';
 import { recordStoreView } from '../utils/storeViewTracker';
 import heroPic from '../pictures/IMG_6125.jpg';
@@ -98,25 +99,7 @@ function Home() {
   return (
     <div>
       <Navbar />
-      <div className="hero">
-        <div className="hero-container">
-          <div className="hero-content">
-            <h1 className="hero-title">
-              Grow Your Business<br />
-              with <span className="hero-highlight">Digital Marketing</span>
-            </h1>
-            <p className="hero-subtitle">
-              Connect with top-rated digital marketing services,<br />
-              discover trending tools, and join thousands of<br />
-              businesses scaling their online presence.
-            </p>
-            <div className="hero-cta">
-              <button className="hero-button hero-button-primary">Get Started{arrowIcon}</button>
-              <button className="hero-button hero-button-outline">Browse Stores</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <BlogHero />
       <section className="hot-picks">
         <div className="hot-picks-header" data-aos="fade-right">
           {/* <span className="hot-pick-icon">🔥</span> */}

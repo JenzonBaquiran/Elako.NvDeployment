@@ -19,6 +19,7 @@ import AdminOverview from "./pages/AdminOverview";
 import AdminMsmeOversight from "./pages/AdminMsmeOversight";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminSettings from "./pages/AdminSettings";
+import BlogManagement from "./pages/admin/BlogManagement";
 import MsmeCustomizeDashboard from "./pages/MsmeCustomizeDashboard";
 import CustomerViewStore from "./pages/CustomerViewStore";
 import CustomerStoreView from "./pages/CustomerStoreView";
@@ -26,6 +27,7 @@ import CustomerFavorites from "./pages/CustomerFavorites";
 import CustomerReviews from "./pages/CustomerReviews";
 import CustomerMessage from "./pages/CustomerMessage";
 import CustomerProfile from "./pages/CustomerProfile";
+import CustomerNotifications from "./pages/CustomerNotifications";
 import ProductDetails from "./pages/ProductDetails";
 
 
@@ -79,6 +81,14 @@ function App() {
               element={
                 <ProtectedRoute allowedUserTypes={['admin']}>
                   <AdminSettings />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-blog-management" 
+              element={
+                <ProtectedRoute allowedUserTypes={['admin']}>
+                  <BlogManagement />
                 </ProtectedRoute>
               } 
             />
@@ -203,6 +213,14 @@ function App() {
               element={
                 <ProtectedRoute allowedUserTypes={['customer']}>
                   <CustomerProfile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/customer-notifications" 
+              element={
+                <ProtectedRoute allowedUserTypes={['customer']}>
+                  <CustomerNotifications />
                 </ProtectedRoute>
               } 
             />

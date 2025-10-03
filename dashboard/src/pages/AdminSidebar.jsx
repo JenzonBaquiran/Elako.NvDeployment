@@ -13,6 +13,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ArticleIcon from '@mui/icons-material/Article';
 
 const AdminSidebar = ({ onSidebarToggle }) => {
   const { showSuccess } = useNotification();
@@ -143,6 +144,12 @@ const AdminSidebar = ({ onSidebarToggle }) => {
               <Link to="/admin-user-management" className={`admin-sidebar__nav-link ${location.pathname === '/admin-user-management' ? 'admin-sidebar__nav-link--active' : ''}`} title="User Management" onClick={handleIconClick}>
                 <InventoryIcon className="admin-sidebar__icon" />
                 <span className="admin-sidebar__text">User Management</span>
+              </Link>
+            </li>
+            <li className="admin-sidebar__nav-item">
+              <Link to="/admin-blog-management" className={`admin-sidebar__nav-link ${location.pathname === '/admin-blog-management' ? 'admin-sidebar__nav-link--active' : ''}`} title="Blog Management" onClick={handleIconClick}>
+                <ArticleIcon className="admin-sidebar__icon" />
+                <span className="admin-sidebar__text">Blog Management</span>
               </Link>
             </li>
             <li className="admin-sidebar__nav-item">

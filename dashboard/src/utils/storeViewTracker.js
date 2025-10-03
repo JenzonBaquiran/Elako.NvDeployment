@@ -10,18 +10,8 @@ export const recordStoreView = async (storeId, userId, navigate) => {
     return;
   }
 
-  // Check if this store has already been viewed in this session
-  const sessionKey = `store_viewed_${storeId}_${userId}`;
-  const hasViewedInSession = sessionStorage.getItem(sessionKey);
-
-  if (hasViewedInSession) {
-    console.log(
-      "Store already viewed in this session, skipping view recording"
-    );
-    navigate(`/customer/store/${storeId}`);
-    return;
-  }
-
+  // Always attempt to record the view - let the server handle duplicate prevention
+  // The server already has daily duplicate prevention, so we don't need session-based blocking
   try {
     const response = await fetch(
       `http://localhost:1337/api/stores/${storeId}/view`,
@@ -39,9 +29,11 @@ export const recordStoreView = async (storeId, userId, navigate) => {
     const data = await response.json();
 
     if (data.success) {
-      // Mark this store as viewed in this session (include userId for better tracking)
+      console.log("Store view processed:", data.message);
+
+      // Mark this store as viewed in this session for reference (but don't block future calls)
+      const sessionKey = `store_viewed_${storeId}_${userId}`;
       sessionStorage.setItem(sessionKey, Date.now().toString());
-      console.log("Store view recorded successfully");
     } else {
       console.warn("Failed to record store view:", data.error);
     }

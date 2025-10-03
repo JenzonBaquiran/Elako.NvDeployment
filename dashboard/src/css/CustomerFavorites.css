@@ -15,7 +15,7 @@
   flex-grow: 1;
   padding: 24px;
   margin-left: 0;
-  overflow-y: auto;
+  overflow-y: hidden;
   overflow-x: hidden;
   transition: all 0.3s ease-in-out;
   width: 100%;

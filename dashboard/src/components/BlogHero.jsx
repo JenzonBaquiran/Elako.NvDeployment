@@ -92,6 +92,34 @@ const BlogHero = () => {
     }
   };
 
+  // Helper function to get YouTube video ID
+  const getYouTubeVideoId = (url) => {
+    if (!url) return null;
+    
+    let videoId;
+    if (url.includes('youtube.com')) {
+      videoId = url.split('v=')[1]?.split('&')[0];
+    } else if (url.includes('youtu.be')) {
+      videoId = url.split('/').pop().split('?')[0];
+    } else {
+      videoId = url.split('/').pop();
+    }
+    return videoId;
+  };
+
+  // Helper function to get YouTube thumbnail URL
+  const getYouTubeThumbnail = (videoId) => {
+    if (!videoId) return heroPic;
+    return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+  };
+
+  // Helper function to handle YouTube click
+  const handleYouTubeClick = (url) => {
+    if (url) {
+      window.open(url, '_blank');
+    }
+  };
+
   // Helper function to render media
   const renderMedia = (post) => {
     if (!post) return <img src={heroPic} alt="Default" className="blog-hero-image" />;
@@ -164,103 +192,82 @@ const BlogHero = () => {
   }
 
   return (
-    <section className="blog-hero">
+    <section className="blog-hero" style={{backgroundImage: `url(${getMediaUrl(currentPost)})`}}>
+      {/* Background image with overlay */}
+      <div className="blog-hero-background">
+        <div className="blog-hero-background-image">
+          {renderMedia(currentPost)}
+        </div>
+      </div>
+      
       <div className="blog-hero-container">
         <div className="blog-hero-content">
-          <div className="blog-hero-image-section">
-            <div className="blog-hero-image-container">
-              {renderMedia(currentPost)}
-              <div className="blog-hero-overlay">
-                <div className="blog-hero-category-badge">
-                  {currentPost.category}
-                </div>
-                {currentPost.featured && (
-                  <div className="blog-hero-featured-badge">
-                    FEATURED
-                  </div>
-                )}
-                
-                {/* Video-like caption overlay */}
-                <div className="blog-hero-video-caption">
-                  <div className="caption-text">
-                    <h3 className="caption-title">{currentPost.title}</h3>
-                    <p className="caption-subtitle">{currentPost.subtitle}</p>
-                  </div>
-                  <div className="caption-progress">
-                    <div 
-                      className="progress-bar"
-                      style={{
-                        animationDuration: '5s',
-                        animationDelay: `${currentSlide * 5}s`
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Slide indicators */}
-            <div className="blog-hero-indicators">
-              {blogPosts.map((_, index) => (
-                <button
-                  key={index}
-                  className={`indicator ${index === currentSlide ? 'active' : ''}`}
-                  onClick={() => handleSlideChange(index)}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-
           <div className="blog-hero-text-section">
-            <div className="blog-hero-meta">
-              <span className="blog-hero-date">{currentPost ? formatDate(currentPost.createdAt) : ''}</span>
-              <span className="blog-hero-divider">•</span>
-              <span className="blog-hero-author">BY {currentPost?.author || 'ELAKO TEAM'}</span>
-              <span className="blog-hero-divider">•</span>
-              <span className="blog-hero-read-time">{currentPost?.readTime || '5 MIN READ'}</span>
-            </div>
+            {/* YouTube Thumbnail for YouTube videos */}
+            {currentPost?.mediaType === 'youtube' && (
+              <div 
+                className="youtube-thumbnail-container"
+                onClick={() => handleYouTubeClick(currentPost.mediaUrl)}
+              >
+                <img 
+                  src={getYouTubeThumbnail(getYouTubeVideoId(currentPost.mediaUrl))}
+                  alt={currentPost.title}
+                  className="youtube-thumbnail"
+                />
+                <div className="youtube-play-button"></div>
+                <div className="youtube-title">{currentPost.title}</div>
+              </div>
+            )}
 
             <h1 className="blog-hero-title">
-              {currentPost?.title || 'Welcome to ELAKO'}
+              {currentPost?.title || 'Discovering Local Treasures: A Spotlight on Hidden Stores in Nueva Vizcaya'}
             </h1>
 
+            {/* Category badge positioned below the title */}
+            <div className="blog-hero-badges">
+              <div className="blog-hero-category-badge">
+                {currentPost?.category || 'FEATURED STORES'}
+              </div>
+            </div>
+
             <h2 className="blog-hero-subtitle">
-              {currentPost?.subtitle || 'Empowering Filipino MSMEs'}
+              {currentPost?.subtitle || 'Exploring unique shops that bring culture and creativity closer to the community. Nueva Vizcaya is home to a variety of hidden gems—stores that not only sell products but also tell stories. From...'}
             </h2>
 
-            <div className="blog-hero-description-container">
-              <p className={`blog-hero-description ${isDescriptionExpanded ? 'expanded' : 'collapsed'}`}>
-                {currentPost?.description || 'Discover amazing success stories from Filipino entrepreneurs.'}
-              </p>
-              {currentPost?.description && currentPost.description.length > 120 && (
-                <button 
-                  className="read-more-btn"
-                  onClick={toggleDescription}
-                >
-                  {isDescriptionExpanded ? 'Show Less' : 'Read More'}
-                </button>
-              )}
+            <div className="blog-hero-actions">
+              <button 
+                className="blog-hero-cta-primary"
+                onClick={() => {
+                  if (currentPost?.mediaType === 'youtube') {
+                    handleYouTubeClick(currentPost.mediaUrl);
+                  } else {
+                    navigate('/blog');
+                  }
+                }}
+              >
+                {currentPost?.mediaType === 'youtube' ? 'WATCH VIDEO' : 'READ MORE'}
+                <span className="cta-arrow">→</span>
+              </button>
             </div>
           </div>
         </div>
-
-        {/* Navigation arrows */}
-        <button 
-          className="blog-hero-nav prev"
-          onClick={() => handleSlideChange((currentSlide - 1 + blogPosts.length) % blogPosts.length)}
-          aria-label="Previous slide"
-        >
-          ‹
-        </button>
-        <button 
-          className="blog-hero-nav next"
-          onClick={() => handleSlideChange((currentSlide + 1) % blogPosts.length)}
-          aria-label="Next slide"
-        >
-          ›
-        </button>
       </div>
+
+      {/* Navigation arrows */}
+      <button 
+        className="blog-hero-nav prev"
+        onClick={() => handleSlideChange((currentSlide - 1 + blogPosts.length) % blogPosts.length)}
+        aria-label="Previous slide"
+      >
+        ‹
+      </button>
+      <button 
+        className="blog-hero-nav next"
+        onClick={() => handleSlideChange((currentSlide + 1) % blogPosts.length)}
+        aria-label="Next slide"
+      >
+        ›
+      </button>
     </section>
   );
 };

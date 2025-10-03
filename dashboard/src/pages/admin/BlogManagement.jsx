@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from '../AdminSidebar';
+import Notification from '../../components/Notification';
 import '../../css/BlogManagement.css';
 
 const BlogManagement = () => {
@@ -24,6 +25,15 @@ const BlogManagement = () => {
     mediaUrl: '',
     featured: false,
     status: 'draft' // 'draft', 'published'
+  });
+  const [notification, setNotification] = useState({
+    isVisible: false,
+    type: 'info',
+    title: '',
+    message: '',
+    showConfirmButtons: false,
+    onConfirm: null,
+    onCancel: null
   });
 
   const categories = [
@@ -121,9 +131,33 @@ const BlogManagement = () => {
         fetchBlogPosts();
         resetForm();
         setShowForm(false);
+        
+        // Show success notification
+        setNotification({
+          isVisible: true,
+          type: 'success',
+          title: 'Success',
+          message: editingPost 
+            ? `Blog post "${formData.title}" updated successfully`
+            : `Blog post "${formData.title}" created successfully`,
+          showConfirmButtons: false,
+          onConfirm: null,
+          onCancel: null
+        });
       }
     } catch (error) {
       console.error('Error saving blog post:', error);
+      setNotification({
+        isVisible: true,
+        type: 'error',
+        title: 'Error',
+        message: editingPost 
+          ? 'Failed to update blog post'
+          : 'Failed to create blog post',
+        showConfirmButtons: false,
+        onConfirm: null,
+        onCancel: null
+      });
     }
   };
 
@@ -144,9 +178,19 @@ const BlogManagement = () => {
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this blog post?')) return;
-    
+  const handleDelete = (post) => {
+    setNotification({
+      isVisible: true,
+      type: 'confirm',
+      title: 'Confirm Delete',
+      message: `Are you sure you want to delete '${post.title}'?`,
+      showConfirmButtons: true,
+      onConfirm: () => confirmDelete(post._id),
+      onCancel: () => closeNotification()
+    });
+  };
+
+  const confirmDelete = async (id) => {
     try {
       const response = await fetch(`http://localhost:1337/api/blog-posts/${id}`, {
         method: 'DELETE'
@@ -154,10 +198,40 @@ const BlogManagement = () => {
       const data = await response.json();
       if (data.success) {
         fetchBlogPosts();
+        setNotification({
+          isVisible: true,
+          type: 'success',
+          title: 'Success',
+          message: 'Blog post deleted successfully',
+          showConfirmButtons: false,
+          onConfirm: null,
+          onCancel: null
+        });
       }
     } catch (error) {
       console.error('Error deleting blog post:', error);
+      setNotification({
+        isVisible: true,
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to delete blog post',
+        showConfirmButtons: false,
+        onConfirm: null,
+        onCancel: null
+      });
     }
+  };
+
+  const closeNotification = () => {
+    setNotification({
+      isVisible: false,
+      type: 'info',
+      title: '',
+      message: '',
+      showConfirmButtons: false,
+      onConfirm: null,
+      onCancel: null
+    });
   };
 
   const resetForm = () => {
@@ -219,8 +293,10 @@ const BlogManagement = () => {
       <AdminSidebar onSidebarToggle={handleSidebarToggle} />
       <div className={getContentClass()}>
         <div className="blog-management-header">
-          <h1>Blog Management</h1>
-          <p>Create and manage blog posts for the hero section</p>
+          <div className="blog-management-title-section">
+            <h1>Blog Management</h1>
+            <p>Create and manage blog posts for the hero section</p>
+          </div>
           <button 
             className="add-blog-btn"
             onClick={() => {
@@ -461,7 +537,7 @@ const BlogManagement = () => {
                         </button>
                         <button 
                           className="delete-btn"
-                          onClick={() => handleDelete(post._id)}
+                          onClick={() => handleDelete(post)}
                         >
                           Delete
                         </button>
@@ -481,6 +557,17 @@ const BlogManagement = () => {
           </>
         )}
       </div>
+
+      <Notification
+        type={notification.type}
+        title={notification.title}
+        message={notification.message}
+        isVisible={notification.isVisible}
+        showConfirmButtons={notification.showConfirmButtons}
+        onConfirm={notification.onConfirm}
+        onCancel={notification.onCancel}
+        onClose={closeNotification}
+      />
     </div>
   );
 };

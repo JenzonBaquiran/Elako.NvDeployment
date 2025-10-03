@@ -52,6 +52,11 @@
   border-bottom: 1px solid #e9ecef;
 }
 
+.blog-management-title-section {
+  display: flex;
+  flex-direction: column;
+}
+
 .blog-management-header h1 {
   font-size: 28px;
   font-weight: 600;
@@ -443,12 +448,12 @@
 }
 
 .delete-btn {
-  background: #dc3545;
+  background: #313131;
   color: white;
 }
 
 .delete-btn:hover {
-  background: #c82333;
+  background: #7ed957;
   transform: translateY(-1px);
 }
 

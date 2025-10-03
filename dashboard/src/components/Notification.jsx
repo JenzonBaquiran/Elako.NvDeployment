@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import './Notification.css';
 
 const Notification = ({ 
@@ -63,7 +64,7 @@ const Notification = ({
     }
   };
 
-  return (
+  return createPortal(
     <div className={`notification-overlay ${isAnimating ? 'show' : ''}`}>
       <div className={`notification notification--${type} ${isAnimating ? 'slide-in' : 'slide-out'}`}>
         <div className="notification__header">
@@ -92,7 +93,8 @@ const Notification = ({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

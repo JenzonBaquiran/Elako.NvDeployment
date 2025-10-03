@@ -16,8 +16,10 @@
 }
 
 .notification-overlay {
-  position: relative;
-  width: 100%;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: auto;
   height: auto;
   pointer-events: none;
   opacity: 0;
@@ -36,7 +38,7 @@
   max-width: 400px;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   transform: translateX(100%);
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   pointer-events: all;
@@ -44,6 +46,7 @@
   overflow: hidden;
   margin-bottom: 8px;
   z-index: 99999;
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .notification.slide-in {
@@ -195,6 +198,12 @@
 
 /* Mobile responsiveness */
 @media (max-width: 640px) {
+  .notification-overlay {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+  }
+  
   .notification-wrapper {
     top: 60px; /* Slightly less spacing on mobile */
     right: 10px;
@@ -204,6 +213,7 @@
   .notification {
     min-width: auto;
     max-width: none;
+    width: 100%;
   }
   
   .notification__header {

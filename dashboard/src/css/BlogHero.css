@@ -89,6 +89,8 @@
   max-width: 1200px;
   padding: 0 3rem;
   box-sizing: border-box;
+  position: relative;
+  z-index: 3;
 }
 
 /* Badge Container */
@@ -635,4 +637,17 @@
     font-size: clamp(0.9rem, 2vw, 1.2rem);
     padding: 0 1rem;
   }
+}
+
+/* YouTube Video Handling - Full Background Display */
+/* YouTube videos now use the full hero background with black overlay */
+/* The black overlay is already applied via .blog-hero::before pseudo-element */
+
+/* Enhanced cursor pointer for YouTube videos */
+.blog-hero[style*="cursor: pointer"] {
+  transition: opacity 0.2s ease;
+}
+
+.blog-hero[style*="cursor: pointer"]:hover {
+  opacity: 0.95;
 }

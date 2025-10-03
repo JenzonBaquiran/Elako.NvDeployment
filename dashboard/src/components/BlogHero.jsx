@@ -191,8 +191,27 @@ const BlogHero = () => {
     );
   }
 
+  // Get background image URL (use YouTube thumbnail for YouTube videos)
+  const getBackgroundImage = (post) => {
+    if (!post) return heroPic;
+    
+    if (post.mediaType === 'youtube') {
+      const videoId = getYouTubeVideoId(post.mediaUrl);
+      return getYouTubeThumbnail(videoId);
+    }
+    
+    return getMediaUrl(post);
+  };
+
   return (
-    <section className="blog-hero" style={{backgroundImage: `url(${getMediaUrl(currentPost)})`}}>
+    <section 
+      className="blog-hero" 
+      onClick={currentPost?.mediaType === 'youtube' ? () => handleYouTubeClick(currentPost.mediaUrl) : undefined}
+      style={{
+        backgroundImage: `url(${getBackgroundImage(currentPost)})`,
+        cursor: currentPost?.mediaType === 'youtube' ? 'pointer' : 'default'
+      }}
+    >
       {/* Background image with overlay */}
       <div className="blog-hero-background">
         <div className="blog-hero-background-image">
@@ -203,22 +222,6 @@ const BlogHero = () => {
       <div className="blog-hero-container">
         <div className="blog-hero-content">
           <div className="blog-hero-text-section">
-            {/* YouTube Thumbnail for YouTube videos */}
-            {currentPost?.mediaType === 'youtube' && (
-              <div 
-                className="youtube-thumbnail-container"
-                onClick={() => handleYouTubeClick(currentPost.mediaUrl)}
-              >
-                <img 
-                  src={getYouTubeThumbnail(getYouTubeVideoId(currentPost.mediaUrl))}
-                  alt={currentPost.title}
-                  className="youtube-thumbnail"
-                />
-                <div className="youtube-play-button"></div>
-                <div className="youtube-title">{currentPost.title}</div>
-              </div>
-            )}
-
             <h1 className="blog-hero-title">
               {currentPost?.title || 'Discovering Local Treasures: A Spotlight on Hidden Stores in Nueva Vizcaya'}
             </h1>

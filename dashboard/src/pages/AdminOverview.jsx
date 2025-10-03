@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   GroupAdd, 
   Message, 
-  Analytics, 
   Settings,
   People,
   Business,
@@ -21,7 +20,65 @@ const AdminOverview = () => {
     isCollapsed: false
   });
   const [activeTab, setActiveTab] = useState('overview');
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeMsmes: 0,
+    customers: 0,
+    pendingApprovals: 0
+  });
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activitiesLoading, setActivitiesLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Fetch dashboard statistics
+  const fetchDashboardStats = async () => {
+    try {
+      const response = await fetch('http://localhost:1337/api/admin/dashboard-stats');
+      const data = await response.json();
+      
+      if (data.success) {
+        setStats(data.stats);
+      } else {
+        console.error('Failed to fetch dashboard stats:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch recent activities
+  const fetchRecentActivities = async () => {
+    setActivitiesLoading(true);
+    try {
+      const response = await fetch('http://localhost:1337/api/admin/recent-activities');
+      const data = await response.json();
+      
+      if (data.success) {
+        setActivities(data.activities);
+      } else {
+        console.error('Failed to fetch recent activities:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching recent activities:', error);
+    } finally {
+      setActivitiesLoading(false);
+    }
+  };
+
+  // Load stats when component mounts
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
+
+  // Fetch activities when tab changes to activities
+  useEffect(() => {
+    if (activeTab === 'activities' && activities.length === 0) {
+      fetchRecentActivities();
+    }
+  }, [activeTab]);
 
   const handleSidebarToggle = (state) => {
     setSidebarState(state);
@@ -34,6 +91,36 @@ const AdminOverview = () => {
     return sidebarState.isOpen 
       ? 'admin-overview__content admin-overview__content--sidebar-open' 
       : 'admin-overview__content admin-overview__content--sidebar-collapsed';
+  };
+
+  // Helper function to get time ago
+  const getTimeAgo = (date) => {
+    const now = new Date();
+    const activityDate = new Date(date);
+    const diffInHours = Math.floor((now - activityDate) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays === 1) return '1 day ago';
+    if (diffInDays < 7) return `${diffInDays} days ago`;
+    
+    return activityDate.toLocaleDateString();
+  };
+
+  // Helper function to get status badge class
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case 'approved':
+        return 'admin-overview__status-badge--verified';
+      case 'pending':
+        return 'admin-overview__status-badge--pending';
+      case 'active':
+        return 'admin-overview__status-badge--verified';
+      default:
+        return '';
+    }
   };
 
   return (
@@ -52,7 +139,9 @@ const AdminOverview = () => {
               <People />
             </div>
             <div className="admin-overview__stat-content">
-              <div className="admin-overview__stat-value">1,247</div>
+              <div className="admin-overview__stat-value">
+                {loading ? "..." : stats.totalUsers.toLocaleString()}
+              </div>
               <div className="admin-overview__stat-label">Total Users</div>
               <div className="admin-overview__stat-growth">+8% from last month</div>
             </div>
@@ -62,7 +151,9 @@ const AdminOverview = () => {
               <Business />
             </div>
             <div className="admin-overview__stat-content">
-              <div className="admin-overview__stat-value">324</div>
+              <div className="admin-overview__stat-value">
+                {loading ? "..." : stats.activeMsmes.toLocaleString()}
+              </div>
               <div className="admin-overview__stat-label">Active MSMEs</div>
               <div className="admin-overview__stat-growth">+15% from last month</div>
             </div>
@@ -72,7 +163,9 @@ const AdminOverview = () => {
               <Person />
             </div>
             <div className="admin-overview__stat-content">
-              <div className="admin-overview__stat-value">923</div>
+              <div className="admin-overview__stat-value">
+                {loading ? "..." : stats.customers.toLocaleString()}
+              </div>
               <div className="admin-overview__stat-label">Customers</div>
               <div className="admin-overview__stat-growth">+12% from last month</div>
             </div>
@@ -82,19 +175,11 @@ const AdminOverview = () => {
               <PendingActions />
             </div>
             <div className="admin-overview__stat-content">
-              <div className="admin-overview__stat-value">56</div>
+              <div className="admin-overview__stat-value">
+                {loading ? "..." : stats.pendingApprovals.toLocaleString()}
+              </div>
               <div className="admin-overview__stat-label">Pending Approvals</div>
               <div className="admin-overview__stat-growth">-5% from last month</div>
-            </div>
-          </div>
-          <div className="admin-overview__stat-box">
-            <div className="admin-overview__stat-icon">
-              <Star />
-            </div>
-            <div className="admin-overview__stat-content">
-              <div className="admin-overview__stat-value">4.8</div>
-              <div className="admin-overview__stat-label">Avg Rating</div>
-              <div className="admin-overview__stat-growth">+0.3 from last month</div>
             </div>
           </div>
         </div>
@@ -198,92 +283,61 @@ const AdminOverview = () => {
           )}
 
           {activeTab === 'activities' && (
-            <div className="admin-overview__cards-grid">
-              <div className="admin-overview__activity-card">
-                <div className="admin-overview__card-header">
-                  <div className="admin-overview__card-avatar">M</div>
-                  <div className="admin-overview__card-info">
-                    <h3 className="admin-overview__card-title">New MSME Registration</h3>
-                    <p className="admin-overview__card-email">maria.bakery@email.com</p>
-                  </div>
-                  <div className="admin-overview__card-badges">
-                    <span className="admin-overview__category-badge">Food</span>
-                    <span className="admin-overview__status-badge admin-overview__status-badge--pending">Pending</span>
-                  </div>
+            <div className="admin-overview__activities-container">
+              {activitiesLoading ? (
+                <div className="admin-overview__loading">Loading recent activities...</div>
+              ) : activities.length === 0 ? (
+                <div className="admin-overview__no-activities">
+                  <p>No recent activities found for the past week.</p>
                 </div>
-                <div className="admin-overview__card-metrics">
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">2h</div>
-                    <div className="admin-overview__metric-label">Ago</div>
+              ) : (
+                <div className="admin-overview__activities-list">
+                  <div className="admin-overview__activities-header">
+                    <div className="admin-overview__header-item admin-overview__header-item--main">Activity</div>
+                    <div className="admin-overview__header-item">Type</div>
+                    <div className="admin-overview__header-item">Status</div>
+                    <div className="admin-overview__header-item">Time</div>
+                    <div className="admin-overview__header-item admin-overview__header-item--details">Details</div>
                   </div>
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">Food</div>
-                    <div className="admin-overview__metric-label">Category</div>
-                  </div>
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">High</div>
-                    <div className="admin-overview__metric-label">Priority</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="admin-overview__activity-card">
-                <div className="admin-overview__card-header">
-                  <div className="admin-overview__card-avatar">N</div>
-                  <div className="admin-overview__card-info">
-                    <h3 className="admin-overview__card-title">MSME Approved</h3>
-                    <p className="admin-overview__card-email">nueva@crafts.ph</p>
-                  </div>
-                  <div className="admin-overview__card-badges">
-                    <span className="admin-overview__category-badge">Artisan</span>
-                    <span className="admin-overview__status-badge admin-overview__status-badge--verified">Approved</span>
-                  </div>
-                </div>
-                <div className="admin-overview__card-metrics">
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">4h</div>
-                    <div className="admin-overview__metric-label">Ago</div>
-                  </div>
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">Craft</div>
-                    <div className="admin-overview__metric-label">Category</div>
-                  </div>
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">
-                      4.8 <Star className="admin-overview__rating-star" />
+                  {activities.map((activity, index) => (
+                    <div key={index} className="admin-overview__activity-row">
+                      <div className="admin-overview__activity-main">
+                        <div className="admin-overview__activity-avatar">
+                          {activity.avatar}
+                        </div>
+                        <div className="admin-overview__activity-info">
+                          <h4 className="admin-overview__activity-title">{activity.title}</h4>
+                          <p className="admin-overview__activity-subtitle">{activity.email}</p>
+                        </div>
+                      </div>
+                      <div className="admin-overview__activity-type">
+                        <span className={`admin-overview__type-badge admin-overview__type-badge--${activity.type.replace('_', '-')}`}>
+                          {activity.type === 'customer_registration' ? 'Customer' : 
+                           activity.category || activity.type.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                        </span>
+                      </div>
+                      <div className="admin-overview__activity-status">
+                        <span className={`admin-overview__status-badge ${getStatusBadgeClass(activity.status)}`}>
+                          {activity.status.charAt(0).toUpperCase() + activity.status.slice(1)}
+                        </span>
+                      </div>
+                      <div className="admin-overview__activity-time">
+                        {getTimeAgo(activity.createdAt)}
+                      </div>
+                      <div className="admin-overview__activity-details">
+                        <div className="admin-overview__detail-name">
+                          {activity.businessName || activity.name || 'N/A'}
+                        </div>
+                        {activity.type === 'msme_approval' && activity.rating > 0 && (
+                          <div className="admin-overview__detail-rating">
+                            {activity.rating.toFixed(1)} <Star className="admin-overview__rating-star-small" />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="admin-overview__metric-label">Rating</div>
-                  </div>
+                  ))}
                 </div>
-              </div>
-
-              <div className="admin-overview__activity-card">
-                <div className="admin-overview__card-header">
-                  <div className="admin-overview__card-avatar">J</div>
-                  <div className="admin-overview__card-info">
-                    <h3 className="admin-overview__card-title">New Customer Registration</h3>
-                    <p className="admin-overview__card-email">john.doe@customer.com</p>
-                  </div>
-                  <div className="admin-overview__card-badges">
-                    <span className="admin-overview__category-badge">Customer</span>
-                    <span className="admin-overview__status-badge admin-overview__status-badge--verified">Active</span>
-                  </div>
-                </div>
-                <div className="admin-overview__card-metrics">
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">6h</div>
-                    <div className="admin-overview__metric-label">Ago</div>
-                  </div>
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">New</div>
-                    <div className="admin-overview__metric-label">Status</div>
-                  </div>
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">1st</div>
-                    <div className="admin-overview__metric-label">Order</div>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -426,26 +480,6 @@ const AdminOverview = () => {
               <div className="admin-overview__action-card">
                 <div className="admin-overview__card-header">
                   <div className="admin-overview__action-icon">
-                    <Analytics />
-                  </div>
-                  <div className="admin-overview__card-info">
-                    <h3 className="admin-overview__card-title">View Reports</h3>
-                    <p className="admin-overview__card-email">Generate and view platform reports</p>
-                  </div>
-                </div>
-                <div className="admin-overview__action-button-container">
-                  <button 
-                    className="admin-overview__action-button"
-                    onClick={() => navigate('/admin-overview')}
-                  >
-                    Generate Reports
-                  </button>
-                </div>
-              </div>
-
-              <div className="admin-overview__action-card">
-                <div className="admin-overview__card-header">
-                  <div className="admin-overview__action-icon">
                     <Settings />
                   </div>
                   <div className="admin-overview__card-info">
@@ -456,7 +490,7 @@ const AdminOverview = () => {
                 <div className="admin-overview__action-button-container">
                   <button 
                     className="admin-overview__action-button"
-                    onClick={() => navigate('/admin-user-management')}
+                    onClick={() => navigate('/admin-settings')}
                   >
                     Open Settings
                   </button>

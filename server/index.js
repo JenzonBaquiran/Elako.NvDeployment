@@ -1078,6 +1078,132 @@ app.get("/api/admin/users", async (req, res) => {
   }
 });
 
+// Get admin dashboard statistics
+app.get("/api/admin/dashboard-stats", async (req, res) => {
+  try {
+    // Get counts for all user types
+    const totalCustomers = await Customer.countDocuments();
+    const totalMsmes = await MSME.countDocuments();
+    const totalUsers = totalCustomers + totalMsmes;
+
+    // Get active MSMEs (approved and verified)
+    const activeMsmes = await MSME.countDocuments({
+      status: { $in: ["approved", "verified"] },
+    });
+
+    // Get pending approvals (MSMEs with pending status)
+    const pendingApprovals = await MSME.countDocuments({
+      status: "pending",
+    });
+
+    res.json({
+      success: true,
+      stats: {
+        totalUsers,
+        activeMsmes,
+        customers: totalCustomers,
+        pendingApprovals,
+      },
+    });
+  } catch (err) {
+    console.error("Error fetching dashboard stats:", err);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching dashboard statistics",
+    });
+  }
+});
+
+// Get recent activities for admin dashboard
+app.get("/api/admin/recent-activities", async (req, res) => {
+  try {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    // Get recent MSME registrations
+    const recentMsmes = await MSME.find({
+      createdAt: { $gte: oneWeekAgo },
+    })
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    // Get recent customer registrations
+    const recentCustomers = await Customer.find({
+      createdAt: { $gte: oneWeekAgo },
+    })
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    // Get recent MSME status updates (approvals)
+    const recentApprovals = await MSME.find({
+      status: "approved",
+      updatedAt: { $gte: oneWeekAgo },
+    })
+      .sort({ updatedAt: -1 })
+      .limit(10);
+
+    // Combine and format activities
+    const activities = [];
+
+    // Add MSME registrations
+    recentMsmes.forEach((msme) => {
+      activities.push({
+        type: "msme_registration",
+        title: "New MSME Registration",
+        email: `${msme.username}@msme.com`,
+        businessName: msme.businessName,
+        category: msme.category || "General",
+        status: msme.status,
+        createdAt: msme.createdAt,
+        avatar: msme.businessName.charAt(0).toUpperCase(),
+      });
+    });
+
+    // Add customer registrations
+    recentCustomers.forEach((customer) => {
+      activities.push({
+        type: "customer_registration",
+        title: "New Customer Registration",
+        email: `${customer.username}@customer.com`,
+        name: `${customer.firstname} ${customer.lastname}`,
+        status: "active",
+        createdAt: customer.createdAt,
+        avatar: customer.firstname.charAt(0).toUpperCase(),
+      });
+    });
+
+    // Add MSME approvals
+    recentApprovals.forEach((msme) => {
+      activities.push({
+        type: "msme_approval",
+        title: "MSME Approved",
+        email: `${msme.username}@msme.com`,
+        businessName: msme.businessName,
+        category: msme.category || "General",
+        status: "approved",
+        createdAt: msme.updatedAt,
+        avatar: msme.businessName.charAt(0).toUpperCase(),
+        rating: msme.averageRating || 0,
+      });
+    });
+
+    // Sort all activities by date (newest first) and limit to 20
+    activities.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    const limitedActivities = activities.slice(0, 20);
+
+    res.json({
+      success: true,
+      activities: limitedActivities,
+    });
+  } catch (err) {
+    console.error("Error fetching recent activities:", err);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching recent activities",
+    });
+  }
+});
+
 // Delete customer (admin only)
 app.delete("/api/admin/customers/:id", async (req, res) => {
   try {

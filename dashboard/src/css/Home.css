@@ -840,6 +840,8 @@ body {
   font-size: 0.95rem;
   display: flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .top-stores-card .hero-button.hero-button-outline {
@@ -1706,6 +1708,7 @@ body {
 .store-rating {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   margin-bottom: 8px;
   font-size: 0.9rem;
@@ -1713,9 +1716,29 @@ body {
   font-weight: 500;
 }
 
+.store-rating .stars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .store-rating .star {
-  color: #ffa726;
   font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.store-rating .star.filled {
+  color: #ffa726;
+}
+
+.store-rating .star.empty {
+  color: #ddd;
+}
+
+.store-rating .rating-text {
+  font-size: 0.9rem;
+  color: #666;
+  margin-left: 6px;
 }
 
 .store-joined {

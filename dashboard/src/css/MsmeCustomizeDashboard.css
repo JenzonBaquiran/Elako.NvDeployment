@@ -278,6 +278,7 @@
   flex: 1;
   min-width: 0;
   overflow: hidden;
+  text-align: center;
 }
 
 .business-name-input {
@@ -292,6 +293,7 @@
   font-family: 'Poppins', sans-serif;
   box-sizing: border-box;
   outline: none;
+  text-align: center;
 }
 
 .business-name {
@@ -300,6 +302,7 @@
   color: #333;
   margin: 0 0 1rem 0;
   font-family: 'Poppins', sans-serif;
+  text-align: center;
 }
 
 .description-input {
@@ -315,6 +318,7 @@
   outline: none;
   min-height: 80px;
   max-height: 200px;
+  text-align: center;
 }
 
 .store-description {
@@ -322,11 +326,13 @@
   line-height: 1.6;
   margin: 0 0 1rem 0;
   font-family: 'Poppins', sans-serif;
+  text-align: center;
 }
 
 .store-rating {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
 }
 

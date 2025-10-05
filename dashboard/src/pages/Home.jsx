@@ -302,12 +302,28 @@ function Home() {
               <p className="store-description">{description}</p>
               
               <div className="store-rating">
-                <span className="star">★</span>
-                {dashboard?.rating ? (
-                  <span>{dashboard.rating.toFixed(1)} ({dashboard.reviewCount || 0} reviews)</span>
-                ) : (
-                  <span>New Business (0 reviews)</span>
-                )}
+                <div className="stars">
+                  {dashboard?.rating ? (
+                    <>
+                      {Array.from({ length: 5 }, (_, index) => (
+                        <span
+                          key={index}
+                          className={`star ${index < Math.floor(dashboard.rating) ? 'filled' : 'empty'}`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                      <span className="rating-text">({dashboard.rating.toFixed(1)})</span>
+                    </>
+                  ) : (
+                    <>
+                      {Array.from({ length: 5 }, (_, index) => (
+                        <span key={index} className="star empty">★</span>
+                      ))}
+                      <span className="rating-text">(0.0)</span>
+                    </>
+                  )}
+                </div>
               </div>
               
               <div className="store-joined">

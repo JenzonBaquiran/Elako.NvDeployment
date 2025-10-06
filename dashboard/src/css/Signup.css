@@ -85,23 +85,14 @@
   overflow-y: auto; /* Allow scrolling if content is too long */
 }
 
-/* Custom scrollbar for the form */
+/* Hide scrollbar completely */
 .signup-form::-webkit-scrollbar {
-  width: 6px;
+  display: none;
 }
 
-.signup-form::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-}
-
-.signup-form::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 10px;
-}
-
-.signup-form::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.5);
+.signup-form {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
 }
 
 @keyframes slideInUp {

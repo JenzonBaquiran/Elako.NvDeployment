@@ -35,7 +35,15 @@ function Signup() {
     email: "",
     username: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    tinNumber: ""
+  });
+
+  // Certificate files state
+  const [certificateFiles, setCertificateFiles] = useState({
+    mayorsPermit: null,
+    bir: null,
+    fda: null
   });
 
   const handleCustomerChange = (field, value) => {
@@ -44,6 +52,10 @@ function Signup() {
 
   const handleMsmeChange = (field, value) => {
     setMsmeData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileChange = (certificateType, file) => {
+    setCertificateFiles(prev => ({ ...prev, [certificateType]: file }));
   };
 
   const handleCustomerSubmit = async (e) => {
@@ -93,12 +105,32 @@ function Signup() {
       return;
     }
 
+    // Validate required certificate files
+    if (!certificateFiles.mayorsPermit || !certificateFiles.bir || !certificateFiles.fda) {
+      setError("Please upload all required certificates (Mayor's Permit, BIR, and FDA)");
+      setLoading(false);
+      return;
+    }
+
     try {
+      const formData = new FormData();
+      
+      // Add all MSME data except confirmPassword
       const { confirmPassword, ...submitData } = msmeData;
+      Object.keys(submitData).forEach(key => {
+        formData.append(key, submitData[key]);
+      });
+
+      // Add certificate files
+      Object.keys(certificateFiles).forEach(key => {
+        if (certificateFiles[key]) {
+          formData.append(key, certificateFiles[key]);
+        }
+      });
+
       const response = await fetch("http://localhost:1337/api/msme/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(submitData),
+        body: formData, // Send as FormData instead of JSON
       });
 
       const data = await response.json();
@@ -356,6 +388,72 @@ function Signup() {
                   required
                   disabled={loading}
                 />
+                <TextField
+                  variant="outlined"
+                  placeholder="TIN Number"
+                  value={msmeData.tinNumber}
+                  onChange={(e) => handleMsmeChange("tinNumber", e.target.value)}
+                  fullWidth
+                  className="signup-input"
+                  required
+                  disabled={loading}
+                />
+                
+                {/* Certificate Upload Section */}
+                <div className="certificate-upload-section">
+                  <h4 className="certificate-section-title">Business Certificates</h4>
+                  
+                  <div className="file-upload-group">
+                    <label className="file-upload-label">
+                      Mayor's Permit *
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange("mayorsPermit", e.target.files[0])}
+                        className="file-upload-input"
+                        disabled={loading}
+                        required
+                      />
+                      <span className="file-upload-custom">
+                        {certificateFiles.mayorsPermit ? certificateFiles.mayorsPermit.name : "Choose file"}
+                      </span>
+                    </label>
+                  </div>
+
+                  <div className="file-upload-group">
+                    <label className="file-upload-label">
+                      BIR Certificate *
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange("bir", e.target.files[0])}
+                        className="file-upload-input"
+                        disabled={loading}
+                        required
+                      />
+                      <span className="file-upload-custom">
+                        {certificateFiles.bir ? certificateFiles.bir.name : "Choose file"}
+                      </span>
+                    </label>
+                  </div>
+
+                  <div className="file-upload-group">
+                    <label className="file-upload-label">
+                      FDA Certificate *
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange("fda", e.target.files[0])}
+                        className="file-upload-input"
+                        disabled={loading}
+                        required
+                      />
+                      <span className="file-upload-custom">
+                        {certificateFiles.fda ? certificateFiles.fda.name : "Choose file"}
+                      </span>
+                    </label>
+                  </div>
+                </div>
                 <TextField
                   variant="outlined"
                   placeholder="Password"

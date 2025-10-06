@@ -1,0 +1,11 @@
+# Sample BIR Certificate
+
+Bureau of Internal Revenue
+Certificate of Registration
+
+TIN: 123-456-789-000
+Business Name: Test MSME Business
+Business Type: Retail/Food Service
+Date Registered: January 15, 2024
+
+This is a sample BIR certificate document for testing purposes.

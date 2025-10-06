@@ -24,6 +24,14 @@ const MSMESchema = new mongoose.Schema(
     },
     isVisible: { type: Boolean, default: true }, // Controls visibility on homepage and login access
 
+    // Certificate documents
+    certificates: {
+      mayorsPermit: { type: String, default: "" }, // File path for Mayor's Permit
+      bir: { type: String, default: "" }, // File path for BIR certificate
+      tinNumber: { type: String, default: "" }, // TIN number as text
+      fda: { type: String, default: "" }, // File path for FDA certificate
+    },
+
     // Rating system for stores
     ratings: [
       {

@@ -1,0 +1,12 @@
+# Sample FDA Certificate
+
+Food and Drug Administration
+Certificate of Product Registration
+
+License Number: FDA-2024-001
+Business Name: Test MSME Business
+Product Category: Food Products
+Date Issued: February 1, 2024
+Valid Until: February 1, 2026
+
+This is a sample FDA certificate document for testing purposes.

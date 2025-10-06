@@ -1,0 +1,9 @@
+# Sample Mayor's Permit
+
+Business Name: Test MSME Business
+Business Type: Food Service
+Permit Number: MP-2024-001
+Issued Date: January 1, 2024
+Valid Until: December 31, 2024
+
+This is a sample Mayor's Permit document for testing purposes.

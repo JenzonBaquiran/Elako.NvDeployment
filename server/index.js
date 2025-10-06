@@ -19,7 +19,14 @@ const BlogPost = require("./models/blogPost.model");
 // Import Services
 const CustomerNotificationService = require("./services/customerNotificationService");
 
+const fs = require("fs");
+
 const app = express();
+
+// Ensure uploads directory exists
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads", { recursive: true });
+}
 const port = 1337;
 
 // Middleware
@@ -54,6 +61,43 @@ const upload = multer({
   },
   limits: {
     fileSize: 50 * 1024 * 1024, // 50MB limit
+  },
+});
+
+// Separate multer configuration for certificates
+const certificateStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const certificatesDir = "uploads/certificates/";
+    if (!fs.existsSync(certificatesDir)) {
+      fs.mkdirSync(certificatesDir, { recursive: true });
+    }
+    cb(null, certificatesDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const prefix = file.fieldname; // mayorsPermit, bir, or fda
+    cb(null, prefix + "-" + uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const certificateUpload = multer({
+  storage: certificateStorage,
+  fileFilter: (req, file, cb) => {
+    // Allow images and PDFs for certificates
+    if (
+      file.mimetype.startsWith("image/") ||
+      file.mimetype === "application/pdf"
+    ) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error("Only image and PDF files are allowed for certificates!"),
+        false
+      );
+    }
+  },
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit for certificates
   },
 });
 
@@ -592,60 +636,102 @@ app.get("/api/customers/:id/review-stats", async (req, res) => {
 });
 
 // --- MSME Routes ---
-app.post("/api/msme/register", async (req, res) => {
-  const errors = validateMSMEInput(req.body);
-  if (errors.length > 0) {
-    return res.status(400).json({ errors });
+app.post(
+  "/api/msme/register",
+  certificateUpload.fields([
+    { name: "mayorsPermit", maxCount: 1 },
+    { name: "bir", maxCount: 1 },
+    { name: "fda", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const errors = validateMSMEInput(req.body);
+    if (errors.length > 0) {
+      return res.status(400).json({ errors });
+    }
+
+    try {
+      // Check if email is already taken
+      const existingEmailMsme = await MSME.findOne({ email: req.body.email });
+      if (existingEmailMsme) {
+        return res.status(400).json({
+          error:
+            "Email is already registered. Please use a different email address.",
+        });
+      }
+
+      // Check if username is already taken
+      const existingUsernameMsme = await MSME.findOne({
+        username: req.body.username,
+      });
+      if (existingUsernameMsme) {
+        return res.status(400).json({
+          error:
+            "Username is already taken. Please choose a different username.",
+        });
+      }
+
+      // Generate unique ID
+      const id = `MSME_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+
+      // Process uploaded certificate files
+      const certificates = {
+        mayorsPermit: req.files?.mayorsPermit
+          ? `certificates/${req.files.mayorsPermit[0].filename}`
+          : "",
+        bir: req.files?.bir ? `certificates/${req.files.bir[0].filename}` : "",
+        fda: req.files?.fda ? `certificates/${req.files.fda[0].filename}` : "",
+        tinNumber: req.body.tinNumber || "",
+      };
+
+      const msme = new MSME({
+        ...req.body,
+        id,
+        certificates,
+      });
+
+      await msme.save();
+      res.status(201).json({
+        success: true,
+        message: "MSME registered successfully",
+        msme: { ...msme.toObject(), password: undefined },
+      });
+    } catch (err) {
+      if (err.code === 11000) {
+        return res.status(400).json({
+          error: "Client profiling number, email, or username already exists",
+        });
+      }
+      res.status(400).json({ error: err.message });
+    }
   }
-
-  try {
-    // Check if email is already taken
-    const existingEmailMsme = await MSME.findOne({ email: req.body.email });
-    if (existingEmailMsme) {
-      return res.status(400).json({
-        error:
-          "Email is already registered. Please use a different email address.",
-      });
-    }
-
-    // Check if username is already taken
-    const existingUsernameMsme = await MSME.findOne({
-      username: req.body.username,
-    });
-    if (existingUsernameMsme) {
-      return res.status(400).json({
-        error: "Username is already taken. Please choose a different username.",
-      });
-    }
-
-    // Generate unique ID
-    const id = `MSME_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    const msme = new MSME({
-      ...req.body,
-      id,
-    });
-
-    await msme.save();
-    res.status(201).json({
-      success: true,
-      message: "MSME registered successfully",
-      msme: { ...msme.toObject(), password: undefined },
-    });
-  } catch (err) {
-    if (err.code === 11000) {
-      return res.status(400).json({
-        error: "Client profiling number, email, or username already exists",
-      });
-    }
-    res.status(400).json({ error: err.message });
-  }
-});
+);
 
 app.get("/api/msme", async (req, res) => {
   try {
     const msmes = await MSME.find({}, { password: 0 });
     res.json(msmes);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Route to view MSME certificates
+app.get("/api/msme/:id/certificates", async (req, res) => {
+  try {
+    const msme = await MSME.findOne(
+      { id: req.params.id },
+      { certificates: 1, businessName: 1 }
+    );
+    if (!msme) {
+      return res.status(404).json({ error: "MSME not found" });
+    }
+    res.json({
+      success: true,
+      businessName: msme.businessName,
+      certificates: msme.certificates,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

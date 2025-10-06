@@ -57,6 +57,10 @@ const AdminUserManagement = () => {
   const [adminFormLoading, setAdminFormLoading] = useState(false);
   const [msmeFormLoading, setMsmeFormLoading] = useState(false);
   const [editUserFormLoading, setEditUserFormLoading] = useState(false);
+  const [certificates, setCertificates] = useState(null);
+  const [loadingCertificates, setLoadingCertificates] = useState(false);
+  const [showCertificateViewer, setShowCertificateViewer] = useState(false);
+  const [currentCertificate, setCurrentCertificate] = useState({ title: '', url: '' });
 
   // Fetch users from API
   useEffect(() => {
@@ -370,15 +374,49 @@ const AdminUserManagement = () => {
     }
   };
 
-  const handleViewUser = (user) => {
+  const handleViewUser = async (user) => {
     setSelectedUser(user);
     setShowModal(true);
     setActiveDropdown(null);
+    
+    // Fetch certificates if user is MSME
+    if (user.type === 'MSME') {
+      setLoadingCertificates(true);
+      try {
+        const response = await fetch(`http://localhost:1337/api/msme/${user.id}/certificates`);
+        const data = await response.json();
+        
+        if (data.success) {
+          setCertificates(data.certificates);
+        } else {
+          console.error('Error fetching certificates:', data.error);
+          setCertificates(null);
+        }
+      } catch (error) {
+        console.error('Error fetching certificates:', error);
+        setCertificates(null);
+      } finally {
+        setLoadingCertificates(false);
+      }
+    } else {
+      setCertificates(null);
+    }
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedUser(null);
+    setCertificates(null);
+  };
+
+  const handleViewCertificate = (title, url) => {
+    setCurrentCertificate({ title, url });
+    setShowCertificateViewer(true);
+  };
+
+  const handleCloseCertificateViewer = () => {
+    setShowCertificateViewer(false);
+    setCurrentCertificate({ title: '', url: '' });
   };
 
   const handleAddMsme = async (e) => {
@@ -1442,6 +1480,72 @@ const AdminUserManagement = () => {
                 </div>
               )}
 
+              {/* Business Certificates for MSME */}
+              {selectedUser.type === 'MSME' && (
+                <div className="admin-user-management__certificates-section">
+                  <div className="admin-user-management__modal-label" style={{ marginBottom: '12px', fontSize: '16px', fontWeight: '600' }}>
+                    Business Certificates
+                  </div>
+                  
+                  {loadingCertificates ? (
+                    <div className="admin-user-management__loading">Loading certificates...</div>
+                  ) : certificates ? (
+                    <div className="admin-user-management__certificates-grid">
+                      <div className="admin-user-management__certificate-item">
+                        <h4>TIN Number</h4>
+                        <p>{certificates.tinNumber || 'Not provided'}</p>
+                      </div>
+                      
+                      <div className="admin-user-management__certificate-item">
+                        <h4>Mayor's Permit</h4>
+                        {certificates.mayorsPermit ? (
+                          <button 
+                            className="admin-user-management__view-certificate-btn"
+                            onClick={() => handleViewCertificate('Mayor\'s Permit', `http://localhost:1337/uploads/${certificates.mayorsPermit}`)}
+                          >
+                            View Document
+                          </button>
+                        ) : (
+                          <p className="admin-user-management__no-document">Not uploaded</p>
+                        )}
+                      </div>
+                      
+                      <div className="admin-user-management__certificate-item">
+                        <h4>BIR Certificate</h4>
+                        {certificates.bir ? (
+                          <button 
+                            className="admin-user-management__view-certificate-btn"
+                            onClick={() => handleViewCertificate('BIR Certificate', `http://localhost:1337/uploads/${certificates.bir}`)}
+                          >
+                            View Document
+                          </button>
+                        ) : (
+                          <p className="admin-user-management__no-document">Not uploaded</p>
+                        )}
+                      </div>
+                      
+                      <div className="admin-user-management__certificate-item">
+                        <h4>FDA Certificate</h4>
+                        {certificates.fda ? (
+                          <button 
+                            className="admin-user-management__view-certificate-btn"
+                            onClick={() => handleViewCertificate('FDA Certificate', `http://localhost:1337/uploads/${certificates.fda}`)}
+                          >
+                            View Document
+                          </button>
+                        ) : (
+                          <p className="admin-user-management__no-document">Not uploaded</p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="admin-user-management__no-certificates">
+                      No certificate information available
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Action Buttons */}
               <div className="admin-user-management__modal-actions">
                 {selectedUser.type === "MSME" && selectedUser.status === "pending" && (
@@ -1505,6 +1609,46 @@ const AdminUserManagement = () => {
           )}
         </div>
       </div>
+
+      {/* Certificate Viewer Modal */}
+      {showCertificateViewer && (
+        <div className="admin-user-management__certificate-viewer-overlay" onClick={handleCloseCertificateViewer}>
+          <div className="admin-user-management__certificate-viewer-content" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-user-management__certificate-viewer-header">
+              <h3>{currentCertificate.title}</h3>
+              <button 
+                className="admin-user-management__certificate-viewer-close" 
+                onClick={handleCloseCertificateViewer}
+              >
+                ×
+              </button>
+            </div>
+            <div className="admin-user-management__certificate-viewer-body">
+              <img 
+                src={currentCertificate.url} 
+                alt={currentCertificate.title}
+                className="admin-user-management__certificate-viewer-image"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'block';
+                }}
+              />
+              <div className="admin-user-management__certificate-viewer-fallback" style={{display: 'none'}}>
+                <div className="admin-user-management__document-icon-large">📄</div>
+                <p>This document cannot be previewed as an image</p>
+                <a 
+                  href={currentCertificate.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="admin-user-management__download-btn"
+                >
+                  Download Document
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

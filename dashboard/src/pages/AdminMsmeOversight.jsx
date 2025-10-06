@@ -22,6 +22,10 @@ const AdminMsmeOversight = () => {
   const [selectedMsme, setSelectedMsme] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [certificates, setCertificates] = useState(null);
+  const [loadingCertificates, setLoadingCertificates] = useState(false);
+  const [showCertificateViewer, setShowCertificateViewer] = useState(false);
+  const [currentCertificate, setCurrentCertificate] = useState({ title: '', url: '' });
 
   // Fetch MSMEs from API
   const fetchMsmes = async () => {
@@ -204,9 +208,43 @@ const AdminMsmeOversight = () => {
     }
   };
 
-  const handleViewDetails = (msme) => {
+  const handleViewDetails = async (msme) => {
     setSelectedMsme(msme);
     setShowModal(true);
+    setLoadingCertificates(true);
+    
+    try {
+      const response = await fetch(`http://localhost:1337/api/msme/${msme.id}/certificates`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setCertificates(data.certificates);
+      } else {
+        console.error('Error fetching certificates:', data.error);
+        setCertificates(null);
+      }
+    } catch (error) {
+      console.error('Error fetching certificates:', error);
+      setCertificates(null);
+    } finally {
+      setLoadingCertificates(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedMsme(null);
+    setCertificates(null);
+  };
+
+  const handleViewCertificate = (title, url) => {
+    setCurrentCertificate({ title, url });
+    setShowCertificateViewer(true);
+  };
+
+  const handleCloseCertificateViewer = () => {
+    setShowCertificateViewer(false);
+    setCurrentCertificate({ title: '', url: '' });
   };
 
   const getStatusBadgeClass = (status) => {
@@ -379,7 +417,11 @@ const AdminMsmeOversight = () => {
           ) : (
             <div className="admin-msme-oversight__cards-grid">
               {filteredData.map((msme) => (
-                <div key={msme.id} className="admin-msme-oversight__msme-card">
+                <div 
+                  key={msme.id} 
+                  className="admin-msme-oversight__msme-card admin-msme-oversight__msme-card--clickable"
+                  onClick={() => handleViewDetails(msme)}
+                >
                   <div className="admin-msme-oversight__card-header">
                     <div className="admin-msme-oversight__card-avatar">
                       {msme.businessName.charAt(0)}
@@ -394,7 +436,7 @@ const AdminMsmeOversight = () => {
                         {msme.status}
                       </span>
                     </div>
-                    <div className="admin-msme-oversight__visibility-toggle">
+                    <div className="admin-msme-oversight__visibility-toggle" onClick={(e) => e.stopPropagation()}>
                       <label className="admin-msme-oversight__toggle-switch">
                         <input
                           type="checkbox"
@@ -422,12 +464,155 @@ const AdminMsmeOversight = () => {
                       <div className="admin-msme-oversight__metric-label">Followers</div>
                     </div>
                   </div>
+                  
+
                 </div>
               ))}
             </div>
           )}
         </div>
       </div>
+
+      {/* Certificate Modal */}
+      {showModal && selectedMsme && (
+        <div className="admin-msme-oversight__modal-overlay" onClick={handleCloseModal}>
+          <div className="admin-msme-oversight__modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-msme-oversight__modal-header">
+              <h2>MSME Details - {selectedMsme.businessName}</h2>
+              <button className="admin-msme-oversight__modal-close" onClick={handleCloseModal}>
+                ×
+              </button>
+            </div>
+            
+            <div className="admin-msme-oversight__modal-body">
+              {/* MSME Basic Information */}
+              <div className="admin-msme-oversight__msme-info">
+                <div className="admin-msme-oversight__info-row">
+                  <div className="admin-msme-oversight__info-label">Business Name:</div>
+                  <div className="admin-msme-oversight__info-value">{selectedMsme.businessName}</div>
+                </div>
+                <div className="admin-msme-oversight__info-row">
+                  <div className="admin-msme-oversight__info-label">Email:</div>
+                  <div className="admin-msme-oversight__info-value">{selectedMsme.email}</div>
+                </div>
+                <div className="admin-msme-oversight__info-row">
+                  <div className="admin-msme-oversight__info-label">Category:</div>
+                  <div className="admin-msme-oversight__info-value">{selectedMsme.businessType}</div>
+                </div>
+                <div className="admin-msme-oversight__info-row">
+                  <div className="admin-msme-oversight__info-label">Status:</div>
+                  <div className="admin-msme-oversight__info-value">
+                    <span className={`admin-msme-oversight__status-badge ${getStatusBadgeClass(selectedMsme.status)}`}>
+                      {selectedMsme.status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Business Certificates */}
+              <div className="admin-msme-oversight__certificates-section">
+                <h3>Business Certificates</h3>
+                {loadingCertificates ? (
+                  <div className="admin-msme-oversight__loading">Loading certificates...</div>
+                ) : certificates ? (
+                <div className="admin-msme-oversight__certificates-grid">
+                  <div className="admin-msme-oversight__certificate-item">
+                    <h4>TIN Number</h4>
+                    <p>{certificates.tinNumber || 'Not provided'}</p>
+                  </div>
+                  
+                  <div className="admin-msme-oversight__certificate-item">
+                    <h4>Mayor's Permit</h4>
+                    {certificates.mayorsPermit ? (
+                      <button 
+                        className="admin-msme-oversight__view-certificate-btn"
+                        onClick={() => handleViewCertificate('Mayor\'s Permit', `http://localhost:1337/uploads/${certificates.mayorsPermit}`)}
+                      >
+                        View Document
+                      </button>
+                    ) : (
+                      <p className="admin-msme-oversight__no-document">Not uploaded</p>
+                    )}
+                  </div>
+                  
+                  <div className="admin-msme-oversight__certificate-item">
+                    <h4>BIR Certificate</h4>
+                    {certificates.bir ? (
+                      <button 
+                        className="admin-msme-oversight__view-certificate-btn"
+                        onClick={() => handleViewCertificate('BIR Certificate', `http://localhost:1337/uploads/${certificates.bir}`)}
+                      >
+                        View Document
+                      </button>
+                    ) : (
+                      <p className="admin-msme-oversight__no-document">Not uploaded</p>
+                    )}
+                  </div>
+                  
+                  <div className="admin-msme-oversight__certificate-item">
+                    <h4>FDA Certificate</h4>
+                    {certificates.fda ? (
+                      <button 
+                        className="admin-msme-oversight__view-certificate-btn"
+                        onClick={() => handleViewCertificate('FDA Certificate', `http://localhost:1337/uploads/${certificates.fda}`)}
+                      >
+                        View Document
+                      </button>
+                    ) : (
+                      <p className="admin-msme-oversight__no-document">Not uploaded</p>
+                    )}
+                  </div>
+                </div>
+                ) : (
+                  <div className="admin-msme-oversight__no-certificates">
+                    No certificate information available
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Certificate Viewer Modal */}
+      {showCertificateViewer && (
+        <div className="admin-msme-oversight__certificate-viewer-overlay" onClick={handleCloseCertificateViewer}>
+          <div className="admin-msme-oversight__certificate-viewer-content" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-msme-oversight__certificate-viewer-header">
+              <h3>{currentCertificate.title}</h3>
+              <button 
+                className="admin-msme-oversight__certificate-viewer-close" 
+                onClick={handleCloseCertificateViewer}
+              >
+                ×
+              </button>
+            </div>
+            <div className="admin-msme-oversight__certificate-viewer-body">
+              <img 
+                src={currentCertificate.url} 
+                alt={currentCertificate.title}
+                className="admin-msme-oversight__certificate-viewer-image"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'block';
+                }}
+              />
+              <div className="admin-msme-oversight__certificate-viewer-fallback" style={{display: 'none'}}>
+                <div className="admin-msme-oversight__document-icon-large">📄</div>
+                <p>This document cannot be previewed as an image</p>
+                <a 
+                  href={currentCertificate.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="admin-msme-oversight__download-btn"
+                >
+                  Download Document
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

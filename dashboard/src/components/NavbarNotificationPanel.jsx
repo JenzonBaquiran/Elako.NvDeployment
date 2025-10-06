@@ -136,7 +136,7 @@ const NavbarNotificationPanel = () => {
     switch (type) {
       case 'price_drop':
         return '💰';
-      case 'stock_alert':
+      case 'availability_alert':
         return '📦';
       case 'promotion':
         return '🎉';
@@ -151,8 +151,8 @@ const NavbarNotificationPanel = () => {
     switch (notification.type) {
       case 'price_drop':
         return 'Price Drop Alert!';
-      case 'stock_alert':
-        return 'Back in Stock!';
+      case 'availability_alert':
+        return 'Back Available!';
       case 'promotion':
         return 'Special Promotion!';
       case 'order':

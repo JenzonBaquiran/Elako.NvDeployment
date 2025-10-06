@@ -138,7 +138,7 @@ const CustomerNotifications = () => {
       
       case 'none':
       default:
-        if (['new_product', 'price_drop', 'stock_alert'].includes(type) && productId?._id) {
+        if (['new_product', 'price_drop', 'availability_alert'].includes(type) && productId?._id) {
           navigate(`/product/${productId._id}`);
         } else if (type === 'store_promotion' && storeId?._id) {
           navigate(`/customer/store/${storeId._id}`);
@@ -195,8 +195,8 @@ const CustomerNotifications = () => {
         return <ShoppingBagIcon className="customer-notifications__type-icon" />;
       case 'price_drop':
         return <span className="customer-notifications__type-icon price-drop">💰</span>;
-      case 'stock_alert':
-        return <span className="customer-notifications__type-icon stock-alert">📦</span>;
+      case 'availability_alert':
+        return <span className="customer-notifications__type-icon availability-alert">📦</span>;
       case 'store_promotion':
         return <span className="customer-notifications__type-icon promotion">🎉</span>;
       case 'order_status':
@@ -210,7 +210,7 @@ const CustomerNotifications = () => {
     switch (type) {
       case 'new_product': return '#7ed957';
       case 'price_drop': return '#ff9800';
-      case 'stock_alert': return '#2196f3';
+      case 'availability_alert': return '#2196f3';
       case 'store_promotion': return '#e91e63';
       case 'order_status': return '#9c27b0';
       default: return '#7ed957';
@@ -240,7 +240,7 @@ const CustomerNotifications = () => {
     { value: 'all', label: 'All Types' },
     { value: 'new_product', label: 'New Products' },
     { value: 'price_drop', label: 'Price Drops' },
-    { value: 'stock_alert', label: 'Stock Alerts' },
+    { value: 'availability_alert', label: 'Availability Alerts' },
     { value: 'store_promotion', label: 'Promotions' },
     { value: 'order_status', label: 'Order Updates' }
   ];

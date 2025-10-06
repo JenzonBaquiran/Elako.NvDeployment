@@ -88,8 +88,8 @@ const ProductDetails = () => {
             <div className="product-details-price">₱{product.price}</div>
             
             <div className="product-details-meta">
-              <span className="product-details-stock-status">
-                {product.stocks > 0 ? '✓ In Stock' : '✗ Out of Stock'}
+              <span className="product-details-availability-status">
+                {product.availability ? '✓ Available' : '✗ Unavailable'}
               </span>
               <span className="product-details-category">Category: {product.category || 'N/A'}</span>
             </div>

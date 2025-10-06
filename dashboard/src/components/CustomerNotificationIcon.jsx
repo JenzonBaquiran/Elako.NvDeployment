@@ -111,8 +111,8 @@ const CustomerNotificationIcon = () => {
     switch (notification.type) {
       case 'price_drop':
         return 'Price Drop Alert!';
-      case 'stock_alert':
-        return 'Back in Stock!';
+      case 'availability_alert':
+        return 'Back Available!';
       case 'promotion':
         return 'Special Promotion!';
       case 'order':
@@ -433,8 +433,8 @@ const CustomerNotificationIcon = () => {
       
       case 'none':
       default:
-        // For 'new_product', 'price_drop', 'stock_alert' - navigate to product
-        if (['new_product', 'price_drop', 'stock_alert'].includes(type) && productId?._id) {
+        // For 'new_product', 'price_drop', 'availability_alert' - navigate to product
+        if (['new_product', 'price_drop', 'availability_alert'].includes(type) && productId?._id) {
           navigate(`/product/${productId._id}`);
         }
         // For 'store_promotion' - navigate to store
@@ -472,9 +472,9 @@ const CustomerNotificationIcon = () => {
             💰
           </span>
         );
-      case 'stock_alert':
+      case 'availability_alert':
         return (
-          <span className="customer-notification-icon__type-icon stock-alert">
+          <span className="customer-notification-icon__type-icon availability-alert">
             📦
           </span>
         );
@@ -780,7 +780,7 @@ const CustomerNotificationIcon = () => {
                       <ListItemAvatar>
                         <Avatar className="customer-notification-icon__drawer-avatar">
                           {notification.type === 'price_drop' ? '💰' : 
-                           notification.type === 'stock_alert' ? '📦' : 
+                           notification.type === 'availability_alert' ? '📦' : 
                            notification.type === 'promotion' ? '🎉' : 
                            notification.type === 'order' ? '🛍️' : '🔔'}
                         </Avatar>

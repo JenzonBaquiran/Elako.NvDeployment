@@ -7,6 +7,10 @@ import FollowButton from '../components/FollowButton';
 import '../css/CustomerStoreView.css';
 import defaultStoreImg from '../assets/pic.jpg';
 import foodStoreImg from '../assets/shakshouka.jpg';
+import doleLogo from '../pictures/DOLE.png';
+import dostLogo from '../pictures/DOST.png';
+import fdaLogo from '../pictures/FDA.png';
+import dtiLogo from '../pictures/DTI.png';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PhoneIcon from '@mui/icons-material/Phone';
@@ -19,6 +23,10 @@ import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import ChatIcon from '@mui/icons-material/Chat';
 import RateReviewIcon from '@mui/icons-material/RateReview';
+import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import AudiotrackIcon from '@mui/icons-material/Audiotrack';
+
 
 const CustomerStoreView = () => {
   const { storeId } = useParams();
@@ -378,8 +386,15 @@ const CustomerStoreView = () => {
               )}
               
               <div className="store-meta">
-                {/* Location */}
-                {dashboard.location && (
+                {/* Location - prioritize Google Maps URL, fallback to regular location */}
+                {dashboard.googleMapsUrl ? (
+                  <div className="store-detail-row">
+                    <LocationOnIcon className="detail-icon location-icon" />
+                    <a href={dashboard.googleMapsUrl} target="_blank" rel="noopener noreferrer" className="social-link">
+                       View Location on Google Maps
+                    </a>
+                  </div>
+                ) : dashboard.location && (
                   <div className="store-detail-row">
                     <LocationOnIcon className="detail-icon location-icon" />
                     <span>{dashboard.location}</span>
@@ -393,7 +408,7 @@ const CustomerStoreView = () => {
                     <span>{dashboard.contactNumber || store.contactNumber}</span>
                   </div>
                 )}
-                
+
                 {/* Social Media Links */}
                 {dashboard.socialLinks?.facebook && (
                   <div className="store-detail-row">
@@ -427,6 +442,34 @@ const CustomerStoreView = () => {
                     <LanguageIcon className="detail-icon website-icon" />
                     <a href={dashboard.socialLinks.website} target="_blank" rel="noopener noreferrer" className="social-link">
                       Website
+                    </a>
+                  </div>
+                )}
+
+                {/* E-commerce Platforms */}
+                {dashboard.ecommercePlatforms?.shopee?.url && (
+                  <div className="store-detail-row">
+                    <ShoppingBagIcon className="detail-icon shopee-icon" />
+                    <a href={dashboard.ecommercePlatforms.shopee.url} target="_blank" rel="noopener noreferrer" className="social-link">
+                      Shopee Store
+                    </a>
+                  </div>
+                )}
+                
+                {dashboard.ecommercePlatforms?.lazada?.url && (
+                  <div className="store-detail-row">
+                    <ShoppingCartIcon className="detail-icon lazada-icon" />
+                    <a href={dashboard.ecommercePlatforms.lazada.url} target="_blank" rel="noopener noreferrer" className="social-link">
+                      Lazada Store
+                    </a>
+                  </div>
+                )}
+                
+                {dashboard.ecommercePlatforms?.tiktok?.url && (
+                  <div className="store-detail-row">
+                    <AudiotrackIcon className="detail-icon tiktok-icon" />
+                    <a href={dashboard.ecommercePlatforms.tiktok.url} target="_blank" rel="noopener noreferrer" className="social-link">
+                      TikTok Shop
                     </a>
                   </div>
                 )}
@@ -471,6 +514,63 @@ const CustomerStoreView = () => {
             </div>
           </div>
         </div>
+
+        {/* Government Approvals Section */}
+        {(true || dashboard.governmentApprovals?.dole || dashboard.governmentApprovals?.dost || dashboard.governmentApprovals?.fda || dashboard.governmentApprovals?.others) && (
+          <div className="government-approvals-section">
+            <h2>Government Approvals & Assistance</h2>
+            <div className="approvals-grid">
+              {/* DTI is always shown - all MSMEs are DTI assisted */}
+              <div className="approval-badge dti-default">
+                <img 
+                  src={dtiLogo} 
+                  alt="DTI - Department of Trade and Industry" 
+                  className="approval-logo"
+                />
+              </div>
+              
+              {dashboard.governmentApprovals?.dole && (
+                <div className="approval-badge">
+                  <img 
+                    src={doleLogo} 
+                    alt="DOLE - Department of Labor and Employment" 
+                    className="approval-logo"
+                  />
+                </div>
+              )}
+              {dashboard.governmentApprovals?.dost && (
+                <div className="approval-badge">
+                  <img 
+                    src={dostLogo} 
+                    alt="DOST - Department of Science and Technology" 
+                    className="approval-logo"
+                  />
+                </div>
+              )}
+              {dashboard.governmentApprovals?.fda && (
+                <div className="approval-badge">
+                  <img 
+                    src={fdaLogo} 
+                    alt="FDA - Food and Drug Administration" 
+                    className="approval-logo"
+                  />
+                </div>
+              )}
+              {dashboard.governmentApprovals?.others && dashboard.governmentApprovals?.otherAgencies?.length > 0 && 
+                dashboard.governmentApprovals.otherAgencies.map((agency, index) => (
+                  agency.trim() && (
+                    <div key={index} className="approval-badge others-badge">
+                      <div className="others-content">
+                        <span className="approval-icon">🏢</span>
+                        <span className="others-name">{agency}</span>
+                      </div>
+                    </div>
+                  )
+                ))
+              }
+            </div>
+          </div>
+        )}
 
         {/* Products Section */}
         <div className="store-products">

@@ -238,12 +238,16 @@ class CustomerNotificationService {
   }
 
   /**
-   * Notify followers about stock availability
+   * Notify followers about product availability
    * @param {string} storeId - MSME store ID
    * @param {string} productId - Product ID
-   * @param {number} stockLevel - Current stock level
+   * @param {boolean} availability - Product availability status
    */
-  static async notifyFollowersOfStockAlert(storeId, productId, stockLevel) {
+  static async notifyFollowersOfAvailabilityAlert(
+    storeId,
+    productId,
+    availability
+  ) {
     try {
       const store = await MSME.findById(storeId);
       const product = await Product.findById(productId);
@@ -257,27 +261,26 @@ class CustomerNotificationService {
       );
       if (followers.length === 0) return;
 
-      const message =
-        stockLevel > 0
-          ? `${product.productName} is back in stock!`
-          : `${product.productName} is running low (${stockLevel} left)`;
+      const message = availability
+        ? `${product.productName} is now available!`
+        : `${product.productName} is currently unavailable`;
 
       const notifications = followers.map((customer) => ({
         customerId: customer._id,
         storeId: storeId,
         productId: productId,
-        type: "stock_alert",
+        type: "availability_alert",
         actionType: "product_detail",
-        title: "Stock Update",
+        title: "Availability Update",
         message: message,
-        metadata: { stockLevel },
+        metadata: { availability },
       }));
 
       const result = await CustomerNotification.insertMany(notifications);
-      console.log(`Created ${result.length} stock alert notifications`);
+      console.log(`Created ${result.length} availability alert notifications`);
       return result;
     } catch (error) {
-      console.error("Error notifying followers of stock alert:", error);
+      console.error("Error notifying followers of availability alert:", error);
       throw error;
     }
   }

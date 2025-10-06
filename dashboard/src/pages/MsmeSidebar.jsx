@@ -13,6 +13,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import RateReviewIcon from '@mui/icons-material/RateReview';
 
 const MsmeSidebar = ({ onSidebarToggle }) => {
   const { showSuccess } = useNotification();
@@ -157,6 +158,12 @@ const MsmeSidebar = ({ onSidebarToggle }) => {
               <Link to="/msme-manage-product" className={`msme-sidebar__nav-link ${location.pathname === '/msme-manage-product' ? 'msme-sidebar__nav-link--active' : ''}`} title="Inventory" onClick={handleIconClick}>
                 <InventoryIcon className="msme-sidebar__icon" />
                 <span className="msme-sidebar__text">Manage Product</span>
+              </Link>
+            </li>
+            <li className="msme-sidebar__nav-item">
+              <Link to="/msme-reviews" className={`msme-sidebar__nav-link ${location.pathname === '/msme-reviews' ? 'msme-sidebar__nav-link--active' : ''}`} title="Reviews & Ratings" onClick={handleIconClick}>
+                <RateReviewIcon className="msme-sidebar__icon" />
+                <span className="msme-sidebar__text">Reviews & Ratings</span>
               </Link>
             </li>
             <li className="msme-sidebar__nav-item">

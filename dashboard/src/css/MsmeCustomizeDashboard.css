@@ -721,3 +721,479 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Enhanced Location Styles */
+.location-enhanced-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+
+.location-enhanced-section h4 {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 12px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+.location-input-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.specific-address-input {
+  flex: 1;
+  min-width: 250px;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.location-search-btn,
+.view-on-maps-btn {
+  background: #4285f4;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.location-search-btn:hover,
+.view-on-maps-btn:hover {
+  background: #3367d6;
+  transform: translateY(-1px);
+}
+
+.address-with-map {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.specific-address {
+  color: #333;
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.no-address {
+  color: #666;
+  font-style: italic;
+  margin: 0;
+}
+
+.location-help-text {
+  margin-top: 8px;
+}
+
+.location-help-text small {
+  color: #666;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* E-commerce Platforms Styles */
+.ecommerce-section {
+  background: #f8f9ff;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+  border: 1px solid #e8eaff;
+}
+
+.ecommerce-section h3 {
+  color: #333;
+  font-size: 18px;
+  margin-bottom: 20px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  text-align: center;
+}
+
+.ecommerce-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.ecommerce-item {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.ecommerce-item:hover {
+  border-color: #007bff;
+  box-shadow: 0 4px 16px rgba(0, 123, 255, 0.1);
+}
+
+.platform-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.platform-logo {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.platform-name {
+  flex: 1;
+  font-size: 16px;
+  color: #333;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+.platform-toggle {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.platform-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: #7ed957;
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(26px);
+}
+
+.platform-url-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.platform-url-input:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+}
+
+.platform-link {
+  display: inline-block;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  text-decoration: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.platform-link:hover {
+  background: linear-gradient(135deg, #0056b3, #004085);
+  transform: translateY(-1px);
+  text-decoration: none;
+  color: white;
+}
+
+/* Government Approvals Styles */
+.government-approvals-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.government-approvals-section h3 {
+  color: #333;
+  font-size: 18px;
+  margin-bottom: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+.section-description {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 12px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.dti-notice {
+  background: #e8f4f8;
+  border: 1px solid #b8e6ff;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: #0369a1;
+  font-family: 'Poppins', sans-serif;
+}
+
+.dti-notice strong {
+  color: #0284c7;
+}
+
+.approval-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.approval-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.approval-checkbox-item:hover {
+  border-color: #7ed957;
+  background: #f8fff8;
+}
+
+.approval-checkbox-item input {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.checkbox-custom::after {
+  content: '✓';
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.approval-checkbox-item input:checked + .checkbox-custom {
+  background: #7ed957;
+  border-color: #7ed957;
+}
+
+.approval-checkbox-item input:checked + .checkbox-custom::after {
+  opacity: 1;
+}
+
+.approval-text {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.approval-text strong {
+  color: #313131;
+  font-weight: 600;
+}
+
+.approval-checkbox-item-with-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.others-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  background: white;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+  box-sizing: border-box;
+}
+
+.others-input:focus {
+  outline: none;
+  border-color: #7ed957;
+  background: #f8fff8;
+  box-shadow: none;
+}
+
+.others-input::placeholder {
+  color: #666;
+  font-size: 14px;
+}
+
+.other-agencies-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.agency-input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.agency-input-group .others-input {
+  flex: 1;
+  margin-top: 0;
+}
+
+.remove-agency-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.remove-agency-btn:hover {
+  background: #c82333;
+  transform: scale(1.1);
+}
+
+.add-agency-btn {
+  background: #7ed957;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  align-self: flex-start;
+}
+
+.add-agency-btn:hover {
+  background: #6bc946;
+  transform: translateY(-1px);
+}
+
+.checkbox-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  font-family: 'Poppins', sans-serif;
+}
+
+.approval-status {
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+}
+
+.approval-status.approved {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.approval-status.not-approved {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Responsive for new sections */
+@media (max-width: 768px) {
+  .location-input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .specific-address-input {
+    min-width: auto;
+  }
+  
+  .ecommerce-grid,
+  .approvals-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .platform-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}

@@ -19,11 +19,26 @@ const MsmeCustomizeDashboard = () => {
     description: '',
     contactNumber: '',
     location: '',
+    googleMapsUrl: '',
+    coordinates: { lat: null, lng: null },
     socialLinks: {
       facebook: '',
       instagram: '',
       twitter: '',
       website: ''
+    },
+    ecommercePlatforms: {
+      shopee: { enabled: false, url: '' },
+      lazada: { enabled: false, url: '' },
+      tiktok: { enabled: false, url: '' }
+    },
+    governmentApprovals: {
+      dole: false,
+      dost: false,
+      fda: false,
+      dti: false,
+      others: false,
+      otherAgencies: []
     },
     rating: 0,
     isPublic: true
@@ -52,7 +67,24 @@ const MsmeCustomizeDashboard = () => {
       const data = await response.json();
       
       if (data.success) {
-        setDashboardData(data.dashboard);
+        // Ensure new fields have default values if not present in the data
+        const dashboardWithDefaults = {
+          ...data.dashboard,
+          ecommercePlatforms: data.dashboard.ecommercePlatforms || {
+            shopee: { enabled: false, url: '' },
+            lazada: { enabled: false, url: '' },
+            tiktok: { enabled: false, url: '' }
+          },
+          governmentApprovals: data.dashboard.governmentApprovals || {
+            dole: false,
+            dost: false,
+            fda: false,
+            others: false
+          },
+          googleMapsUrl: data.dashboard.googleMapsUrl || '',
+          coordinates: data.dashboard.coordinates || { lat: null, lng: null }
+        };
+        setDashboardData(dashboardWithDefaults);
         // Set preview URLs for existing images
         if (data.dashboard.coverPhoto) {
           setPreviewUrls(prev => ({
@@ -99,22 +131,86 @@ const MsmeCustomizeDashboard = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+    
     if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setDashboardData(prev => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value
-        }
-      }));
+      const parts = name.split('.');
+      if (parts.length === 2) {
+        const [parent, child] = parts;
+        setDashboardData(prev => {
+          const newData = {
+            ...prev,
+            [parent]: {
+              ...prev[parent],
+              [child]: type === 'checkbox' ? checked : value
+            }
+          };
+          
+          // Initialize otherAgencies array when "others" is checked for the first time
+          if (name === 'governmentApprovals.others' && checked && (!prev.governmentApprovals.otherAgencies || prev.governmentApprovals.otherAgencies.length === 0)) {
+            newData.governmentApprovals.otherAgencies = [''];
+          }
+          
+          return newData;
+        });
+      } else if (parts.length === 3) {
+        const [parent, child, subchild] = parts;
+        setDashboardData(prev => ({
+          ...prev,
+          [parent]: {
+            ...prev[parent],
+            [child]: {
+              ...prev[parent][child],
+              [subchild]: type === 'checkbox' ? checked : value
+            }
+          }
+        }));
+      }
     } else {
       setDashboardData(prev => ({
         ...prev,
-        [name]: value
+        [name]: type === 'checkbox' ? checked : value
       }));
     }
+  };
+
+  // Handler functions for managing other agencies
+  const handleOtherAgencyChange = (index, value) => {
+    setDashboardData(prev => {
+      const newOtherAgencies = [...(prev.governmentApprovals.otherAgencies || [])];
+      newOtherAgencies[index] = value;
+      return {
+        ...prev,
+        governmentApprovals: {
+          ...prev.governmentApprovals,
+          otherAgencies: newOtherAgencies
+        }
+      };
+    });
+  };
+
+  const addOtherAgency = () => {
+    setDashboardData(prev => ({
+      ...prev,
+      governmentApprovals: {
+        ...prev.governmentApprovals,
+        otherAgencies: [...(prev.governmentApprovals.otherAgencies || []), '']
+      }
+    }));
+  };
+
+  const removeOtherAgency = (index) => {
+    setDashboardData(prev => {
+      const newOtherAgencies = [...(prev.governmentApprovals.otherAgencies || [])];
+      newOtherAgencies.splice(index, 1);
+      return {
+        ...prev,
+        governmentApprovals: {
+          ...prev.governmentApprovals,
+          otherAgencies: newOtherAgencies
+        }
+      };
+    });
   };
 
   const handleFileChange = (e, type) => {
@@ -147,7 +243,11 @@ const MsmeCustomizeDashboard = () => {
       formData.append('description', dashboardData.description);
       formData.append('contactNumber', dashboardData.contactNumber);
       formData.append('location', dashboardData.location);
+      formData.append('googleMapsUrl', dashboardData.googleMapsUrl);
+      formData.append('coordinates', JSON.stringify(dashboardData.coordinates));
       formData.append('socialLinks', JSON.stringify(dashboardData.socialLinks));
+      formData.append('ecommercePlatforms', JSON.stringify(dashboardData.ecommercePlatforms));
+      formData.append('governmentApprovals', JSON.stringify(dashboardData.governmentApprovals));
       formData.append('isPublic', dashboardData.isPublic);
       formData.append('msmeId', user._id);
       
@@ -373,20 +473,139 @@ const MsmeCustomizeDashboard = () => {
                   <p>{dashboardData.contactNumber || 'No contact number provided'}</p>
                 )}
               </div>
+            </div>
 
-              <div className="contact-item">
-                <h4>Location</h4>
-                {editMode ? (
+            {/* Location Section */}
+            <div className="location-enhanced-section">
+              <h4>Location</h4>
+              {editMode ? (
+                <div className="location-input-group">
                   <input
-                    type="text"
-                    name="location"
-                    value={dashboardData.location}
+                    type="url"
+                    name="googleMapsUrl"
+                    value={dashboardData.googleMapsUrl || ''}
                     onChange={handleInputChange}
-                    placeholder="Store Location"
-                    className="contact-input"
+                    placeholder="Paste your Google Maps link here (e.g., https://maps.google.com/...)"
+                    className="specific-address-input"
                   />
-                ) : (
-                  <p>{dashboardData.location || 'No location provided'}</p>
+                  <div className="location-help-text">
+                    <small>💡 Go to Google Maps, search your location, click "Share" and paste the link here</small>
+                  </div>
+                </div>
+              ) : (
+                <div className="location-display">
+                  {dashboardData.googleMapsUrl ? (
+                    <div className="address-with-map">
+                      <button
+                        onClick={() => {
+                          window.open(dashboardData.googleMapsUrl, '_blank');
+                        }}
+                        className="view-on-maps-btn"
+                      >
+                        📍 View Location on Google Maps
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="no-address">No location provided</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+
+
+          {/* Government Approvals Section */}
+          <div className="government-approvals-section">
+            <h3>Government Approvals & Assistance</h3>
+            <p className="section-description">Select the government agencies that have approved or assisted your business:</p>
+            <div className="dti-notice">
+              <strong>Note:</strong> All MSMEs are automatically DTI approved/assisted and will be displayed in your store view.
+            </div>
+            
+            <div className="approval-checklist">
+              <label className="approval-checkbox-item">
+                <input
+                  type="checkbox"
+                  name="governmentApprovals.dole"
+                  checked={dashboardData.governmentApprovals?.dole || false}
+                  onChange={handleInputChange}
+                />
+                <span className="checkbox-custom"></span>
+                <span className="approval-text">
+                  <strong>DOLE</strong> - Department of Labor and Employment
+                </span>
+              </label>
+
+              <label className="approval-checkbox-item">
+                <input
+                  type="checkbox"
+                  name="governmentApprovals.dost"
+                  checked={dashboardData.governmentApprovals?.dost || false}
+                  onChange={handleInputChange}
+                />
+                <span className="checkbox-custom"></span>
+                <span className="approval-text">
+                  <strong>DOST</strong> - Department of Science and Technology
+                </span>
+              </label>
+
+              <label className="approval-checkbox-item">
+                <input
+                  type="checkbox"
+                  name="governmentApprovals.fda"
+                  checked={dashboardData.governmentApprovals?.fda || false}
+                  onChange={handleInputChange}
+                />
+                <span className="checkbox-custom"></span>
+                <span className="approval-text">
+                  <strong>FDA</strong> - Food and Drug Administration
+                </span>
+              </label>
+
+
+
+              <div className="approval-checkbox-item-with-input">
+                <label className="approval-checkbox-item">
+                  <input
+                    type="checkbox"
+                    name="governmentApprovals.others"
+                    checked={dashboardData.governmentApprovals?.others || false}
+                    onChange={handleInputChange}
+                  />
+                  <span className="checkbox-custom"></span>
+                  <span className="approval-text">
+                    <strong>Others</strong> - Specify Government Agencies
+                  </span>
+                </label>
+                {dashboardData.governmentApprovals?.others && (
+                  <div className="other-agencies-container">
+                    {(dashboardData.governmentApprovals?.otherAgencies || []).map((agency, index) => (
+                      <div key={index} className="agency-input-group">
+                        <input
+                          type="text"
+                          value={agency}
+                          onChange={(e) => handleOtherAgencyChange(index, e.target.value)}
+                          placeholder="Enter government agency name (e.g., BSP, DILG, etc.)"
+                          className="others-input"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeOtherAgency(index)}
+                          className="remove-agency-btn"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addOtherAgency}
+                      className="add-agency-btn"
+                    >
+                      + Add Another Agency
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -415,6 +634,37 @@ const MsmeCustomizeDashboard = () => {
                       {url ? (
                         <a href={url} target="_blank" rel="noopener noreferrer" className="social-link">
                           {url}
+                        </a>
+                      ) : (
+                        <span className="social-empty">Not provided</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+              
+              {/* E-commerce Platforms in Social Links Style */}
+              {Object.entries(dashboardData.ecommercePlatforms || {}).map(([platform, data]) => (
+                <div key={platform} className="social-item">
+                  <label className="social-label">
+                    {platform === 'shopee' && '🛍️ Shopee'}
+                    {platform === 'lazada' && '🛒 Lazada'}
+                    {platform === 'tiktok' && '🎵 TikTok Shop'}
+                  </label>
+                  {editMode ? (
+                    <input
+                      type="url"
+                      name={`ecommercePlatforms.${platform}.url`}
+                      value={data?.url || ''}
+                      onChange={handleInputChange}
+                      placeholder={`${platform} store URL`}
+                      className="social-input"
+                    />
+                  ) : (
+                    <div className="social-display">
+                      {data?.url ? (
+                        <a href={data?.url} target="_blank" rel="noopener noreferrer" className="social-link">
+                          {data?.url}
                         </a>
                       ) : (
                         <span className="social-empty">Not provided</span>

@@ -157,8 +157,8 @@ const MsmeAnalytics = () => {
 
           <div className="msme-analytics__chart-card">
             <div className="msme-analytics__chart-header">
-              <h3>Product Performance</h3>
-              <p>Sales performance by product category</p>
+              <h3>Product Rating Performance</h3>
+              <p>Performance by product rating</p>
             </div>
             <div className="msme-analytics__chart-container">
               <LineChart

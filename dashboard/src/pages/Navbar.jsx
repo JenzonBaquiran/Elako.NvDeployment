@@ -48,6 +48,8 @@ function Header() {
     }
   }
 
+
+
   const getUserGreeting = () => {
     if (!user) return null
     
@@ -174,6 +176,8 @@ function Header() {
                 Notifications
               </button>
             )}
+
+
            
             {user ? (
               <>

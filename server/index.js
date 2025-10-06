@@ -1781,18 +1781,16 @@ app.post("/api/products", upload.single("picture"), async (req, res) => {
       price,
       description,
       availability,
-      stocks,
       category,
       hashtags,
       msmeId,
     } = req.body;
 
     // Validate required fields
-    if (!productName || !price || !description || !stocks || !msmeId) {
+    if (!productName || !price || !description || !msmeId) {
       return res.status(400).json({
         success: false,
-        error:
-          "Product name, price, description, stocks, and MSME ID are required",
+        error: "Product name, price, description, and MSME ID are required",
       });
     }
 
@@ -1820,7 +1818,6 @@ app.post("/api/products", upload.single("picture"), async (req, res) => {
       description,
       availability: availability === "true" || availability === true,
       visible: true, // New products are visible by default
-      stocks: parseInt(stocks),
       picture: picturePath,
       hashtags: parsedHashtags,
       category: category || "",
@@ -1920,7 +1917,6 @@ app.put("/api/products/:id", upload.single("picture"), async (req, res) => {
       description,
       availability,
       visible,
-      stocks,
       category,
       hashtags,
     } = req.body;
@@ -1966,7 +1962,7 @@ app.put("/api/products/:id", upload.single("picture"), async (req, res) => {
           visible !== undefined
             ? visible === "true" || visible === true
             : existingProduct.visible,
-        stocks: stocks ? parseInt(stocks) : existingProduct.stocks,
+
         picture: picturePath,
         hashtags: parsedHashtags,
         category: category !== undefined ? category : existingProduct.category,
@@ -2204,11 +2200,25 @@ app.get("/api/stores/:storeId", async (req, res) => {
         storeLogo: null,
         contactNumber: store.contactNumber || "",
         location: store.address || "",
+        googleMapsUrl: "",
+        coordinates: { lat: null, lng: null },
         socialLinks: {
           facebook: "",
           instagram: "",
           twitter: "",
           website: "",
+        },
+        ecommercePlatforms: {
+          shopee: { enabled: false, url: "" },
+          lazada: { enabled: false, url: "" },
+          tiktok: { enabled: false, url: "" },
+        },
+        governmentApprovals: {
+          dole: false,
+          dost: false,
+          fda: false,
+          others: false,
+          otherAgencies: [],
         },
         rating: 0,
       };
@@ -2230,11 +2240,24 @@ app.get("/api/stores/:storeId", async (req, res) => {
         storeLogo: dashboard.storeLogo,
         contactNumber: dashboard.contactNumber || store.contactNumber || "",
         location: dashboard.location || store.address || "",
+        googleMapsUrl: dashboard.googleMapsUrl || "",
+        coordinates: dashboard.coordinates || { lat: null, lng: null },
         socialLinks: dashboard.socialLinks || {
           facebook: "",
           instagram: "",
           twitter: "",
           website: "",
+        },
+        ecommercePlatforms: dashboard.ecommercePlatforms || {
+          shopee: { enabled: false, url: "" },
+          lazada: { enabled: false, url: "" },
+          tiktok: { enabled: false, url: "" },
+        },
+        governmentApprovals: dashboard.governmentApprovals || {
+          dole: false,
+          dost: false,
+          fda: false,
+          others: false,
         },
         // Use MSME rating for display, not dashboard rating
         rating: store.averageRating || 0,
@@ -2447,11 +2470,24 @@ app.get("/api/stores", async (req, res) => {
               storeLogo: null,
               contactNumber: msme.contactNumber || "",
               location: msme.address || "",
+              googleMapsUrl: "",
+              coordinates: { lat: null, lng: null },
               socialLinks: {
                 facebook: "",
                 instagram: "",
                 twitter: "",
                 website: "",
+              },
+              ecommercePlatforms: {
+                shopee: { enabled: false, url: "" },
+                lazada: { enabled: false, url: "" },
+                tiktok: { enabled: false, url: "" },
+              },
+              governmentApprovals: {
+                dole: false,
+                dost: false,
+                fda: false,
+                others: false,
               },
               rating: 0,
               isPublic: true,
@@ -3085,6 +3121,27 @@ app.get("/api/msme/:msmeId/dashboard", async (req, res) => {
         msmeId,
         businessName: msme.businessName || msme.username,
         description: `Welcome to ${msme.businessName || msme.username}!`,
+        contactNumber: msme.contactNumber || "",
+        location: msme.address || "",
+        googleMapsUrl: "",
+        coordinates: { lat: null, lng: null },
+        socialLinks: {
+          facebook: "",
+          instagram: "",
+          twitter: "",
+          website: "",
+        },
+        ecommercePlatforms: {
+          shopee: { enabled: false, url: "" },
+          lazada: { enabled: false, url: "" },
+          tiktok: { enabled: false, url: "" },
+        },
+        governmentApprovals: {
+          dole: false,
+          dost: false,
+          fda: false,
+          others: false,
+        },
         rating: 4.0,
       });
       await dashboard.save();
@@ -3118,7 +3175,11 @@ app.post(
         description,
         contactNumber,
         location,
+        googleMapsUrl,
+        coordinates,
         socialLinks,
+        ecommercePlatforms,
+        governmentApprovals,
         isPublic,
       } = req.body;
 
@@ -3143,13 +3204,77 @@ app.post(
         }
       }
 
+      // Parse coordinates if it's a string
+      let parsedCoordinates = { lat: null, lng: null };
+      if (coordinates) {
+        try {
+          parsedCoordinates =
+            typeof coordinates === "string"
+              ? JSON.parse(coordinates)
+              : coordinates;
+        } catch (error) {
+          console.error("Error parsing coordinates:", error);
+          parsedCoordinates = { lat: null, lng: null };
+        }
+      }
+
+      // Parse ecommercePlatforms if it's a string
+      let parsedEcommercePlatforms = {
+        shopee: { enabled: false, url: "" },
+        lazada: { enabled: false, url: "" },
+        tiktok: { enabled: false, url: "" },
+      };
+      if (ecommercePlatforms) {
+        try {
+          parsedEcommercePlatforms =
+            typeof ecommercePlatforms === "string"
+              ? JSON.parse(ecommercePlatforms)
+              : ecommercePlatforms;
+        } catch (error) {
+          console.error("Error parsing ecommercePlatforms:", error);
+          parsedEcommercePlatforms = {
+            shopee: { enabled: false, url: "" },
+            lazada: { enabled: false, url: "" },
+            tiktok: { enabled: false, url: "" },
+          };
+        }
+      }
+
+      // Parse governmentApprovals if it's a string
+      let parsedGovernmentApprovals = {
+        dole: false,
+        dost: false,
+        fda: false,
+        others: false,
+      };
+      if (governmentApprovals) {
+        try {
+          parsedGovernmentApprovals =
+            typeof governmentApprovals === "string"
+              ? JSON.parse(governmentApprovals)
+              : governmentApprovals;
+        } catch (error) {
+          console.error("Error parsing governmentApprovals:", error);
+          parsedGovernmentApprovals = {
+            dole: false,
+            dost: false,
+            fda: false,
+            others: false,
+          };
+        }
+      }
+
       // Prepare update data
       const updateData = {
         businessName,
         description,
         contactNumber,
         location,
+        googleMapsUrl,
+        coordinates: parsedCoordinates,
         socialLinks: parsedSocialLinks,
+        ecommercePlatforms: parsedEcommercePlatforms,
+        governmentApprovals: parsedGovernmentApprovals,
         isPublic: isPublic === "true" || isPublic === true,
       };
 
@@ -3623,6 +3748,92 @@ app.delete("/api/reviews/:reviewId", async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Error deleting review",
+    });
+  }
+});
+
+// Get store reviews for MSME (all reviews for products belonging to the store)
+app.get("/api/stores/:storeId/reviews", async (req, res) => {
+  try {
+    const { storeId } = req.params;
+
+    // Validate store exists
+    const store = await MSME.findById(storeId);
+    if (!store) {
+      return res.status(404).json({
+        success: false,
+        error: "Store not found",
+      });
+    }
+
+    // Get all products belonging to this store
+    const storeProducts = await Product.find({ msmeId: storeId });
+    const productIds = storeProducts.map((product) => product._id);
+
+    if (productIds.length === 0) {
+      return res.json({
+        success: true,
+        reviews: [],
+        message: "No products found for this store",
+      });
+    }
+
+    // Find all reviews for the store's products
+    const reviews = [];
+
+    for (const product of storeProducts) {
+      if (product.feedback && product.feedback.length > 0) {
+        for (const feedback of product.feedback) {
+          // Get customer details if userId exists
+          let customer = null;
+          if (feedback.userId) {
+            try {
+              customer = await Customer.findById(feedback.userId).select(
+                "firstname lastname"
+              );
+            } catch (customerError) {
+              console.warn(
+                `Could not find customer with ID: ${feedback.userId}`,
+                customerError.message
+              );
+              customer = null;
+            }
+          }
+
+          reviews.push({
+            _id: feedback._id || `${product._id}_${reviews.length}`,
+            productId: product._id,
+            product: {
+              productName: product.productName,
+              picture: product.picture,
+            },
+            customer: customer,
+            rating: feedback.rating,
+            comment: feedback.comment,
+            createdAt: feedback.createdAt || new Date(),
+          });
+        }
+      }
+    }
+
+    // Sort reviews by creation date (newest first)
+    reviews.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    console.log(
+      `Found ${reviews.length} reviews for store ${store.businessName}`
+    );
+
+    res.json({
+      success: true,
+      reviews: reviews,
+      totalReviews: reviews.length,
+      storeName: store.businessName,
+    });
+  } catch (error) {
+    console.error("Error fetching store reviews:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching store reviews",
     });
   }
 });
@@ -4251,35 +4462,35 @@ app.post("/api/customer-notifications/price-drop", async (req, res) => {
   }
 });
 
-// Create stock alert notification
-app.post("/api/customer-notifications/stock-alert", async (req, res) => {
+// Create availability alert notification
+app.post("/api/customer-notifications/availability-alert", async (req, res) => {
   try {
-    const { storeId, productId, stockLevel } = req.body;
+    const { storeId, productId, availability } = req.body;
 
-    if (!storeId || !productId || stockLevel === undefined) {
+    if (!storeId || !productId || availability === undefined) {
       return res.status(400).json({
         success: false,
-        error: "Store ID, Product ID, and stock level are required",
+        error: "Store ID, Product ID, and availability status are required",
       });
     }
 
     const result =
-      await CustomerNotificationService.notifyFollowersOfStockAlert(
+      await CustomerNotificationService.notifyFollowersOfAvailabilityAlert(
         storeId,
         productId,
-        stockLevel
+        availability
       );
 
     res.json({
       success: true,
-      message: "Stock alert notifications sent successfully",
+      message: "Availability alert notifications sent successfully",
       notificationsCreated: result.length,
     });
   } catch (error) {
-    console.error("Error creating stock alert notifications:", error);
+    console.error("Error creating availability alert notifications:", error);
     res.status(500).json({
       success: false,
-      error: "Error creating stock alert notifications",
+      error: "Error creating availability alert notifications",
     });
   }
 });

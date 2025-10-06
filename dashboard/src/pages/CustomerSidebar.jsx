@@ -13,6 +13,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import RateReviewIcon from '@mui/icons-material/RateReview';
 
 const CustomerSidebar = ({ onSidebarToggle }) => {
   const { showSuccess } = useNotification();
@@ -155,9 +156,9 @@ const CustomerSidebar = ({ onSidebarToggle }) => {
               </Link>
             </li>
             <li className="customer-sidebar__nav-item">
-              <Link to="/customer-reviews" className={`customer-sidebar__nav-link ${location.pathname === '/customer-wishlist' ? 'customer-sidebar__nav-link--active' : ''}`} title="Wishlist" onClick={handleIconClick}>
-                <FavoriteIcon className="customer-sidebar__icon" />
-                <span className="customer-sidebar__text">My Reviews</span>
+              <Link to="/customer-reviews" className={`customer-sidebar__nav-link ${location.pathname === '/customer-reviews' ? 'customer-sidebar__nav-link--active' : ''}`} title="Reviews & Ratings" onClick={handleIconClick}>
+                <RateReviewIcon className="customer-sidebar__icon" />
+                <span className="customer-sidebar__text">Reviews & Ratings</span>
               </Link>
             </li>
             <li className="customer-sidebar__nav-item">

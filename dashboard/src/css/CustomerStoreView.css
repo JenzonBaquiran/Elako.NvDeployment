@@ -1270,3 +1270,167 @@
   margin: 0;
   font-size: 1rem;
 }
+
+/* Government Approvals Section */
+.government-approvals-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.government-approvals-section h2 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.approvals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.approval-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  padding: 16px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  min-height: 80px;
+}
+
+.approval-badge:hover {
+  background: rgba(126, 217, 87, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(126, 217, 87, 0.2);
+}
+
+.approval-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border-radius: 8px;
+  padding: 4px;
+  transition: all 0.3s ease;
+}
+
+.approval-badge.dti-default {
+  background: transparent;
+}
+
+.approval-badge.dti-default:hover {
+  background: rgba(126, 217, 87, 0.1);
+}
+
+.others-badge {
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  min-height: auto;
+}
+
+.others-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.others-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 4px 8px;
+  border-radius: 4px;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.approval-icon {
+  font-size: 1.2rem;
+}
+
+.approval-text {
+  font-size: 0.9rem;
+}
+
+/* E-commerce Platform Styling */
+.store-detail-row .detail-icon {
+  font-size: 18px !important;
+  flex-shrink: 0;
+  margin-right: 0;
+}
+
+/* E-commerce platform specific colors */
+.shopee-icon {
+  color: #ff5722 !important; /* Shopee orange */
+}
+
+.lazada-icon {
+  color: #0f136d !important; /* Lazada blue */
+}
+
+.tiktok-icon {
+  color: #ff0050 !important; /* TikTok pink */
+}
+
+/* Legacy selectors for backward compatibility */
+.store-detail-row:has([href*="shopee"]) .detail-icon {
+  color: #ff5722 !important; /* Shopee orange */
+}
+
+.store-detail-row:has([href*="lazada"]) .detail-icon {
+  color: #0f136d !important; /* Lazada blue */
+}
+
+.store-detail-row:has([href*="tiktok"]) .detail-icon {
+  color: #ff0050 !important; /* TikTok pink */
+}
+
+/* Ensure all social links have consistent styling */
+.social-link {
+  font-weight: 500;
+  text-decoration: none;
+  color: #007acc;
+  transition: all 0.3s ease;
+  flex: 1;
+  text-align: left;
+}
+
+.social-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+  transform: translateX(2px);
+}
+
+/* Ensure e-commerce platforms align with social links */
+.store-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #666;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+@media (max-width: 768px) {
+  .approvals-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .approval-badge {
+    justify-content: center;
+    text-align: center;
+  }
+}

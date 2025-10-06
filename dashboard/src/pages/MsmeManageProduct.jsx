@@ -27,7 +27,6 @@ const MsmeManageProduct = () => {
     price: '',
     description: '',
     availability: true,
-    stocks: '',
     picture: null,
     hashtags: '',
     category: ''
@@ -207,9 +206,9 @@ const MsmeManageProduct = () => {
     
     let matchesStatus = true;
     if (statusFilter === 'available') {
-      matchesStatus = product.availability === true && product.stocks > 0;
-    } else if (statusFilter === 'out-of-stock') {
-      matchesStatus = product.availability === false || product.stocks === 0;
+      matchesStatus = product.availability === true;
+    } else if (statusFilter === 'unavailable') {
+      matchesStatus = product.availability === false;
     } else if (statusFilter === 'visible') {
       matchesStatus = product.visible === true;
     } else if (statusFilter === 'hidden') {
@@ -223,7 +222,6 @@ const MsmeManageProduct = () => {
     if (statusFilter !== 'all') {
       console.log(`Product: ${product.productName}, Status Filter: ${statusFilter}, Matches: ${matchesStatus}`, {
         availability: product.availability,
-        stocks: product.stocks,
         visible: product.visible
       });
     }
@@ -283,7 +281,6 @@ const MsmeManageProduct = () => {
       price: '',
       description: '',
       availability: true,
-      stocks: '',
       picture: null,
       hashtags: '',
       category: ''
@@ -312,7 +309,7 @@ const MsmeManageProduct = () => {
     submitData.append('price', formData.price);
     submitData.append('description', formData.description);
     submitData.append('availability', formData.availability);
-    submitData.append('stocks', formData.stocks);
+
     submitData.append('category', formData.category);
     submitData.append('hashtags', JSON.stringify(hashtagList));
     submitData.append('msmeId', user._id);
@@ -350,7 +347,6 @@ const MsmeManageProduct = () => {
       price: product.price.toString(),
       description: product.description,
       availability: product.availability,
-      stocks: product.stocks.toString(),
       picture: null, // Don't set existing picture in form
       category: product.category || ''
     });
@@ -429,16 +425,6 @@ const MsmeManageProduct = () => {
     return shakshoukaImg; // Default image
   };
 
-  const getStockStatus = (product) => {
-    if (!product.availability || product.stocks === 0) {
-      return { class: 'out-of-stock', text: 'Out of Stock' };
-    } else if (product.stocks <= 10) {
-      return { class: 'low-stock', text: 'Low Stock' };
-    } else {
-      return { class: 'available', text: 'Available' };
-    }
-  };
-
   const getContentClass = () => {
     if (sidebarState.isMobile) {
       return 'msme-manage-product-content msme-manage-product-content--mobile';
@@ -484,7 +470,7 @@ const MsmeManageProduct = () => {
             >
               <option value="all">All Status</option>
               <option value="available">Available</option>
-              <option value="out-of-stock">Out of Stock</option>
+              <option value="unavailable">Unavailable</option>
               <option value="visible">Visible Products</option>
               <option value="hidden">Hidden Products</option>
             </select>
@@ -528,7 +514,7 @@ const MsmeManageProduct = () => {
             </div>
           ) : (
             filteredProducts.map((product) => {
-              const stockStatus = getStockStatus(product);
+
               return (
                 <div key={product._id} className={`msme-manage-product-card ${!product.visible ? 'hidden-product' : ''}`}>
                   <div className="msme-manage-product-visibility-indicator">
@@ -577,13 +563,12 @@ const MsmeManageProduct = () => {
                     <div className="msme-manage-product-top-content">
                       <h3>{product.productName}</h3>
                       <p className="msme-manage-product-description">{product.description}</p>
-                      <div className="msme-manage-product-price-and-stock">
+                      <div className="msme-manage-product-price-and-availability">
                         <p className="msme-manage-product-price">₱{product.price}</p>
-                        <div className="msme-manage-product-stock-container">
-                          <div className="msme-manage-product-stock-info">
-                            <span className="msme-manage-product-stock-count">Stock: {product.stocks}</span>
-                            <span className={`msme-manage-product-availability ${stockStatus.class}`}>
-                              {stockStatus.text}
+                        <div className="msme-manage-product-availability-container">
+                          <div className="msme-manage-product-availability-info">
+                            <span className={`msme-manage-product-availability ${product.availability ? 'available' : 'unavailable'}`}>
+                              {product.availability ? 'Available' : 'Unavailable'}
                             </span>
                             {/* Visibility Toggle moved here */}
                             <div className="msme-manage-product-visibility-control-inline">
@@ -696,20 +681,6 @@ const MsmeManageProduct = () => {
                 </div>
 
                 <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="stocks">Stock Quantity *</label>
-                    <input
-                      type="number"
-                      id="stocks"
-                      name="stocks"
-                      value={formData.stocks}
-                      onChange={handleInputChange}
-                      required
-                      min="0"
-                      placeholder="0"
-                    />
-                  </div>
-
                   <div className="form-group">
                     <label htmlFor="category">Category</label>
                     <select

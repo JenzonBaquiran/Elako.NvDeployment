@@ -38,6 +38,9 @@ const CustomerStoreView = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [selectedBlogPost, setSelectedBlogPost] = useState(null);
+  const [showBlogModal, setShowBlogModal] = useState(false);
   
   // Rating modal state
   const [showRatingModal, setShowRatingModal] = useState(false);
@@ -61,6 +64,7 @@ const CustomerStoreView = () => {
       fetchStoreProducts();
       fetchTopRatedProducts();
       fetchProductFeedbacks();
+      fetchBlogPosts();
       // Scroll to top when component mounts or storeId changes
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -149,6 +153,60 @@ const CustomerStoreView = () => {
       console.error('Error fetching existing rating:', error);
     } finally {
       setLoadingExistingRating(false);
+    }
+  };
+
+  const fetchBlogPosts = async () => {
+    try {
+      const response = await fetch(`http://localhost:1337/api/msme/${storeId}/blog-posts`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setBlogPosts(data.blogPosts || []);
+      }
+    } catch (error) {
+      console.error('Error fetching blog posts:', error);
+    }
+  };
+
+  // Function to extract YouTube video ID from various URL formats
+  const extractYouTubeId = (url) => {
+    if (!url) return null;
+    
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  const handleBlogPostClick = async (post) => {
+    try {
+      // Increment view count by fetching the single blog post
+      const response = await fetch(`http://localhost:1337/api/msme/blog-posts/${post._id}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        // Update the blog post with the new view count
+        const updatedPost = data.post;
+        setSelectedBlogPost(updatedPost);
+        
+        // Update the blog posts list to reflect the new view count
+        setBlogPosts(prevPosts => 
+          prevPosts.map(p => 
+            p._id === post._id ? { ...p, views: updatedPost.views } : p
+          )
+        );
+      } else {
+        // If incrementing fails, still show the modal with original post
+        setSelectedBlogPost(post);
+      }
+      
+      setShowBlogModal(true);
+    } catch (error) {
+      console.error('Error incrementing blog post views:', error);
+      // Still show the modal even if view increment fails
+      setSelectedBlogPost(post);
+      setShowBlogModal(true);
     }
   };
 
@@ -781,6 +839,149 @@ const CustomerStoreView = () => {
           </div>
         )}
 
+        {/* Blog Section */}
+        <div className="store-blog-section">
+          <h2 className="blog-section-title">Store Blog & Updates</h2>
+          {blogPosts.length > 0 ? (
+            <div className="blog-posts-grid">
+              {blogPosts.map((post) => (
+                <div 
+                  key={post._id} 
+                  className="blog-post-card"
+                  onClick={() => handleBlogPostClick(post)}
+                >
+                  <div className="blog-post-media">
+                    {post.mediaType === 'image' && post.mediaUrl && (
+                      <img 
+                        src={`http://localhost:1337/uploads/${post.mediaUrl}`} 
+                        alt={post.title}
+                        className="blog-post-image"
+                      />
+                    )}
+                    {post.mediaType === 'video' && post.mediaUrl && (
+                      <video 
+                        src={`http://localhost:1337/uploads/${post.mediaUrl}`}
+                        className="blog-post-video"
+                        controls={false}
+                        muted
+                      />
+                    )}
+                    {post.mediaType === 'youtube' && post.mediaUrl && (
+                      <div className="blog-post-youtube-thumbnail">
+                        <img 
+                          src={`https://img.youtube.com/vi/${extractYouTubeId(post.mediaUrl)}/maxresdefault.jpg`}
+                          alt={post.title}
+                          className="youtube-thumbnail"
+                          onError={(e) => {
+                            // Try medium quality thumbnail if max resolution fails
+                            if (e.target.src.includes('maxresdefault')) {
+                              e.target.src = `https://img.youtube.com/vi/${extractYouTubeId(post.mediaUrl)}/mqdefault.jpg`;
+                            } else if (e.target.src.includes('mqdefault')) {
+                              // Fallback to standard definition thumbnail
+                              e.target.src = `https://img.youtube.com/vi/${extractYouTubeId(post.mediaUrl)}/sddefault.jpg`;
+                            }
+                          }}
+                        />
+                        <div className="youtube-play-overlay">
+                          <div className="play-button">▶</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="blog-post-content">
+                    <h3 className="blog-post-title">{post.title}</h3>
+                    <p className="blog-post-excerpt">
+                      {post.description && post.description.length > 150 
+                        ? post.description.substring(0, 150) + '...' 
+                        : post.description || ''
+                      }
+                    </p>
+                    <div className="blog-post-meta">
+                      <span className="blog-post-category">{post.category}</span>
+                      <span className="blog-post-date">
+                        {new Date(post.createdAt).toLocaleDateString()}
+                      </span>
+                      <span className="blog-post-views">
+                        {post.views || 0} view{(post.views || 0) !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="no-blog-posts">
+              <p>This store hasn't published any blog posts yet.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Blog Post Modal */}
+        {showBlogModal && selectedBlogPost && (
+          <div className="blog-modal-overlay" onClick={() => setShowBlogModal(false)}>
+            <div className="blog-modal-content" onClick={(e) => e.stopPropagation()}>
+              <button 
+                className="blog-modal-close"
+                onClick={() => setShowBlogModal(false)}
+              >
+                ×
+              </button>
+              
+              <div className="blog-modal-header">
+                <h2 className="blog-modal-title">{selectedBlogPost.title}</h2>
+                <div className="blog-modal-meta">
+                  <span className="blog-modal-category">{selectedBlogPost.category}</span>
+                  <span className="blog-modal-date">
+                    {new Date(selectedBlogPost.createdAt).toLocaleDateString()}
+                  </span>
+                  <span className="blog-modal-views">
+                    {selectedBlogPost.views || 0} view{(selectedBlogPost.views || 0) !== 1 ? 's' : ''}
+                  </span>
+                </div>
+              </div>
+
+              <div className="blog-modal-body">
+                {selectedBlogPost.mediaType === 'image' && selectedBlogPost.mediaUrl && (
+                  <div className="blog-modal-media">
+                    <img 
+                      src={`http://localhost:1337/uploads/${selectedBlogPost.mediaUrl}`} 
+                      alt={selectedBlogPost.title}
+                      className="blog-modal-image"
+                    />
+                  </div>
+                )}
+                
+                {selectedBlogPost.mediaType === 'video' && selectedBlogPost.mediaUrl && (
+                  <div className="blog-modal-media">
+                    <video 
+                      src={`http://localhost:1337/uploads/${selectedBlogPost.mediaUrl}`}
+                      className="blog-modal-video"
+                      controls
+                    />
+                  </div>
+                )}
+                
+                {selectedBlogPost.mediaType === 'youtube' && selectedBlogPost.mediaUrl && (
+                  <div className="blog-modal-media">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${extractYouTubeId(selectedBlogPost.mediaUrl)}?rel=0&modestbranding=1`}
+                      title={selectedBlogPost.title}
+                      className="blog-modal-youtube"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    />
+                  </div>
+                )}
+                
+                <div className="blog-modal-text">
+                  <p>{selectedBlogPost.description}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

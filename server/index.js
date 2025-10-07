@@ -1774,7 +1774,7 @@ app.delete("/api/admin/admins/:id", async (req, res) => {
 
 // --- Product Routes ---
 // Create new product
-app.post("/api/products", upload.single("picture"), async (req, res) => {
+app.post("/api/products", upload.array("pictures", 10), async (req, res) => {
   try {
     const {
       productName,
@@ -1784,6 +1784,8 @@ app.post("/api/products", upload.single("picture"), async (req, res) => {
       category,
       hashtags,
       msmeId,
+      variants,
+      sizeOptions,
     } = req.body;
 
     // Validate required fields
@@ -1805,10 +1807,37 @@ app.post("/api/products", upload.single("picture"), async (req, res) => {
       }
     }
 
-    // Handle file upload
-    let picturePath = null;
-    if (req.file) {
-      picturePath = req.file.filename;
+    // Parse variants if it's a string
+    let parsedVariants = [];
+    if (variants) {
+      try {
+        parsedVariants =
+          typeof variants === "string" ? JSON.parse(variants) : variants;
+      } catch (e) {
+        parsedVariants = [];
+      }
+    }
+
+    // Parse size options if it's a string
+    let parsedSizeOptions = [];
+    if (sizeOptions) {
+      try {
+        parsedSizeOptions =
+          typeof sizeOptions === "string"
+            ? JSON.parse(sizeOptions)
+            : sizeOptions;
+      } catch (e) {
+        parsedSizeOptions = [];
+      }
+    }
+
+    // Handle multiple file uploads
+    let pictures = [];
+    let singlePicture = null; // For backward compatibility
+
+    if (req.files && req.files.length > 0) {
+      pictures = req.files.map((file) => file.filename);
+      singlePicture = pictures[0]; // Use first image as main picture
     }
 
     // Create new product
@@ -1818,7 +1847,10 @@ app.post("/api/products", upload.single("picture"), async (req, res) => {
       description,
       availability: availability === "true" || availability === true,
       visible: true, // New products are visible by default
-      picture: picturePath,
+      picture: singlePicture, // Backward compatibility
+      pictures: pictures, // New multiple images support
+      variants: parsedVariants,
+      sizeOptions: parsedSizeOptions,
       hashtags: parsedHashtags,
       category: category || "",
       msmeId,
@@ -1908,9 +1940,15 @@ app.get("/api/products/:id", async (req, res) => {
 });
 
 // Update product
-app.put("/api/products/:id", upload.single("picture"), async (req, res) => {
+app.put("/api/products/:id", upload.array("pictures", 10), async (req, res) => {
   try {
     const productId = req.params.id;
+    console.log(
+      "PUT /api/products/" + productId + " - Update request received"
+    );
+    console.log("Request body keys:", Object.keys(req.body));
+    console.log("Files received:", req.files ? req.files.length : 0);
+
     const {
       productName,
       price,
@@ -1919,6 +1957,10 @@ app.put("/api/products/:id", upload.single("picture"), async (req, res) => {
       visible,
       category,
       hashtags,
+      variants,
+      sizeOptions,
+      keepExistingImages,
+      existingImages,
     } = req.body;
 
     // Find existing product
@@ -1941,11 +1983,88 @@ app.put("/api/products/:id", upload.single("picture"), async (req, res) => {
       }
     }
 
-    // Handle file upload
-    let picturePath = existingProduct.picture;
-    if (req.file) {
-      picturePath = req.file.filename;
+    // Parse variants if it's a string
+    let parsedVariants = existingProduct.variants || [];
+    if (variants) {
+      try {
+        parsedVariants =
+          typeof variants === "string" ? JSON.parse(variants) : variants;
+      } catch (e) {
+        parsedVariants = existingProduct.variants || [];
+      }
     }
+
+    // Parse size options if it's a string
+    let parsedSizeOptions = existingProduct.sizeOptions || [];
+    if (sizeOptions) {
+      try {
+        parsedSizeOptions =
+          typeof sizeOptions === "string"
+            ? JSON.parse(sizeOptions)
+            : sizeOptions;
+      } catch (e) {
+        parsedSizeOptions = existingProduct.sizeOptions || [];
+      }
+    }
+
+    // Handle multiple file uploads with existing image removal support
+    let pictures = [];
+    let singlePicture = null;
+
+    // Parse existing images to keep (sent from frontend)
+    let imagesToKeep = [];
+    if (existingImages) {
+      try {
+        imagesToKeep =
+          typeof existingImages === "string"
+            ? JSON.parse(existingImages)
+            : existingImages;
+      } catch (e) {
+        console.error("Error parsing existingImages:", e);
+        imagesToKeep = existingProduct.pictures || [];
+      }
+    } else {
+      // If no existingImages specified, keep all existing images (for backward compatibility)
+      imagesToKeep = existingProduct.pictures || [];
+    }
+
+    console.log("Existing images to keep:", imagesToKeep);
+
+    // Identify images to delete from filesystem
+    const originalImages = existingProduct.pictures || [];
+    const imagesToDelete = originalImages.filter(
+      (img) => !imagesToKeep.includes(img)
+    );
+
+    // Delete removed images from filesystem
+    if (imagesToDelete.length > 0) {
+      console.log("Images to delete from filesystem:", imagesToDelete);
+      imagesToDelete.forEach((imageFilename) => {
+        const imagePath = path.join(__dirname, "uploads", imageFilename);
+        fs.unlink(imagePath, (err) => {
+          if (err) {
+            console.error(`Error deleting image file ${imageFilename}:`, err);
+          } else {
+            console.log(`Successfully deleted image file: ${imageFilename}`);
+          }
+        });
+      });
+    }
+
+    // Start with existing images that should be kept
+    pictures = [...imagesToKeep];
+
+    // Add newly uploaded images
+    if (req.files && req.files.length > 0) {
+      const newPictures = req.files.map((file) => file.filename);
+      pictures = [...pictures, ...newPictures];
+      console.log("Added new images:", newPictures);
+    }
+
+    // Update single picture for backward compatibility
+    singlePicture = pictures.length > 0 ? pictures[0] : null;
+
+    console.log("Final pictures array:", pictures);
 
     // Update product
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -1962,14 +2081,24 @@ app.put("/api/products/:id", upload.single("picture"), async (req, res) => {
           visible !== undefined
             ? visible === "true" || visible === true
             : existingProduct.visible,
-
-        picture: picturePath,
+        picture: singlePicture,
+        pictures: pictures,
+        variants: parsedVariants,
+        sizeOptions: parsedSizeOptions,
         hashtags: parsedHashtags,
         category: category !== undefined ? category : existingProduct.category,
         updatedAt: new Date(),
       },
       { new: true }
     );
+
+    console.log("Product updated successfully:", {
+      id: updatedProduct._id,
+      name: updatedProduct.productName,
+      picturesCount: updatedProduct.pictures?.length || 0,
+      variants: updatedProduct.variants?.length || 0,
+      sizeOptions: updatedProduct.sizeOptions?.length || 0,
+    });
 
     res.json({
       success: true,
@@ -4726,6 +4855,219 @@ app.delete("/api/blog-posts/:id", async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Error deleting blog post",
+    });
+  }
+});
+
+// --- MSME Blog Posts Routes ---
+const MsmeBlogPost = require("./models/msmeBlogPost.model");
+
+// Get all published blog posts for a specific MSME
+app.get("/api/msme/:msmeId/blog-posts", async (req, res) => {
+  try {
+    const { msmeId } = req.params;
+    const blogPosts = await MsmeBlogPost.findPublishedByMsme(msmeId);
+
+    res.json({
+      success: true,
+      blogPosts,
+    });
+  } catch (error) {
+    console.error("Error fetching MSME blog posts:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching blog posts",
+    });
+  }
+});
+
+// Get all blog posts for a specific MSME (including drafts)
+app.get("/api/msme/:msmeId/blog-posts/all", async (req, res) => {
+  try {
+    const { msmeId } = req.params;
+    const posts = await MsmeBlogPost.find({ msmeId })
+      .sort({ featured: -1, createdAt: -1 })
+      .populate("msmeId", "businessName username");
+
+    res.json({
+      success: true,
+      posts,
+    });
+  } catch (error) {
+    console.error("Error fetching MSME blog posts:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching blog posts",
+    });
+  }
+});
+
+// Create new MSME blog post
+app.post("/api/msme/blog-posts", upload.single("media"), async (req, res) => {
+  try {
+    const {
+      msmeId,
+      title,
+      subtitle,
+      description,
+      mediaType,
+      mediaUrl,
+      category,
+      featured,
+      status,
+    } = req.body;
+
+    let finalMediaUrl = mediaUrl;
+
+    // Handle file upload
+    if (req.file && (mediaType === "image" || mediaType === "video")) {
+      finalMediaUrl = req.file.filename;
+    }
+
+    const newPost = new MsmeBlogPost({
+      msmeId,
+      title,
+      subtitle,
+      description,
+      mediaType,
+      mediaUrl: finalMediaUrl,
+      category,
+      featured: featured === "true",
+      status: status || "published",
+    });
+
+    const savedPost = await newPost.save();
+
+    res.json({
+      success: true,
+      message: "Blog post created successfully",
+      post: savedPost,
+    });
+  } catch (error) {
+    console.error("Error creating MSME blog post:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error creating blog post",
+    });
+  }
+});
+
+// Update MSME blog post
+app.put(
+  "/api/msme/blog-posts/:id",
+  upload.single("media"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const {
+        title,
+        subtitle,
+        description,
+        mediaType,
+        mediaUrl,
+        category,
+        featured,
+        status,
+      } = req.body;
+
+      const updateData = {
+        title,
+        subtitle,
+        description,
+        mediaType,
+        category,
+        featured: featured === "true",
+        status,
+        updatedAt: Date.now(),
+      };
+
+      // Handle media update
+      if (req.file && (mediaType === "image" || mediaType === "video")) {
+        updateData.mediaUrl = req.file.filename;
+      } else if (mediaUrl) {
+        updateData.mediaUrl = mediaUrl;
+      }
+
+      const updatedPost = await MsmeBlogPost.findByIdAndUpdate(id, updateData, {
+        new: true,
+      });
+
+      if (!updatedPost) {
+        return res.status(404).json({
+          success: false,
+          error: "Blog post not found",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Blog post updated successfully",
+        post: updatedPost,
+      });
+    } catch (error) {
+      console.error("Error updating MSME blog post:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error updating blog post",
+      });
+    }
+  }
+);
+
+// Delete MSME blog post
+app.delete("/api/msme/blog-posts/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedPost = await MsmeBlogPost.findByIdAndDelete(id);
+
+    if (!deletedPost) {
+      return res.status(404).json({
+        success: false,
+        error: "Blog post not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Blog post deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting MSME blog post:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error deleting blog post",
+    });
+  }
+});
+
+// Get single MSME blog post and increment views
+app.get("/api/msme/blog-posts/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const post = await MsmeBlogPost.findById(id).populate(
+      "msmeId",
+      "businessName username"
+    );
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        error: "Blog post not found",
+      });
+    }
+
+    // Increment views
+    await post.incrementViews();
+
+    res.json({
+      success: true,
+      post,
+    });
+  } catch (error) {
+    console.error("Error fetching MSME blog post:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching blog post",
     });
   }
 });

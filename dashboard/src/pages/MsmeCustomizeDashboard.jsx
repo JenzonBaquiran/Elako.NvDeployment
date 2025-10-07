@@ -10,6 +10,19 @@ const MsmeCustomizeDashboard = () => {
   const [sidebarState, setSidebarState] = useState({ isOpen: true, isMobile: false });
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [showBlogForm, setShowBlogForm] = useState(false);
+  const [editingBlog, setEditingBlog] = useState(null);
+  const [blogFormData, setBlogFormData] = useState({
+    title: '',
+    subtitle: '',
+    description: '',
+    mediaType: 'image',
+    mediaUrl: '',
+    category: 'STORE UPDATE',
+    featured: false
+  });
+  const [blogFormLoading, setBlogFormLoading] = useState(false);
   
   // Dashboard customization state
   const [dashboardData, setDashboardData] = useState({
@@ -51,12 +64,15 @@ const MsmeCustomizeDashboard = () => {
   });
 
   const [editMode, setEditMode] = useState(false);
+  const [showBlogViewModal, setShowBlogViewModal] = useState(false);
+  const [selectedViewBlog, setSelectedViewBlog] = useState(null);
 
   // Fetch dashboard data and products on component mount
   useEffect(() => {
     if (user && user._id) {
       fetchDashboardData();
       fetchProducts();
+      fetchBlogPosts();
     }
   }, [user]);
 
@@ -120,6 +136,169 @@ const MsmeCustomizeDashboard = () => {
     } catch (error) {
       console.error("Error fetching products:", error);
     }
+  };
+
+  const fetchBlogPosts = async () => {
+    if (!user?._id) return;
+    
+    try {
+      const response = await fetch(`http://localhost:1337/api/msme/${user._id}/blog-posts/all`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setBlogPosts(data.posts);
+      }
+    } catch (error) {
+      console.error("Error fetching blog posts:", error);
+    }
+  };
+
+  const handleBlogFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setBlogFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleBlogFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setBlogFormData(prev => ({
+        ...prev,
+        mediaUrl: file
+      }));
+    }
+  };
+
+  const handleAddBlog = () => {
+    setBlogFormData({
+      title: '',
+      subtitle: '',
+      description: '',
+      mediaType: 'image',
+      mediaUrl: '',
+      category: 'STORE UPDATE',
+      featured: false
+    });
+    setEditingBlog(null);
+    setShowBlogForm(true);
+  };
+
+  const handleEditBlog = (blog) => {
+    setBlogFormData({
+      title: blog.title,
+      subtitle: blog.subtitle,
+      description: blog.description,
+      mediaType: blog.mediaType,
+      mediaUrl: blog.mediaUrl,
+      category: blog.category,
+      featured: blog.featured
+    });
+    setEditingBlog(blog);
+    setShowBlogForm(true);
+  };
+
+  const handleSaveBlog = async (e) => {
+    e.preventDefault();
+    setBlogFormLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('msmeId', user._id);
+      formData.append('title', blogFormData.title);
+      formData.append('subtitle', blogFormData.subtitle);
+      formData.append('description', blogFormData.description);
+      formData.append('mediaType', blogFormData.mediaType);
+      formData.append('category', blogFormData.category);
+      formData.append('featured', blogFormData.featured);
+
+      if (blogFormData.mediaType === 'youtube') {
+        formData.append('mediaUrl', blogFormData.mediaUrl);
+      } else if (blogFormData.mediaUrl instanceof File) {
+        formData.append('media', blogFormData.mediaUrl);
+      } else if (typeof blogFormData.mediaUrl === 'string' && blogFormData.mediaUrl) {
+        formData.append('mediaUrl', blogFormData.mediaUrl);
+      }
+
+      const url = editingBlog 
+        ? `http://localhost:1337/api/msme/blog-posts/${editingBlog._id}`
+        : 'http://localhost:1337/api/msme/blog-posts';
+      
+      const method = editingBlog ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showSuccess(editingBlog ? "Blog post updated successfully!" : "Blog post created successfully!");
+        setShowBlogForm(false);
+        fetchBlogPosts();
+      } else {
+        showError(data.error || "Failed to save blog post");
+      }
+    } catch (error) {
+      console.error("Error saving blog post:", error);
+      showError("Failed to save blog post");
+    } finally {
+      setBlogFormLoading(false);
+    }
+  };
+
+  const handleDeleteBlog = async (blogId) => {
+    if (!window.confirm("Are you sure you want to delete this blog post?")) return;
+
+    try {
+      const response = await fetch(`http://localhost:1337/api/msme/blog-posts/${blogId}`, {
+        method: 'DELETE'
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showSuccess("Blog post deleted successfully!");
+        fetchBlogPosts();
+      } else {
+        showError(data.error || "Failed to delete blog post");
+      }
+    } catch (error) {
+      console.error("Error deleting blog post:", error);
+      showError("Failed to delete blog post");
+    }
+  };
+
+  const handleViewBlog = (blog) => {
+    setSelectedViewBlog(blog);
+    setShowBlogViewModal(true);
+  };
+
+  const getBlogMediaUrl = (blog) => {
+    if (blog.mediaType === 'youtube') {
+      return blog.mediaUrl;
+    }
+    return `http://localhost:1337/uploads/${blog.mediaUrl}`;
+  };
+
+  const getYouTubeThumbnail = (url) => {
+    const videoId = extractYouTubeId(url);
+    if (videoId) {
+      return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+    }
+    return null;
+  };
+
+  // Function to extract YouTube video ID from various URL formats
+  const extractYouTubeId = (url) => {
+    if (!url) return null;
+    
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    
+    return (match && match[2].length === 11) ? match[2] : null;
   };
 
   const handleSidebarToggle = (stateOrIsOpen, isMobile = false) => {
@@ -693,6 +872,93 @@ const MsmeCustomizeDashboard = () => {
             </div>
           </div>
 
+          {/* Blog/Video Section */}
+          <div className="blog-section">
+            <div className="blog-section-header">
+              <h3>Store Blog & Videos</h3>
+              <p>Share your story, showcase your products, and connect with customers through engaging content</p>
+              {editMode && (
+                <button 
+                  className="add-blog-btn"
+                  onClick={handleAddBlog}
+                >
+                  + Add Blog Post
+                </button>
+              )}
+            </div>
+            
+            {blogPosts.length > 0 ? (
+              <div className="blog-grid">
+                {blogPosts.map((blog) => (
+                  <div key={blog._id} className="blog-card">
+                    <div className="blog-media" onClick={() => handleViewBlog(blog)}>
+                      {blog.mediaType === 'youtube' ? (
+                        <img 
+                          src={getYouTubeThumbnail(blog.mediaUrl)} 
+                          alt={blog.title}
+                          className="blog-thumbnail"
+                          onError={(e) => {
+                            // Fallback to different quality thumbnails
+                            const videoId = extractYouTubeId(blog.mediaUrl);
+                            if (e.target.src.includes('maxresdefault')) {
+                              e.target.src = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+                            } else if (e.target.src.includes('mqdefault')) {
+                              e.target.src = `https://img.youtube.com/vi/${videoId}/sddefault.jpg`;
+                            }
+                          }}
+                        />
+                      ) : (
+                        <img 
+                          src={getBlogMediaUrl(blog)} 
+                          alt={blog.title}
+                          className="blog-thumbnail"
+                        />
+                      )}
+                      <div className="blog-media-type">
+                        {blog.mediaType === 'youtube' && '▶️ Video'}
+                        {blog.mediaType === 'video' && '🎥 Video'}
+                        {blog.mediaType === 'image' && '📷 Image'}
+                      </div>
+                      {blog.featured && <div className="blog-featured-badge">Featured</div>}
+                    </div>
+                    <div className="blog-content">
+                      <div className="blog-category">{blog.category}</div>
+                      <h4 className="blog-title">{blog.title}</h4>
+                      <p className="blog-subtitle">{blog.subtitle}</p>
+                      <p className="blog-description">{blog.description}</p>
+                      <div className="blog-meta">
+                        <span className="blog-date">
+                          {new Date(blog.createdAt).toLocaleDateString()}
+                        </span>
+                        <span className="blog-views">{blog.views || 0} views</span>
+                      </div>
+                      {editMode && (
+                        <div className="blog-actions">
+                          <button 
+                            className="edit-blog-btn"
+                            onClick={() => handleEditBlog(blog)}
+                          >
+                            Edit
+                          </button>
+                          <button 
+                            className="delete-blog-btn"
+                            onClick={() => handleDeleteBlog(blog._id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="no-blogs">
+                <p>No blog posts yet. {editMode ? 'Add your first blog post or video to engage with customers!' : 'Check back later for updates from this store.'}</p>
+              </div>
+            )}
+          </div>
+
           {/* Products Section */}
           <div className="products-section">
             <h3>Our Products</h3>
@@ -735,6 +1001,219 @@ const MsmeCustomizeDashboard = () => {
           )}
         </div>
       </div>
+
+      {/* Blog Form Modal */}
+      {showBlogForm && (
+        <div className="blog-form-overlay" onClick={() => setShowBlogForm(false)}>
+          <div className="blog-form-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="blog-form-header">
+              <h3>{editingBlog ? 'Edit Blog Post' : 'Add New Blog Post'}</h3>
+              <button 
+                className="blog-form-close"
+                onClick={() => setShowBlogForm(false)}
+              >
+                ×
+              </button>
+            </div>
+            
+            <form onSubmit={handleSaveBlog} className="blog-form">
+              <div className="blog-form-row">
+                <div className="blog-form-field">
+                  <label>Title *</label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={blogFormData.title}
+                    onChange={handleBlogFormChange}
+                    placeholder="Enter blog post title"
+                    required
+                  />
+                </div>
+                <div className="blog-form-field">
+                  <label>Category *</label>
+                  <select
+                    name="category"
+                    value={blogFormData.category}
+                    onChange={handleBlogFormChange}
+                    required
+                  >
+                    <option value="STORE UPDATE">Store Update</option>
+                    <option value="NEW PRODUCTS">New Products</option>
+                    <option value="BEHIND THE SCENES">Behind the Scenes</option>
+                    <option value="CUSTOMER STORIES">Customer Stories</option>
+                    <option value="BUSINESS JOURNEY">Business Journey</option>
+                    <option value="PROMOTIONS">Promotions</option>
+                    <option value="EVENTS">Events</option>
+                    <option value="TUTORIALS">Tutorials</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="blog-form-field">
+                <label>Subtitle *</label>
+                <input
+                  type="text"
+                  name="subtitle"
+                  value={blogFormData.subtitle}
+                  onChange={handleBlogFormChange}
+                  placeholder="Enter a compelling subtitle"
+                  required
+                />
+              </div>
+
+              <div className="blog-form-field">
+                <label>Description *</label>
+                <textarea
+                  name="description"
+                  value={blogFormData.description}
+                  onChange={handleBlogFormChange}
+                  placeholder="Tell your story..."
+                  rows="4"
+                  required
+                />
+              </div>
+
+              <div className="blog-form-row">
+                <div className="blog-form-field">
+                  <label>Media Type *</label>
+                  <select
+                    name="mediaType"
+                    value={blogFormData.mediaType}
+                    onChange={handleBlogFormChange}
+                    required
+                  >
+                    <option value="image">Image</option>
+                    <option value="video">Video File</option>
+                    <option value="youtube">YouTube Video</option>
+                  </select>
+                </div>
+                <div className="blog-form-field">
+                  <label className="blog-form-checkbox">
+                    <input
+                      type="checkbox"
+                      name="featured"
+                      checked={blogFormData.featured}
+                      onChange={handleBlogFormChange}
+                    />
+                    <span>Featured Post</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="blog-form-field">
+                {blogFormData.mediaType === 'youtube' ? (
+                  <>
+                    <label>YouTube URL *</label>
+                    <input
+                      type="url"
+                      name="mediaUrl"
+                      value={blogFormData.mediaUrl}
+                      onChange={handleBlogFormChange}
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      required
+                    />
+                  </>
+                ) : (
+                  <>
+                    <label>Upload {blogFormData.mediaType === 'video' ? 'Video' : 'Image'} *</label>
+                    <input
+                      type="file"
+                      accept={blogFormData.mediaType === 'video' ? 'video/*' : 'image/*'}
+                      onChange={handleBlogFileChange}
+                      required={!editingBlog}
+                    />
+                  </>
+                )}
+              </div>
+
+              <div className="blog-form-actions">
+                <button
+                  type="button"
+                  className="blog-form-cancel"
+                  onClick={() => setShowBlogForm(false)}
+                  disabled={blogFormLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="blog-form-save"
+                  disabled={blogFormLoading}
+                >
+                  {blogFormLoading ? 'Saving...' : (editingBlog ? 'Update Post' : 'Create Post')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Blog View Modal */}
+      {showBlogViewModal && selectedViewBlog && (
+        <div className="blog-view-modal-overlay" onClick={() => setShowBlogViewModal(false)}>
+          <div className="blog-view-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button 
+              className="blog-view-modal-close"
+              onClick={() => setShowBlogViewModal(false)}
+            >
+              ×
+            </button>
+            
+            <div className="blog-view-modal-header">
+              <h2 className="blog-view-modal-title">{selectedViewBlog.title}</h2>
+              <div className="blog-view-modal-meta">
+                <span className="blog-view-modal-category">{selectedViewBlog.category}</span>
+                <span className="blog-view-modal-date">
+                  {new Date(selectedViewBlog.createdAt).toLocaleDateString()}
+                </span>
+                <span className="blog-view-modal-views">
+                  {selectedViewBlog.views || 0} view{(selectedViewBlog.views || 0) !== 1 ? 's' : ''}
+                </span>
+              </div>
+            </div>
+
+            <div className="blog-view-modal-body">
+              {selectedViewBlog.mediaType === 'image' && selectedViewBlog.mediaUrl && (
+                <div className="blog-view-modal-media">
+                  <img 
+                    src={getBlogMediaUrl(selectedViewBlog)} 
+                    alt={selectedViewBlog.title}
+                    className="blog-view-modal-image"
+                  />
+                </div>
+              )}
+              
+              {selectedViewBlog.mediaType === 'video' && selectedViewBlog.mediaUrl && (
+                <div className="blog-view-modal-media">
+                  <video 
+                    src={getBlogMediaUrl(selectedViewBlog)}
+                    className="blog-view-modal-video"
+                    controls
+                  />
+                </div>
+              )}
+              
+              {selectedViewBlog.mediaType === 'youtube' && selectedViewBlog.mediaUrl && (
+                <div className="blog-view-modal-media">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${extractYouTubeId(selectedViewBlog.mediaUrl)}?rel=0&modestbranding=1`}
+                    title={selectedViewBlog.title}
+                    className="blog-view-modal-youtube"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                </div>
+              )}
+              
+              <div className="blog-view-modal-text">
+                <h3>{selectedViewBlog.subtitle}</h3>
+                <p>{selectedViewBlog.description}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

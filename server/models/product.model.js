@@ -35,6 +35,33 @@ const productSchema = new mongoose.Schema(
       required: false,
       default: null,
     },
+    // Multiple images support
+    pictures: [
+      {
+        type: String,
+        required: false,
+      },
+    ],
+    // Variants for food products (spicy, cheese, etc.)
+    variants: [
+      {
+        id: { type: String, required: true },
+        name: { type: String, required: true },
+        imageIndex: { type: Number, default: 0 }, // Which image to show for this variant
+      },
+    ],
+    // Size options for beverages
+    sizeOptions: [
+      {
+        id: { type: String, required: true },
+        size: { type: Number, required: true },
+        unit: {
+          type: String,
+          required: true,
+          enum: ["ml", "L", "g", "kg", "oz", "lb"],
+        },
+      },
+    ],
     hashtags: [
       {
         type: String,
@@ -106,9 +133,32 @@ productSchema.index({ availability: 1 });
 productSchema.index({ visible: 1 });
 productSchema.index({ hashtags: 1 });
 
-// Virtual for product URL
+// Virtual for product URL (backward compatibility)
 productSchema.virtual("imageUrl").get(function () {
+  // Prioritize new pictures array, fallback to single picture
+  if (this.pictures && this.pictures.length > 0) {
+    return `/uploads/${this.pictures[0]}`;
+  }
   return this.picture ? `/uploads/${this.picture}` : null;
+});
+
+// Virtual for all image URLs
+productSchema.virtual("imageUrls").get(function () {
+  const urls = [];
+
+  // Add images from pictures array
+  if (this.pictures && this.pictures.length > 0) {
+    this.pictures.forEach((pic) => {
+      if (pic) urls.push(`/uploads/${pic}`);
+    });
+  }
+
+  // Fallback to single picture if no pictures array
+  if (urls.length === 0 && this.picture) {
+    urls.push(`/uploads/${this.picture}`);
+  }
+
+  return urls;
 });
 
 // Method to check if product is available

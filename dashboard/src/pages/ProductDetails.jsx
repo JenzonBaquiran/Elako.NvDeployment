@@ -13,6 +13,11 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Image gallery state
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
+
   // Feedback form state
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -26,6 +31,37 @@ const ProductDetails = () => {
       fetchProductDetails();
     }
   }, [productId]);
+
+  // Helper function to get all available images
+  const getAllImages = () => {
+    if (!product) return [];
+    
+    let images = [];
+    
+    // Add images from pictures array (new multiple image system)
+    if (product.pictures && product.pictures.length > 0) {
+      images = product.pictures.map(pic => `http://localhost:1337/uploads/${pic}`);
+    } 
+    // Fallback to single picture (backward compatibility)
+    else if (product.picture) {
+      images = [`http://localhost:1337/uploads/${product.picture}`];
+    }
+    
+    return images;
+  };
+
+  // Handle variant selection
+  const handleVariantSelection = (variant) => {
+    setSelectedVariant(variant);
+    
+    // If variant has specific image index, switch to that image
+    if (variant.imageIndex !== undefined && variant.imageIndex >= 0) {
+      const images = getAllImages();
+      if (variant.imageIndex < images.length) {
+        setSelectedImageIndex(variant.imageIndex);
+      }
+    }
+  };
 
   const fetchProductDetails = async () => {
     try {
@@ -62,11 +98,58 @@ const ProductDetails = () => {
         {/* Main Product Card - Image and Details */}
         <div className="product-details-main-card">
           <div className="product-details-image-section">
-            <img 
-              src={`http://localhost:1337/uploads/${product.picture}`} 
-              alt={product.productName} 
-              className="product-details-image" 
-            />
+            {/* Main Image Display */}
+            <div className="product-details-main-image-container">
+              <img 
+                src={getAllImages()[selectedImageIndex] || `http://localhost:1337/uploads/${product.picture}`} 
+                alt={product.productName} 
+                className="product-details-image" 
+              />
+              
+              {/* Image Counter */}
+              {getAllImages().length > 1 && (
+                <div className="product-details-image-counter">
+                  {selectedImageIndex + 1} / {getAllImages().length}
+                </div>
+              )}
+              
+              {/* Image Navigation Arrows */}
+              {getAllImages().length > 1 && (
+                <>
+                  <button 
+                    className="product-details-image-nav prev"
+                    onClick={() => setSelectedImageIndex(prev => 
+                      prev > 0 ? prev - 1 : getAllImages().length - 1
+                    )}
+                  >
+                    ‹
+                  </button>
+                  <button 
+                    className="product-details-image-nav next"
+                    onClick={() => setSelectedImageIndex(prev => 
+                      prev < getAllImages().length - 1 ? prev + 1 : 0
+                    )}
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+            </div>
+            
+            {/* Image Thumbnails */}
+            {getAllImages().length > 1 && (
+              <div className="product-details-thumbnails">
+                {getAllImages().map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`${product.productName} ${index + 1}`}
+                    className={`product-details-thumbnail ${index === selectedImageIndex ? 'active' : ''}`}
+                    onClick={() => setSelectedImageIndex(index)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
           
           <div className="product-details-info-section">
@@ -93,6 +176,52 @@ const ProductDetails = () => {
               </span>
               <span className="product-details-category">Category: {product.category || 'N/A'}</span>
             </div>
+            
+            {/* Product Variants */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="product-details-variants">
+                <h4>Available Variants:</h4>
+                <div className="product-details-variants-list">
+                  {product.variants.map((variant) => (
+                    <button
+                      key={variant.id}
+                      className={`product-details-variant-btn ${selectedVariant?.id === variant.id ? 'selected' : ''}`}
+                      onClick={() => handleVariantSelection(variant)}
+                    >
+                      {variant.name}
+                    </button>
+                  ))}
+                </div>
+                {selectedVariant && (
+                  <div className="product-details-selected-variant">
+                    Selected: <strong>{selectedVariant.name}</strong>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Size Options */}
+            {product.sizeOptions && product.sizeOptions.length > 0 && (
+              <div className="product-details-sizes">
+                <h4>Available Sizes:</h4>
+                <div className="product-details-sizes-list">
+                  {product.sizeOptions.map((size) => (
+                    <button
+                      key={size.id}
+                      className={`product-details-size-btn ${selectedSize?.id === size.id ? 'selected' : ''}`}
+                      onClick={() => setSelectedSize(size)}
+                    >
+                      {size.size} {size.unit}
+                    </button>
+                  ))}
+                </div>
+                {selectedSize && (
+                  <div className="product-details-selected-size">
+                    Selected Size: <strong>{selectedSize.size} {selectedSize.unit}</strong>
+                  </div>
+                )}
+              </div>
+            )}
             
             <div className="product-details-rating">
               <span className="product-details-rating-stars">
@@ -199,17 +328,8 @@ const ProductDetails = () => {
                     const data = await res.json();
                     
                     if (data.success) {
-                      // Add new feedback to local state
-                      setProduct(prev => ({
-                        ...prev,
-                        feedback: [...(prev.feedback || []), { 
-                          user: userName, 
-                          userId: userId,
-                          comment, 
-                          rating,
-                          createdAt: new Date()
-                        }]
-                      }));
+                      // Re-fetch product data to get updated rating and feedback
+                      await fetchProductDetails();
                       
                       // Reset form
                       setRating(0);

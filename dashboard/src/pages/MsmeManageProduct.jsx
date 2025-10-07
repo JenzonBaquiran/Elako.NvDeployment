@@ -27,12 +27,25 @@ const MsmeManageProduct = () => {
     price: '',
     description: '',
     availability: true,
-    picture: null,
+    pictures: [], // Changed from single picture to multiple pictures
     hashtags: '',
-    category: ''
+    category: '',
+    // New fields for enhanced product management
+    variants: [], // For flavors/types (spicy, cheese, etc.)
+    sizeOptions: [], // For beverage sizes (grams, ml, etc.)
+    selectedVariant: 0 // Currently selected variant for image display
   });
   const [hashtagInput, setHashtagInput] = useState('');
   const [hashtagList, setHashtagList] = useState([]);
+  
+  // New states for enhanced features
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [imagePreview, setImagePreview] = useState([]);
+  const [existingImages, setExistingImages] = useState([]); // Track existing images from server
+  const [currentVariant, setCurrentVariant] = useState('');
+  const [currentSize, setCurrentSize] = useState({ size: '', unit: 'ml' });
+  const [showVariantForm, setShowVariantForm] = useState(false);
+  const [showSizeForm, setShowSizeForm] = useState(false);
 
   // Fetch products on component mount
   useEffect(() => {
@@ -127,18 +140,35 @@ const MsmeManageProduct = () => {
 
   const updateProduct = async (productId, productData) => {
     try {
+      console.log('Updating product:', productId);
+      console.log('Update data being sent:', {
+        productName: productData.get('productName'),
+        price: productData.get('price'),
+        description: productData.get('description'),
+        category: productData.get('category'),
+        availability: productData.get('availability'),
+        visible: productData.get('visible'),
+        variants: productData.get('variants'),
+        sizeOptions: productData.get('sizeOptions'),
+        hashtags: productData.get('hashtags'),
+        existingImages: productData.get('existingImages'),
+        picturesCount: productData.getAll('pictures').length
+      });
+      
       const response = await fetch(`http://localhost:1337/api/products/${productId}`, {
         method: 'PUT',
         body: productData
       });
       
       const data = await response.json();
+      console.log('Update response:', data);
       
       if (data.success) {
         showSuccess("Product updated successfully!", "Success");
         fetchProducts(); // Refresh the product list
         return true;
       } else {
+        console.error('Update failed:', data.error);
         showError(data.error || "Failed to update product", "Error");
         return false;
       }
@@ -281,18 +311,132 @@ const MsmeManageProduct = () => {
       price: '',
       description: '',
       availability: true,
-      picture: null,
+      pictures: [],
       hashtags: '',
-      category: ''
+      category: '',
+      variants: [],
+      sizeOptions: [],
+      selectedVariant: 0
     });
     setHashtagList([]);
     setHashtagInput('');
+    setSelectedImages([]);
+    setImagePreview([]);
+    setExistingImages([]);
+    setCurrentVariant('');
+    setCurrentSize({ size: '', unit: 'ml' });
+    setShowVariantForm(false);
+    setShowSizeForm(false);
     
     // Reset file input
     const fileInput = document.querySelector('input[type="file"]');
     if (fileInput) {
       fileInput.value = '';
     }
+  };
+
+  // Helper functions for enhanced features
+  const handleMultipleImageSelect = (e) => {
+    const files = Array.from(e.target.files);
+    const totalCurrentImages = existingImages.length + selectedImages.length;
+    
+    if (files.length + totalCurrentImages > 10) {
+      showError('Maximum 10 images allowed per product', 'Too Many Images');
+      return;
+    }
+
+    const newImages = [...selectedImages, ...files];
+    setSelectedImages(newImages);
+
+    // Create preview URLs for new files
+    const newPreviews = files.map(file => URL.createObjectURL(file));
+    setImagePreview(prev => [...prev, ...newPreviews]);
+
+    // Update formData
+    setFormData(prev => ({ ...prev, pictures: newImages }));
+  };
+
+  const removeImage = (index) => {
+    console.log('Removing image at index:', index);
+    console.log('Current existingImages:', existingImages);
+    console.log('Current selectedImages:', selectedImages);
+    
+    // Check if this is an existing image (from server) or a new image (locally selected)
+    const totalExistingImages = existingImages.length;
+    
+    if (index < totalExistingImages) {
+      // Removing an existing image - mark it for removal
+      const imageToRemove = existingImages[index];
+      console.log('Removing existing image:', imageToRemove);
+      const newExistingImages = existingImages.filter((_, i) => i !== index);
+      setExistingImages(newExistingImages);
+      console.log('New existingImages array:', newExistingImages);
+    } else {
+      // Removing a newly selected image
+      const newImageIndex = index - totalExistingImages;
+      console.log('Removing newly selected image at index:', newImageIndex);
+      const newImages = selectedImages.filter((_, i) => i !== newImageIndex);
+      setSelectedImages(newImages);
+      
+      // Revoke URL to prevent memory leaks for local files
+      if (imagePreview[index] && imagePreview[index].startsWith('blob:')) {
+        URL.revokeObjectURL(imagePreview[index]);
+      }
+    }
+    
+    // Remove from preview array
+    const newPreviews = imagePreview.filter((_, i) => i !== index);
+    setImagePreview(newPreviews);
+  };
+
+  const addVariant = () => {
+    if (!currentVariant.trim()) return;
+    
+    const newVariant = {
+      id: Date.now(),
+      name: currentVariant.trim(),
+      imageIndex: selectedImages.length > 0 ? 0 : -1
+    };
+    
+    setFormData(prev => ({
+      ...prev,
+      variants: [...(prev.variants || []), newVariant]
+    }));
+    
+    setCurrentVariant('');
+    setShowVariantForm(false);
+  };
+
+  const removeVariant = (variantId) => {
+    setFormData(prev => ({
+      ...prev,
+      variants: (prev.variants || []).filter(v => v.id !== variantId)
+    }));
+  };
+
+  const addSizeOption = () => {
+    if (!currentSize.size.trim()) return;
+    
+    const newSize = {
+      id: Date.now(),
+      size: currentSize.size.trim(),
+      unit: currentSize.unit
+    };
+    
+    setFormData(prev => ({
+      ...prev,
+      sizeOptions: [...(prev.sizeOptions || []), newSize]
+    }));
+    
+    setCurrentSize({ size: '', unit: 'ml' });
+    setShowSizeForm(false);
+  };
+
+  const removeSizeOption = (sizeId) => {
+    setFormData(prev => ({
+      ...prev,
+      sizeOptions: (prev.sizeOptions || []).filter(s => s.id !== sizeId)
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -309,15 +453,28 @@ const MsmeManageProduct = () => {
     submitData.append('price', formData.price);
     submitData.append('description', formData.description);
     submitData.append('availability', formData.availability);
-
     submitData.append('category', formData.category);
     submitData.append('hashtags', JSON.stringify(hashtagList));
     submitData.append('msmeId', user._id);
-    submitData.append('visible', true); // New products are visible by default
     
-    if (formData.picture) {
-      submitData.append('picture', formData.picture);
+    // For updates, preserve visibility status; for new products, set to visible
+    if (editingProduct) {
+      submitData.append('visible', editingProduct.visible);
+      // For updates, send information about existing images to keep
+      submitData.append('existingImages', JSON.stringify(existingImages));
+      console.log('Existing images being sent to server:', existingImages);
+    } else {
+      submitData.append('visible', true); // New products are visible by default
     }
+    
+    // Handle multiple images
+    selectedImages.forEach((image, index) => {
+      submitData.append('pictures', image);
+    });
+    
+    // Add variants and size options as JSON
+    submitData.append('variants', JSON.stringify(formData.variants || []));
+    submitData.append('sizeOptions', JSON.stringify(formData.sizeOptions || []));
 
     let success = false;
     if (editingProduct) {
@@ -341,16 +498,71 @@ const MsmeManageProduct = () => {
   };
 
   const handleEdit = (product) => {
+    console.log('Edit button clicked for product:', product);
+    console.log('Current showEditModal state:', showEditModal);
+    console.log('Current editingProduct state:', editingProduct);
+    
+    // Set the editing product first
     setEditingProduct(product);
-    setFormData({
-      productName: product.productName,
-      price: product.price.toString(),
-      description: product.description,
-      availability: product.availability,
-      picture: null, // Don't set existing picture in form
-      category: product.category || ''
-    });
-    setHashtagList(product.hashtags || []);
+    console.log('Setting editingProduct to:', product);
+    
+    // Populate form data with product details
+    const newFormData = {
+      productName: product.productName || '',
+      price: product.price ? product.price.toString() : '',
+      description: product.description || '',
+      availability: product.availability !== undefined ? product.availability : true,
+      pictures: [], // Will be handled separately for existing images
+      hashtags: '',
+      category: product.category || '',
+      variants: Array.isArray(product.variants) ? product.variants : [], 
+      sizeOptions: Array.isArray(product.sizeOptions) ? product.sizeOptions : [], 
+      selectedVariant: 0
+    };
+    
+    console.log('Setting form data to:', newFormData);
+    setFormData(newFormData);
+    
+    // Set hashtags
+    const hashtagsToSet = Array.isArray(product.hashtags) ? product.hashtags : [];
+    console.log('Setting hashtags to:', hashtagsToSet);
+    setHashtagList(hashtagsToSet);
+    setHashtagInput('');
+    
+    // Handle existing images
+    if (product.pictures && Array.isArray(product.pictures) && product.pictures.length > 0) {
+      // Store existing images for tracking removal
+      setExistingImages([...product.pictures]);
+      
+      // Set image previews for existing images
+      const existingPreviews = product.pictures.map(pic => 
+        pic.startsWith('http') ? pic : `http://localhost:1337/uploads/${pic}`
+      );
+      setImagePreview(existingPreviews);
+      setSelectedImages([]); // No new images selected yet
+    } else if (product.picture) {
+      // Fallback to single picture
+      setExistingImages([product.picture]);
+      const preview = product.picture.startsWith('http') 
+        ? product.picture 
+        : `http://localhost:1337/uploads/${product.picture}`;
+      setImagePreview([preview]);
+      setSelectedImages([]);
+    } else {
+      // No existing images
+      setExistingImages([]);
+      setImagePreview([]);
+      setSelectedImages([]);
+    }
+    
+    // Clear any form-related states
+    setCurrentVariant('');
+    setCurrentSize({ size: '', unit: 'ml' });
+    setShowVariantForm(false);
+    setShowSizeForm(false);
+    
+    // Show the edit modal
+    console.log('Setting showEditModal to true');
     setShowEditModal(true);
   };
 
@@ -699,19 +911,138 @@ const MsmeManageProduct = () => {
                   </div>
                 </div>
 
+                {/* Multiple Images Upload */}
                 <div className="form-group">
-                  <label htmlFor="picture">Product Image</label>
+                  <label htmlFor="pictures">Product Images (1-10 images)</label>
                   <input
-                    key={`file-input-${editingProduct ? editingProduct._id : 'new'}`}
                     type="file"
-                    id="picture"
-                    name="picture"
-                    onChange={handleFileChange}
+                    id="pictures"
+                    name="pictures"
+                    onChange={handleMultipleImageSelect}
                     accept="image/*"
+                    multiple
                     className="file-input"
                   />
-                  <small>Recommended: JPG, PNG, max 5MB</small>
+                  <small>Recommended: JPG, PNG, max 5MB each. Upload 1-10 images.</small>
+                  
+                  {/* Image Preview */}
+                  {imagePreview.length > 0 && (
+                    <div className="image-preview-container">
+                      {imagePreview.map((preview, index) => (
+                        <div key={index} className="image-preview-item">
+                          <img src={preview} alt={`Preview ${index + 1}`} className="image-preview" />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="remove-image-btn"
+                          >
+                            ×
+                          </button>
+                          <span className="image-number">{index + 1}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
+
+                {/* Size Options for Beverages */}
+                {formData.category === 'beverages' && (
+                  <div className="form-group">
+                    <label>Size Options</label>
+                    <div className="size-options-container">
+                      {(formData.sizeOptions || []).map((size) => (
+                        <div key={size.id} className="size-option-item">
+                          <span>{size.size} {size.unit}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeSizeOption(size.id)}
+                            className="remove-btn"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                      
+                      {showSizeForm ? (
+                        <div className="add-size-form">
+                          <input
+                            type="number"
+                            value={currentSize.size}
+                            onChange={(e) => setCurrentSize(prev => ({ ...prev, size: e.target.value }))}
+                            placeholder="Size"
+                            className="size-input"
+                          />
+                          <select
+                            value={currentSize.unit}
+                            onChange={(e) => setCurrentSize(prev => ({ ...prev, unit: e.target.value }))}
+                            className="unit-select"
+                          >
+                            <option value="ml">ml</option>
+                            <option value="L">L</option>
+                            <option value="g">g</option>
+                            <option value="kg">kg</option>
+                            <option value="oz">oz</option>
+                            <option value="lb">lb</option>
+                          </select>
+                          <button type="button" onClick={addSizeOption} className="add-btn">Add</button>
+                          <button type="button" onClick={() => setShowSizeForm(false)} className="cancel-btn">Cancel</button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setShowSizeForm(true)}
+                          className="add-size-btn"
+                        >
+                          + Add Size Option
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Variants/Flavors for Food */}
+                {(formData.category === 'processed-foods' || formData.category === 'baked-goods' || formData.category === 'confectionery') && (
+                  <div className="form-group">
+                    <label>Product Variants/Flavors</label>
+                    <div className="variants-container">
+                      {(formData.variants || []).map((variant) => (
+                        <div key={variant.id} className="variant-item">
+                          <span>{variant.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeVariant(variant.id)}
+                            className="remove-btn"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                      
+                      {showVariantForm ? (
+                        <div className="add-variant-form">
+                          <input
+                            type="text"
+                            value={currentVariant}
+                            onChange={(e) => setCurrentVariant(e.target.value)}
+                            placeholder="e.g., Spicy, Cheese, Ube, Pastillas"
+                            className="variant-input"
+                          />
+                          <button type="button" onClick={addVariant} className="add-btn">Add</button>
+                          <button type="button" onClick={() => setShowVariantForm(false)} className="cancel-btn">Cancel</button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setShowVariantForm(true)}
+                          className="add-variant-btn"
+                        >
+                          + Add Variant/Flavor
+                        </button>
+                      )}
+                    </div>
+                    <small>Add different flavors or variants of your product (e.g., Spicy, Cheese, Different flavors)</small>
+                  </div>
+                )}
 
                 <div className="form-group">
                   <label>Hashtags for Filtering</label>

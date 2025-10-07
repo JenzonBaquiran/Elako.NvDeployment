@@ -1420,20 +1420,22 @@ const AdminUserManagement = () => {
               <div className="admin-user-management__modal-avatar">
                 {selectedUser.name[0].toUpperCase()}
               </div>
-              
-              <div className="admin-user-management__modal-field">
-                <div className="admin-user-management__modal-label">Name</div>
-                <div className="admin-user-management__modal-value">{selectedUser.name}</div>
-              </div>
+              {/** Align Last Activity, Client Profiling Number and TIN in a single row */}
+              <div className="admin-user-management__three-columns">
+                <div className="admin-user-management__modal-field">
+                  <div className="admin-user-management__modal-label">Last Activity</div>
+                  <div className="admin-user-management__modal-value">{selectedUser.activity || 'Not provided'}</div>
+                </div>
 
-              <div className="admin-user-management__modal-field">
-                <div className="admin-user-management__modal-label">Email</div>
-                <div className="admin-user-management__modal-value">{selectedUser.email}</div>
-              </div>
+                <div className="admin-user-management__modal-field">
+                  <div className="admin-user-management__modal-label">Client Profiling Number</div>
+                  <div className="admin-user-management__modal-value">{selectedUser.clientProfilingNumber || 'Not provided'}</div>
+                </div>
 
-              <div className="admin-user-management__modal-field">
-                <div className="admin-user-management__modal-label">Username</div>
-                <div className="admin-user-management__modal-value">@{selectedUser.username}</div>
+                <div className="admin-user-management__modal-field">
+                  <div className="admin-user-management__modal-label">TIN Number</div>
+                  <div className="admin-user-management__modal-value">{(certificates && certificates.tinNumber) || 'Not provided'}</div>
+                </div>
               </div>
 
               <div className="admin-user-management__modal-field">
@@ -1454,10 +1456,7 @@ const AdminUserManagement = () => {
                 <div className="admin-user-management__modal-value">{selectedUser.joinDate}</div>
               </div>
 
-              <div className="admin-user-management__modal-field">
-                <div className="admin-user-management__modal-label">Last Activity</div>
-                <div className="admin-user-management__modal-value">{selectedUser.activity}</div>
-              </div>
+      
 
               {selectedUser.contactNumber && (
                 <div className="admin-user-management__modal-field">
@@ -1473,12 +1472,7 @@ const AdminUserManagement = () => {
                 </div>
               )}
 
-              {selectedUser.clientProfilingNumber && (
-                <div className="admin-user-management__modal-field">
-                  <div className="admin-user-management__modal-label">Client Profiling Number</div>
-                  <div className="admin-user-management__modal-value">{selectedUser.clientProfilingNumber}</div>
-                </div>
-              )}
+             
 
               {/* Business Certificates for MSME */}
               {selectedUser.type === 'MSME' && (
@@ -1491,11 +1485,6 @@ const AdminUserManagement = () => {
                     <div className="admin-user-management__loading">Loading certificates...</div>
                   ) : certificates ? (
                     <div className="admin-user-management__certificates-grid">
-                      <div className="admin-user-management__certificate-item">
-                        <h4>TIN Number</h4>
-                        <p>{certificates.tinNumber || 'Not provided'}</p>
-                      </div>
-                      
                       <div className="admin-user-management__certificate-item">
                         <h4>Mayor's Permit</h4>
                         {certificates.mayorsPermit ? (

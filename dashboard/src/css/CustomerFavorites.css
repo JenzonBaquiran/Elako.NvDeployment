@@ -187,7 +187,7 @@
 .customer-favorites__products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+  gap: 32px;
 }
 
 .customer-favorites__product-card {
@@ -251,6 +251,19 @@
 .customer-favorites__favorite-btn:hover {
   background: white;
   transform: scale(1.1);
+}
+
+/* Centered product information */
+.customer-favorites__product-info {
+  text-align: center;
+  align-items: center;
+}
+
+.customer-favorites__product-name,
+.customer-favorites__store-name,
+.customer-favorites__product-rating,
+.customer-favorites__product-description {
+  text-align: center;
 }
 
 .customer-favorites__product-info {
@@ -365,7 +378,7 @@
 .customer-favorites__stores-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
+  gap: 40px!important;  
 }
 
 .customer-favorites__store-card {
@@ -537,54 +550,59 @@
   transform: translateY(-1px);
 }
 
-/* Responsive Design */
+/* Improved CSS for better viewing across desktop and mobile views */
+.customer-favorites__content {
+  gap: 20px;
+}
+
+.customer-favorites__products-grid {
+  gap: 40px;
+}
+
+.customer-favorites__stores-grid {
+  gap: 40px;
+}
+
 @media (max-width: 768px) {
-  .customer-favorites__content,
-  .customer-favorites__content--sidebar-open,
-  .customer-favorites__content--sidebar-collapsed,
-  .customer-favorites__content--mobile {
-    margin-left: 0 !important;
-    width: 100vw !important;
-    max-width: 100vw !important;
-    padding: 16px;
+  .customer-favorites__content {
+    gap: 28px;
   }
-  
-  .customer-favorites__header-content {
-    flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
-  }
-  
-  .customer-favorites__container {
-    padding: 16px;
-  }
-  
-  .customer-favorites__tabs-section {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
+
   .customer-favorites__products-grid,
   .customer-favorites__stores-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 36px;
   }
-  
+
+  .customer-favorites__header-content {
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .customer-favorites__container {
+    padding: 20px;
+  }
+
+  .customer-favorites__tabs-section {
+    flex-direction: column;
+    gap: 12px;
+  }
+
   .customer-favorites__product-footer {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: 16px;
   }
-  
+
   .customer-favorites__store-header {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: 16px;
   }
-  
+
   .customer-favorites__store-stats {
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
   }
 }
 
@@ -592,6 +610,6 @@
   .customer-favorites__store-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+    gap: 20px;
   }
 }

@@ -502,7 +502,7 @@ const MsmeCustomizeDashboard = () => {
                         }}
                         className="view-on-maps-btn"
                       >
-                        📍 View Location on Google Maps
+                         View Location on Google Maps
                       </button>
                     </div>
                   ) : (
@@ -516,7 +516,7 @@ const MsmeCustomizeDashboard = () => {
 
 
           {/* Government Approvals Section */}
-          <div className="government-approvals-section">
+          <div className={`government-approvals-section ${!editMode ? 'readonly' : 'editable'}`}>
             <h3>Government Approvals & Assistance</h3>
             <p className="section-description">Select the government agencies that have approved or assisted your business:</p>
             <div className="dti-notice">
@@ -530,6 +530,7 @@ const MsmeCustomizeDashboard = () => {
                   name="governmentApprovals.dole"
                   checked={dashboardData.governmentApprovals?.dole || false}
                   onChange={handleInputChange}
+                  disabled={!editMode}
                 />
                 <span className="checkbox-custom"></span>
                 <span className="approval-text">
@@ -543,6 +544,7 @@ const MsmeCustomizeDashboard = () => {
                   name="governmentApprovals.dost"
                   checked={dashboardData.governmentApprovals?.dost || false}
                   onChange={handleInputChange}
+                  disabled={!editMode}
                 />
                 <span className="checkbox-custom"></span>
                 <span className="approval-text">
@@ -556,6 +558,7 @@ const MsmeCustomizeDashboard = () => {
                   name="governmentApprovals.fda"
                   checked={dashboardData.governmentApprovals?.fda || false}
                   onChange={handleInputChange}
+                  disabled={!editMode}
                 />
                 <span className="checkbox-custom"></span>
                 <span className="approval-text">
@@ -568,45 +571,51 @@ const MsmeCustomizeDashboard = () => {
               <div className="approval-checkbox-item-with-input">
                 <label className="approval-checkbox-item">
                   <input
-                    type="checkbox"
-                    name="governmentApprovals.others"
-                    checked={dashboardData.governmentApprovals?.others || false}
-                    onChange={handleInputChange}
-                  />
+                      type="checkbox"
+                      name="governmentApprovals.others"
+                      checked={dashboardData.governmentApprovals?.others || false}
+                      onChange={handleInputChange}
+                      disabled={!editMode}
+                    />
                   <span className="checkbox-custom"></span>
                   <span className="approval-text">
                     <strong>Others</strong> - Specify Government Agencies
                   </span>
                 </label>
-                {dashboardData.governmentApprovals?.others && (
-                  <div className="other-agencies-container">
-                    {(dashboardData.governmentApprovals?.otherAgencies || []).map((agency, index) => (
-                      <div key={index} className="agency-input-group">
-                        <input
-                          type="text"
-                          value={agency}
-                          onChange={(e) => handleOtherAgencyChange(index, e.target.value)}
-                          placeholder="Enter government agency name (e.g., BSP, DILG, etc.)"
-                          className="others-input"
-                        />
+                  {dashboardData.governmentApprovals?.others && (
+                    <div className="other-agencies-container">
+                      {(dashboardData.governmentApprovals?.otherAgencies || []).map((agency, index) => (
+                        <div key={index} className="agency-input-group">
+                          <input
+                            type="text"
+                            value={agency}
+                            onChange={(e) => handleOtherAgencyChange(index, e.target.value)}
+                            placeholder="Enter government agency name (e.g., BSP, DILG, etc.)"
+                            className="others-input"
+                            disabled={!editMode}
+                          />
+                          {editMode && (
+                            <button
+                              type="button"
+                              onClick={() => removeOtherAgency(index)}
+                              className="remove-agency-btn"
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      {editMode && (
                         <button
                           type="button"
-                          onClick={() => removeOtherAgency(index)}
-                          className="remove-agency-btn"
+                          onClick={addOtherAgency}
+                          className="add-agency-btn"
                         >
-                          ×
+                          + Add Another Agency
                         </button>
-                      </div>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={addOtherAgency}
-                      className="add-agency-btn"
-                    >
-                      + Add Another Agency
-                    </button>
-                  </div>
-                )}
+                      )}
+                    </div>
+                  )}
               </div>
             </div>
           </div>

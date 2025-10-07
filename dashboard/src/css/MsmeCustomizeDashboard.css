@@ -329,6 +329,23 @@
   text-align: center;
 }
 
+.store-details .store-description,
+.store-details-display .store-description {
+  text-align: center !important;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 800px; /* keep line-length comfortable on wide screens */
+}
+
+@media (max-width: 768px) {
+  .store-details .store-description,
+  .store-details-display .store-description {
+    max-width: 100%;
+    padding: 0 12px;
+  }
+}
+
 .store-rating {
   display: flex;
   align-items: center;
@@ -622,6 +639,49 @@
   font-family: 'Poppins', sans-serif;
 }
 
+/* Read-only visual style for approvals section when not editing */
+.government-approvals-section.readonly {
+  opacity: 0.85;
+}
+
+.government-approvals-section.readonly .approval-checkbox-item,
+.government-approvals-section.readonly .approval-checkbox-item-with-input {
+  cursor: default;
+}
+
+.government-approvals-section.readonly .others-input {
+  background: transparent;
+  border-color: transparent;
+}
+
+.government-approvals-section.readonly .remove-agency-btn,
+.government-approvals-section.readonly .add-agency-btn {
+  display: none;
+}
+
+/* Update map/view button colors to match design: dark default, green hover, white text */
+.view-on-maps-btn,
+.location-search-btn {
+  background: #313131; /* default dark color */
+  color: #ffffff; /* white text */
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.15s ease-in-out;
+  white-space: nowrap;
+}
+
+.view-on-maps-btn:hover,
+.location-search-btn:hover {
+  background: #7ed957; /* hover green */
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .msme-customize-dashboard-content {
@@ -756,8 +816,8 @@
 
 .location-search-btn,
 .view-on-maps-btn {
-  background: #4285f4;
-  color: white;
+  background: #313131; /* default dark color */
+  color: #ffffff; /* white text */
   border: none;
   padding: 12px 16px;
   border-radius: 8px;
@@ -765,13 +825,14 @@
   font-size: 13px;
   font-weight: 500;
   font-family: 'Poppins', sans-serif;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease-in-out;
   white-space: nowrap;
 }
 
 .location-search-btn:hover,
 .view-on-maps-btn:hover {
-  background: #3367d6;
+  background: #7ed957; /* hover green */
+  color: #ffffff;
   transform: translateY(-1px);
 }
 

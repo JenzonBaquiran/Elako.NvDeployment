@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ELako.Nv Real-time Messaging Test</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #2d3436;
+            margin-bottom: 30px;
+        }
+        .connection-status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .user-setup {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        .user-setup input, .user-setup select, .user-setup button {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .user-setup button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .user-setup button:hover {
+            background: #5a6fd8;
+        }
+        .conversations {
+            display: flex;
+            gap: 20px;
+            height: 500px;
+        }
+        .conversations-list {
+            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow-y: auto;
+        }
+        .conversation-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .conversation-item:hover {
+            background: #f8f9fa;
+        }
+        .conversation-item.active {
+            background: #667eea;
+            color: white;
+        }
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .chat-header {
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+        }
+        .messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .message.own {
+            align-self: flex-end;
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .message.other {
+            align-self: flex-start;
+            background: #f1f3f4;
+            color: #2d3436;
+            border-bottom-left-radius: 4px;
+        }
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+        .typing {
+            font-style: italic;
+            color: #666;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+        .input-area {
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+        }
+        .input-area input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+        }
+        .input-area input:focus {
+            border-color: #667eea;
+        }
+        .input-area button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .input-area button:hover:not(:disabled) {
+            background: #5a6fd8;
+        }
+        .input-area button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .no-chat {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #666;
+            font-size: 16px;
+        }
+        .actions {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .actions button {
+            background: #51cf66;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: background 0.2s;
+        }
+        .actions button:hover {
+            background: #45c655;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 ELako.Nv Real-time Messaging System</h1>
+        
+        <div id="connectionStatus" class="connection-status disconnected">
+            🔴 Disconnected from server
+        </div>
+
+        <div class="user-setup">
+            <input type="text" id="userId" placeholder="Enter User ID (e.g., user123)" value="customer1">
+            <select id="userType">
+                <option value="customer">Customer</option>
+                <option value="msme">MSME Store</option>
+            </select>
+            <button onclick="connectUser()">Connect</button>
+        </div>
+
+        <div class="actions">
+            <button onclick="createTestConversation()">Create Test Conversation</button>
+            <button onclick="clearMessages()">Clear Messages</button>
+        </div>
+
+        <div class="conversations">
+            <div class="conversations-list">
+                <h3 style="margin: 0; padding: 15px; background: #f8f9fa; border-bottom: 1px solid #ddd;">Conversations</h3>
+                <div id="conversationsList">
+                    <div class="conversation-item" onclick="selectConversation('test123')">
+                        <div><strong>Test Conversation</strong></div>
+                        <div style="font-size: 12px; color: #666;">Click to select</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-area">
+                <div class="chat-header" id="chatHeader">
+                    <div class="no-chat">Select a conversation to start messaging</div>
+                </div>
+                <div class="messages" id="messages">
+                    <div class="no-chat">Select a conversation to start messaging</div>
+                </div>
+                <div class="input-area" id="inputArea" style="display: none;">
+                    <input type="text" id="messageInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+                    <button onclick="sendMessage()" id="sendBtn" disabled>Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let socket = null;
+        let currentUser = null;
+        let selectedConversation = null;
+        let isConnected = false;
+
+        const connectionStatus = document.getElementById('connectionStatus');
+        const messages = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const chatHeader = document.getElementById('chatHeader');
+        const inputArea = document.getElementById('inputArea');
+
+        function updateConnectionStatus(connected) {
+            isConnected = connected;
+            if (connected) {
+                connectionStatus.className = 'connection-status connected';
+                connectionStatus.innerHTML = '🟢 Connected to messaging server';
+            } else {
+                connectionStatus.className = 'connection-status disconnected';
+                connectionStatus.innerHTML = '🔴 Disconnected from server';
+            }
+            sendBtn.disabled = !connected || !messageInput.value.trim();
+        }
+
+        function connectUser() {
+            const userId = document.getElementById('userId').value.trim();
+            const userType = document.getElementById('userType').value;
+
+            if (!userId) {
+                alert('Please enter a User ID');
+                return;
+            }
+
+            currentUser = { id: userId, userType: userType };
+
+            if (socket) {
+                socket.disconnect();
+            }
+
+            socket = io('http://localhost:1337');
+
+            socket.on('connect', () => {
+                console.log('✅ Connected to server');
+                updateConnectionStatus(true);
+                
+                // Join user room
+                socket.emit('join_user_room', {
+                    userId: currentUser.id,
+                    userType: currentUser.userType
+                });
+            });
+
+            socket.on('disconnect', () => {
+                console.log('❌ Disconnected from server');
+                updateConnectionStatus(false);
+            });
+
+            socket.on('receive_message', (message) => {
+                console.log('📥 Received message:', message);
+                displayMessage(message, false);
+            });
+
+            socket.on('message_sent', (data) => {
+                console.log('✅ Message sent confirmation:', data);
+                // Update temporary message with real data
+                const tempMsg = document.querySelector(`[data-temp-id="${data.tempId}"]`);
+                if (tempMsg) {
+                    tempMsg.removeAttribute('data-temp-id');
+                    tempMsg.querySelector('.message-time').textContent = new Date().toLocaleTimeString();
+                }
+            });
+
+            socket.on('message_error', (data) => {
+                console.error('❌ Message error:', data);
+                alert('Failed to send message: ' + data.error);
+                // Remove failed message
+                const tempMsg = document.querySelector(`[data-temp-id="${data.tempId}"]`);
+                if (tempMsg) {
+                    tempMsg.remove();
+                }
+            });
+
+            socket.on('user_typing', (data) => {
+                console.log('⌨️ User typing:', data);
+                showTypingIndicator();
+            });
+
+            socket.on('user_stop_typing', (data) => {
+                console.log('⌨️ User stopped typing:', data);
+                hideTypingIndicator();
+            });
+
+            socket.on('new_message_notification', (data) => {
+                console.log('🔔 New message notification:', data);
+                // Could show desktop notification here
+            });
+        }
+
+        function selectConversation(conversationId) {
+            selectedConversation = conversationId;
+            
+            // Update UI
+            chatHeader.innerHTML = `
+                <div><strong>Conversation: ${conversationId}</strong></div>
+                <div style="font-size: 12px; color: #666;">Real-time messaging active</div>
+            `;
+            
+            messages.innerHTML = '';
+            inputArea.style.display = 'flex';
+            
+            // Join conversation room
+            if (socket && isConnected) {
+                socket.emit('join_conversation', conversationId);
+            }
+            
+            // Update conversation selection UI
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.conversation-item').classList.add('active');
+        }
+
+        function createTestConversation() {
+            if (!currentUser) {
+                alert('Please connect first');
+                return;
+            }
+
+            // Simulate creating a conversation
+            const otherUserType = currentUser.userType === 'customer' ? 'msme' : 'customer';
+            const otherUserId = otherUserType + '_' + Date.now();
+            
+            selectConversation('test_' + Date.now());
+            
+            // Add a welcome message
+            const welcomeMessage = {
+                _id: 'welcome_' + Date.now(),
+                message: `Welcome to the conversation! You are connected as a ${currentUser.userType}.`,
+                senderId: { _id: 'system' },
+                createdAt: new Date(),
+                senderType: 'system'
+            };
+            
+            displayMessage(welcomeMessage, false);
+        }
+
+        function sendMessage() {
+            const messageText = messageInput.value.trim();
+            if (!messageText || !selectedConversation || !isConnected) return;
+
+            const tempId = Date.now().toString();
+            const messageData = {
+                conversationId: selectedConversation,
+                senderId: currentUser.id,
+                senderModel: currentUser.userType === 'customer' ? 'Customer' : 'MSME',
+                receiverId: 'test_receiver',
+                receiverModel: currentUser.userType === 'customer' ? 'MSME' : 'Customer',
+                message: messageText,
+                tempId: tempId
+            };
+
+            // Add temporary message to UI
+            const tempMessage = {
+                _id: tempId,
+                message: messageText,
+                senderId: { _id: currentUser.id },
+                createdAt: new Date(),
+                sending: true
+            };
+
+            displayMessage(tempMessage, true, tempId);
+            messageInput.value = '';
+            sendBtn.disabled = true;
+
+            // Send via Socket.IO
+            socket.emit('send_message', messageData);
+        }
+
+        function displayMessage(message, isOwn, tempId = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isOwn ? 'own' : 'other'}`;
+            
+            if (tempId) {
+                messageDiv.setAttribute('data-temp-id', tempId);
+            }
+
+            const time = new Date(message.createdAt).toLocaleTimeString();
+            const sendingText = message.sending ? ' (sending...)' : '';
+            
+            messageDiv.innerHTML = `
+                <div>${message.message}</div>
+                <div class="message-time">${time}${sendingText}</div>
+            `;
+
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            let typingDiv = document.getElementById('typing-indicator');
+            if (!typingDiv) {
+                typingDiv = document.createElement('div');
+                typingDiv.id = 'typing-indicator';
+                typingDiv.className = 'typing';
+                typingDiv.textContent = 'Other user is typing...';
+                messages.appendChild(typingDiv);
+                messages.scrollTop = messages.scrollHeight;
+            }
+        }
+
+        function hideTypingIndicator() {
+            const typingDiv = document.getElementById('typing-indicator');
+            if (typingDiv) {
+                typingDiv.remove();
+            }
+        }
+
+        function clearMessages() {
+            messages.innerHTML = '';
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            } else {
+                // Send typing indicator
+                if (socket && isConnected && selectedConversation) {
+                    socket.emit('typing', {
+                        conversationId: selectedConversation,
+                        userId: currentUser.id,
+                        userType: currentUser.userType
+                    });
+
+                    // Stop typing after 3 seconds
+                    setTimeout(() => {
+                        if (socket && isConnected) {
+                            socket.emit('stop_typing', {
+                                conversationId: selectedConversation,
+                                userId: currentUser.id
+                            });
+                        }
+                    }, 3000);
+                }
+            }
+        }
+
+        // Enable/disable send button based on input
+        messageInput.addEventListener('input', () => {
+            sendBtn.disabled = !isConnected || !messageInput.value.trim();
+        });
+
+        // Auto-connect on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                connectUser();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

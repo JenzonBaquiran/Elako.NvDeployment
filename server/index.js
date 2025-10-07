@@ -4,6 +4,8 @@ const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
 const bcrypt = require("bcryptjs");
+const http = require("http");
+const socketIo = require("socket.io");
 
 // Import Models
 const Customer = require("./models/customer.model");
@@ -15,6 +17,8 @@ const PageView = require("./models/pageview.model");
 const Notification = require("./models/notification.model");
 const CustomerNotification = require("./models/customerNotification.model");
 const BlogPost = require("./models/blogPost.model");
+const Message = require("./models/message.model");
+const Conversation = require("./models/conversation.model");
 
 // Import Services
 const CustomerNotificationService = require("./services/customerNotificationService");
@@ -22,12 +26,26 @@ const CustomerNotificationService = require("./services/customerNotificationServ
 const fs = require("fs");
 
 const app = express();
+const server = http.createServer(app);
 
 // Ensure uploads directory exists
 if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads", { recursive: true });
 }
 const port = 1337;
+
+// Socket.IO setup
+const io = socketIo(server, {
+  cors: {
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://localhost:5173",
+    ],
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
 
 // Middleware
 app.use(cors());
@@ -5077,7 +5095,461 @@ app.post("/api/users", async (req, res) => {
   // ... existing user routes ...
 });
 
+// Socket.IO connection handling
+const connectedUsers = new Map(); // Store connected users
+
+io.on("connection", (socket) => {
+  console.log("🔌 User connected:", socket.id);
+
+  // User joins their personal room for notifications
+  socket.on("join_user_room", (userData) => {
+    const { userId, userType } = userData;
+    socket.join(`user_${userId}`);
+    connectedUsers.set(socket.id, { userId, userType });
+    console.log(`👤 ${userType} ${userId} joined their room`);
+
+    // Notify user they're online
+    socket.broadcast.emit("user_online", { userId, userType });
+  });
+
+  // Join specific conversation
+  socket.on("join_conversation", (conversationId) => {
+    socket.join(`conversation_${conversationId}`);
+    console.log(`💬 User joined conversation ${conversationId}`);
+  });
+
+  // Handle sending messages
+  socket.on("send_message", async (messageData) => {
+    try {
+      const {
+        conversationId,
+        senderId,
+        senderModel,
+        receiverId,
+        receiverModel,
+        message,
+        tempId,
+      } = messageData;
+
+      // Save message to database
+      const newMessage = new Message({
+        conversationId,
+        senderId,
+        senderModel,
+        receiverId,
+        receiverModel,
+        message,
+        messageType: "text",
+      });
+
+      const savedMessage = await newMessage.save();
+
+      // Update conversation
+      await Conversation.findByIdAndUpdate(conversationId, {
+        lastMessage: savedMessage._id,
+        lastActivity: new Date(),
+      });
+
+      // Populate message with sender info
+      const populatedMessage = await Message.findById(savedMessage._id)
+        .populate("senderId", "firstname lastname businessName username email")
+        .populate(
+          "receiverId",
+          "firstname lastname businessName username email"
+        );
+
+      // Send to conversation participants
+      socket
+        .to(`conversation_${conversationId}`)
+        .emit("receive_message", populatedMessage);
+
+      // Send to receiver's personal room (for notifications)
+      socket.to(`user_${receiverId}`).emit("new_message_notification", {
+        conversationId,
+        sender: populatedMessage.senderId,
+        message: populatedMessage.message,
+        timestamp: populatedMessage.createdAt,
+      });
+
+      // Confirm message sent to sender
+      socket.emit("message_sent", {
+        tempId,
+        messageId: savedMessage._id,
+        message: populatedMessage,
+      });
+    } catch (error) {
+      console.error("❌ Error handling message:", error);
+      socket.emit("message_error", {
+        error: "Failed to send message",
+        tempId: messageData.tempId,
+      });
+    }
+  });
+
+  // Handle typing indicators
+  socket.on("typing", (data) => {
+    socket.to(`conversation_${data.conversationId}`).emit("user_typing", data);
+  });
+
+  socket.on("stop_typing", (data) => {
+    socket
+      .to(`conversation_${data.conversationId}`)
+      .emit("user_stop_typing", data);
+  });
+
+  // Mark messages as read
+  socket.on("mark_messages_read", async (data) => {
+    try {
+      const { conversationId, userId } = data;
+
+      await Message.updateMany(
+        {
+          conversationId: conversationId,
+          receiverId: userId,
+          isRead: false,
+        },
+        {
+          isRead: true,
+          readAt: new Date(),
+        }
+      );
+
+      socket.to(`conversation_${conversationId}`).emit("messages_read", {
+        conversationId,
+        readBy: userId,
+      });
+    } catch (error) {
+      console.error("❌ Error marking messages as read:", error);
+    }
+  });
+
+  // Handle user disconnect
+  socket.on("disconnect", () => {
+    const userData = connectedUsers.get(socket.id);
+    if (userData) {
+      socket.broadcast.emit("user_offline", userData);
+      connectedUsers.delete(socket.id);
+      console.log(`👋 User ${userData.userId} disconnected`);
+    } else {
+      console.log("🔌 User disconnected:", socket.id);
+    }
+  });
+});
+
+// --- Messaging API Routes ---
+
+// Create or get conversation between two users
+app.post("/api/conversations", async (req, res) => {
+  try {
+    const { userId, userModel, targetId, targetModel } = req.body;
+
+    console.log("💬 Creating/Getting conversation:", {
+      userId,
+      userModel,
+      targetId: targetId,
+      targetModel,
+      customerToStore: userModel === "Customer" && targetModel === "MSME",
+    });
+
+    if (!userId || !userModel || !targetId || !targetModel) {
+      console.log("❌ Validation failed - missing required fields");
+      return res.status(400).json({
+        success: false,
+        error: "All user details are required",
+      });
+    }
+
+    const conversation = await Conversation.findOrCreateConversation(
+      userId,
+      userModel,
+      targetId,
+      targetModel
+    );
+
+    console.log("✅ Conversation created/found:", {
+      conversationId: conversation._id,
+      participants: conversation.participants.length,
+      storeId: targetModel === "MSME" ? targetId : userId,
+      customerId: userModel === "Customer" ? userId : targetId,
+    });
+
+    res.json({
+      success: true,
+      conversation,
+    });
+  } catch (error) {
+    console.error("❌ Error creating/getting conversation:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Get user's conversations
+app.get("/api/users/:userId/conversations", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { userModel } = req.query;
+
+    if (!userModel) {
+      return res.status(400).json({
+        success: false,
+        error: "userModel query parameter is required",
+      });
+    }
+
+    const conversations = await Conversation.find({
+      "participants.userId": userId,
+      isActive: true,
+    })
+      .populate([
+        {
+          path: "participants.userId",
+          select: "firstname lastname businessName username email",
+        },
+        { path: "lastMessage" },
+      ])
+      .sort({ lastActivity: -1 });
+
+    // Get unread message counts for each conversation
+    const conversationsWithUnread = await Promise.all(
+      conversations.map(async (conversation) => {
+        const unreadCount = await Message.countDocuments({
+          conversationId: conversation._id,
+          receiverId: userId,
+          isRead: false,
+          isDeleted: false,
+        });
+
+        // Find the other participant
+        const otherParticipant = conversation.participants.find(
+          (p) => p.userId._id.toString() !== userId.toString()
+        );
+
+        return {
+          ...conversation.toObject(),
+          unreadCount,
+          otherParticipant: otherParticipant
+            ? {
+                id: otherParticipant.userId._id,
+                name:
+                  otherParticipant.userModel === "Customer"
+                    ? `${otherParticipant.userId.firstname} ${otherParticipant.userId.lastname}`
+                    : otherParticipant.userId.businessName,
+                username: otherParticipant.userId.username,
+                email: otherParticipant.userId.email,
+                userType: otherParticipant.userModel.toLowerCase(),
+              }
+            : null,
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      conversations: conversationsWithUnread,
+    });
+  } catch (error) {
+    console.error("Error fetching conversations:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Get messages for a conversation
+app.get("/api/conversations/:conversationId/messages", async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const { page = 1, limit = 50 } = req.query;
+
+    const messages = await Message.find({
+      conversationId: conversationId,
+      isDeleted: false,
+    })
+      .populate("senderId", "firstname lastname businessName username email")
+      .populate("receiverId", "firstname lastname businessName username email")
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const totalMessages = await Message.countDocuments({
+      conversationId: conversationId,
+      isDeleted: false,
+    });
+
+    res.json({
+      success: true,
+      messages: messages.reverse(), // Reverse to show oldest first
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total: totalMessages,
+        hasMore: page * limit < totalMessages,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Mark messages as read
+app.patch("/api/conversations/:conversationId/read", async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        error: "userId is required",
+      });
+    }
+
+    const result = await Message.updateMany(
+      {
+        conversationId: conversationId,
+        receiverId: userId,
+        isRead: false,
+      },
+      {
+        isRead: true,
+        readAt: new Date(),
+      }
+    );
+
+    res.json({
+      success: true,
+      message: "Messages marked as read",
+      modifiedCount: result.modifiedCount,
+    });
+  } catch (error) {
+    console.error("Error marking messages as read:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Send a message (HTTP endpoint - also handled by Socket.IO)
+app.post("/api/conversations/:conversationId/messages", async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const {
+      senderId,
+      senderModel,
+      receiverId,
+      receiverModel,
+      message,
+      messageType = "text",
+    } = req.body;
+
+    if (
+      !senderId ||
+      !senderModel ||
+      !receiverId ||
+      !receiverModel ||
+      !message
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: "All message fields are required",
+      });
+    }
+
+    const newMessage = new Message({
+      conversationId,
+      senderId,
+      senderModel,
+      receiverId,
+      receiverModel,
+      message,
+      messageType,
+    });
+
+    const savedMessage = await newMessage.save();
+
+    // Update conversation last activity
+    await Conversation.findByIdAndUpdate(conversationId, {
+      lastMessage: savedMessage._id,
+      lastActivity: new Date(),
+    });
+
+    // Populate sender info
+    const populatedMessage = await Message.findById(savedMessage._id)
+      .populate("senderId", "firstname lastname businessName username email")
+      .populate("receiverId", "firstname lastname businessName username email");
+
+    // Emit via Socket.IO to real-time users
+    io.to(`conversation_${conversationId}`).emit(
+      "receive_message",
+      populatedMessage
+    );
+    io.to(`user_${receiverId}`).emit("new_message_notification", {
+      conversationId,
+      sender: populatedMessage.senderId,
+      message: populatedMessage.message,
+      timestamp: populatedMessage.createdAt,
+    });
+
+    res.json({
+      success: true,
+      message: populatedMessage,
+    });
+  } catch (error) {
+    console.error("Error sending message:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Get unread message count for a user
+app.get("/api/users/:userId/unread-count", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const unreadCount = await Message.countDocuments({
+      receiverId: userId,
+      isRead: false,
+      isDeleted: false,
+    });
+
+    res.json({
+      success: true,
+      unreadCount,
+    });
+  } catch (error) {
+    console.error("Error fetching unread count:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Delete a conversation
+app.delete("/api/conversations/:conversationId", async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    // Delete all messages in the conversation
+    await Message.deleteMany({ conversationId: conversationId });
+
+    // Delete the conversation
+    const deletedConversation = await Conversation.findByIdAndDelete(
+      conversationId
+    );
+
+    if (!deletedConversation) {
+      return res.status(404).json({
+        success: false,
+        message: "Conversation not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Conversation deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting conversation:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 // --- Start Server ---
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`🚀 Server running at http://localhost:${port}`);
+  console.log(`🔌 Socket.IO enabled for real-time messaging`);
 });

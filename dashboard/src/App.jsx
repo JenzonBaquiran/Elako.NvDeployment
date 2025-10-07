@@ -218,6 +218,14 @@ function App() {
               } 
             />
             <Route 
+              path="/customer-message/:storeId" 
+              element={
+                <ProtectedRoute allowedUserTypes={['customer']}>
+                  <CustomerMessage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="/customer-profile" 
               element={
                 <ProtectedRoute allowedUserTypes={['customer']}>

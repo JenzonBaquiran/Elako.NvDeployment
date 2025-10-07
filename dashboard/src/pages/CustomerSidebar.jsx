@@ -162,7 +162,7 @@ const CustomerSidebar = ({ onSidebarToggle }) => {
               </Link>
             </li>
             <li className="customer-sidebar__nav-item">
-              <Link to="/customer-message" className={`customer-sidebar__nav-link ${location.pathname === '/customer-orders' ? 'customer-sidebar__nav-link--active' : ''}`} title="Order History" onClick={handleIconClick}>
+              <Link to="/customer-message" className={`customer-sidebar__nav-link ${location.pathname === '/customer-message' ? 'customer-sidebar__nav-link--active' : ''}`} title="Messages" onClick={handleIconClick}>
                 <HistoryIcon className="customer-sidebar__icon" />
                 <span className="customer-sidebar__text">Messages</span>
               </Link>

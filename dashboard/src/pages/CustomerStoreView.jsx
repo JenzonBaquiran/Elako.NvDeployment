@@ -263,17 +263,43 @@ const CustomerStoreView = () => {
   };
 
   const handleChatClick = () => {
+    console.log('🔍 Chat button clicked - Debug info:', {
+      user: !!user,
+      userDetails: user ? { id: user._id || user.id, name: `${user.firstname} ${user.lastname}` } : null,
+      storeId: storeId,
+      storeName: store?.businessName,
+      storeExists: !!store
+    });
+
     if (!user) {
+      console.log('❌ User not authenticated');
       showError('Please log in to chat with this store', 'Login Required');
       return;
     }
-    // Navigate to chat page with store info
-    navigate(`/customer/chat/${storeId}`, { 
-      state: { 
-        storeName: store.businessName,
-        storeId: storeId 
-      } 
+
+    if (!storeId) {
+      console.log('❌ Store ID not available');
+      showError('Store information not available', 'Error');
+      return;
+    }
+
+    if (!store) {
+      console.log('❌ Store data not loaded');
+      showError('Store information not loaded', 'Error');
+      return;
+    }
+    
+    console.log('✅ Starting conversation with store:', {
+      storeId: storeId,
+      storeName: store.businessName,
+      customerId: user._id || user.id
     });
+
+    // Show loading indicator while navigating
+    showSuccess(`Starting conversation with ${store?.businessName || 'store'}...`, 'Chat');
+    
+    // Navigate to customer messages with store ID (matches App.jsx route)
+    navigate(`/customer-message/${storeId}`);
   };
 
   const handleFollowToggle = async () => {

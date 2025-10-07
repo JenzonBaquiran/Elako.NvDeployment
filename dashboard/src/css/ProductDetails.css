@@ -489,6 +489,61 @@
   color: #dc3545;
 }
 
+/* Store Section & Chat Button */
+.product-details-store-section {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 24px;
+  margin: 24px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.product-details-store-info h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3436;
+}
+
+.product-details-store-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #636e72;
+}
+
+.product-details-chat-button {
+  background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+  border: none;
+  color: white;
+  padding: 14px 28px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+}
+
+.product-details-chat-button:hover {
+  background: linear-gradient(135deg, #00a085 0%, #019874 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
+}
+
+.product-details-chat-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(0, 184, 148, 0.3);
+}
+
 /* Responsive design */
 @media (max-width: 1200px) {
   .product-details-content {
@@ -891,5 +946,16 @@
   .product-details-size-btn {
     padding: 6px 12px;
     font-size: 13px;
+  }
+  
+  .product-details-store-section {
+    padding: 16px;
+    margin: 16px 0;
+  }
+  
+  .product-details-chat-button {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 16px;
   }
 }

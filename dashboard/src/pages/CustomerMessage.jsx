@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import CustomerSidebar from './CustomerSidebar';
+import Notification from '../components/Notification';
 import SearchIcon from '@mui/icons-material/Search';
 import SendIcon from '@mui/icons-material/Send';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -31,6 +32,15 @@ const CustomerMessage = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [notification, setNotification] = useState({
+    isVisible: false,
+    type: 'info',
+    title: '',
+    message: '',
+    showConfirmButtons: false,
+    onConfirm: () => {},
+    onCancel: () => {}
+  });
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -139,6 +149,13 @@ const CustomerMessage = () => {
             ...msg,
             isRead: msg.receiverId === data.readBy ? true : msg.isRead
           })));
+        }
+        
+        // Update conversation unread count when messages are read
+        if (data.readBy === currentUser.id) {
+          setConversations(prev => prev.map(conv =>
+            conv._id === data.conversationId ? { ...conv, unreadCount: 0 } : conv
+          ));
         }
       });
 
@@ -271,13 +288,25 @@ const CustomerMessage = () => {
       // Join conversation room for real-time updates
       socketService.joinConversation(conversationId);
       
-      // Mark messages as read
-      if (messages.some(msg => msg.receiverId === currentUser.id && !msg.isRead)) {
-        await messageService.markMessagesAsRead(conversationId, currentUser.id);
-        socketService.markMessagesRead({
-          conversationId,
-          userId: currentUser.id
-        });
+      // Mark messages as read and update unread count
+      const unreadMessages = messages.filter(msg => msg.receiverId === currentUser.id && !msg.isRead);
+      if (unreadMessages.length > 0) {
+        try {
+          await messageService.markMessagesAsRead(conversationId, currentUser.id);
+          socketService.markMessagesRead({
+            conversationId,
+            userId: currentUser.id
+          });
+          
+          // Update the conversation's unread count in the local state after successful API call
+          setConversations(prev => prev.map(conv =>
+            conv._id === conversationId ? { ...conv, unreadCount: 0 } : conv
+          ));
+          
+          console.log(`✅ Marked ${unreadMessages.length} messages as read`);
+        } catch (error) {
+          console.error('❌ Error marking messages as read:', error);
+        }
       }
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -309,35 +338,63 @@ const CustomerMessage = () => {
     setSelectedChat(conversation);
     setMessages([]);
     loadMessages(conversation._id);
-    
-    // Reset unread count for this conversation
-    setConversations(prev => prev.map(conv =>
-      conv._id === conversation._id ? { ...conv, unreadCount: 0 } : conv
-    ));
+    // Note: unread count will be reset in loadMessages after messages are actually marked as read
   };
 
-  const handleDeleteConversation = async () => {
+  const handleDeleteConversation = () => {
     if (!selectedChat) return;
     
-    const confirmDelete = window.confirm('Are you sure you want to delete this conversation? This action cannot be undone.');
+    // Show confirmation notification
+    setNotification({
+      isVisible: true,
+      type: 'confirm',
+      title: 'Delete Conversation',
+      message: 'Are you sure you want to delete this conversation? This action cannot be undone.',
+      showConfirmButtons: true,
+      onConfirm: performDeleteConversation,
+      onCancel: () => setNotification(prev => ({ ...prev, isVisible: false }))
+    });
+  };
+
+  const performDeleteConversation = async () => {
+    if (!selectedChat) return;
     
-    if (confirmDelete) {
-      try {
-        await messageService.deleteConversation(selectedChat._id);
-        
-        // Remove from conversations list
-        setConversations(prev => prev.filter(conv => conv._id !== selectedChat._id));
-        
-        // Clear selected chat and messages
-        setSelectedChat(null);
-        setMessages([]);
-        setShowDropdown(false);
-        
-        console.log('✅ Conversation deleted successfully');
-      } catch (error) {
-        console.error('❌ Error deleting conversation:', error);
-        alert('Failed to delete conversation. Please try again.');
-      }
+    try {
+      await messageService.deleteConversation(selectedChat._id);
+      
+      // Remove from conversations list
+      setConversations(prev => prev.filter(conv => conv._id !== selectedChat._id));
+      
+      // Clear selected chat and messages
+      setSelectedChat(null);
+      setMessages([]);
+      setShowDropdown(false);
+      
+      // Show success notification
+      setNotification({
+        isVisible: true,
+        type: 'success',
+        title: 'Success',
+        message: 'Conversation deleted successfully',
+        showConfirmButtons: false,
+        onConfirm: () => {},
+        onCancel: () => {}
+      });
+      
+      console.log('✅ Conversation deleted successfully');
+    } catch (error) {
+      console.error('❌ Error deleting conversation:', error);
+      
+      // Show error notification  
+      setNotification({
+        isVisible: true,
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to delete conversation. Please try again.',
+        showConfirmButtons: false,
+        onConfirm: () => {},
+        onCancel: () => {}
+      });
     }
   };
 
@@ -555,7 +612,7 @@ const CustomerMessage = () => {
                       <span className="customer-messages__conversation-time">
                         {formatTime(conversation.lastActivity)}
                       </span>
-                      {conversation.unreadCount > 0 && (
+                      {conversation.unreadCount > 0 && selectedChat?._id !== conversation._id && (
                         <div className="customer-messages__unread-indicator">
                           {conversation.unreadCount}
                         </div>
@@ -702,6 +759,19 @@ const CustomerMessage = () => {
         </div>
       </div>
       </div>
+      
+      {/* Notification Component */}
+      <Notification
+        type={notification.type}
+        title={notification.title}
+        message={notification.message}
+        isVisible={notification.isVisible}
+        showConfirmButtons={notification.showConfirmButtons}
+        onClose={() => setNotification(prev => ({ ...prev, isVisible: false }))}
+        onConfirm={notification.onConfirm}
+        onCancel={notification.onCancel}
+        duration={4000}
+      />
     </div>
   );
 };

@@ -38,6 +38,24 @@ const customerNotificationSchema = new mongoose.Schema(
       default: "product_detail",
     },
 
+    // Message ID for message notifications
+    messageId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+      required: function () {
+        return this.type === "new_message";
+      },
+    },
+
+    // Conversation ID for message notifications
+    conversationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Conversation",
+      required: function () {
+        return this.type === "new_message";
+      },
+    },
+
     // Additional metadata for notifications
     metadata: {
       oldPrice: Number, // For price drop notifications
@@ -45,6 +63,8 @@ const customerNotificationSchema = new mongoose.Schema(
       discountPercentage: Number, // For promotion notifications
       stockLevel: Number, // For stock alerts
       orderStatus: String, // For order status updates
+      senderName: String, // For message notifications
+      messagePreview: String, // For message notifications
     },
 
     // Type of notification
@@ -56,6 +76,7 @@ const customerNotificationSchema = new mongoose.Schema(
         "stock_alert",
         "store_promotion",
         "order_status",
+        "new_message",
       ],
       required: true,
     },
@@ -105,6 +126,38 @@ customerNotificationSchema.statics.createNewProductNotification =
       type: "new_product",
       title: "New Product Available!",
       message: `${storeName} has added a new product: ${productName}`,
+    });
+  };
+
+// Static method to create new message notification
+customerNotificationSchema.statics.createNewMessageNotification =
+  async function (
+    customerId,
+    storeId,
+    messageId,
+    conversationId,
+    senderName,
+    messageText
+  ) {
+    const messagePreview =
+      messageText.length > 50
+        ? messageText.substring(0, 50) + "..."
+        : messageText;
+
+    return this.create({
+      customerId,
+      storeId,
+      messageId,
+      conversationId,
+      type: "new_message",
+      title: "New Message",
+      message: `${senderName} sent you a message: ${messagePreview}`,
+      actionType: "custom_url",
+      actionUrl: `/customer-message?storeId=${storeId}`,
+      metadata: {
+        senderName,
+        messagePreview,
+      },
     });
   };
 

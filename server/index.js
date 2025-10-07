@@ -5171,6 +5171,37 @@ io.on("connection", (socket) => {
         timestamp: populatedMessage.createdAt,
       });
 
+      // Create persistent notification in database
+      try {
+        if (receiverModel === "Customer") {
+          // Create notification for customer
+          await CustomerNotification.createNewMessageNotification(
+            receiverId,
+            senderId,
+            savedMessage._id,
+            conversationId,
+            populatedMessage.senderId.businessName ||
+              populatedMessage.senderId.username,
+            populatedMessage.message
+          );
+        } else if (receiverModel === "MSME") {
+          // Create notification for MSME
+          await Notification.createNewMessageNotification(
+            receiverId,
+            senderId,
+            savedMessage._id,
+            conversationId,
+            `${populatedMessage.senderId.firstname} ${populatedMessage.senderId.lastname}`,
+            populatedMessage.message
+          );
+        }
+      } catch (notificationError) {
+        console.error(
+          "❌ Error creating message notification:",
+          notificationError
+        );
+      }
+
       // Confirm message sent to sender
       socket.emit("message_sent", {
         tempId,
@@ -5544,6 +5575,174 @@ app.delete("/api/conversations/:conversationId", async (req, res) => {
     });
   } catch (error) {
     console.error("Error deleting conversation:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Get customer notifications
+app.get("/api/customers/:customerId/notifications", async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    const { page = 1, limit = 20 } = req.query;
+    const skip = (page - 1) * limit;
+
+    const notifications = await CustomerNotification.getCustomerNotifications(
+      customerId,
+      parseInt(limit),
+      parseInt(skip)
+    );
+
+    const unreadCount = await CustomerNotification.getUnreadCount(customerId);
+
+    res.json({
+      success: true,
+      notifications,
+      unreadCount,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        hasMore: notifications.length === parseInt(limit),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching customer notifications:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Get MSME notifications
+app.get("/api/msme/:msmeId/notifications", async (req, res) => {
+  try {
+    const { msmeId } = req.params;
+    const { page = 1, limit = 20 } = req.query;
+    const skip = (page - 1) * limit;
+
+    const notifications = await Notification.find({ storeId: msmeId })
+      .populate("customerId", "firstname lastname email")
+      .populate("messageId", "message createdAt")
+      .populate("conversationId")
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip(parseInt(skip));
+
+    const unreadCount = await Notification.countDocuments({
+      storeId: msmeId,
+      isRead: false,
+    });
+
+    res.json({
+      success: true,
+      notifications,
+      unreadCount,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        hasMore: notifications.length === parseInt(limit),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching MSME notifications:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Mark customer notification as read
+app.patch(
+  "/api/customers/:customerId/notifications/:notificationId/read",
+  async (req, res) => {
+    try {
+      const { customerId, notificationId } = req.params;
+
+      const notification = await CustomerNotification.markAsRead(
+        notificationId,
+        customerId
+      );
+
+      if (!notification) {
+        return res.status(404).json({
+          success: false,
+          message: "Notification not found",
+        });
+      }
+
+      res.json({
+        success: true,
+        notification,
+      });
+    } catch (error) {
+      console.error("Error marking customer notification as read:", error);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  }
+);
+
+// Mark MSME notification as read
+app.patch(
+  "/api/msme/:msmeId/notifications/:notificationId/read",
+  async (req, res) => {
+    try {
+      const { msmeId, notificationId } = req.params;
+
+      const notification = await Notification.findOneAndUpdate(
+        { _id: notificationId, storeId: msmeId },
+        { isRead: true },
+        { new: true }
+      );
+
+      if (!notification) {
+        return res.status(404).json({
+          success: false,
+          message: "Notification not found",
+        });
+      }
+
+      res.json({
+        success: true,
+        notification,
+      });
+    } catch (error) {
+      console.error("Error marking MSME notification as read:", error);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  }
+);
+
+// Mark all customer notifications as read
+app.patch(
+  "/api/customers/:customerId/notifications/mark-all-read",
+  async (req, res) => {
+    try {
+      const { customerId } = req.params;
+
+      await CustomerNotification.markAllAsRead(customerId);
+
+      res.json({
+        success: true,
+        message: "All notifications marked as read",
+      });
+    } catch (error) {
+      console.error("Error marking all customer notifications as read:", error);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  }
+);
+
+// Mark all MSME notifications as read
+app.patch("/api/msme/:msmeId/notifications/mark-all-read", async (req, res) => {
+  try {
+    const { msmeId } = req.params;
+
+    await Notification.updateMany(
+      { storeId: msmeId, isRead: false },
+      { isRead: true }
+    );
+
+    res.json({
+      success: true,
+      message: "All notifications marked as read",
+    });
+  } catch (error) {
+    console.error("Error marking all MSME notifications as read:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });

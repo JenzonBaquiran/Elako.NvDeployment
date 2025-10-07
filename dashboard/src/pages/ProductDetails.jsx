@@ -79,19 +79,6 @@ const ProductDetails = () => {
     }
   };
 
-  const handleChatWithStore = () => {
-    if (!product.msmeId || !product.msmeId._id) {
-      console.error('Store information not available');
-      return;
-    }
-
-    const storeName = product.msmeId.businessName || product.msmeId.username || 'store';
-    console.log(`Starting conversation with store: ${storeName} (ID: ${product.msmeId._id})`);
-
-    // Navigate to customer messages with store ID as URL parameter (matches App.jsx route)
-    navigate(`/customer-message/${product.msmeId._id}`);
-  };
-
   if (loading) {
     return <div className="product-details-container"><Header /><div className="loading-state">Loading...</div></div>;
   }
@@ -247,23 +234,9 @@ const ProductDetails = () => {
               </span>
             </div>
 
-            {/* Store Information and Chat Button */}
-            {product.msmeId && isAuthenticated && userType === 'customer' && (
-              <div className="product-details-store-section">
-                <div className="product-details-store-info">
-                  <h4>Store Information</h4>
-                  <p className="product-details-store-name">
-                    {product.msmeId.businessName || product.msmeId.username || 'Unknown Store'}
-                  </p>
-                </div>
-                <button 
-                  className="product-details-chat-button"
-                  onClick={() => handleChatWithStore()}
-                >
-                  💬 Chat with Store
-                </button>
-              </div>
-            )}
+            {/* Store Information */}
+           
+          
           </div>
         </div>
 

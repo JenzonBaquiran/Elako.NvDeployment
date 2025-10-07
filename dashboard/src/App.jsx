@@ -30,6 +30,7 @@ import CustomerMessage from "./pages/CustomerMessage";
 import CustomerProfile from "./pages/CustomerProfile";
 import CustomerNotifications from "./pages/CustomerNotifications";
 import ProductDetails from "./pages/ProductDetails";
+import ForgotPassword from "./pages/ForgotPassword";
 
 
 
@@ -43,6 +44,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             
             {/* Admin Protected Routes */}
             <Route 

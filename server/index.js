@@ -22,6 +22,7 @@ const Conversation = require("./models/conversation.model");
 
 // Import Services
 const CustomerNotificationService = require("./services/customerNotificationService");
+const { generateOTP, sendOTPEmail } = require("./services/emailService");
 
 const fs = require("fs");
 
@@ -5744,6 +5745,284 @@ app.patch("/api/msme/:msmeId/notifications/mark-all-read", async (req, res) => {
   } catch (error) {
     console.error("Error marking all MSME notifications as read:", error);
     res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// --- Password Reset with OTP Routes ---
+// In-memory storage for OTPs (in production, use Redis or database)
+const otpStorage = new Map();
+
+// Clean up expired OTPs every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of otpStorage.entries()) {
+    if (now > value.expiresAt) {
+      otpStorage.delete(key);
+    }
+  }
+}, 5 * 60 * 1000);
+
+// Send OTP for password reset
+app.post("/api/forgot-password", async (req, res) => {
+  try {
+    const { email, userType } = req.body;
+
+    if (!email || !userType) {
+      return res.status(400).json({
+        success: false,
+        error: "Email and user type are required",
+      });
+    }
+
+    let user = null;
+    let username = "";
+
+    // Find user based on userType
+    if (userType === "customer") {
+      user = await Customer.findOne({ email });
+      if (user) {
+        username = user.username;
+      }
+    } else if (userType === "msme") {
+      user = await MSME.findOne({ email });
+      if (user) {
+        username = user.username;
+      }
+    }
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: "No account found with this email address",
+      });
+    }
+
+    // Generate OTP
+    const otp = generateOTP();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes from now
+
+    // Store OTP with user info
+    const otpKey = `${email}-${userType}`;
+    otpStorage.set(otpKey, {
+      otp,
+      email,
+      userType,
+      userId: user._id,
+      expiresAt,
+      attempts: 0,
+    });
+
+    // Send OTP email
+    const emailResult = await sendOTPEmail(email, otp, username);
+
+    if (!emailResult.success) {
+      return res.status(500).json({
+        success: false,
+        error: "Failed to send OTP email. Please try again.",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "OTP sent successfully to your email address",
+      expiresIn: 10, // minutes
+    });
+  } catch (error) {
+    console.error("Error in forgot password:", error);
+    res.status(500).json({
+      success: false,
+      error: "Server error. Please try again later.",
+    });
+  }
+});
+
+// Verify OTP and reset password
+app.post("/api/reset-password", async (req, res) => {
+  try {
+    const { email, userType, otp, newPassword } = req.body;
+
+    if (!email || !userType || !otp || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        error: "All fields are required",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        error: "Password must be at least 6 characters long",
+      });
+    }
+
+    const otpKey = `${email}-${userType}`;
+    const storedOTP = otpStorage.get(otpKey);
+
+    if (!storedOTP) {
+      return res.status(400).json({
+        success: false,
+        error: "OTP not found or expired. Please request a new one.",
+      });
+    }
+
+    // Check if OTP is expired
+    if (Date.now() > storedOTP.expiresAt) {
+      otpStorage.delete(otpKey);
+      return res.status(400).json({
+        success: false,
+        error: "OTP has expired. Please request a new one.",
+      });
+    }
+
+    // Check attempts (max 3 attempts)
+    if (storedOTP.attempts >= 3) {
+      otpStorage.delete(otpKey);
+      return res.status(400).json({
+        success: false,
+        error: "Too many incorrect attempts. Please request a new OTP.",
+      });
+    }
+
+    // Verify OTP
+    if (storedOTP.otp !== otp) {
+      storedOTP.attempts += 1;
+      return res.status(400).json({
+        success: false,
+        error: `Invalid OTP. ${3 - storedOTP.attempts} attempts remaining.`,
+      });
+    }
+
+    // OTP is valid, update password
+    let updateResult = null;
+
+    if (userType === "customer") {
+      updateResult = await Customer.findByIdAndUpdate(
+        storedOTP.userId,
+        {
+          password: newPassword, // In production, hash this password
+          updatedAt: new Date(),
+        },
+        { new: true }
+      );
+    } else if (userType === "msme") {
+      updateResult = await MSME.findByIdAndUpdate(
+        storedOTP.userId,
+        {
+          password: newPassword, // In production, hash this password
+          updatedAt: new Date(),
+        },
+        { new: true }
+      );
+    }
+
+    if (!updateResult) {
+      return res.status(500).json({
+        success: false,
+        error: "Failed to update password. Please try again.",
+      });
+    }
+
+    // Remove OTP from storage after successful reset
+    otpStorage.delete(otpKey);
+
+    res.json({
+      success: true,
+      message:
+        "Password reset successfully. You can now login with your new password.",
+    });
+  } catch (error) {
+    console.error("Error in reset password:", error);
+    res.status(500).json({
+      success: false,
+      error: "Server error. Please try again later.",
+    });
+  }
+});
+
+// Resend OTP
+app.post("/api/resend-otp", async (req, res) => {
+  try {
+    const { email, userType } = req.body;
+
+    if (!email || !userType) {
+      return res.status(400).json({
+        success: false,
+        error: "Email and user type are required",
+      });
+    }
+
+    const otpKey = `${email}-${userType}`;
+    const existingOTP = otpStorage.get(otpKey);
+
+    // Check if there's a recent OTP (prevent spam)
+    if (
+      existingOTP &&
+      Date.now() - (existingOTP.expiresAt - 10 * 60 * 1000) < 60 * 1000
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: "Please wait at least 1 minute before requesting a new OTP",
+      });
+    }
+
+    // Find user
+    let user = null;
+    let username = "";
+
+    if (userType === "customer") {
+      user = await Customer.findOne({ email });
+      if (user) {
+        username = user.username;
+      }
+    } else if (userType === "msme") {
+      user = await MSME.findOne({ email });
+      if (user) {
+        username = user.username;
+      }
+    }
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: "No account found with this email address",
+      });
+    }
+
+    // Generate new OTP
+    const otp = generateOTP();
+    const expiresAt = Date.now() + 10 * 60 * 1000;
+
+    // Update OTP storage
+    otpStorage.set(otpKey, {
+      otp,
+      email,
+      userType,
+      userId: user._id,
+      expiresAt,
+      attempts: 0,
+    });
+
+    // Send new OTP email
+    const emailResult = await sendOTPEmail(email, otp, username);
+
+    if (!emailResult.success) {
+      return res.status(500).json({
+        success: false,
+        error: "Failed to send OTP email. Please try again.",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "New OTP sent successfully to your email address",
+      expiresIn: 10,
+    });
+  } catch (error) {
+    console.error("Error in resend OTP:", error);
+    res.status(500).json({
+      success: false,
+      error: "Server error. Please try again later.",
+    });
   }
 });
 

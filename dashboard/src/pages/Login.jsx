@@ -207,7 +207,11 @@ function Login() {
                 </span>
                 <span 
                   className="login-link"
-                  style={{ opacity: loading ? 0.5 : 1 }}
+                  style={{ 
+                    cursor: loading ? "not-allowed" : "pointer",
+                    opacity: loading ? 0.5 : 1 
+                  }}
+                  onClick={() => !loading && navigate("/forgot-password")}
                 >
                   Forgot Password?
                 </span>

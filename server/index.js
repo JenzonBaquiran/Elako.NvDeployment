@@ -3105,18 +3105,19 @@ app.get("/api/msme/:msmeId/dashboard", async (req, res) => {
   try {
     const { msmeId } = req.params;
 
+    // Get MSME data first to access rating information
+    const msme = await MSME.findById(msmeId);
+    if (!msme) {
+      return res.status(404).json({
+        success: false,
+        error: "MSME not found",
+      });
+    }
+
     let dashboard = await Dashboard.findByMsmeId(msmeId);
 
     // If no dashboard exists, create a default one
     if (!dashboard) {
-      const msme = await MSME.findById(msmeId);
-      if (!msme) {
-        return res.status(404).json({
-          success: false,
-          error: "MSME not found",
-        });
-      }
-
       dashboard = new Dashboard({
         msmeId,
         businessName: msme.businessName || msme.username,
@@ -3142,14 +3143,22 @@ app.get("/api/msme/:msmeId/dashboard", async (req, res) => {
           fda: false,
           others: false,
         },
-        rating: 4.0,
+        rating: msme.averageRating || 0,
       });
       await dashboard.save();
     }
 
+    // Always update dashboard with current MSME rating data
+    dashboard.rating = msme.averageRating || 0;
+    dashboard.totalRatings = msme.totalRatings || 0;
+
     res.json({
       success: true,
-      dashboard,
+      dashboard: {
+        ...dashboard.toObject(),
+        rating: msme.averageRating || 0,
+        totalRatings: msme.totalRatings || 0,
+      },
     });
   } catch (err) {
     console.error("Error fetching dashboard:", err);

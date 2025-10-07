@@ -374,6 +374,12 @@
   font-size: 0.9rem;
 }
 
+.rating-count {
+  color: #999;
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+
 /* Contact Section - Card Style */
 .contact-section {
   background: white;

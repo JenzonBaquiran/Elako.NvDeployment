@@ -41,6 +41,7 @@ const MsmeCustomizeDashboard = () => {
       otherAgencies: []
     },
     rating: 0,
+    totalRatings: 0,
     isPublic: true
   });
 
@@ -82,7 +83,9 @@ const MsmeCustomizeDashboard = () => {
             others: false
           },
           googleMapsUrl: data.dashboard.googleMapsUrl || '',
-          coordinates: data.dashboard.coordinates || { lat: null, lng: null }
+          coordinates: data.dashboard.coordinates || { lat: null, lng: null },
+          rating: data.dashboard.rating || 0,
+          totalRatings: data.dashboard.totalRatings || 0
         };
         setDashboardData(dashboardWithDefaults);
         // Set preview URLs for existing images
@@ -448,9 +451,14 @@ const MsmeCustomizeDashboard = () => {
               {/* Rating Display */}
               <div className="store-rating">
                 <div className="rating-stars">
-                  {renderStars(dashboardData.rating || 4)}
+                  {renderStars(dashboardData.rating || 0)}
                 </div>
-                <span className="rating-text">({dashboardData.rating || 4.0}/5.0)</span>
+                <span className="rating-text">
+                  ({dashboardData.rating ? dashboardData.rating.toFixed(1) : '0.0'}/5.0)
+                  {dashboardData.totalRatings > 0 && (
+                    <span className="rating-count"> • {dashboardData.totalRatings} rating{dashboardData.totalRatings !== 1 ? 's' : ''}</span>
+                  )}
+                </span>
               </div>
             </div>
           </div>

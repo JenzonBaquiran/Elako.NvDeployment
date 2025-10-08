@@ -23,6 +23,7 @@ const Conversation = require("./models/conversation.model");
 // Import Services
 const CustomerNotificationService = require("./services/customerNotificationService");
 const { generateOTP, sendOTPEmail } = require("./services/emailService");
+const StoreActivityNotificationService = require("./services/storeActivityNotificationService");
 
 const fs = require("fs");
 
@@ -1883,6 +1884,11 @@ app.post("/api/products", upload.array("pictures", 10), async (req, res) => {
         msmeId,
         newProduct._id
       );
+      // Also send email notifications
+      await StoreActivityNotificationService.notifyFollowersOfNewProduct(
+        msmeId,
+        newProduct._id
+      );
     } catch (notificationError) {
       console.error("Error sending customer notifications:", notificationError);
       // Continue with product creation even if notifications fail
@@ -2110,6 +2116,44 @@ app.put("/api/products/:id", upload.array("pictures", 10), async (req, res) => {
       },
       { new: true }
     );
+
+    // Check for price changes and availability changes to send notifications
+    try {
+      const oldPrice = existingProduct.price;
+      const newPrice = updatedProduct.price;
+      const oldAvailability = existingProduct.availability;
+      const newAvailability = updatedProduct.availability;
+
+      // Send price change notification if price changed
+      if (price && parseFloat(price) !== oldPrice) {
+        console.log(
+          `Price changed for product ${updatedProduct.productName}: ${oldPrice} -> ${newPrice}`
+        );
+        await StoreActivityNotificationService.notifyFollowersOfPriceChange(
+          updatedProduct.msmeId,
+          updatedProduct._id,
+          oldPrice,
+          newPrice
+        );
+      }
+
+      // Send availability notification if product became available
+      if (!oldAvailability && newAvailability) {
+        console.log(
+          `Product ${updatedProduct.productName} became available again`
+        );
+        await StoreActivityNotificationService.notifyFollowersOfProductAvailability(
+          updatedProduct.msmeId,
+          updatedProduct._id
+        );
+      }
+    } catch (notificationError) {
+      console.error(
+        "Error sending product update notifications:",
+        notificationError
+      );
+      // Continue with product update response even if notifications fail
+    }
 
     console.log("Product updated successfully:", {
       id: updatedProduct._id,
@@ -4957,6 +5001,30 @@ app.post("/api/msme/blog-posts", upload.single("media"), async (req, res) => {
 
     const savedPost = await newPost.save();
 
+    // Send email notifications to followers if the post is published
+    if (savedPost.status === "published") {
+      try {
+        await StoreActivityNotificationService.notifyFollowersOfNewBlogPost(
+          msmeId,
+          savedPost._id,
+          {
+            title: savedPost.title,
+            subtitle: savedPost.subtitle,
+            description: savedPost.description,
+            category: savedPost.category,
+            mediaUrl: savedPost.mediaUrl,
+            mediaType: savedPost.mediaType,
+          }
+        );
+      } catch (notificationError) {
+        console.error(
+          "Error sending blog post notifications:",
+          notificationError
+        );
+        // Continue with blog post creation response even if notifications fail
+      }
+    }
+
     res.json({
       success: true,
       message: "Blog post created successfully",
@@ -4989,6 +5057,15 @@ app.put(
         status,
       } = req.body;
 
+      // Get the original post to check status change
+      const originalPost = await MsmeBlogPost.findById(id);
+      if (!originalPost) {
+        return res.status(404).json({
+          success: false,
+          error: "Blog post not found",
+        });
+      }
+
       const updateData = {
         title,
         subtitle,
@@ -5011,11 +5088,31 @@ app.put(
         new: true,
       });
 
-      if (!updatedPost) {
-        return res.status(404).json({
-          success: false,
-          error: "Blog post not found",
-        });
+      // Send email notifications if the post was just published (status changed from draft to published)
+      if (
+        originalPost.status === "draft" &&
+        updatedPost.status === "published"
+      ) {
+        try {
+          await StoreActivityNotificationService.notifyFollowersOfNewBlogPost(
+            updatedPost.msmeId,
+            updatedPost._id,
+            {
+              title: updatedPost.title,
+              subtitle: updatedPost.subtitle,
+              description: updatedPost.description,
+              category: updatedPost.category,
+              mediaUrl: updatedPost.mediaUrl,
+              mediaType: updatedPost.mediaType,
+            }
+          );
+        } catch (notificationError) {
+          console.error(
+            "Error sending blog post publication notifications:",
+            notificationError
+          );
+          // Continue with blog post update response even if notifications fail
+        }
       }
 
       res.json({

@@ -119,7 +119,346 @@ const sendOTPEmail = async (email, otp, username) => {
   }
 };
 
+// Helper function to generate image HTML for emails
+const generateImageHTML = (imageUrl, altText, maxWidth = 300) => {
+  if (!imageUrl) return "";
+
+  // Handle different image types and sources
+  let finalImageUrl = imageUrl;
+
+  // If it's a local upload, construct the full URL
+  if (
+    imageUrl &&
+    !imageUrl.startsWith("http") &&
+    !imageUrl.startsWith("data:")
+  ) {
+    finalImageUrl = `${
+      process.env.SERVER_URL || "http://localhost:1337"
+    }/uploads/${imageUrl}`;
+  }
+
+  return `
+    <div style="text-align: center; margin: 20px 0;">
+      <img src="${finalImageUrl}" 
+           alt="${altText}" 
+           style="max-width: ${maxWidth}px; width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);" 
+           onerror="this.style.display='none'">
+    </div>
+  `;
+};
+
+// Helper function to generate video/YouTube embed HTML
+const generateMediaHTML = (mediaUrl, mediaType, title) => {
+  if (!mediaUrl) return "";
+
+  switch (mediaType) {
+    case "youtube":
+      // Extract YouTube video ID from URL
+      const youtubeMatch = mediaUrl.match(
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/
+      );
+      const videoId = youtubeMatch ? youtubeMatch[1] : null;
+
+      if (videoId) {
+        return `
+          <div style="text-align: center; margin: 20px 0;">
+            <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+              <iframe src="https://www.youtube.com/embed/${videoId}" 
+                      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" 
+                      allowfullscreen 
+                      title="${title}">
+              </iframe>
+            </div>
+            <p style="color: #666; font-size: 12px; margin-top: 5px;">▶️ Click to watch on YouTube</p>
+          </div>
+        `;
+      }
+      break;
+
+    case "video":
+      const videoUrl = mediaUrl.startsWith("http")
+        ? mediaUrl
+        : `${
+            process.env.SERVER_URL || "http://localhost:1337"
+          }/uploads/${mediaUrl}`;
+      return `
+        <div style="text-align: center; margin: 20px 0;">
+          <video controls 
+                 style="max-width: 400px; width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+            <source src="${videoUrl}" type="video/mp4">
+            <p style="color: #999;">Your email client doesn't support video playback.</p>
+          </video>
+        </div>
+      `;
+
+    case "image":
+      return generateImageHTML(mediaUrl, title, 400);
+
+    default:
+      return "";
+  }
+};
+
+// Send store activity notification email
+const sendStoreActivityEmail = async (
+  customerEmail,
+  customerName,
+  storeInfo,
+  activityData
+) => {
+  try {
+    let subject = "";
+    let activityMessage = "";
+    let actionButton = "";
+
+    switch (activityData.type) {
+      case "NEW_PRODUCT":
+        subject = `🆕 New Product from ${storeInfo.businessName}!`;
+        const productImageHTML = generateImageHTML(
+          activityData.productImage,
+          activityData.productName,
+          350
+        );
+        activityMessage = `
+          <h2 style="color: #4CAF50; margin-bottom: 20px;">New Product Alert!</h2>
+          <p style="color: #666; line-height: 1.6;">
+            Great news! <strong>${storeInfo.businessName}</strong> has added a new product that you might be interested in:
+          </p>
+          <div style="background-color: #f0f8f0; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            ${productImageHTML}
+            <h3 style="color: #2E7D32; margin: 0 0 10px 0;">${activityData.productName}</h3>
+            <p style="color: #666; margin: 5px 0;"><strong>Price:</strong> ₱${activityData.price}</p>
+            <p style="color: #666; margin: 5px 0;">${activityData.description}</p>
+          </div>
+        `;
+        actionButton = `
+          <a href="${
+            activityData.productUrl || "#"
+          }" style="background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+            View Product
+          </a>
+        `;
+        break;
+
+      case "PRICE_INCREASE":
+        subject = `📈 Price Update from ${storeInfo.businessName}`;
+        const priceIncreaseImageHTML = generateImageHTML(
+          activityData.productImage,
+          activityData.productName,
+          300
+        );
+        activityMessage = `
+          <h2 style="color: #FF9800; margin-bottom: 20px;">Price Update Notification</h2>
+          <p style="color: #666; line-height: 1.6;">
+            <strong>${storeInfo.businessName}</strong> has updated the price for one of their products:
+          </p>
+          <div style="background-color: #fff8e1; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            ${priceIncreaseImageHTML}
+            <h3 style="color: #F57C00; margin: 0 0 10px 0;">${activityData.productName}</h3>
+            <p style="color: #666; margin: 5px 0;">
+              <strong>Previous Price:</strong> <span style="text-decoration: line-through;">₱${activityData.oldPrice}</span>
+            </p>
+            <p style="color: #666; margin: 5px 0;">
+              <strong>New Price:</strong> <span style="color: #F57C00; font-weight: bold;">₱${activityData.newPrice}</span>
+            </p>
+          </div>
+        `;
+        actionButton = `
+          <a href="${
+            activityData.productUrl || "#"
+          }" style="background-color: #FF9800; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+            View Product
+          </a>
+        `;
+        break;
+
+      case "PRICE_DECREASE":
+        subject = `🎉 Great Deal from ${storeInfo.businessName}!`;
+        const priceDecreaseImageHTML = generateImageHTML(
+          activityData.productImage,
+          activityData.productName,
+          300
+        );
+        activityMessage = `
+          <h2 style="color: #4CAF50; margin-bottom: 20px;">Price Drop Alert!</h2>
+          <p style="color: #666; line-height: 1.6;">
+            Exciting news! <strong>${
+              storeInfo.businessName
+            }</strong> has reduced the price on one of their products:
+          </p>
+          <div style="background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            ${priceDecreaseImageHTML}
+            <h3 style="color: #2E7D32; margin: 0 0 10px 0;">${
+              activityData.productName
+            }</h3>
+            <p style="color: #666; margin: 5px 0;">
+              <strong>Previous Price:</strong> <span style="text-decoration: line-through;">₱${
+                activityData.oldPrice
+              }</span>
+            </p>
+            <p style="color: #666; margin: 5px 0;">
+              <strong>New Price:</strong> <span style="color: #4CAF50; font-weight: bold;">₱${
+                activityData.newPrice
+              }</span>
+            </p>
+            <p style="color: #4CAF50; font-weight: bold; margin: 10px 0;">
+              💰 You save ₱${(
+                activityData.oldPrice - activityData.newPrice
+              ).toFixed(2)}!
+            </p>
+          </div>
+        `;
+        actionButton = `
+          <a href="${
+            activityData.productUrl || "#"
+          }" style="background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+            Get This Deal
+          </a>
+        `;
+        break;
+
+      case "PRODUCT_AVAILABLE":
+        subject = `✅ Product Back in Stock at ${storeInfo.businessName}!`;
+        const availableImageHTML = generateImageHTML(
+          activityData.productImage,
+          activityData.productName,
+          300
+        );
+        activityMessage = `
+          <h2 style="color: #4CAF50; margin-bottom: 20px;">Back in Stock!</h2>
+          <p style="color: #666; line-height: 1.6;">
+            Good news! The product you've been waiting for is now available again at <strong>${storeInfo.businessName}</strong>:
+          </p>
+          <div style="background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            ${availableImageHTML}
+            <h3 style="color: #2E7D32; margin: 0 0 10px 0;">${activityData.productName}</h3>
+            <p style="color: #666; margin: 5px 0;"><strong>Price:</strong> ₱${activityData.price}</p>
+            <p style="color: #4CAF50; font-weight: bold; margin: 10px 0;">
+              ✅ Available Now - Get it before it's gone again!
+            </p>
+          </div>
+        `;
+        actionButton = `
+          <a href="${
+            activityData.productUrl || "#"
+          }" style="background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+            Order Now
+          </a>
+        `;
+        break;
+
+      case "NEW_BLOG_POST":
+        subject = `📝 New Update from ${storeInfo.businessName}!`;
+        const blogMediaHTML = generateMediaHTML(
+          activityData.mediaUrl,
+          activityData.mediaType,
+          activityData.title
+        );
+        activityMessage = `
+          <h2 style="color: #2196F3; margin-bottom: 20px;">New Blog Post!</h2>
+          <p style="color: #666; line-height: 1.6;">
+            <strong>${storeInfo.businessName}</strong> has shared a new update:
+          </p>
+          <div style="background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #1976D2; margin: 0 0 10px 0;">${
+              activityData.title
+            }</h3>
+            <p style="color: #666; margin: 5px 0; font-style: italic;">${
+              activityData.subtitle
+            }</p>
+            ${blogMediaHTML}
+            <p style="color: #666; margin: 10px 0;">${activityData.description.substring(
+              0,
+              200
+            )}${activityData.description.length > 200 ? "..." : ""}</p>
+            <p style="color: #2196F3; font-weight: bold; margin: 10px 0;">
+              📂 Category: ${activityData.category}
+            </p>
+          </div>
+        `;
+        actionButton = `
+          <a href="${
+            activityData.blogUrl || "#"
+          }" style="background-color: #2196F3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
+            Read Full Post
+          </a>
+        `;
+        break;
+
+      default:
+        subject = `Update from ${storeInfo.businessName}`;
+        activityMessage = `
+          <h2 style="color: #666; margin-bottom: 20px;">Store Update</h2>
+          <p style="color: #666; line-height: 1.6;">
+            <strong>${storeInfo.businessName}</strong> has a new update for you.
+          </p>
+        `;
+        break;
+    }
+
+    const mailOptions = {
+      from: '"ELako.NV Notifications" <elakonv@gmail.com>',
+      to: customerEmail,
+      subject: subject,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #4CAF50;">ELako.NV</h1>
+            <p style="color: #666;">Digital Marketing Solution For MSMEs</p>
+          </div>
+          
+          <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <p style="color: #666; line-height: 1.6;">
+              Hello <strong>${customerName}</strong>,
+            </p>
+            
+            ${activityMessage}
+            
+            <div style="text-align: center; margin: 30px 0;">
+              ${actionButton}
+            </div>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+              <p style="color: #666; font-size: 14px; line-height: 1.4;">
+                <strong>About ${storeInfo.businessName}:</strong><br>
+                ${
+                  storeInfo.businessDescription ||
+                  "A trusted local business in your area."
+                }
+              </p>
+              <p style="color: #999; font-size: 12px; margin-top: 15px;">
+                You're receiving this email because you follow ${
+                  storeInfo.businessName
+                } on ELako.NV.
+                <br>To unfollow this store, please log in to your account and manage your following list.
+              </p>
+            </div>
+          </div>
+          
+          <div style="text-align: center; color: #999; font-size: 12px;">
+            <p>&copy; 2025 ELako.NV. All rights reserved.</p>
+          </div>
+        </div>
+      `,
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log(
+      `✅ Store activity email sent successfully to ${customerEmail}:`,
+      result.messageId
+    );
+    return { success: true, messageId: result.messageId };
+  } catch (error) {
+    console.error(
+      `❌ Error sending store activity email to ${customerEmail}:`,
+      error
+    );
+    return { success: false, error: error.message };
+  }
+};
+
 module.exports = {
   generateOTP,
   sendOTPEmail,
+  sendStoreActivityEmail,
 };

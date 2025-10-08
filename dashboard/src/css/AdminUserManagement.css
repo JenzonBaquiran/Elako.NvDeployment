@@ -261,6 +261,8 @@
 .admin-user-management__table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
+  overflow: hidden;
 }
 
 .admin-user-management__table th {

@@ -31,6 +31,7 @@ import CustomerProfile from "./pages/CustomerProfile";
 import CustomerNotifications from "./pages/CustomerNotifications";
 import ProductDetails from "./pages/ProductDetails";
 import ForgotPassword from "./pages/ForgotPassword";
+import AdminAuditLogs from "./pages/AdminAuditLogs";
 
 
 
@@ -92,6 +93,14 @@ function App() {
               element={
                 <ProtectedRoute allowedUserTypes={['admin']}>
                   <BlogManagement />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-audit-logs" 
+              element={
+                <ProtectedRoute allowedUserTypes={['admin']}>
+                  <AdminAuditLogs />
                 </ProtectedRoute>
               } 
             />

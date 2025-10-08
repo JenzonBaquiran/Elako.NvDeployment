@@ -82,8 +82,46 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     try {
+      // Log admin logout if user is admin
+      if (userType === 'admin' && user) {
+        try {
+          const loginTime = sessionStorage.getItem('adminLoginTime');
+          const sessionDuration = loginTime ? Date.now() - parseInt(loginTime) : null;
+          
+          console.log('Logging admin logout:', {
+            adminId: user.id,
+            username: user.username,
+            firstname: user.firstname,
+            lastname: user.lastname,
+            sessionDuration: sessionDuration
+          });
+          
+          const response = await fetch('http://localhost:1337/api/admin/logout', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              adminId: user.id,
+              username: user.username,
+              firstname: user.firstname,
+              lastname: user.lastname,
+              sessionDuration: sessionDuration
+            }),
+          });
+          
+          const result = await response.json();
+          console.log('Logout audit log result:', result);
+          
+          sessionStorage.removeItem('adminLoginTime');
+        } catch (auditError) {
+          console.error('Error logging admin logout:', auditError);
+          // Continue with logout even if audit logging fails
+        }
+      }
+      
       // Clear all localStorage data
       clearAuthData();
       

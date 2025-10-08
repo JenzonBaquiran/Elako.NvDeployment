@@ -14,6 +14,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ArticleIcon from '@mui/icons-material/Article';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 
 const AdminSidebar = ({ onSidebarToggle }) => {
   const { showSuccess } = useNotification();
@@ -168,6 +169,12 @@ const AdminSidebar = ({ onSidebarToggle }) => {
               <Link to="/admin-settings" className={`admin-sidebar__nav-link ${location.pathname === '/settings' ? 'admin-sidebar__nav-link--active' : ''}`} title="Settings" onClick={handleIconClick}>
                 <SettingsIcon className="admin-sidebar__icon" />
                 <span className="admin-sidebar__text">Settings</span>
+              </Link>
+            </li>
+            <li className="admin-sidebar__nav-item">
+              <Link to="/admin-audit-logs" className={`admin-sidebar__nav-link ${location.pathname === '/admin-audit-logs' ? 'admin-sidebar__nav-link--active' : ''}`} title="Audit Logs" onClick={handleIconClick}>
+                <AssignmentIcon className="admin-sidebar__icon" />
+                <span className="admin-sidebar__text">Audit Logs</span>
               </Link>
             </li>
           </ul>

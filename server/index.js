@@ -11,6 +11,7 @@ const socketIo = require("socket.io");
 const Customer = require("./models/customer.model");
 const MSME = require("./models/msme.model");
 const Admin = require("./models/admin.model");
+const AuditLog = require("./models/auditLog.model");
 const Product = require("./models/product.model");
 const Dashboard = require("./models/dashboard.model");
 const PageView = require("./models/pageview.model");
@@ -24,6 +25,7 @@ const Conversation = require("./models/conversation.model");
 const CustomerNotificationService = require("./services/customerNotificationService");
 const { generateOTP, sendOTPEmail } = require("./services/emailService");
 const StoreActivityNotificationService = require("./services/storeActivityNotificationService");
+const AuditLogService = require("./services/auditLogService");
 
 const fs = require("fs");
 
@@ -1099,6 +1101,11 @@ app.post("/api/admin/login", async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
+    await AuditLogService.logFailedLogin(
+      username,
+      req,
+      "Missing username or password"
+    );
     return res
       .status(400)
       .json({ error: "Username and password are required." });
@@ -1110,6 +1117,16 @@ app.post("/api/admin/login", async (req, res) => {
     const ADMIN_PASSWORD = "admin123";
 
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      const adminData = {
+        id: "admin",
+        username: ADMIN_USERNAME,
+        firstname: "Super",
+        lastname: "Admin",
+      };
+
+      // Log successful login
+      await AuditLogService.logLogin(adminData, req);
+
       res.json({
         success: true,
         user: {
@@ -1128,6 +1145,7 @@ app.post("/api/admin/login", async (req, res) => {
     const admin = await Admin.findOne({ username });
 
     if (!admin) {
+      await AuditLogService.logFailedLogin(username, req, "Admin not found");
       return res
         .status(401)
         .json({ success: false, error: "Invalid admin credentials" });
@@ -1135,6 +1153,11 @@ app.post("/api/admin/login", async (req, res) => {
 
     // Check if admin is active
     if (admin.status !== "active") {
+      await AuditLogService.logFailedLogin(
+        username,
+        req,
+        "Admin account not active"
+      );
       return res
         .status(401)
         .json({ success: false, error: "Admin account is not active" });
@@ -1144,10 +1167,22 @@ app.post("/api/admin/login", async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, admin.password);
 
     if (!isPasswordValid) {
+      await AuditLogService.logFailedLogin(username, req, "Invalid password");
       return res
         .status(401)
         .json({ success: false, error: "Invalid admin credentials" });
     }
+
+    // Log successful login
+    await AuditLogService.logLogin(
+      {
+        id: admin._id,
+        username: admin.username,
+        firstname: admin.firstname,
+        lastname: admin.lastname,
+      },
+      req
+    );
 
     // Login successful
     res.json({
@@ -1164,7 +1199,99 @@ app.post("/api/admin/login", async (req, res) => {
     });
   } catch (error) {
     console.error("Error during admin login:", error);
+    await AuditLogService.logFailedLogin(
+      username,
+      req,
+      "Server error during login"
+    );
     res.status(500).json({ success: false, error: "Error during admin login" });
+  }
+});
+
+// Admin logout endpoint
+app.post("/api/admin/logout", async (req, res) => {
+  try {
+    const { adminId, username, firstname, lastname, sessionDuration } =
+      req.body;
+
+    if (adminId && username) {
+      await AuditLogService.logLogout(
+        {
+          id: adminId,
+          username: username,
+          firstname: firstname || "Unknown",
+          lastname: lastname || "User",
+        },
+        req,
+        sessionDuration
+      );
+    }
+
+    res.json({ success: true, message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Error during admin logout:", error);
+    res.json({ success: true, message: "Logged out successfully" }); // Still return success even if logging fails
+  }
+});
+
+// Get audit logs (admin only)
+app.get("/api/admin/audit-logs", async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 20,
+      adminId,
+      adminUsername,
+      action,
+      status,
+      startDate,
+      endDate,
+    } = req.query;
+
+    const result = await AuditLogService.getLogs(
+      {
+        adminId,
+        adminUsername,
+        action,
+        status,
+        startDate,
+        endDate,
+      },
+      {
+        page: parseInt(page),
+        limit: parseInt(limit),
+      }
+    );
+
+    res.json({
+      success: true,
+      data: result.logs,
+      pagination: result.pagination,
+    });
+  } catch (error) {
+    console.error("Error fetching audit logs:", error);
+    res
+      .status(500)
+      .json({ success: false, error: "Error fetching audit logs" });
+  }
+});
+
+// Get audit log statistics (admin only)
+app.get("/api/admin/audit-logs/statistics", async (req, res) => {
+  try {
+    const { timeframe = "30d" } = req.query;
+    const stats = await AuditLogService.getStatistics(timeframe);
+
+    res.json({
+      success: true,
+      data: stats,
+      timeframe,
+    });
+  } catch (error) {
+    console.error("Error fetching audit statistics:", error);
+    res
+      .status(500)
+      .json({ success: false, error: "Error fetching audit statistics" });
   }
 });
 

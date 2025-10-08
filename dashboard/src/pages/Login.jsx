@@ -65,6 +65,9 @@ function Login() {
       if (data.success) {
         const loginSuccess = login(data.user, 'admin');
         if (loginSuccess) {
+          // Track admin login time for audit logging
+          sessionStorage.setItem('adminLoginTime', Date.now().toString());
+          
           showSuccess("Welcome back, Admin!", "Login Successful");
           const from = location.state?.from?.pathname || '/admin-user-management';
           navigate(from, { replace: true });

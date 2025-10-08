@@ -1780,3 +1780,143 @@
     min-width: 600px;
   }
 }
+
+/* Audit Log Specific Styles */
+.admin-user-management__timestamp {
+  text-align: center;
+}
+
+.admin-user-management__time {
+  font-size: 0.8em;
+  color: #888;
+  margin-top: 2px;
+}
+
+.admin-user-management__action-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-user-management__action-icon {
+  font-size: 1.2em;
+  width: 20px;
+  text-align: center;
+}
+
+.admin-user-management__action-text {
+  font-weight: 500;
+}
+
+.admin-user-management__ip-address {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.admin-user-management__details {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-user-management__view-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.admin-user-management__view-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.admin-user-management__modal--audit-details {
+  max-width: 600px;
+  width: 90%;
+}
+
+.admin-user-management__modal-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0 auto 20px;
+}
+
+.admin-user-management__modal-field {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.admin-user-management__modal-field:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.admin-user-management__modal-label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-user-management__modal-value {
+  color: #666;
+  font-size: 1em;
+  line-height: 1.4;
+}
+
+.admin-user-management__error-message {
+  color: #e74c3c;
+  background-color: #fdf2f2;
+  padding: 8px;
+  border-radius: 4px;
+  border-left: 3px solid #e74c3c;
+}
+
+.admin-user-management__user-agent {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85em;
+  background-color: #f8f9fa;
+  padding: 8px;
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+.admin-user-management__stat-box--active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.admin-user-management__loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 1.1em;
+}
+
+.admin-user-management__na-text {
+  color: #999;
+  font-style: italic;
+  font-size: 0.9em;
+}
+
+.admin-user-management__na-text:contains("Still Active") {
+  color: #28a745;
+  font-weight: 500;
+}

@@ -254,6 +254,8 @@
   background: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .admin-user-management__table {
@@ -876,18 +878,17 @@
   }
   
   .admin-user-management__tabs {
-    overflow-x: auto;
+    overflow: hidden;
     white-space: nowrap;
   }
   
   .admin-user-management__table-section {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden;
     border-radius: 8px;
   }
 
   .admin-user-management__table {
-    min-width: 700px;
+    table-layout: fixed;
   }
 
   .admin-user-management__user-cell {
@@ -1268,8 +1269,8 @@
 /* Medium screens (tablets) */
 @media (max-width: 1024px) and (min-width: 769px) {
   .admin-user-management__modal {
-    min-width: 700px;
     max-width: 900px;
+    width: 90%;
   }
   
   .admin-user-management__certificates-grid {
@@ -1772,12 +1773,11 @@
 
   /* Better mobile table */
   .admin-user-management__table-section {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden;
   }
 
   .admin-user-management__table {
-    min-width: 600px;
+    table-layout: fixed;
   }
 }
 

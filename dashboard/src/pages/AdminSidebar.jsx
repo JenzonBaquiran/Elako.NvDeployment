@@ -165,18 +165,19 @@ const AdminSidebar = ({ onSidebarToggle }) => {
                 <span className="admin-sidebar__text">MSME Analytics</span>
               </Link>
             </li>
+              <li className="admin-sidebar__nav-item">
+              <Link to="/admin-audit-logs" className={`admin-sidebar__nav-link ${location.pathname === '/admin-audit-logs' ? 'admin-sidebar__nav-link--active' : ''}`} title="Audit Logs" onClick={handleIconClick}>
+                <AssignmentIcon className="admin-sidebar__icon" />
+                <span className="admin-sidebar__text">Audit Logs</span>
+              </Link>
+            </li>
             <li className="admin-sidebar__nav-item">
               <Link to="/admin-settings" className={`admin-sidebar__nav-link ${location.pathname === '/settings' ? 'admin-sidebar__nav-link--active' : ''}`} title="Settings" onClick={handleIconClick}>
                 <SettingsIcon className="admin-sidebar__icon" />
                 <span className="admin-sidebar__text">Settings</span>
               </Link>
             </li>
-            <li className="admin-sidebar__nav-item">
-              <Link to="/admin-audit-logs" className={`admin-sidebar__nav-link ${location.pathname === '/admin-audit-logs' ? 'admin-sidebar__nav-link--active' : ''}`} title="Audit Logs" onClick={handleIconClick}>
-                <AssignmentIcon className="admin-sidebar__icon" />
-                <span className="admin-sidebar__text">Audit Logs</span>
-              </Link>
-            </li>
+          
           </ul>
         </nav>
         {(!isMobileView || isSidebarOpen) && (

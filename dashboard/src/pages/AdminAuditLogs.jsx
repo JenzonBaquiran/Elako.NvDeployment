@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import AdminSidebar from './AdminSidebar';
 import { useNotification } from '../components/NotificationProvider';
 import { format } from 'date-fns';
-import '../css/AdminUserManagement.css';
+import '../css/AdminAuditLogs.css';
+import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
+import ErrorIcon from '@mui/icons-material/Error';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import BuildIcon from '@mui/icons-material/Build';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import CloseIcon from '@mui/icons-material/Close';
 
 const AdminAuditLogs = () => {
   const { showSuccess, showError } = useNotification();
@@ -173,15 +180,15 @@ const AdminAuditLogs = () => {
   const getActionIcon = (action) => {
     switch (action) {
       case 'LOGIN':
-        return '🔓';
+        return <LoginIcon sx={{ fontSize: 16, color: '#28a745' }} />;
       case 'LOGOUT':
-        return '🔒';
+        return <LogoutIcon sx={{ fontSize: 16, color: '#6c757d' }} />;
       case 'FAILED_LOGIN':
-        return '❌';
+        return <ErrorIcon sx={{ fontSize: 16, color: '#dc3545' }} />;
       case 'SESSION_EXPIRED':
-        return '⏰';
+        return <AccessTimeIcon sx={{ fontSize: 16, color: '#ffc107' }} />;
       default:
-        return '🔧';
+        return <BuildIcon sx={{ fontSize: 16, color: '#17a2b8' }} />;
     }
   };
 
@@ -336,42 +343,42 @@ const AdminAuditLogs = () => {
         {/* Statistics */}
         <div className="admin-user-management__stats">
           <div 
-            className={`admin-user-management__stat-box ${activeStatFilter === 'total' ? 'admin-user-management__stat-box--active' : ''}`}
+            className="admin-user-management__stat-box"
             onClick={() => handleStatBoxClick('total')}
           >
             <span className="admin-user-management__stat-value">{stats.total}</span>
             <span className="admin-user-management__stat-label">Total Logs</span>
           </div>
           <div 
-            className={`admin-user-management__stat-box ${activeStatFilter === 'login' ? 'admin-user-management__stat-box--active' : ''}`}
+            className="admin-user-management__stat-box"
             onClick={() => handleStatBoxClick('login')}
           >
             <span className="admin-user-management__stat-value">{stats.login}</span>
             <span className="admin-user-management__stat-label">Login Events</span>
           </div>
           <div 
-            className={`admin-user-management__stat-box ${activeStatFilter === 'logout' ? 'admin-user-management__stat-box--active' : ''}`}
+            className="admin-user-management__stat-box"
             onClick={() => handleStatBoxClick('logout')}
           >
             <span className="admin-user-management__stat-value">{stats.logout}</span>
             <span className="admin-user-management__stat-label">Logout Events</span>
           </div>
           <div 
-            className={`admin-user-management__stat-box ${activeStatFilter === 'failed' ? 'admin-user-management__stat-box--active' : ''}`}
+            className="admin-user-management__stat-box"
             onClick={() => handleStatBoxClick('failed')}
           >
             <span className="admin-user-management__stat-value">{stats.failed}</span>
             <span className="admin-user-management__stat-label">Failed Attempts</span>
           </div>
           <div 
-            className={`admin-user-management__stat-box ${activeStatFilter === 'success' ? 'admin-user-management__stat-box--active' : ''}`}
+            className="admin-user-management__stat-box"
             onClick={() => handleStatBoxClick('success')}
           >
             <span className="admin-user-management__stat-value">{stats.success}</span>
             <span className="admin-user-management__stat-label">Successful</span>
           </div>
           <div 
-            className={`admin-user-management__stat-box ${activeStatFilter === 'error' ? 'admin-user-management__stat-box--active' : ''}`}
+            className="admin-user-management__stat-box"
             onClick={() => handleStatBoxClick('error')}
           >
             <span className="admin-user-management__stat-value">{stats.error}</span>
@@ -573,7 +580,7 @@ const AdminAuditLogs = () => {
                             onClick={() => handleViewDetails(log)}
                             title="View Details"
                           >
-                            👁️
+                            <VisibilityIcon sx={{ fontSize: 16 }} />
                           </button>
                         </div>
                       </td>
@@ -615,7 +622,7 @@ const AdminAuditLogs = () => {
           <div className="admin-user-management__modal-header">
             <h3 className="admin-user-management__modal-title">Audit Log Details</h3>
             <button className="admin-user-management__modal-close" onClick={handleCloseModal}>
-              ×
+              <CloseIcon sx={{ fontSize: 20 }} />
             </button>
           </div>
           {selectedLog && (

@@ -30,7 +30,7 @@ function Login() {
   const getDefaultRoute = (type) => {
     switch (type) {
       case 'admin':
-        return '/admin-user-management';
+        return '/admin-overview';
       case 'msme':
         return '/msme-dashboard';
       case 'customer':

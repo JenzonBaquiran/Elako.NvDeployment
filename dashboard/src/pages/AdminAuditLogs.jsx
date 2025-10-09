@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AdminSidebar from './AdminSidebar';
 import { useNotification } from '../components/NotificationProvider';
 import { format } from 'date-fns';
-import '../css/AdminAuditLogs.css';
+import '../css/AdminAuditLogs-standalone.css';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -120,11 +120,11 @@ const AdminAuditLogs = () => {
 
   const getContentClass = () => {
     if (sidebarState.isMobile) {
-      return 'admin-user-management__content admin-user-management__content--mobile';
+      return 'audit-logs__content audit-logs__content--mobile';
     }
     return sidebarState.isOpen 
-      ? 'admin-user-management__content admin-user-management__content--sidebar-open' 
-      : 'admin-user-management__content admin-user-management__content--sidebar-collapsed';
+      ? 'audit-logs__content audit-logs__content--sidebar-open' 
+      : 'audit-logs__content audit-logs__content--sidebar-collapsed';
   };
 
   const handleClearFilters = () => {
@@ -195,13 +195,13 @@ const AdminAuditLogs = () => {
   const getStatusClass = (status) => {
     switch (status) {
       case 'SUCCESS':
-        return 'admin-user-management__status-badge--active';
+        return 'audit-logs__status-badge--success';
       case 'FAILED':
-        return 'admin-user-management__status-badge--rejected';
+        return 'audit-logs__status-badge--failed';
       case 'ERROR':
-        return 'admin-user-management__status-badge--suspended';
+        return 'audit-logs__status-badge--error';
       default:
-        return 'admin-user-management__status-badge--pending';
+        return 'audit-logs__status-badge--error';
     }
   };
 
@@ -328,12 +328,12 @@ const AdminAuditLogs = () => {
   };
 
   return (
-    <div className="admin-user-management">
+    <div className="audit-logs">
       <AdminSidebar onSidebarToggle={handleSidebarToggle} />
       <div className={getContentClass()}>
-        <div className="admin-user-management__header">
-          <div className="admin-user-management__header-content">
-            <div className="admin-user-management__header-text">
+        <div className="audit-logs__header">
+          <div className="audit-logs__header-content">
+            <div className="audit-logs__header-text">
               <h1>Admin Audit Logs</h1>
               <p>Monitor and track all administrative activities and security events.</p>
             </div>
@@ -341,63 +341,63 @@ const AdminAuditLogs = () => {
         </div>
 
         {/* Statistics */}
-        <div className="admin-user-management__stats">
+        <div className="audit-logs__stats">
           <div 
-            className="admin-user-management__stat-box"
+            className={`audit-logs__stat-box ${activeStatFilter === 'total' ? 'audit-logs__stat-box--active' : ''}`}
             onClick={() => handleStatBoxClick('total')}
           >
-            <span className="admin-user-management__stat-value">{stats.total}</span>
-            <span className="admin-user-management__stat-label">Total Logs</span>
+            <span className="audit-logs__stat-value">{stats.total}</span>
+            <span className="audit-logs__stat-label">Total Logs</span>
           </div>
           <div 
-            className="admin-user-management__stat-box"
+            className={`audit-logs__stat-box ${activeStatFilter === 'login' ? 'audit-logs__stat-box--active' : ''}`}
             onClick={() => handleStatBoxClick('login')}
           >
-            <span className="admin-user-management__stat-value">{stats.login}</span>
-            <span className="admin-user-management__stat-label">Login Events</span>
+            <span className="audit-logs__stat-value">{stats.login}</span>
+            <span className="audit-logs__stat-label">Login Events</span>
           </div>
           <div 
-            className="admin-user-management__stat-box"
+            className={`audit-logs__stat-box ${activeStatFilter === 'logout' ? 'audit-logs__stat-box--active' : ''}`}
             onClick={() => handleStatBoxClick('logout')}
           >
-            <span className="admin-user-management__stat-value">{stats.logout}</span>
-            <span className="admin-user-management__stat-label">Logout Events</span>
+            <span className="audit-logs__stat-value">{stats.logout}</span>
+            <span className="audit-logs__stat-label">Logout Events</span>
           </div>
           <div 
-            className="admin-user-management__stat-box"
+            className={`audit-logs__stat-box ${activeStatFilter === 'failed' ? 'audit-logs__stat-box--active' : ''}`}
             onClick={() => handleStatBoxClick('failed')}
           >
-            <span className="admin-user-management__stat-value">{stats.failed}</span>
-            <span className="admin-user-management__stat-label">Failed Attempts</span>
+            <span className="audit-logs__stat-value">{stats.failed}</span>
+            <span className="audit-logs__stat-label">Failed Attempts</span>
           </div>
           <div 
-            className="admin-user-management__stat-box"
+            className={`audit-logs__stat-box ${activeStatFilter === 'success' ? 'audit-logs__stat-box--active' : ''}`}
             onClick={() => handleStatBoxClick('success')}
           >
-            <span className="admin-user-management__stat-value">{stats.success}</span>
-            <span className="admin-user-management__stat-label">Successful</span>
+            <span className="audit-logs__stat-value">{stats.success}</span>
+            <span className="audit-logs__stat-label">Successful</span>
           </div>
           <div 
-            className="admin-user-management__stat-box"
+            className={`audit-logs__stat-box ${activeStatFilter === 'error' ? 'audit-logs__stat-box--active' : ''}`}
             onClick={() => handleStatBoxClick('error')}
           >
-            <span className="admin-user-management__stat-value">{stats.error}</span>
-            <span className="admin-user-management__stat-label">Errors</span>
+            <span className="audit-logs__stat-value">{stats.error}</span>
+            <span className="audit-logs__stat-label">Errors</span>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="admin-user-management__filters">
-          <div className="admin-user-management__filters-row">
+        <div className="audit-logs__filters">
+          <div className="audit-logs__filters-row">
             <input 
               type="text" 
               placeholder="Search admin username..." 
-              className="admin-user-management__search-input"
+              className="audit-logs__search-input"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <select 
-              className="admin-user-management__filter-dropdown"
+              className="audit-logs__filter-dropdown"
               value={actionFilter}
               onChange={(e) => setActionFilter(e.target.value)}
             >
@@ -409,7 +409,7 @@ const AdminAuditLogs = () => {
               ))}
             </select>
             <select 
-              className="admin-user-management__filter-dropdown"
+              className="audit-logs__filter-dropdown"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -422,26 +422,26 @@ const AdminAuditLogs = () => {
             </select>
             <input
               type="date"
-              className="admin-user-management__filter-dropdown"
+              className="audit-logs__filter-dropdown"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               title="Start Date"
             />
             <input
               type="date"
-              className="admin-user-management__filter-dropdown"
+              className="audit-logs__filter-dropdown"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               title="End Date"
             />
             <button 
-              className="admin-user-management__refresh-btn"
+              className="audit-logs__refresh-btn"
               onClick={handleClearFilters}
             >
               Clear Filters
             </button>
             <button 
-              className="admin-user-management__refresh-btn"
+              className="audit-logs__refresh-btn"
               onClick={() => {
                 fetchAuditLogs();
                 fetchStatistics();
@@ -451,7 +451,7 @@ const AdminAuditLogs = () => {
               {loading ? "Loading..." : "Refresh"}
             </button>
             <button 
-              className="admin-user-management__refresh-btn"
+              className="audit-logs__export-btn"
               onClick={exportLogs}
             >
               Export CSV
@@ -460,11 +460,11 @@ const AdminAuditLogs = () => {
         </div>
 
         {/* Audit Logs Table */}
-        <div className="admin-user-management__table-section">
+        <div className="audit-logs__table-section">
           {loading ? (
-            <div className="admin-user-management__loading">Loading audit logs...</div>
+            <div className="audit-logs__loading">Loading audit logs...</div>
           ) : (
-            <table className="admin-user-management__table">
+            <table className="audit-logs__table">
               <thead>
                 <tr>
                   <th>Login Time</th>
@@ -479,7 +479,7 @@ const AdminAuditLogs = () => {
               <tbody>
                 {currentLogs.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="admin-user-management__no-data">
+                    <td colSpan="7" className="audit-logs__no-data">
                       No audit logs found
                     </td>
                   </tr>
@@ -487,11 +487,11 @@ const AdminAuditLogs = () => {
                   currentLogs.map((log) => (
                     <tr key={log._id}>
                       <td>
-                        <div className="admin-user-management__timestamp">
+                        <div className="audit-logs__timestamp">
                           {log.action === 'LOGIN' ? (
                             <>
                               {format(new Date(log.createdAt), 'yyyy-MM-dd')}
-                              <div className="admin-user-management__time">
+                              <div className="audit-logs__time">
                                 {format(new Date(log.createdAt), 'HH:mm:ss')}
                               </div>
                             </>
@@ -501,51 +501,51 @@ const AdminAuditLogs = () => {
                               return correspondingLogin ? (
                                 <>
                                   {format(new Date(correspondingLogin.createdAt), 'yyyy-MM-dd')}
-                                  <div className="admin-user-management__time">
+                                  <div className="audit-logs__time">
                                     {format(new Date(correspondingLogin.createdAt), 'HH:mm:ss')}
                                   </div>
                                 </>
                               ) : (
-                                <span className="admin-user-management__na-text">N/A</span>
+                                <span className="audit-logs__na-text">N/A</span>
                               );
                             })()
                           ) : (
-                            <span className="admin-user-management__na-text">N/A</span>
+                            <span className="audit-logs__na-text">N/A</span>
                           )}
                         </div>
                       </td>
                       <td>
-                        <div className="admin-user-management__user-cell">
-                          <div className="admin-user-management__avatar">
+                        <div className="audit-logs__user-cell">
+                          <div className="audit-logs__avatar">
                             {log.adminName ? log.adminName[0].toUpperCase() : 'A'}
                           </div>
-                          <div className="admin-user-management__user-info">
-                            <div className="admin-user-management__user-name">{log.adminName || 'Unknown'}</div>
-                            <div className="admin-user-management__user-username">@{log.adminUsername || 'unknown'}</div>
+                          <div className="audit-logs__user-info">
+                            <div className="audit-logs__user-name">{log.adminName || 'Unknown'}</div>
+                            <div className="audit-logs__user-username">@{log.adminUsername || 'unknown'}</div>
                           </div>
                         </div>
                       </td>
                       <td>
-                        <div className="admin-user-management__action-cell">
-                          <span className="admin-user-management__action-icon">
+                        <div className="audit-logs__action-cell">
+                          <span className="audit-logs__action-icon">
                             {getActionIcon(log.action)}
                           </span>
-                          <span className="admin-user-management__action-text">
+                          <span className="audit-logs__action-text">
                             {log.action}
                           </span>
                         </div>
                       </td>
                       <td>
-                        <span className={`admin-user-management__status-badge ${getStatusClass(log.status)}`}>
+                        <span className={`audit-logs__status-badge ${getStatusClass(log.status)}`}>
                           {log.status}
                         </span>
                       </td>
                       <td>
-                        <div className="admin-user-management__timestamp">
+                        <div className="audit-logs__timestamp">
                           {log.action === 'LOGOUT' ? (
                             <>
                               {format(new Date(log.createdAt), 'yyyy-MM-dd')}
-                              <div className="admin-user-management__time">
+                              <div className="audit-logs__time">
                                 {format(new Date(log.createdAt), 'HH:mm:ss')}
                               </div>
                             </>
@@ -555,28 +555,28 @@ const AdminAuditLogs = () => {
                               return correspondingLogout ? (
                                 <>
                                   {format(new Date(correspondingLogout.createdAt), 'yyyy-MM-dd')}
-                                  <div className="admin-user-management__time">
+                                  <div className="audit-logs__time">
                                     {format(new Date(correspondingLogout.createdAt), 'HH:mm:ss')}
                                   </div>
                                 </>
                               ) : (
-                                <span className="admin-user-management__na-text">Still Active</span>
+                                <span className="audit-logs__na-text">Still Active</span>
                               );
                             })()
                           ) : (
-                            <span className="admin-user-management__na-text">N/A</span>
+                            <span className="audit-logs__na-text">N/A</span>
                           )}
                         </div>
                       </td>
                       <td>
-                        <div className="admin-user-management__details">
+                        <div className="audit-logs__details">
                           {log.details || 'No details'}
                         </div>
                       </td>
                       <td>
-                        <div className="admin-user-management__actions">
+                        <div className="audit-logs__actions">
                           <button 
-                            className="admin-user-management__view-btn"
+                            className="audit-logs__view-btn"
                             onClick={() => handleViewDetails(log)}
                             title="View Details"
                           >
@@ -594,19 +594,19 @@ const AdminAuditLogs = () => {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="admin-user-management__pagination">
+          <div className="audit-logs__pagination">
             <button 
-              className="admin-user-management__pagination-btn"
+              className="audit-logs__pagination-btn"
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
             >
               Previous
             </button>
-            <span className="admin-user-management__pagination-info">
+            <span className="audit-logs__pagination-info">
               Page {currentPage} of {totalPages}
             </span>
             <button 
-              className="admin-user-management__pagination-btn"
+              className="audit-logs__pagination-btn"
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
             >
@@ -617,45 +617,45 @@ const AdminAuditLogs = () => {
       </div>
 
       {/* Details Modal */}
-      <div className={`admin-user-management__modal-overlay ${showModal ? 'show' : ''}`} onClick={handleCloseModal}>
-        <div className="admin-user-management__modal admin-user-management__modal--audit-details" onClick={(e) => e.stopPropagation()}>
-          <div className="admin-user-management__modal-header">
-            <h3 className="admin-user-management__modal-title">Audit Log Details</h3>
-            <button className="admin-user-management__modal-close" onClick={handleCloseModal}>
+      <div className={`audit-logs__modal-overlay ${showModal ? 'show' : ''}`} onClick={handleCloseModal}>
+        <div className="audit-logs__modal audit-logs__modal--audit-details" onClick={(e) => e.stopPropagation()}>
+          <div className="audit-logs__modal-header">
+            <h3 className="audit-logs__modal-title">Audit Log Details</h3>
+            <button className="audit-logs__modal-close" onClick={handleCloseModal}>
               <CloseIcon sx={{ fontSize: 20 }} />
             </button>
           </div>
           {selectedLog && (
-            <div className="admin-user-management__modal-content">
-              <div className="admin-user-management__modal-avatar">
+            <div className="audit-logs__modal-content">
+              <div className="audit-logs__modal-avatar">
                 {selectedLog.adminName ? selectedLog.adminName[0].toUpperCase() : 'A'}
               </div>
               
-              <div className="admin-user-management__modal-field">
-                <div className="admin-user-management__modal-label">Action Timestamp</div>
-                <div className="admin-user-management__modal-value">
+              <div className="audit-logs__modal-field">
+                <div className="audit-logs__modal-label">Action Timestamp</div>
+                <div className="audit-logs__modal-value">
                   {format(new Date(selectedLog.createdAt), 'yyyy-MM-dd HH:mm:ss')}
                 </div>
               </div>
 
-              <div className="admin-user-management__modal-field">
-                <div className="admin-user-management__modal-label">Admin</div>
-                <div className="admin-user-management__modal-value">
+              <div className="audit-logs__modal-field">
+                <div className="audit-logs__modal-label">Admin</div>
+                <div className="audit-logs__modal-value">
                   {selectedLog.adminName || 'Unknown'} (@{selectedLog.adminUsername || 'unknown'})
                 </div>
               </div>
 
-              <div className="admin-user-management__modal-field">
-                <div className="admin-user-management__modal-label">Action</div>
-                <div className="admin-user-management__modal-value">
+              <div className="audit-logs__modal-field">
+                <div className="audit-logs__modal-label">Action</div>
+                <div className="audit-logs__modal-value">
                   {getActionIcon(selectedLog.action)} {selectedLog.action}
                 </div>
               </div>
 
-              <div className="admin-user-management__modal-field">
-                <div className="admin-user-management__modal-label">Status</div>
-                <div className="admin-user-management__modal-value">
-                  <span className={`admin-user-management__status-badge ${getStatusClass(selectedLog.status)}`}>
+              <div className="audit-logs__modal-field">
+                <div className="audit-logs__modal-label">Status</div>
+                <div className="audit-logs__modal-value">
+                  <span className={`audit-logs__status-badge ${getStatusClass(selectedLog.status)}`}>
                     {selectedLog.status}
                   </span>
                 </div>
@@ -664,17 +664,17 @@ const AdminAuditLogs = () => {
               {selectedLog.action === 'LOGIN' && (() => {
                 const correspondingLogout = findLogoutForLogin(selectedLog);
                 return correspondingLogout ? (
-                  <div className="admin-user-management__modal-field">
-                    <div className="admin-user-management__modal-label">Logout Time</div>
-                    <div className="admin-user-management__modal-value">
+                  <div className="audit-logs__modal-field">
+                    <div className="audit-logs__modal-label">Logout Time</div>
+                    <div className="audit-logs__modal-value">
                       {format(new Date(correspondingLogout.createdAt), 'yyyy-MM-dd HH:mm:ss')}
                     </div>
                   </div>
                 ) : (
-                  <div className="admin-user-management__modal-field">
-                    <div className="admin-user-management__modal-label">Session Status</div>
-                    <div className="admin-user-management__modal-value">
-                      <span className="admin-user-management__status-badge admin-user-management__status-badge--active">
+                  <div className="audit-logs__modal-field">
+                    <div className="audit-logs__modal-label">Session Status</div>
+                    <div className="audit-logs__modal-value">
+                      <span className="audit-logs__status-badge audit-logs__status-badge--success">
                         Still Active
                       </span>
                     </div>
@@ -685,9 +685,9 @@ const AdminAuditLogs = () => {
               {selectedLog.action === 'LOGOUT' && (() => {
                 const correspondingLogin = findLoginForLogout(selectedLog);
                 return correspondingLogin ? (
-                  <div className="admin-user-management__modal-field">
-                    <div className="admin-user-management__modal-label">Login Time</div>
-                    <div className="admin-user-management__modal-value">
+                  <div className="audit-logs__modal-field">
+                    <div className="audit-logs__modal-label">Login Time</div>
+                    <div className="audit-logs__modal-value">
                       {format(new Date(correspondingLogin.createdAt), 'yyyy-MM-dd HH:mm:ss')}
                     </div>
                   </div>
@@ -695,34 +695,34 @@ const AdminAuditLogs = () => {
               })()}
 
               {selectedLog.duration && (
-                <div className="admin-user-management__modal-field">
-                  <div className="admin-user-management__modal-label">Session Duration</div>
-                  <div className="admin-user-management__modal-value">
+                <div className="audit-logs__modal-field">
+                  <div className="audit-logs__modal-label">Session Duration</div>
+                  <div className="audit-logs__modal-value">
                     {formatDuration(selectedLog.duration)}
                   </div>
                 </div>
               )}
 
-              <div className="admin-user-management__modal-field">
-                <div className="admin-user-management__modal-label">Details</div>
-                <div className="admin-user-management__modal-value">
+              <div className="audit-logs__modal-field">
+                <div className="audit-logs__modal-label">Details</div>
+                <div className="audit-logs__modal-value">
                   {selectedLog.details || 'No additional details'}
                 </div>
               </div>
 
               {selectedLog.errorMessage && (
-                <div className="admin-user-management__modal-field">
-                  <div className="admin-user-management__modal-label">Error Message</div>
-                  <div className="admin-user-management__modal-value admin-user-management__error-message">
+                <div className="audit-logs__modal-field">
+                  <div className="audit-logs__modal-label">Error Message</div>
+                  <div className="audit-logs__modal-value audit-logs__error-message">
                     {selectedLog.errorMessage}
                   </div>
                 </div>
               )}
 
               {selectedLog.userAgent && (
-                <div className="admin-user-management__modal-field">
-                  <div className="admin-user-management__modal-label">User Agent</div>
-                  <div className="admin-user-management__modal-value admin-user-management__user-agent">
+                <div className="audit-logs__modal-field">
+                  <div className="audit-logs__modal-label">User Agent</div>
+                  <div className="audit-logs__modal-value audit-logs__user-agent">
                     {selectedLog.userAgent}
                   </div>
                 </div>
@@ -730,26 +730,26 @@ const AdminAuditLogs = () => {
 
               {selectedLog.targetEntity?.entityType && (
                 <>
-                  <div className="admin-user-management__modal-field">
-                    <div className="admin-user-management__modal-label">Target Entity Type</div>
-                    <div className="admin-user-management__modal-value">
+                  <div className="audit-logs__modal-field">
+                    <div className="audit-logs__modal-label">Target Entity Type</div>
+                    <div className="audit-logs__modal-value">
                       {selectedLog.targetEntity.entityType}
                     </div>
                   </div>
                   
                   {selectedLog.targetEntity.entityId && (
-                    <div className="admin-user-management__modal-field">
-                      <div className="admin-user-management__modal-label">Target Entity ID</div>
-                      <div className="admin-user-management__modal-value">
+                    <div className="audit-logs__modal-field">
+                      <div className="audit-logs__modal-label">Target Entity ID</div>
+                      <div className="audit-logs__modal-value">
                         {selectedLog.targetEntity.entityId}
                       </div>
                     </div>
                   )}
                   
                   {selectedLog.targetEntity.entityName && (
-                    <div className="admin-user-management__modal-field">
-                      <div className="admin-user-management__modal-label">Target Entity Name</div>
-                      <div className="admin-user-management__modal-value">
+                    <div className="audit-logs__modal-field">
+                      <div className="audit-logs__modal-label">Target Entity Name</div>
+                      <div className="audit-logs__modal-value">
                         {selectedLog.targetEntity.entityName}
                       </div>
                     </div>

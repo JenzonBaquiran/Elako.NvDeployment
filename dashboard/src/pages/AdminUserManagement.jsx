@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar";
 import { useNotification } from "../components/NotificationProvider";
-import "../css/AdminUserManagement.css";
+import "../css/AdminUserManagement-standalone.css";
 
 const AdminUserManagement = () => {
   const { showConfirm, showSuccess, showError } = useNotification();
@@ -692,6 +692,25 @@ const AdminUserManagement = () => {
 
   const toggleDropdown = (userId) => {
     setActiveDropdown(activeDropdown === userId ? null : userId);
+    
+    // Smart positioning to prevent dropdown from being cut off
+    if (activeDropdown !== userId) {
+      setTimeout(() => {
+        const dropdownElement = document.querySelector(`[data-dropdown-id="${userId}"]`);
+        if (dropdownElement) {
+          const rect = dropdownElement.getBoundingClientRect();
+          const windowHeight = window.innerHeight;
+          const spaceBelow = windowHeight - rect.bottom;
+          const spaceAbove = rect.top;
+          
+          if (spaceBelow < 120 && spaceAbove > spaceBelow) {
+            dropdownElement.classList.add('user-management__dropdown--up');
+          } else {
+            dropdownElement.classList.remove('user-management__dropdown--up');
+          }
+        }
+      }, 10);
+    }
   };
 
   // Close dropdown when clicking outside
@@ -713,37 +732,37 @@ const AdminUserManagement = () => {
 
   const getContentClass = () => {
     if (sidebarState.isMobile) {
-      return 'admin-user-management__content admin-user-management__content--mobile';
+      return 'user-management__content user-management__content--mobile';
     }
     return sidebarState.isOpen 
-      ? 'admin-user-management__content admin-user-management__content--sidebar-open' 
-      : 'admin-user-management__content admin-user-management__content--sidebar-collapsed';
+      ? 'user-management__content user-management__content--sidebar-open' 
+      : 'user-management__content user-management__content--sidebar-collapsed';
   };
 
   return (
-    <div className="admin-user-management">
+    <div className="user-management">
       <AdminSidebar onSidebarToggle={handleSidebarToggle} />
       <div className={getContentClass()}>
-        <div className="admin-user-management__header">
-          <div className="admin-user-management__header-content">
-            <div className="admin-user-management__header-text">
+        <div className="user-management__header">
+          <div className="user-management__header-content">
+            <div className="user-management__header-text">
               <h1>User Management</h1>
               <p>Manage customers and MSME businesses on the platform.</p>
             </div>
-            <div className="admin-user-management__add-user-dropdown">
+            <div className="user-management__add-user-dropdown">
               <button 
-                className="admin-user-management__add-user-btn"
+                className="user-management__add-user-btn"
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowAddUserDropdown(!showAddUserDropdown);
                 }}
               >
                 + Add New User
-                <span className="admin-user-management__dropdown-arrow">▼</span>
+                <span className="user-management__dropdown-arrow">▼</span>
               </button>
-              <div className={`admin-user-management__add-user-menu ${showAddUserDropdown ? 'show' : ''}`}>
+              <div className={`user-management__add-user-menu ${showAddUserDropdown ? 'show' : ''}`}>
                 <button 
-                  className="admin-user-management__add-user-option"
+                  className="user-management__add-user-option"
                   onClick={() => {
                     setShowAddAdminModal(true);
                     setShowAddUserDropdown(false);
@@ -752,7 +771,7 @@ const AdminUserManagement = () => {
                   Add Admin
                 </button>
                 <button 
-                  className="admin-user-management__add-user-option"
+                  className="user-management__add-user-option"
                   onClick={() => {
                     setShowAddMsmeModal(true);
                     setShowAddUserDropdown(false);
@@ -766,74 +785,74 @@ const AdminUserManagement = () => {
         </div>
 
         {error && (
-          <div className="admin-user-management__error">
+          <div className="user-management__error">
             {error}
           </div>
         )}
 
-        <div className="admin-user-management__stats">
+        <div className="user-management__stats">
           <div 
-            className={`admin-user-management__stat-box ${activeStatFilter === 'total' ? 'admin-user-management__stat-box--active' : ''}`}
+            className={`user-management__stat-box ${activeStatFilter === 'total' ? 'user-management__stat-box--active' : ''}`}
             onClick={() => handleStatBoxClick('total')}
           >
-            <span className="admin-user-management__stat-value">{stats.total}</span>
-            <span className="admin-user-management__stat-label">Total Users</span>
+            <span className="user-management__stat-value">{stats.total}</span>
+            <span className="user-management__stat-label">Total Users</span>
           </div>
           <div 
-            className={`admin-user-management__stat-box ${activeStatFilter === 'customers' ? 'admin-user-management__stat-box--active' : ''}`}
+            className={`user-management__stat-box ${activeStatFilter === 'customers' ? 'user-management__stat-box--active' : ''}`}
             onClick={() => handleStatBoxClick('customers')}
           >
-            <span className="admin-user-management__stat-value">{stats.customers}</span>
-            <span className="admin-user-management__stat-label">Customers</span>
+            <span className="user-management__stat-value">{stats.customers}</span>
+            <span className="user-management__stat-label">Customers</span>
           </div>
           <div 
-            className={`admin-user-management__stat-box ${activeStatFilter === 'msmes' ? 'admin-user-management__stat-box--active' : ''}`}
+            className={`user-management__stat-box ${activeStatFilter === 'msmes' ? 'user-management__stat-box--active' : ''}`}
             onClick={() => handleStatBoxClick('msmes')}
           >
-            <span className="admin-user-management__stat-value">{stats.msmes}</span>
-            <span className="admin-user-management__stat-label">MSMEs</span>
+            <span className="user-management__stat-value">{stats.msmes}</span>
+            <span className="user-management__stat-label">MSMEs</span>
           </div>
           <div 
-            className={`admin-user-management__stat-box ${activeStatFilter === 'admins' ? 'admin-user-management__stat-box--active' : ''}`}
+            className={`user-management__stat-box ${activeStatFilter === 'admins' ? 'user-management__stat-box--active' : ''}`}
             onClick={() => handleStatBoxClick('admins')}
           >
-            <span className="admin-user-management__stat-value">{stats.admins}</span>
-            <span className="admin-user-management__stat-label">Admins</span>
+            <span className="user-management__stat-value">{stats.admins}</span>
+            <span className="user-management__stat-label">Admins</span>
           </div>
           <div 
-            className="admin-user-management__stat-box"
+            className="user-management__stat-box"
             onClick={() => handleStatBoxClick('active')}
           >
-            <span className="admin-user-management__stat-value">{stats.active}</span>
-            <span className="admin-user-management__stat-label">Active</span>
+            <span className="user-management__stat-value">{stats.active}</span>
+            <span className="user-management__stat-label">Active</span>
           </div>
           <div 
-            className={`admin-user-management__stat-box ${activeStatFilter === 'pending' ? 'admin-user-management__stat-box--active' : ''}`}
+            className={`user-management__stat-box ${activeStatFilter === 'pending' ? 'user-management__stat-box--active' : ''}`}
             onClick={() => handleStatBoxClick('pending')}
           >
-            <span className="admin-user-management__stat-value">{stats.pending}</span>
-            <span className="admin-user-management__stat-label">Pending</span>
+            <span className="user-management__stat-value">{stats.pending}</span>
+            <span className="user-management__stat-label">Pending</span>
           </div>
           <div 
-            className={`admin-user-management__stat-box ${activeStatFilter === 'suspended' ? 'admin-user-management__stat-box--active' : ''}`}
+            className={`user-management__stat-box ${activeStatFilter === 'suspended' ? 'user-management__stat-box--active' : ''}`}
             onClick={() => handleStatBoxClick('suspended')}
           >
-            <span className="admin-user-management__stat-value">{stats.suspended}</span>
-            <span className="admin-user-management__stat-label">Suspended</span>
+            <span className="user-management__stat-value">{stats.suspended}</span>
+            <span className="user-management__stat-label">Suspended</span>
           </div>
         </div>
 
-        <div className="admin-user-management__filters">
-          <div className="admin-user-management__filters-row">
+        <div className="user-management__filters">
+          <div className="user-management__filters-row">
             <input 
               type="text" 
               placeholder="Search users..." 
-              className="admin-user-management__search-input"
+              className="user-management__search-input"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <select 
-              className="admin-user-management__filter-dropdown"
+              className="user-management__filter-dropdown"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -845,7 +864,7 @@ const AdminUserManagement = () => {
               <option value="rejected">Rejected</option>
             </select>
             <button 
-              className="admin-user-management__refresh-btn"
+              className="user-management__refresh-btn"
               onClick={fetchUsers}
               disabled={loading}
             >
@@ -854,38 +873,39 @@ const AdminUserManagement = () => {
           </div>
         </div>
 
-        <div className="admin-user-management__tabs">
+        <div className="user-management__tabs">
           <button 
-            className={`admin-user-management__tab-button ${activeTab === "all" ? "admin-user-management__tab-button--active" : ""}`}
+            className={`user-management__tab-button ${activeTab === "all" ? "user-management__tab-button--active" : ""}`}
             onClick={() => setActiveTab("all")}
           >
             All Users ({stats.total - stats.admins})
           </button>
           <button 
-            className={`admin-user-management__tab-button ${activeTab === "customers" ? "admin-user-management__tab-button--active" : ""}`}
+            className={`user-management__tab-button ${activeTab === "customers" ? "user-management__tab-button--active" : ""}`}
             onClick={() => setActiveTab("customers")}
           >
             Customers ({stats.customers})
           </button>
           <button 
-            className={`admin-user-management__tab-button ${activeTab === "msmes" ? "admin-user-management__tab-button--active" : ""}`}
+            className={`user-management__tab-button ${activeTab === "msmes" ? "user-management__tab-button--active" : ""}`}
             onClick={() => setActiveTab("msmes")}
           >
             MSMEs ({stats.msmes})
           </button>
           <button 
-            className={`admin-user-management__tab-button ${activeTab === "admins" ? "admin-user-management__tab-button--active" : ""}`}
+            className={`user-management__tab-button ${activeTab === "admins" ? "user-management__tab-button--active" : ""}`}
             onClick={() => setActiveTab("admins")}
           >
             Admins ({stats.admins})
           </button>
         </div>
 
-        <div className="admin-user-management__table-section">
+        <div className="user-management__table-section">
           {loading ? (
-            <div className="admin-user-management__loading">Loading users...</div>
+            <div className="user-management__loading">Loading users...</div>
           ) : (
-            <table className="admin-user-management__table">
+            <div className="user-management__table-wrapper">
+              <table className="user-management__table">
               <thead>
                 <tr>
                   <th>User</th>
@@ -899,7 +919,7 @@ const AdminUserManagement = () => {
               <tbody>
                 {currentDisplayData.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="admin-user-management__no-data">
+                    <td colSpan="6" className="user-management__no-data">
                       No {activeTab === "admins" ? "admins" : "users"} found
                     </td>
                   </tr>
@@ -907,19 +927,19 @@ const AdminUserManagement = () => {
                   currentDisplayData.map((user) => (
                     <tr key={user.id}>
                       <td>
-                        <div className="admin-user-management__user-cell">
-                          <div className="admin-user-management__avatar">
+                        <div className="user-management__user-cell">
+                          <div className="user-management__avatar">
                             {user.name[0].toUpperCase()}
                           </div>
-                          <div className="admin-user-management__user-info">
-                            <div className="admin-user-management__user-name">{user.name}</div>
-                            <div className="admin-user-management__user-email">{user.email}</div>
-                            <div className="admin-user-management__user-username">@{user.username}</div>
+                          <div className="user-management__user-info">
+                            <div className="user-management__user-name">{user.name}</div>
+                            <div className="user-management__user-email">{user.email}</div>
+                            <div className="user-management__user-username">@{user.username}</div>
                           </div>
                         </div>
                       </td>
                       <td>
-                        <span className="admin-user-management__type-badge">
+                        <span className="user-management__type-badge">
                           {user.type}
                           {user.type === "MSME" && user.category && (
                             <small> ({user.category})</small>
@@ -930,16 +950,16 @@ const AdminUserManagement = () => {
                         </span>
                       </td>
                       <td>
-                        <span className={`admin-user-management__status-badge admin-user-management__status-badge--${user.status}`}>
+                        <span className={`user-management__status-badge user-management__status-badge--${user.status}`}>
                           {user.status}
                         </span>
                       </td>
                       <td>{user.joinDate}</td>
                       <td>{user.activity}</td>
                       <td>
-                        <div className="admin-user-management__actions">
+                        <div className="user-management__actions">
                           <button 
-                            className="admin-user-management__more-btn"
+                            className="user-management__more-btn"
                             onClick={(e) => {
                               e.stopPropagation();
                               toggleDropdown(user.id);
@@ -947,15 +967,18 @@ const AdminUserManagement = () => {
                           >
                             ⋯
                           </button>
-                          <div className={`admin-user-management__dropdown ${activeDropdown === user.id ? 'show' : ''}`}>
+                          <div 
+                            className={`user-management__dropdown ${activeDropdown === user.id ? 'show' : ''}`}
+                            data-dropdown-id={user.id}
+                          >
                             <button 
-                              className="admin-user-management__dropdown-item"
+                              className="user-management__dropdown-item"
                               onClick={() => handleViewUser(user)}
                             >
                               View
                             </button>
                             <button 
-                              className="admin-user-management__dropdown-item"
+                              className="user-management__dropdown-item"
                               onClick={() => handleEditUser(user)}
                             >
                               Edit
@@ -963,13 +986,13 @@ const AdminUserManagement = () => {
                             {user.type === "MSME" && user.status === "pending" && (
                               <>
                                 <button 
-                                  className="admin-user-management__dropdown-item approve"
+                                  className="user-management__dropdown-item approve"
                                   onClick={() => handleStatusUpdate(user.id, "approved", "MSME")}
                                 >
                                   Approve
                                 </button>
                                 <button 
-                                  className="admin-user-management__dropdown-item reject"
+                                  className="user-management__dropdown-item reject"
                                   onClick={() => handleStatusUpdate(user.id, "rejected", "MSME")}
                                 >
                                   Reject
@@ -978,7 +1001,7 @@ const AdminUserManagement = () => {
                             )}
                             {user.type === "Admin" && user.status === "active" && (
                               <button 
-                                className="admin-user-management__dropdown-item reject"
+                                className="user-management__dropdown-item reject"
                                 onClick={() => handleStatusUpdate(user.id, "suspended", "Admin")}
                               >
                                 Suspend
@@ -986,14 +1009,14 @@ const AdminUserManagement = () => {
                             )}
                             {user.type === "Admin" && user.status === "suspended" && (
                               <button 
-                                className="admin-user-management__dropdown-item approve"
+                                className="user-management__dropdown-item approve"
                                 onClick={() => handleStatusUpdate(user.id, "active", "Admin")}
                               >
                                 Activate
                               </button>
                             )}
                             <button 
-                              className="admin-user-management__dropdown-item delete"
+                              className="user-management__dropdown-item delete"
                               onClick={() => handleDeleteUser(user.id, user.type)}
                             >
                               Delete
@@ -1005,80 +1028,81 @@ const AdminUserManagement = () => {
                   ))
                 )}
               </tbody>
-            </table>
+              </table>
+            </div>
           )}
         </div>
       </div>
 
       {/* Add MSME Modal */}
-      <div className={`admin-user-management__modal-overlay ${showAddMsmeModal ? 'show' : ''}`} onClick={handleCloseAddMsmeModal}>
-        <div className="admin-user-management__modal admin-user-management__modal--add-msme" onClick={(e) => e.stopPropagation()}>
-          <div className="admin-user-management__modal-header">
-            <h3 className="admin-user-management__modal-title">Add New MSME</h3>
-            <button className="admin-user-management__modal-close" onClick={handleCloseAddMsmeModal}>
+      <div className={`user-management__modal-overlay ${showAddMsmeModal ? 'show' : ''}`} onClick={handleCloseAddMsmeModal}>
+        <div className="user-management__modal user-management__modal--add-msme" onClick={(e) => e.stopPropagation()}>
+          <div className="user-management__modal-header">
+            <h3 className="user-management__modal-title">Add New MSME</h3>
+            <button className="user-management__modal-close" onClick={handleCloseAddMsmeModal}>
               ×
             </button>
           </div>
           
-          <form onSubmit={handleAddMsme} className="admin-user-management__msme-form">
-            <div className="admin-user-management__form-field">
-              <label className="admin-user-management__form-label">Business Name *</label>
+          <form onSubmit={handleAddMsme} className="user-management__msme-form">
+            <div className="user-management__form-field">
+              <label className="user-management__form-label">Business Name *</label>
               <input
                 type="text"
                 name="businessName"
                 value={msmeFormData.businessName}
                 onChange={handleMsmeFormChange}
-                className="admin-user-management__form-input"
+                className="user-management__form-input"
                 required
               />
             </div>
 
-            <div className="admin-user-management__form-field">
-              <label className="admin-user-management__form-label">Email *</label>
+            <div className="user-management__form-field">
+              <label className="user-management__form-label">Email *</label>
               <input
                 type="email"
                 name="email"
                 value={msmeFormData.email}
                 onChange={handleMsmeFormChange}
-                className="admin-user-management__form-input"
+                className="user-management__form-input"
                 required
               />
             </div>
 
-            <div className="admin-user-management__form-row">
-              <div className="admin-user-management__form-field">
-                <label className="admin-user-management__form-label">Username *</label>
+            <div className="user-management__form-row">
+              <div className="user-management__form-field">
+                <label className="user-management__form-label">Username *</label>
                 <input
                   type="text"
                   name="username"
                   value={msmeFormData.username}
                   onChange={handleMsmeFormChange}
-                  className="admin-user-management__form-input"
+                  className="user-management__form-input"
                   required
                 />
               </div>
-              <div className="admin-user-management__form-field">
-                <label className="admin-user-management__form-label">Password *</label>
+              <div className="user-management__form-field">
+                <label className="user-management__form-label">Password *</label>
                 <input
                   type="password"
                   name="password"
                   value={msmeFormData.password}
                   onChange={handleMsmeFormChange}
-                  className="admin-user-management__form-input"
+                  className="user-management__form-input"
                   required
                   minLength="6"
                 />
               </div>
             </div>
 
-            <div className="admin-user-management__form-row">
-              <div className="admin-user-management__form-field">
-                <label className="admin-user-management__form-label">Category *</label>
+            <div className="user-management__form-row">
+              <div className="user-management__form-field">
+                <label className="user-management__form-label">Category *</label>
                 <select
                   name="category"
                   value={msmeFormData.category}
                   onChange={handleMsmeFormChange}
-                  className="admin-user-management__form-input"
+                  className="user-management__form-input"
                   required
                 >
                   <option value="">Select Category</option>
@@ -1086,44 +1110,44 @@ const AdminUserManagement = () => {
                   <option value="artisan">Artisan</option>
                 </select>
               </div>
-              <div className="admin-user-management__form-field">
-                <label className="admin-user-management__form-label">Contact Number</label>
+              <div className="user-management__form-field">
+                <label className="user-management__form-label">Contact Number</label>
                 <input
                   type="tel"
                   name="contactNumber"
                   value={msmeFormData.contactNumber}
                   onChange={handleMsmeFormChange}
-                  className="admin-user-management__form-input"
+                  className="user-management__form-input"
                 />
               </div>
             </div>
 
-            <div className="admin-user-management__form-field">
-              <label className="admin-user-management__form-label">Address</label>
+            <div className="user-management__form-field">
+              <label className="user-management__form-label">Address</label>
               <textarea
                 name="address"
                 value={msmeFormData.address}
                 onChange={handleMsmeFormChange}
-                className="admin-user-management__form-input"
+                className="user-management__form-input"
                 rows="3"
               />
             </div>
 
-            <div className="admin-user-management__form-field">
-              <label className="admin-user-management__form-label">Client Profiling Number</label>
+            <div className="user-management__form-field">
+              <label className="user-management__form-label">Client Profiling Number</label>
               <input
                 type="text"
                 name="clientProfilingNumber"
                 value={msmeFormData.clientProfilingNumber}
                 onChange={handleMsmeFormChange}
-                className="admin-user-management__form-input"
+                className="user-management__form-input"
               />
             </div>
 
-            <div className="admin-user-management__form-actions">
+            <div className="user-management__form-actions">
               <button
                 type="button"
-                className="admin-user-management__form-btn admin-user-management__form-btn--cancel"
+                className="user-management__form-btn user-management__form-btn--cancel"
                 onClick={handleCloseAddMsmeModal}
                 disabled={msmeFormLoading}
               >
@@ -1131,7 +1155,7 @@ const AdminUserManagement = () => {
               </button>
               <button
                 type="submit"
-                className="admin-user-management__form-btn admin-user-management__form-btn--submit"
+                className="user-management__form-btn user-management__form-btn--submit"
                 disabled={msmeFormLoading}
               >
                 {msmeFormLoading ? "Creating..." : "Create MSME"}
@@ -1142,82 +1166,82 @@ const AdminUserManagement = () => {
       </div>
 
       {/* Add Admin Modal */}
-      <div className={`admin-user-management__modal-overlay ${showAddAdminModal ? 'show' : ''}`} onClick={handleCloseAddAdminModal}>
-        <div className="admin-user-management__modal admin-user-management__modal--add-admin" onClick={(e) => e.stopPropagation()}>
-          <div className="admin-user-management__modal-header">
-            <h3 className="admin-user-management__modal-title">Add New Admin</h3>
-            <button className="admin-user-management__modal-close" onClick={handleCloseAddAdminModal}>
+      <div className={`user-management__modal-overlay ${showAddAdminModal ? 'show' : ''}`} onClick={handleCloseAddAdminModal}>
+        <div className="user-management__modal user-management__modal--add-admin" onClick={(e) => e.stopPropagation()}>
+          <div className="user-management__modal-header">
+            <h3 className="user-management__modal-title">Add New Admin</h3>
+            <button className="user-management__modal-close" onClick={handleCloseAddAdminModal}>
               ×
             </button>
           </div>
           
-          <form onSubmit={handleAddAdmin} className="admin-user-management__admin-form">
-            <div className="admin-user-management__form-row">
-              <div className="admin-user-management__form-field">
-                <label className="admin-user-management__form-label">First Name *</label>
+          <form onSubmit={handleAddAdmin} className="user-management__admin-form">
+            <div className="user-management__form-row">
+              <div className="user-management__form-field">
+                <label className="user-management__form-label">First Name *</label>
                 <input
                   type="text"
                   name="firstname"
                   value={adminFormData.firstname}
                   onChange={handleAdminFormChange}
-                  className="admin-user-management__form-input"
+                  className="user-management__form-input"
                   required
                 />
               </div>
-              <div className="admin-user-management__form-field">
-                <label className="admin-user-management__form-label">Last Name *</label>
+              <div className="user-management__form-field">
+                <label className="user-management__form-label">Last Name *</label>
                 <input
                   type="text"
                   name="lastname"
                   value={adminFormData.lastname}
                   onChange={handleAdminFormChange}
-                  className="admin-user-management__form-input"
+                  className="user-management__form-input"
                   required
                 />
               </div>
             </div>
 
-            <div className="admin-user-management__form-field">
-              <label className="admin-user-management__form-label">Username *</label>
+            <div className="user-management__form-field">
+              <label className="user-management__form-label">Username *</label>
               <input
                 type="text"
                 name="username"
                 value={adminFormData.username}
                 onChange={handleAdminFormChange}
-                className="admin-user-management__form-input"
+                className="user-management__form-input"
                 required
               />
             </div>
 
-            <div className="admin-user-management__form-field">
-              <label className="admin-user-management__form-label">Email *</label>
+            <div className="user-management__form-field">
+              <label className="user-management__form-label">Email *</label>
               <input
                 type="email"
                 name="email"
                 value={adminFormData.email}
                 onChange={handleAdminFormChange}
-                className="admin-user-management__form-input"
+                className="user-management__form-input"
                 required
               />
             </div>
 
-            <div className="admin-user-management__form-field">
-              <label className="admin-user-management__form-label">Password *</label>
+            <div className="user-management__form-field">
+              <label className="user-management__form-label">Password *</label>
               <input
                 type="password"
                 name="password"
                 value={adminFormData.password}
                 onChange={handleAdminFormChange}
-                className="admin-user-management__form-input"
+                className="user-management__form-input"
                 required
                 minLength="6"
               />
             </div>
 
-            <div className="admin-user-management__form-actions">
+            <div className="user-management__form-actions">
               <button
                 type="button"
-                className="admin-user-management__form-btn admin-user-management__form-btn--cancel"
+                className="user-management__form-btn user-management__form-btn--cancel"
                 onClick={handleCloseAddAdminModal}
                 disabled={adminFormLoading}
               >
@@ -1225,7 +1249,7 @@ const AdminUserManagement = () => {
               </button>
               <button
                 type="submit"
-                className="admin-user-management__form-btn admin-user-management__form-btn--submit"
+                className="user-management__form-btn user-management__form-btn--submit"
                 disabled={adminFormLoading}
               >
                 {adminFormLoading ? "Creating..." : "Create Admin"}
@@ -1236,26 +1260,26 @@ const AdminUserManagement = () => {
       </div>
 
       {/* Edit User Modal */}
-      <div className={`admin-user-management__modal-overlay ${showEditUserModal ? 'show' : ''}`} onClick={handleCloseEditUserModal}>
-        <div className="admin-user-management__modal admin-user-management__modal--edit-user" onClick={(e) => e.stopPropagation()}>
-          <div className="admin-user-management__modal-header">
-            <h3 className="admin-user-management__modal-title">Edit {editingUser?.type}</h3>
-            <button className="admin-user-management__modal-close" onClick={handleCloseEditUserModal}>
+      <div className={`user-management__modal-overlay ${showEditUserModal ? 'show' : ''}`} onClick={handleCloseEditUserModal}>
+        <div className="user-management__modal user-management__modal--edit-user" onClick={(e) => e.stopPropagation()}>
+          <div className="user-management__modal-header">
+            <h3 className="user-management__modal-title">Edit {editingUser?.type}</h3>
+            <button className="user-management__modal-close" onClick={handleCloseEditUserModal}>
               ×
             </button>
           </div>
           
           {editingUser && (
-            <form onSubmit={handleEditUserSubmit} className="admin-user-management__edit-form">
+            <form onSubmit={handleEditUserSubmit} className="user-management__edit-form">
               {/* Common Fields */}
-              <div className="admin-user-management__form-field">
-                <label className="admin-user-management__form-label">Username *</label>
+              <div className="user-management__form-field">
+                <label className="user-management__form-label">Username *</label>
                 <input
                   type="text"
                   name="username"
                   value={editUserFormData.username}
                   onChange={handleEditUserFormChange}
-                  className="admin-user-management__form-input"
+                  className="user-management__form-input"
                   required
                 />
               </div>
@@ -1263,39 +1287,39 @@ const AdminUserManagement = () => {
               {/* Admin and Customer Fields */}
               {(editingUser.type === 'Admin' || editingUser.type === 'Customer') && (
                 <>
-                  <div className="admin-user-management__form-row">
-                    <div className="admin-user-management__form-field">
-                      <label className="admin-user-management__form-label">First Name *</label>
+                  <div className="user-management__form-row">
+                    <div className="user-management__form-field">
+                      <label className="user-management__form-label">First Name *</label>
                       <input
                         type="text"
                         name="firstname"
                         value={editUserFormData.firstname}
                         onChange={handleEditUserFormChange}
-                        className="admin-user-management__form-input"
+                        className="user-management__form-input"
                         required
                       />
                     </div>
-                    <div className="admin-user-management__form-field">
-                      <label className="admin-user-management__form-label">Last Name *</label>
+                    <div className="user-management__form-field">
+                      <label className="user-management__form-label">Last Name *</label>
                       <input
                         type="text"
                         name="lastname"
                         value={editUserFormData.lastname}
                         onChange={handleEditUserFormChange}
-                        className="admin-user-management__form-input"
+                        className="user-management__form-input"
                         required
                       />
                     </div>
                   </div>
 
-                  <div className="admin-user-management__form-field">
-                    <label className="admin-user-management__form-label">Email *</label>
+                  <div className="user-management__form-field">
+                    <label className="user-management__form-label">Email *</label>
                     <input
                       type="email"
                       name="email"
                       value={editUserFormData.email}
                       onChange={handleEditUserFormChange}
-                      className="admin-user-management__form-input"
+                      className="user-management__form-input"
                       required
                     />
                   </div>
@@ -1305,37 +1329,37 @@ const AdminUserManagement = () => {
               {/* MSME Fields */}
               {editingUser.type === 'MSME' && (
                 <>
-                  <div className="admin-user-management__form-field">
-                    <label className="admin-user-management__form-label">Business Name *</label>
+                  <div className="user-management__form-field">
+                    <label className="user-management__form-label">Business Name *</label>
                     <input
                       type="text"
                       name="businessName"
                       value={editUserFormData.businessName}
                       onChange={handleEditUserFormChange}
-                      className="admin-user-management__form-input"
+                      className="user-management__form-input"
                       required
                     />
                   </div>
 
-                  <div className="admin-user-management__form-field">
-                    <label className="admin-user-management__form-label">Email *</label>
+                  <div className="user-management__form-field">
+                    <label className="user-management__form-label">Email *</label>
                     <input
                       type="email"
                       name="email"
                       value={editUserFormData.email}
                       onChange={handleEditUserFormChange}
-                      className="admin-user-management__form-input"
+                      className="user-management__form-input"
                       required
                     />
                   </div>
 
-                  <div className="admin-user-management__form-field">
-                    <label className="admin-user-management__form-label">Category *</label>
+                  <div className="user-management__form-field">
+                    <label className="user-management__form-label">Category *</label>
                     <select
                       name="category"
                       value={editUserFormData.category}
                       onChange={handleEditUserFormChange}
-                      className="admin-user-management__form-input"
+                      className="user-management__form-input"
                       required
                     >
                       <option value="">Select Category</option>
@@ -1344,14 +1368,14 @@ const AdminUserManagement = () => {
                     </select>
                   </div>
 
-                  <div className="admin-user-management__form-field">
-                    <label className="admin-user-management__form-label">Client Profiling Number</label>
+                  <div className="user-management__form-field">
+                    <label className="user-management__form-label">Client Profiling Number</label>
                     <input
                       type="text"
                       name="clientProfilingNumber"
                       value={editUserFormData.clientProfilingNumber}
                       onChange={handleEditUserFormChange}
-                      className="admin-user-management__form-input"
+                      className="user-management__form-input"
                     />
                   </div>
                 </>
@@ -1360,34 +1384,34 @@ const AdminUserManagement = () => {
               {/* Common Fields for Customer and MSME */}
               {(editingUser.type === 'Customer' || editingUser.type === 'MSME') && (
                 <>
-                  <div className="admin-user-management__form-field">
-                    <label className="admin-user-management__form-label">Contact Number</label>
+                  <div className="user-management__form-field">
+                    <label className="user-management__form-label">Contact Number</label>
                     <input
                       type="tel"
                       name="contactNumber"
                       value={editUserFormData.contactNumber}
                       onChange={handleEditUserFormChange}
-                      className="admin-user-management__form-input"
+                      className="user-management__form-input"
                     />
                   </div>
 
-                  <div className="admin-user-management__form-field">
-                    <label className="admin-user-management__form-label">Address</label>
+                  <div className="user-management__form-field">
+                    <label className="user-management__form-label">Address</label>
                     <textarea
                       name="address"
                       value={editUserFormData.address}
                       onChange={handleEditUserFormChange}
-                      className="admin-user-management__form-input"
+                      className="user-management__form-input"
                       rows="3"
                     />
                   </div>
                 </>
               )}
 
-              <div className="admin-user-management__form-actions">
+              <div className="user-management__form-actions">
                 <button
                   type="button"
-                  className="admin-user-management__form-btn admin-user-management__form-btn--cancel"
+                  className="user-management__form-btn user-management__form-btn--cancel"
                   onClick={handleCloseEditUserModal}
                   disabled={editUserFormLoading}
                 >
@@ -1395,7 +1419,7 @@ const AdminUserManagement = () => {
                 </button>
                 <button
                   type="submit"
-                  className="admin-user-management__form-btn admin-user-management__form-btn--submit"
+                  className="user-management__form-btn user-management__form-btn--submit"
                   disabled={editUserFormLoading}
                 >
                   {editUserFormLoading ? "Updating..." : "Update User"}
@@ -1407,68 +1431,68 @@ const AdminUserManagement = () => {
       </div>
 
       {/* User Details Modal */}
-      <div className={`admin-user-management__modal-overlay ${showModal ? 'show' : ''}`} onClick={handleCloseModal}>
-        <div className="admin-user-management__modal" onClick={(e) => e.stopPropagation()}>
-          <div className="admin-user-management__modal-header">
-            <h3 className="admin-user-management__modal-title">User Details</h3>
-            <button className="admin-user-management__modal-close" onClick={handleCloseModal}>
+      <div className={`user-management__modal-overlay ${showModal ? 'show' : ''}`} onClick={handleCloseModal}>
+        <div className="user-management__modal" onClick={(e) => e.stopPropagation()}>
+          <div className="user-management__modal-header">
+            <h3 className="user-management__modal-title">User Details</h3>
+            <button className="user-management__modal-close" onClick={handleCloseModal}>
               ×
             </button>
           </div>
           {selectedUser && (
-            <div className="admin-user-management__modal-content">
-              <div className="admin-user-management__modal-avatar">
+            <div className="user-management__modal-content">
+              <div className="user-management__modal-avatar">
                 {selectedUser.name[0].toUpperCase()}
               </div>
               {/** Align Last Activity, Client Profiling Number and TIN in a single row */}
-              <div className="admin-user-management__three-columns">
-                <div className="admin-user-management__modal-field">
-                  <div className="admin-user-management__modal-label">Last Activity</div>
-                  <div className="admin-user-management__modal-value">{selectedUser.activity || 'Not provided'}</div>
+              <div className="user-management__three-columns">
+                <div className="user-management__modal-field">
+                  <div className="user-management__modal-label">Last Activity</div>
+                  <div className="user-management__modal-value">{selectedUser.activity || 'Not provided'}</div>
                 </div>
 
-                <div className="admin-user-management__modal-field">
-                  <div className="admin-user-management__modal-label">Client Profiling Number</div>
-                  <div className="admin-user-management__modal-value">{selectedUser.clientProfilingNumber || 'Not provided'}</div>
+                <div className="user-management__modal-field">
+                  <div className="user-management__modal-label">Client Profiling Number</div>
+                  <div className="user-management__modal-value">{selectedUser.clientProfilingNumber || 'Not provided'}</div>
                 </div>
 
-                <div className="admin-user-management__modal-field">
-                  <div className="admin-user-management__modal-label">TIN Number</div>
-                  <div className="admin-user-management__modal-value">{(certificates && certificates.tinNumber) || 'Not provided'}</div>
+                <div className="user-management__modal-field">
+                  <div className="user-management__modal-label">TIN Number</div>
+                  <div className="user-management__modal-value">{(certificates && certificates.tinNumber) || 'Not provided'}</div>
                 </div>
               </div>
 
-              <div className="admin-user-management__modal-field">
-                <div className="admin-user-management__modal-label">User Type</div>
-                <div className="admin-user-management__modal-value">
+              <div className="user-management__modal-field">
+                <div className="user-management__modal-label">User Type</div>
+                <div className="user-management__modal-value">
                   {selectedUser.type}
                   {selectedUser.type === "MSME" && selectedUser.category && ` (${selectedUser.category})`}
                 </div>
               </div>
 
-              <div className="admin-user-management__modal-field">
-                <div className="admin-user-management__modal-label">Status</div>
-                <div className="admin-user-management__modal-value">{selectedUser.status}</div>
+              <div className="user-management__modal-field">
+                <div className="user-management__modal-label">Status</div>
+                <div className="user-management__modal-value">{selectedUser.status}</div>
               </div>
 
-              <div className="admin-user-management__modal-field">
-                <div className="admin-user-management__modal-label">Join Date</div>
-                <div className="admin-user-management__modal-value">{selectedUser.joinDate}</div>
+              <div className="user-management__modal-field">
+                <div className="user-management__modal-label">Join Date</div>
+                <div className="user-management__modal-value">{selectedUser.joinDate}</div>
               </div>
 
       
 
               {selectedUser.contactNumber && (
-                <div className="admin-user-management__modal-field">
-                  <div className="admin-user-management__modal-label">Contact Number</div>
-                  <div className="admin-user-management__modal-value">{selectedUser.contactNumber}</div>
+                <div className="user-management__modal-field">
+                  <div className="user-management__modal-label">Contact Number</div>
+                  <div className="user-management__modal-value">{selectedUser.contactNumber}</div>
                 </div>
               )}
 
               {selectedUser.address && (
-                <div className="admin-user-management__modal-field">
-                  <div className="admin-user-management__modal-label">Address</div>
-                  <div className="admin-user-management__modal-value">{selectedUser.address}</div>
+                <div className="user-management__modal-field">
+                  <div className="user-management__modal-label">Address</div>
+                  <div className="user-management__modal-value">{selectedUser.address}</div>
                 </div>
               )}
 
@@ -1476,59 +1500,59 @@ const AdminUserManagement = () => {
 
               {/* Business Certificates for MSME */}
               {selectedUser.type === 'MSME' && (
-                <div className="admin-user-management__certificates-section">
-                  <div className="admin-user-management__modal-label" style={{ marginBottom: '12px', fontSize: '16px', fontWeight: '600' }}>
+                <div className="user-management__certificates-section">
+                  <div className="user-management__modal-label" style={{ marginBottom: '12px', fontSize: '16px', fontWeight: '600' }}>
                     Business Certificates
                   </div>
                   
                   {loadingCertificates ? (
-                    <div className="admin-user-management__loading">Loading certificates...</div>
+                    <div className="user-management__loading">Loading certificates...</div>
                   ) : certificates ? (
-                    <div className="admin-user-management__certificates-grid">
-                      <div className="admin-user-management__certificate-item">
+                    <div className="user-management__certificates-grid">
+                      <div className="user-management__certificate-item">
                         <h4>Mayor's Permit</h4>
                         {certificates.mayorsPermit ? (
                           <button 
-                            className="admin-user-management__view-certificate-btn"
+                            className="user-management__view-certificate-btn"
                             onClick={() => handleViewCertificate('Mayor\'s Permit', `http://localhost:1337/uploads/${certificates.mayorsPermit}`)}
                           >
                             View Document
                           </button>
                         ) : (
-                          <p className="admin-user-management__no-document">Not uploaded</p>
+                          <p className="user-management__no-document">Not uploaded</p>
                         )}
                       </div>
                       
-                      <div className="admin-user-management__certificate-item">
+                      <div className="user-management__certificate-item">
                         <h4>BIR Certificate</h4>
                         {certificates.bir ? (
                           <button 
-                            className="admin-user-management__view-certificate-btn"
+                            className="user-management__view-certificate-btn"
                             onClick={() => handleViewCertificate('BIR Certificate', `http://localhost:1337/uploads/${certificates.bir}`)}
                           >
                             View Document
                           </button>
                         ) : (
-                          <p className="admin-user-management__no-document">Not uploaded</p>
+                          <p className="user-management__no-document">Not uploaded</p>
                         )}
                       </div>
                       
-                      <div className="admin-user-management__certificate-item">
+                      <div className="user-management__certificate-item">
                         <h4>FDA Certificate</h4>
                         {certificates.fda ? (
                           <button 
-                            className="admin-user-management__view-certificate-btn"
+                            className="user-management__view-certificate-btn"
                             onClick={() => handleViewCertificate('FDA Certificate', `http://localhost:1337/uploads/${certificates.fda}`)}
                           >
                             View Document
                           </button>
                         ) : (
-                          <p className="admin-user-management__no-document">Not uploaded</p>
+                          <p className="user-management__no-document">Not uploaded</p>
                         )}
                       </div>
                     </div>
                   ) : (
-                    <div className="admin-user-management__no-certificates">
+                    <div className="user-management__no-certificates">
                       No certificate information available
                     </div>
                   )}
@@ -1536,11 +1560,11 @@ const AdminUserManagement = () => {
               )}
 
               {/* Action Buttons */}
-              <div className="admin-user-management__modal-actions">
+              <div className="user-management__modal-actions">
                 {selectedUser.type === "MSME" && selectedUser.status === "pending" && (
                   <>
                     <button 
-                      className="admin-user-management__modal-action-btn admin-user-management__modal-action-btn--approve"
+                      className="user-management__modal-action-btn user-management__modal-action-btn--approve"
                       onClick={() => {
                         handleStatusUpdate(selectedUser.id, "approved", "MSME");
                         handleCloseModal();
@@ -1549,7 +1573,7 @@ const AdminUserManagement = () => {
                       APPROVE
                     </button>
                     <button 
-                      className="admin-user-management__modal-action-btn admin-user-management__modal-action-btn--reject"
+                      className="user-management__modal-action-btn user-management__modal-action-btn--reject"
                       onClick={() => {
                         handleStatusUpdate(selectedUser.id, "rejected", "MSME");
                         handleCloseModal();
@@ -1562,7 +1586,7 @@ const AdminUserManagement = () => {
                 
                 {selectedUser.type === "Admin" && selectedUser.status === "active" && (
                   <button 
-                    className="admin-user-management__modal-action-btn admin-user-management__modal-action-btn--reject"
+                    className="user-management__modal-action-btn user-management__modal-action-btn--reject"
                     onClick={() => {
                       handleStatusUpdate(selectedUser.id, "suspended", "Admin");
                       handleCloseModal();
@@ -1574,7 +1598,7 @@ const AdminUserManagement = () => {
                 
                 {selectedUser.type === "Admin" && selectedUser.status === "suspended" && (
                   <button 
-                    className="admin-user-management__modal-action-btn admin-user-management__modal-action-btn--approve"
+                    className="user-management__modal-action-btn user-management__modal-action-btn--approve"
                     onClick={() => {
                       handleStatusUpdate(selectedUser.id, "active", "Admin");
                       handleCloseModal();
@@ -1585,7 +1609,7 @@ const AdminUserManagement = () => {
                 )}
                 
                 <button 
-                  className="admin-user-management__modal-action-btn admin-user-management__modal-action-btn--delete"
+                  className="user-management__modal-action-btn user-management__modal-action-btn--delete"
                   onClick={() => {
                     handleDeleteUser(selectedUser.id, selectedUser.type);
                     handleCloseModal();
@@ -1601,35 +1625,35 @@ const AdminUserManagement = () => {
 
       {/* Certificate Viewer Modal */}
       {showCertificateViewer && (
-        <div className="admin-user-management__certificate-viewer-overlay" onClick={handleCloseCertificateViewer}>
-          <div className="admin-user-management__certificate-viewer-content" onClick={(e) => e.stopPropagation()}>
-            <div className="admin-user-management__certificate-viewer-header">
+        <div className="user-management__certificate-viewer-overlay" onClick={handleCloseCertificateViewer}>
+          <div className="user-management__certificate-viewer-content" onClick={(e) => e.stopPropagation()}>
+            <div className="user-management__certificate-viewer-header">
               <h3>{currentCertificate.title}</h3>
               <button 
-                className="admin-user-management__certificate-viewer-close" 
+                className="user-management__certificate-viewer-close" 
                 onClick={handleCloseCertificateViewer}
               >
                 ×
               </button>
             </div>
-            <div className="admin-user-management__certificate-viewer-body">
+            <div className="user-management__certificate-viewer-body">
               <img 
                 src={currentCertificate.url} 
                 alt={currentCertificate.title}
-                className="admin-user-management__certificate-viewer-image"
+                className="user-management__certificate-viewer-image"
                 onError={(e) => {
                   e.target.style.display = 'none';
                   e.target.nextSibling.style.display = 'block';
                 }}
               />
-              <div className="admin-user-management__certificate-viewer-fallback" style={{display: 'none'}}>
-                <div className="admin-user-management__document-icon-large">📄</div>
+              <div className="user-management__certificate-viewer-fallback" style={{display: 'none'}}>
+                <div className="user-management__document-icon-large">📄</div>
                 <p>This document cannot be previewed as an image</p>
                 <a 
                   href={currentCertificate.url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="admin-user-management__download-btn"
+                  className="user-management__download-btn"
                 >
                   Download Document
                 </a>

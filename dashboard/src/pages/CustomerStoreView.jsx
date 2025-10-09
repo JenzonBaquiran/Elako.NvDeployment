@@ -399,9 +399,15 @@ const CustomerStoreView = () => {
     
     switch (post.mediaType) {
       case 'youtube':
-        // For YouTube videos, we only use the thumbnail as background
+        // For YouTube videos, show the thumbnail image to maintain consistent sizing
         // The actual video player is shown in the modal when clicked
-        return null;
+        return (
+          <img
+            src={getYouTubeThumbnail(post.mediaUrl)}
+            alt={post.title}
+            className="store-blog-hero-image"
+          />
+        );
       case 'video':
         return (
           <video

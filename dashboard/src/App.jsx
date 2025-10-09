@@ -29,6 +29,7 @@ import CustomerReviews from "./pages/CustomerReviews";
 import CustomerMessage from "./pages/CustomerMessage";
 import CustomerProfile from "./pages/CustomerProfile";
 import CustomerNotifications from "./pages/CustomerNotifications";
+import CustomerHotPicks from "./pages/CustomerHotPicks";
 import ProductDetails from "./pages/ProductDetails";
 import ForgotPassword from "./pages/ForgotPassword";
 import AdminAuditLogs from "./pages/AdminAuditLogs";
@@ -258,6 +259,14 @@ function App() {
               element={
                 <ProtectedRoute allowedUserTypes={['customer']}>
                   <CustomerNotifications />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/customer/hot-picks" 
+              element={
+                <ProtectedRoute allowedUserTypes={['customer', 'msme', 'admin']}>
+                  <CustomerHotPicks />
                 </ProtectedRoute>
               } 
             />

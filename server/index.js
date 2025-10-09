@@ -6879,23 +6879,33 @@ app.get("/api/hot-picks", async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 4;
 
-    // Fetch products with 4.5-5.0 average rating, available, and visible
-    const hotProducts = await Product.find({
+    // Fetch ALL products with 4.5-5.0 average rating, available, and visible
+    const allHotProducts = await Product.find({
       availability: true,
       visible: true,
       rating: { $gte: 4.5, $lte: 5.0 },
     })
       .populate("msmeId", "businessName username status")
-      .sort({ rating: -1, createdAt: -1 }) // Sort by rating desc, then by newest
-      .limit(limit);
+      .sort({ rating: -1, createdAt: -1 }); // Sort by rating desc, then by newest
 
-    // Filter out products from non-approved MSMEs
-    const filteredProducts = hotProducts.filter(
+    // Filter out products from non-approved MSMEs FIRST
+    const filteredProducts = allHotProducts.filter(
       (product) => product.msmeId && product.msmeId.status === "approved"
     );
 
+    // THEN apply the limit to get the final products
+    const hotProducts = filteredProducts.slice(0, limit);
+
+    console.log(`Found ${allHotProducts.length} products with 4.5-5.0 rating`);
+    console.log(
+      `After MSME approval filtering: ${filteredProducts.length} products`
+    );
+    console.log(
+      `Final hot picks (limited to ${limit}): ${hotProducts.length} products`
+    );
+
     // Format the response with product details
-    const formattedProducts = filteredProducts.map((product) => {
+    const formattedProducts = hotProducts.map((product) => {
       const averageRating = product.rating || 0;
       const totalReviews = product.feedback ? product.feedback.length : 0;
       const mainImage =

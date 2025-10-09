@@ -26,6 +26,11 @@ function CustomerTopStores() {
     }
   }, [currentPage, user]);
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   const fetchAllTopStores = async () => {
     try {
       setLoading(true);
@@ -139,7 +144,10 @@ function CustomerTopStores() {
         <div className="browse-stores-content">
           <button 
             className="back-button"
-            onClick={() => navigate('/')}
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              navigate('/');
+            }}
           >
             ← Back to Home
           </button>
@@ -207,7 +215,10 @@ function CustomerTopStores() {
                       <div className="customer-view-store-actions">
                         <button 
                           className="customer-view-store-visit-btn"
-                          onClick={() => navigate(`/customer/store/${store._id}`)}
+                          onClick={() => {
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            navigate(`/customer/store/${store._id}`);
+                          }}
                         >
                           Visit Store
                         </button>
@@ -230,7 +241,10 @@ function CustomerTopStores() {
             <div className="pagination">
               <button 
                 className="pagination-btn"
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                onClick={() => {
+                  setCurrentPage(prev => Math.max(1, prev - 1));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 disabled={currentPage === 1}
               >
                 Previous
@@ -242,7 +256,10 @@ function CustomerTopStores() {
               
               <button 
                 className="pagination-btn"
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                onClick={() => {
+                  setCurrentPage(prev => Math.min(totalPages, prev + 1));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 disabled={currentPage === totalPages}
               >
                 Next
@@ -253,7 +270,7 @@ function CustomerTopStores() {
         </div>
       </div>
 
-      <Footer />
+
     </div>
   );
 }

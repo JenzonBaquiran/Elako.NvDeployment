@@ -306,21 +306,24 @@
 
 @media (max-width: 768px) {
   .browse-stores-page {
-    padding-top: 120px; /* More space for mobile navbar */
+    padding-top: 140px; /* More space for mobile navbar */
   }
 
-
-
   .browse-stores-page .customer-view-store-content {
-    padding: 16px 12px;
+    padding: 20px 16px;
   }
 
   .browse-stores-page .back-button {
-    margin-bottom: 16px;
-    padding: 10px 16px;
-    font-size: 13px;
+    margin-bottom: 20px;
+    padding: 12px 20px;
+    font-size: 14px;
     width: auto;
     white-space: nowrap;
+    background: #313131;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
   .browse-stores-page .browse-header {
@@ -380,18 +383,26 @@
 
 @media (max-width: 480px) {
   .browse-stores-page {
-    padding-top: 140px; /* Even more space for small mobile screens */
+    padding-top: 160px; /* Even more space for small mobile screens */
   }
 
   .browse-stores-page .customer-view-store-content {
-    padding: 12px 8px;
+    padding: 16px 12px;
   }
 
   .browse-stores-page .back-button {
-    margin-bottom: 12px;
-    padding: 8px 12px;
-    font-size: 12px;
+    margin-bottom: 16px;
+    padding: 10px 16px;
+    font-size: 13px;
     width: fit-content;
+    background: #313131;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .browse-stores-page .browse-header {

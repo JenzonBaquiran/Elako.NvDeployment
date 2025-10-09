@@ -491,10 +491,33 @@
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .customer-view-store-content {
-    margin-top: 100px; /* Increased margin for mobile navbar */
+    margin-top: 140px; /* Increased margin for mobile navbar */
+    padding: 20px 16px;
   }
-  .customer-view-store-content {
-    padding: 16px 1rem;
+
+  .back-button {
+    margin-bottom: 20px;
+    padding: 12px 20px;
+    font-size: 14px;
+    width: auto;
+    white-space: nowrap;
+    background: #313131;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .back-button:hover {
+    background: #7ed957;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(126, 217, 87, 0.3);
   }
 
   .customer-view-store-header-content {
@@ -590,7 +613,26 @@
 
 @media (max-width: 480px) {
   .customer-view-store-content {
-    padding: 12px 0.75rem;
+    margin-top: 160px; /* Even more space for small mobile screens */
+    padding: 16px 12px;
+  }
+
+  .back-button {
+    margin-bottom: 16px;
+    padding: 10px 16px;
+    font-size: 13px;
+    width: fit-content;
+    background: #313131;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .customer-view-store-header-text h1 {

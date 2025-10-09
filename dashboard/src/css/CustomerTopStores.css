@@ -460,11 +460,24 @@
 
 @media (max-width: 768px) {
   .browse-stores-page {
-    padding-top: 100px;
+    padding-top: 140px;
   }
   
   .browse-stores-content {
     padding: 24px 16px;
+  }
+
+  .back-button {
+    margin-bottom: 20px;
+    padding: 12px 20px;
+    font-size: 14px;
+    width: auto;
+    white-space: nowrap;
+    background: #313131;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
   .browse-stores-header h1 {
@@ -508,11 +521,26 @@
 
 @media (max-width: 480px) {
   .browse-stores-page {
-    padding-top: 120px;
+    padding-top: 160px;
   }
   
   .browse-stores-content {
     padding: 16px 12px;
+  }
+
+  .back-button {
+    margin-bottom: 16px;
+    padding: 10px 16px;
+    font-size: 13px;
+    width: fit-content;
+    background: #313131;
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .browse-stores-header h1 {

@@ -22,6 +22,11 @@ function CustomerHotPicks() {
     fetchAllHotPicks();
   }, [currentPage]);
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   const fetchAllHotPicks = async () => {
     try {
       setLoading(true);
@@ -69,7 +74,10 @@ function CustomerHotPicks() {
         <div className="browse-header">
           <button 
             className="back-button"
-            onClick={() => navigate('/')}
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              navigate('/');
+            }}
           >
             ← Back to Home
           </button>
@@ -131,7 +139,10 @@ function CustomerHotPicks() {
                       <div className="product-actions">
                         <button 
                           className="customer-view-store-visit-btn"
-                          onClick={() => navigate(`/product/${product._id}`)}
+                          onClick={() => {
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            navigate(`/product/${product._id}`);
+                          }}
                         >
                           View Product
                         </button>
@@ -157,7 +168,10 @@ function CustomerHotPicks() {
             <div className="pagination">
               <button 
                 className="pagination-btn"
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                onClick={() => {
+                  setCurrentPage(prev => Math.max(1, prev - 1));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 disabled={currentPage === 1}
               >
                 Previous
@@ -169,7 +183,10 @@ function CustomerHotPicks() {
               
               <button 
                 className="pagination-btn"
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                onClick={() => {
+                  setCurrentPage(prev => Math.min(totalPages, prev + 1));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 disabled={currentPage === totalPages}
               >
                 Next
@@ -179,7 +196,7 @@ function CustomerHotPicks() {
         </div>
       </div>
 
-      <Footer />
+      
     </div>
   );
 }

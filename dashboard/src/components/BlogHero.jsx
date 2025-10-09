@@ -191,22 +191,15 @@ const BlogHero = () => {
     
     switch (post.mediaType) {
       case 'youtube':
-        let videoId;
-        if (post.mediaUrl.includes('youtube.com')) {
-          videoId = post.mediaUrl.split('v=')[1]?.split('&')[0];
-        } else if (post.mediaUrl.includes('youtu.be')) {
-          videoId = post.mediaUrl.split('/').pop().split('?')[0];
-        } else {
-          videoId = post.mediaUrl.split('/').pop();
-        }
+        // For YouTube videos, show the thumbnail image to maintain consistent sizing
+        // The actual video player is shown in the modal when clicked
+        const videoId = getYouTubeVideoId(post.mediaUrl);
         return (
-          <iframe
-            src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
-            frameBorder="0"
-            allow="encrypted-media"
-            allowFullScreen
+          <img
+            src={getYouTubeThumbnail(videoId)}
+            alt={post.title}
             className="blog-hero-image"
-          ></iframe>
+          />
         );
       case 'video':
         return (

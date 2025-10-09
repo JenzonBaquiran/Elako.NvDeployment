@@ -164,22 +164,25 @@ function Home() {
                     <div className={`hot-pick-label ${productLabel.labelClass}`}>
                       {productLabel.label}
                     </div>
-                    <h3>{product.productName}</h3>
-                    <p>{product.description}</p>
-                    <div className="hot-pick-rating">
-                      {starIcon}
-                      <span>{product.rating.toFixed(1)} ({product.totalReviews})</span>
+                    <div className="hot-pick-content">
+                      <div className="hot-pick-info">
+                        <h3>{product.productName}</h3>
+                        <p>{product.description}</p>
+                        <div className="hot-pick-rating">
+                          {starIcon}
+                          <span>{product.rating.toFixed(1)} ({product.totalReviews})</span>
+                        </div>
+                        <div className="hot-pick-price">
+                          {formatPrice(product.price)}
+                        </div>
+                      </div>
+                      <button 
+                        className="hero-button hero-button-primary hot-pick-button" 
+                        onClick={() => navigate(`/product/${product._id}`)}
+                      >
+                        View Product
+                      </button>
                     </div>
-                    <div className="hot-pick-price">
-                      {formatPrice(product.price)}
-                    </div>
-                    <button 
-                      className="hero-button hero-button-primary" 
-                      style={{width: "100%", marginTop: "1rem"}}
-                      onClick={() => navigate(`/customer/product/${product._id}`)}
-                    >
-                      View Product
-                    </button>
                   </div>
                 );
               })
@@ -240,20 +243,23 @@ function Home() {
               <div className={`top-stores-label ${category.toLowerCase().replace(/\s+/g, '')}`}>
                 {category.charAt(0).toUpperCase() + category.slice(1)}
               </div>
-              <h3>{businessName}</h3>
-              <p>{description}</p>
-              <div className="top-stores-rating">
-                ★ {rating.toFixed(1)} ({totalRatings} review{totalRatings !== 1 ? 's' : ''})
+              <div className="top-stores-content">
+                <div className="top-stores-info">
+                  <h3>{businessName}</h3>
+                  <p>{description}</p>
+                  <div className="top-stores-rating">
+                    ★ {rating.toFixed(1)} ({totalRatings} review{totalRatings !== 1 ? 's' : ''})
+                  </div>
+                </div>
+                <button 
+                  className="hero-button hero-button-outline top-stores-button" 
+                  onClick={() => {
+                    recordStoreView(store._id, user?._id, navigate);
+                  }}
+                >
+                  Visit Store
+                </button>
               </div>
-              <button 
-                className="hero-button hero-button-outline" 
-                style={{width: "100%", marginTop: "1rem"}}
-                onClick={() => {
-                  recordStoreView(store._id, user?._id, navigate);
-                }}
-              >
-                Visit Store
-              </button>
             </div>
           );
         })

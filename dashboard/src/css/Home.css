@@ -410,13 +410,12 @@ body {
   border-radius: 1rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   overflow: hidden;
-  text-align: left;
+  text-align: center;
   position: relative;
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  min-height: 280px; /* Reduced from 320px */
+  min-height: 400px; /* Increased for better button alignment */
   cursor: pointer;
   border: 1px solid #f0f0f0;
 }
@@ -449,7 +448,7 @@ body {
   .top-rated-card,
   .top-stores-card,
   .recently-joined-card {
-    min-height: 320px; /* Reduced from 400px */
+    min-height: 420px; /* Consistent height for tablet */
   }
 }
 
@@ -458,13 +457,23 @@ body {
   .top-rated-card,
   .top-stores-card,
   .recently-joined-card {
-    min-height: 350px; /* Reduced from 480px */
+    min-height: 440px; /* Consistent height for desktop */
   }
 }
 
-.hot-pick-card:hover,
+.hot-pick-card:hover {
+  box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+  transform: translateY(-8px) scale(1.02);
+  border-color: #7ed957;
+}
+
+.top-stores-card:hover {
+  box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+  transform: translateY(-8px) scale(1.02);
+  border-color: #7ed957;
+}
+
 .top-rated-card:hover,
-.top-stores-card:hover,
 .recently-joined-card:hover {
   box-shadow: 0 8px 25px rgba(0,0,0,0.15);
   transform: translateY(-2px);
@@ -555,19 +564,67 @@ body {
   }
 }
 
+/* Hot Pick Content Container */
+.hot-pick-content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Hot Pick Info Container - holds all text content */
+.hot-pick-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  width: 100%;
+}
+
+.hot-pick-info h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: var(--foreground);
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.hot-pick-info p {
+  margin: 0 0 1rem 0;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
 .hot-pick-rating {
-  margin: 0 1rem 0.5rem 1rem;
+  margin: 0 0 0.75rem 0;
   color: #0097a7;
   font-size: 0.95rem;
   display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
 }
 
 .hot-pick-price {
-  margin: 0 1rem 0.5rem 1rem;
+  margin: 0 0 1rem 0;
   color: #0097a7;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: bold;
+  text-align: center;
+}
+
+/* Hot Pick Button - always at bottom */
+.hot-pick-button {
+  width: 100%;
+  margin-top: auto;
+  flex-shrink: 0;
 }
 
 /* Top Rated Products Section - Mobile First */
@@ -822,26 +879,60 @@ body {
 .top-stores-label.video { background: #007c91; }
 .top-stores-label.optimization { background: #ffb300; }
 
-.top-stores-card h3 {
-  margin: 1rem 1rem 0.5rem 1rem;
-  font-size: 1.1rem;
-  color: #000;
+/* Top Stores Content Container */
+.top-stores-content {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  flex: 1;
+  min-height: 0;
 }
 
-.top-stores-card p {
-  margin: 0 1rem 0.5rem 1rem;
+/* Top Stores Info Container - holds all text content */
+.top-stores-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  width: 100%;
+}
+
+.top-stores-info h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
   color: #000;
-  font-size: 0.95rem;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.top-stores-info p {
+  margin: 0 0 1rem 0;
+  color: #000;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  text-align: center;
 }
 
 .top-stores-rating {
-  margin: 0 1rem 0.5rem 1rem;
+  margin: 0 0 1rem 0;
   color: #000;
   font-size: 0.95rem;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  gap: 0.25rem;
+}
+
+/* Top Stores Button - always at bottom */
+.top-stores-button {
+  width: 100%;
+  margin-top: auto;
+  flex-shrink: 0;
 }
 
 .top-stores-card .hero-button.hero-button-outline {
@@ -1311,6 +1402,76 @@ body {
 .hot-pick-card:nth-child(3) { animation-delay: 0.4s; }
 .hot-pick-card:nth-child(4) { animation-delay: 0.5s; }
 
+/* Enhanced Hot Pick Card Hover Effects */
+.hot-pick-card img {
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hot-pick-card:hover img {
+  transform: scale(1.05);
+}
+
+.hot-pick-label {
+  transition: all 0.3s ease;
+}
+
+.hot-pick-card:hover .hot-pick-label {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.hot-pick-content {
+  transition: transform 0.3s ease;
+}
+
+.hot-pick-card:hover .hot-pick-content {
+  transform: translateY(-2px);
+}
+
+.hot-pick-card .hero-button {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hot-pick-card:hover .hero-button {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(126, 217, 87, 0.3);
+}
+
+/* Enhanced Top Stores Card Hover Effects */
+.top-stores-card img {
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.top-stores-card:hover img {
+  transform: scale(1.05);
+}
+
+.top-stores-label {
+  transition: all 0.3s ease;
+}
+
+.top-stores-card:hover .top-stores-label {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.top-stores-content {
+  transition: transform 0.3s ease;
+}
+
+.top-stores-card:hover .top-stores-content {
+  transform: translateY(-2px);
+}
+
+.top-stores-card .hero-button {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.top-stores-card:hover .hero-button {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(126, 217, 87, 0.3);
+}
+
 /* Top Rated Products Animations */
 .top-rated-header {
   animation: slideInRight 0.8s cubic-bezier(.77,0,.175,1) 0.2s both;
@@ -1339,6 +1500,9 @@ body {
 .top-stores-card:nth-child(1) { animation-delay: 0.2s; }
 .top-stores-card:nth-child(2) { animation-delay: 0.3s; }
 .top-stores-card:nth-child(3) { animation-delay: 0.4s; }
+.top-stores-card:nth-child(4) { animation-delay: 0.5s; }
+.top-stores-card:nth-child(5) { animation-delay: 0.6s; }
+.top-stores-card:nth-child(6) { animation-delay: 0.7s; }
 
 /* Recently Joined Animations */
 .recently-joined-header {
@@ -1489,6 +1653,7 @@ body {
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1701,6 +1866,7 @@ body {
   flex: 1;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

@@ -41,6 +41,7 @@ const CustomerViewStore = () => {
       const data = await response.json();
       
       if (data.success && Array.isArray(data.stores)) {
+        console.log('Store data received:', data.stores[0]); // Debug: Check actual store data structure
         setStores(data.stores);
       } else {
         showError("Failed to fetch stores", "Error");
@@ -65,25 +66,70 @@ const CustomerViewStore = () => {
   });
 
   const getStoreBadgeClass = (category) => {
-    switch (category) {
-      case 'food':
-        return 'food-badge';
-      case 'artisan':
-        return 'artisan-badge';
-      default:
-        return 'default-badge';
+    // Handle null, undefined, or empty category
+    if (!category || category.trim() === '') return 'default-badge';
+    
+    const categoryLower = category.toLowerCase().trim();
+    
+    if (categoryLower.includes('food') || categoryLower.includes('beverage') || categoryLower.includes('restaurant') || categoryLower.includes('cafe')) {
+      return 'food-badge';
     }
+    
+    if (categoryLower.includes('artisan') || categoryLower.includes('art') || categoryLower.includes('craft') || categoryLower.includes('handmade')) {
+      return 'artisan-badge';
+    }
+    
+    if (categoryLower.includes('fashion') || categoryLower.includes('clothing') || categoryLower.includes('apparel')) {
+      return 'fashion-badge';
+    }
+    
+    if (categoryLower.includes('tech') || categoryLower.includes('technology') || categoryLower.includes('digital')) {
+      return 'tech-badge';
+    }
+    
+    if (categoryLower.includes('retail') || categoryLower.includes('shop')) {
+      return 'retail-badge';
+    }
+    
+    if (categoryLower.includes('service')) {
+      return 'service-badge';
+    }
+    
+    return 'default-badge';
   };
 
   const formatCategoryName = (category) => {
-    switch (category) {
-      case 'food':
-        return 'Food & Beverages';
-      case 'artisan':
-        return 'Arts & Crafts';
-      default:
-        return category || 'Business';
+    // Handle null, undefined, or empty category
+    if (!category || category.trim() === '') return 'STORE';
+    
+    const categoryLower = category.toLowerCase().trim();
+    
+    if (categoryLower.includes('food') || categoryLower.includes('beverage') || categoryLower.includes('restaurant') || categoryLower.includes('cafe')) {
+      return 'FOOD';
     }
+    
+    if (categoryLower.includes('artisan') || categoryLower.includes('art') || categoryLower.includes('craft') || categoryLower.includes('handmade')) {
+      return 'ARTISAN';
+    }
+    
+    if (categoryLower.includes('fashion') || categoryLower.includes('clothing') || categoryLower.includes('apparel')) {
+      return 'FASHION';
+    }
+    
+    if (categoryLower.includes('tech') || categoryLower.includes('technology') || categoryLower.includes('digital')) {
+      return 'TECH';
+    }
+    
+    if (categoryLower.includes('retail') || categoryLower.includes('shop')) {
+      return 'RETAIL';
+    }
+    
+    if (categoryLower.includes('service')) {
+      return 'SERVICE';
+    }
+    
+    // Return the original category in uppercase, or 'STORE' if empty
+    return category.toUpperCase();
   };
 
   const getDaysAgo = (dateString) => {
@@ -185,6 +231,13 @@ const CustomerViewStore = () => {
     <div className="customer-view-store-container">
       <Header />
       <div className={getContentClass()}>
+        <button 
+          className="back-button"
+          onClick={() => navigate('/')}
+        >
+          ← Back to Home
+        </button>
+        
         <div className="customer-view-store-header">
           <div className="customer-view-store-header-content">
             <div className="customer-view-store-header-text">
@@ -228,15 +281,33 @@ const CustomerViewStore = () => {
             filteredStores.map((store) => {
               const dashboard = store.dashboard || {};
               const isNew = getDaysAgo(store.createdAt).includes('day') && parseInt(getDaysAgo(store.createdAt)) <= 7;
+              const categoryName = formatCategoryName(store.category);
+              const badgeClass = getStoreBadgeClass(store.category);
+              
+              // Debug: Log store data for badges
+              console.log(`Store: ${store.businessName}`);
+              console.log(`- Category: "${store.category}" (${typeof store.category})`);
+              console.log(`- Created: ${store.createdAt}`);
+              console.log(`- Is New: ${isNew}`);
+              console.log(`- Category Name: ${categoryName}`);
+              console.log(`- Badge Class: ${badgeClass}`);
+              console.log('---');
               
               return (
                 <div key={store._id} className="customer-view-store-card">
-                  <div className="customer-view-store-visibility-indicator">
-                    <span className={`category-badge ${getStoreBadgeClass(store.category)}`}>
-                      {formatCategoryName(store.category)}
+                  {/* Category badge on the left - always show */}
+                  <div className="category-badge-container">
+                    <span className={`category-badge ${badgeClass}`}>
+                      {categoryName}
                     </span>
-                    {isNew && <span className="new-badge">NEW</span>}
                   </div>
+                  
+                  {/* NEW badge on the right */}
+                  {isNew && (
+                    <div className="new-badge-container">
+                      <span className="new-badge">NEW</span>
+                    </div>
+                  )}
                   
                   <StoreImage 
                     store={store}

@@ -121,42 +121,81 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-/* Visibility Indicators */
-.customer-view-store-visibility-indicator {
+/* Category Badge Container (Left Side) */
+.category-badge-container {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+}
+
+/* NEW Badge Container (Right Side) */
+.new-badge-container {
   position: absolute;
   top: 12px;
   right: 12px;
   z-index: 10;
   display: flex;
   align-items: center;
-  gap: 8px;
 }
 
 .category-badge, .new-badge {
-  padding: 4px 8px;
-  border-radius: 12px;
+  padding: 6px 12px;
+  border-radius: 16px;
   font-size: 0.75rem;
-  font-weight: 600;
-  backdrop-filter: blur(8px);
+  font-weight: 700;
   color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  z-index: 15;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .food-badge {
-  background: rgba(255, 107, 107, 0.9);
+  background: linear-gradient(135deg, #ff6b35, #ff8e53);
+  box-shadow: 0 3px 12px rgba(255, 107, 53, 0.4) !important;
 }
 
 .artisan-badge {
-  background: rgba(162, 155, 254, 0.9);
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  box-shadow: 0 3px 12px rgba(108, 92, 231, 0.4) !important;
+}
+
+.fashion-badge {
+  background: linear-gradient(135deg, #fd79a8, #e84393);
+  box-shadow: 0 3px 12px rgba(253, 121, 168, 0.4) !important;
+}
+
+.tech-badge {
+  background: linear-gradient(135deg, #74b9ff, #0984e3);
+  box-shadow: 0 3px 12px rgba(116, 185, 255, 0.4) !important;
+}
+
+.retail-badge {
+  background: linear-gradient(135deg, #00b894, #00cec9);
+  box-shadow: 0 3px 12px rgba(0, 184, 148, 0.4) !important;
+}
+
+.service-badge {
+  background: linear-gradient(135deg, #fdcb6e, #e17055);
+  box-shadow: 0 3px 12px rgba(253, 203, 110, 0.4) !important;
 }
 
 .default-badge {
-  background: rgba(116, 185, 255, 0.9);
+  background: linear-gradient(135deg, #636e72, #2d3436);
+  box-shadow: 0 3px 12px rgba(99, 110, 114, 0.4) !important;
 }
 
 .new-badge {
-  background: rgba(40, 167, 69, 0.9);
+  background: linear-gradient(135deg, #28a745, #7ed957);
   animation: pulse 2s infinite;
+  box-shadow: 0 3px 12px rgba(40, 167, 69, 0.4) !important;
 }
 
 @keyframes pulse {
@@ -577,6 +616,22 @@
   .customer-view-store-card {
     border-radius: 12px;
     min-height: 380px;
+  }
+
+  /* Badge positioning on mobile */
+  .category-badge-container {
+    top: 8px;
+    left: 8px;
+  }
+
+  .new-badge-container {
+    top: 8px;
+    right: 8px;
+  }
+
+  .category-badge, .new-badge {
+    padding: 4px 8px;
+    font-size: 0.7rem;
   }
 
   .customer-view-store-image {

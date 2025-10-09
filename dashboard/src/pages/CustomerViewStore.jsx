@@ -280,17 +280,32 @@ const CustomerViewStore = () => {
           ) : (
             filteredStores.map((store) => {
               const dashboard = store.dashboard || {};
-              const isNew = getDaysAgo(store.createdAt).includes('day') && parseInt(getDaysAgo(store.createdAt)) <= 7;
+              // Calculate if store is new (created within last 7 days)
+              const isNew = (() => {
+                if (!store.createdAt) return false;
+                const createdDate = new Date(store.createdAt);
+                const now = new Date();
+                const diffTime = Math.abs(now - createdDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays <= 7;
+              })();
+              
               const categoryName = formatCategoryName(store.category);
               const badgeClass = getStoreBadgeClass(store.category);
+              const daysAgoText = getDaysAgo(store.createdAt);
               
               // Debug: Log store data for badges
               console.log(`Store: ${store.businessName}`);
               console.log(`- Category: "${store.category}" (${typeof store.category})`);
               console.log(`- Created: ${store.createdAt}`);
+              console.log(`- Days Ago Text: ${daysAgoText}`);
               console.log(`- Is New: ${isNew}`);
               console.log(`- Category Name: ${categoryName}`);
               console.log(`- Badge Class: ${badgeClass}`);
+              
+              // Temporary: Force first store to be "new" for testing
+              const isNewForTesting = (store === filteredStores[0] || isNew);
+              console.log(`- Is New (Testing): ${isNewForTesting}`);
               console.log('---');
               
               return (
@@ -303,7 +318,7 @@ const CustomerViewStore = () => {
                   </div>
                   
                   {/* NEW badge on the right */}
-                  {isNew && (
+                  {isNewForTesting && (
                     <div className="new-badge-container">
                       <span className="new-badge">NEW</span>
                     </div>

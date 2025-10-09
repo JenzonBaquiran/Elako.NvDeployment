@@ -304,7 +304,26 @@ function Home() {
         const description = dashboard?.description || 'MSME business services';
         const location = dashboard?.location || store.address || 'Philippines';
         const joinedDays = getDaysAgo(store.createdAt);
-        const isNew = joinedDays.includes('day') && parseInt(joinedDays) <= 7;
+        // Calculate if store is new (created within last 7 days)
+        const isNew = (() => {
+          if (!store.createdAt) return false;
+          const createdDate = new Date(store.createdAt);
+          const now = new Date();
+          const diffTime = Math.abs(now - createdDate);
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          return diffDays <= 7;
+        })();
+        
+        // Temporary: Force first store to be "new" for testing
+        const isNewForTesting = (store === newStores[0] || isNew);
+        
+        // Debug: Log store data for badges (Home page)
+        console.log(`Home - Store: ${businessName}`);
+        console.log(`- Created: ${store.createdAt}`);
+        console.log(`- Days Ago Text: ${joinedDays}`);
+        console.log(`- Is New: ${isNew}`);
+        console.log(`- Is New (Testing): ${isNewForTesting}`);
+        console.log('---');
         
         return (
           <div className="new-store-card" key={store.id || store._id}>
@@ -320,7 +339,7 @@ function Home() {
               <div className={`store-category-badge ${store.category?.toLowerCase().replace(/\s+/g, '') || 'default'}`}>
                 {store.category || 'Business'}
               </div>
-              {isNew && (
+              {isNewForTesting && (
                 <div className="store-new-badge">New</div>
               )}
             </div>

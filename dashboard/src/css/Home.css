@@ -1818,6 +1818,8 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
+  z-index: 15;
+  pointer-events: none;
 }
 
 .store-category-badge:hover {
@@ -1845,7 +1847,7 @@ body {
   position: absolute;
   top: 12px;
   right: 12px;
-  background:#7ed957;
+  background: linear-gradient(135deg, #28a745, #7ed957);
   color: white;
   font-size: 0.7rem;
   font-weight: 800;
@@ -1853,11 +1855,13 @@ body {
   border-radius: 18px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  box-shadow: 0 4px 12px rgba(49, 49, 49, 0.4);
+  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.6);
   backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   transition: all 0.3s ease;
   animation: pulse-glow 2s infinite;
+  z-index: 20;
+  pointer-events: none;
 }
 
 .store-new-badge:hover {

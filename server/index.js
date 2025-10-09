@@ -5749,9 +5749,35 @@ app.post("/api/conversations", async (req, res) => {
       customerId: userModel === "Customer" ? userId : targetId,
     });
 
+    // Find the other participant for the client
+    const otherParticipant = conversation.participants.find(
+      (p) => p.userId._id.toString() !== userId.toString()
+    );
+
+    // Transform conversation data to include otherParticipant field
+    const transformedConversation = {
+      ...conversation.toObject(),
+      otherParticipant: otherParticipant
+        ? {
+            id: otherParticipant.userId._id,
+            name:
+              otherParticipant.userModel === "Customer"
+                ? `${otherParticipant.userId.firstname} ${otherParticipant.userId.lastname}`
+                : otherParticipant.userId.businessName,
+            // Add these fields for proper client-side display
+            firstname: otherParticipant.userId.firstname,
+            lastname: otherParticipant.userId.lastname,
+            businessName: otherParticipant.userId.businessName,
+            username: otherParticipant.userId.username,
+            email: otherParticipant.userId.email,
+            userType: otherParticipant.userModel.toLowerCase(),
+          }
+        : null,
+    };
+
     res.json({
       success: true,
-      conversation,
+      conversation: transformedConversation,
     });
   } catch (error) {
     console.error("❌ Error creating/getting conversation:", error);
@@ -5810,6 +5836,10 @@ app.get("/api/users/:userId/conversations", async (req, res) => {
                   otherParticipant.userModel === "Customer"
                     ? `${otherParticipant.userId.firstname} ${otherParticipant.userId.lastname}`
                     : otherParticipant.userId.businessName,
+                // Add these fields for proper client-side display
+                firstname: otherParticipant.userId.firstname,
+                lastname: otherParticipant.userId.lastname,
+                businessName: otherParticipant.userId.businessName,
                 username: otherParticipant.userId.username,
                 email: otherParticipant.userId.email,
                 userType: otherParticipant.userModel.toLowerCase(),

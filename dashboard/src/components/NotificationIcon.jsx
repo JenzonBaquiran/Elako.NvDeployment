@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
   IconButton, 
   Badge,
@@ -27,6 +28,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import PersonIcon from '@mui/icons-material/Person';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import MessageIcon from '@mui/icons-material/Message';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SelectAllIcon from '@mui/icons-material/SelectAll';
@@ -36,6 +38,7 @@ import './NotificationIcon.css';
 import Notification from './Notification';
 
 const NotificationIcon = ({ storeId }) => {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -308,8 +311,45 @@ const NotificationIcon = ({ storeId }) => {
         return <PersonIcon className="msme-notification-icon__type-icon" />;
       case 'product_favorite':
         return <FavoriteIcon className="msme-notification-icon__type-icon" />;
+      case 'new_message':
+        return <MessageIcon className="msme-notification-icon__type-icon" />;
       default:
         return <NotificationsIcon className="msme-notification-icon__type-icon" />;
+    }
+  };
+
+  const handleNotificationClick = async (notification) => {
+    console.log('🔔 MSME Notification clicked:', notification);
+    
+    try {
+      // Mark as read if not already read
+      if (!notification.isRead) {
+        await markAsRead(notification._id);
+      }
+
+      // Handle navigation based on notification type
+      if (notification.type === 'new_message' && notification.conversationId) {
+        console.log('📨 Navigating to message conversation:', notification.conversationId);
+        
+        // Close the drawer first
+        handleCloseDrawer();
+        
+        // Navigate to messages page with conversation ID as state
+        navigate('/msme-messages', {
+          state: { 
+            openConversationId: notification.conversationId,
+            fromNotification: true 
+          }
+        });
+      } else if (notification.type === 'product_favorite' && notification.productId) {
+        // Navigate to product management or analytics
+        navigate('/msme-products');
+      } else if (notification.type === 'store_follow') {
+        // Navigate to dashboard or analytics
+        navigate('/msme-dashboard');
+      }
+    } catch (error) {
+      console.error('Error handling notification click:', error);
     }
   };
 
@@ -476,9 +516,7 @@ const NotificationIcon = ({ storeId }) => {
                           handleSelectNotification(notification._id);
                           return;
                         }
-                        if (!notification.isRead) {
-                          markAsRead(notification._id);
-                        }
+                        handleNotificationClick(notification);
                       }}
                       onTouchStart={(e) => handleTouchStart(e, notification._id)}
                       onTouchMove={(e) => handleTouchMove(e, notification._id)}

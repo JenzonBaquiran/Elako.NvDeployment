@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import MsmeSidebar from './MsmeSidebar';
 import Notification from '../components/Notification';
@@ -41,6 +41,7 @@ const MsmeMessage = () => {
   });
   
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isAuthenticated, userType } = useAuth(); // Use AuthContext
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -158,7 +159,7 @@ const MsmeMessage = () => {
         socketService.disconnect();
       };
     }
-  }, [currentUser, selectedChat]);
+  }, [currentUser]); // Removed selectedChat dependency to prevent reloading on chat selection
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -188,6 +189,24 @@ const MsmeMessage = () => {
         currentUser.userType
       );
       setConversations(convs);
+      
+      // Check if we need to open a specific conversation from notification
+      const { openConversationId, fromNotification } = location.state || {};
+      if (fromNotification && openConversationId && convs.length > 0) {
+        console.log('🔔 Opening conversation from notification:', openConversationId);
+        
+        // Find the conversation to open
+        const conversationToOpen = convs.find(conv => conv._id === openConversationId);
+        if (conversationToOpen) {
+          console.log('✅ Found conversation to open:', conversationToOpen);
+          handleChatSelect(conversationToOpen);
+          
+          // Clear the navigation state to prevent reopening on refresh
+          navigate('/msme-messages', { replace: true });
+        } else {
+          console.log('❌ Conversation not found in loaded conversations');
+        }
+      }
     } catch (error) {
       console.error('Error loading conversations:', error);
     } finally {
@@ -207,8 +226,11 @@ const MsmeMessage = () => {
       
       // Mark messages as read and update unread count
       const unreadMessages = messages.filter(msg => msg.receiverId === currentUser.id && !msg.isRead);
+      console.log(`🔍 Conversation ${conversationId} - Found ${unreadMessages.length} unread messages`);
+      
       if (unreadMessages.length > 0) {
         try {
+          console.log(`🔄 Marking ${unreadMessages.length} messages as read...`);
           await messageService.markMessagesAsRead(conversationId, currentUser.id);
           socketService.markMessagesRead({
             conversationId,
@@ -220,10 +242,12 @@ const MsmeMessage = () => {
             conv._id === conversationId ? { ...conv, unreadCount: 0 } : conv
           ));
           
-          console.log(`✅ Marked ${unreadMessages.length} messages as read`);
+          console.log(`✅ Marked ${unreadMessages.length} messages as read and updated conversation unread count to 0`);
         } catch (error) {
           console.error('❌ Error marking messages as read:', error);
         }
+      } else {
+        console.log(`ℹ️ No unread messages found in conversation ${conversationId}`);
       }
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -277,8 +301,22 @@ const MsmeMessage = () => {
   };
 
   const handleChatSelect = (conversation) => {
+    console.log(`🎯 Chat selected:`, {
+      conversationId: conversation._id,
+      customerName: getCustomerName(conversation.otherParticipant),
+      currentUnreadCount: conversation.unreadCount,
+      wasSelected: selectedChat?._id === conversation._id
+    });
+    
     setSelectedChat(conversation);
     setMessages([]);
+    
+    // Force update the unread count to 0 immediately (optimistic update)
+    console.log(`🔄 Forcing unread count to 0 for conversation ${conversation._id}`);
+    setConversations(prev => prev.map(conv =>
+      conv._id === conversation._id ? { ...conv, unreadCount: 0 } : conv
+    ));
+    
     loadMessages(conversation._id);
     // Note: unread count will be reset in loadMessages after messages are actually marked as read
   };

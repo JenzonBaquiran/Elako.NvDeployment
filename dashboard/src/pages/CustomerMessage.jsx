@@ -144,11 +144,14 @@ const CustomerMessage = () => {
 
       // Listen for read receipts
       socket.on('messages_read', (data) => {
+        console.log(`📨 Received 'messages_read' event:`, data);
+        
         if (selectedChat && data.conversationId === selectedChat._id) {
           setMessages(prev => prev.map(msg => ({
             ...msg,
             isRead: msg.receiverId === data.readBy ? true : msg.isRead
           })));
+          console.log(`✅ Updated message read status in chat view`);
         }
         
         // Update conversation unread count when messages are read
@@ -156,6 +159,7 @@ const CustomerMessage = () => {
           setConversations(prev => prev.map(conv =>
             conv._id === data.conversationId ? { ...conv, unreadCount: 0 } : conv
           ));
+          console.log(`✅ Updated conversation unread count to 0 via socket event`);
         }
       });
 
@@ -175,7 +179,7 @@ const CustomerMessage = () => {
         socketService.disconnect();
       };
     }
-  }, [currentUser, selectedChat]);
+  }, [currentUser]); // Removed selectedChat dependency to prevent reloading on chat selection
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -290,8 +294,11 @@ const CustomerMessage = () => {
       
       // Mark messages as read and update unread count
       const unreadMessages = messages.filter(msg => msg.receiverId === currentUser.id && !msg.isRead);
+      console.log(`🔍 Conversation ${conversationId} - Found ${unreadMessages.length} unread messages`);
+      
       if (unreadMessages.length > 0) {
         try {
+          console.log(`🔄 Marking ${unreadMessages.length} messages as read...`);
           await messageService.markMessagesAsRead(conversationId, currentUser.id);
           socketService.markMessagesRead({
             conversationId,
@@ -303,10 +310,12 @@ const CustomerMessage = () => {
             conv._id === conversationId ? { ...conv, unreadCount: 0 } : conv
           ));
           
-          console.log(`✅ Marked ${unreadMessages.length} messages as read`);
+          console.log(`✅ Marked ${unreadMessages.length} messages as read and updated conversation unread count to 0`);
         } catch (error) {
           console.error('❌ Error marking messages as read:', error);
         }
+      } else {
+        console.log(`ℹ️ No unread messages found in conversation ${conversationId}`);
       }
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -335,8 +344,22 @@ const CustomerMessage = () => {
   };
 
   const handleChatSelect = (conversation) => {
+    console.log(`🎯 Chat selected:`, {
+      conversationId: conversation._id,
+      storeName: getStoreName(conversation.otherParticipant),
+      currentUnreadCount: conversation.unreadCount,
+      wasSelected: selectedChat?._id === conversation._id
+    });
+    
     setSelectedChat(conversation);
     setMessages([]);
+    
+    // Force update the unread count to 0 immediately (optimistic update)
+    console.log(`🔄 Forcing unread count to 0 for conversation ${conversation._id}`);
+    setConversations(prev => prev.map(conv =>
+      conv._id === conversation._id ? { ...conv, unreadCount: 0 } : conv
+    ));
+    
     loadMessages(conversation._id);
     // Note: unread count will be reset in loadMessages after messages are actually marked as read
   };

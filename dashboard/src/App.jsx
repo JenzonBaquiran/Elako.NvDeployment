@@ -30,6 +30,7 @@ import CustomerMessage from "./pages/CustomerMessage";
 import CustomerProfile from "./pages/CustomerProfile";
 import CustomerNotifications from "./pages/CustomerNotifications";
 import CustomerHotPicks from "./pages/CustomerHotPicks";
+import CustomerTopStores from "./pages/CustomerTopStores";
 import ProductDetails from "./pages/ProductDetails";
 import ForgotPassword from "./pages/ForgotPassword";
 import AdminAuditLogs from "./pages/AdminAuditLogs";
@@ -267,6 +268,14 @@ function App() {
               element={
                 <ProtectedRoute allowedUserTypes={['customer', 'msme', 'admin']}>
                   <CustomerHotPicks />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/customer/top-stores" 
+              element={
+                <ProtectedRoute allowedUserTypes={['customer', 'msme', 'admin']}>
+                  <CustomerTopStores />
                 </ProtectedRoute>
               } 
             />

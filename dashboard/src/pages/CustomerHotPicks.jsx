@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import { useAuth } from '../contexts/AuthContext';
+import FavoriteButton from '../components/FavoriteButton';
 import heroPic from '../pictures/IMG_6125.jpg';
 import '../css/Home.css';
+import '../css/CustomerHotpicks.css';
 
 function CustomerHotPicks() {
   const navigate = useNavigate();
@@ -14,6 +16,7 @@ function CustomerHotPicks() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
+
 
   useEffect(() => {
     fetchAllHotPicks();
@@ -62,8 +65,8 @@ function CustomerHotPicks() {
     <div>
       <Navbar />
       
-      <div className="customer-hot-picks-page">
-        <div className="hot-picks-page-header">
+      <div className="browse-stores-page">
+        <div className="browse-header">
           <button 
             className="back-button"
             onClick={() => navigate('/')}
@@ -71,14 +74,14 @@ function CustomerHotPicks() {
             ← Back to Home
           </button>
           <h1>All Hot Picks</h1>
-          <p>Products with 4.5-5.0 star ratings from approved stores</p>
-          <div className="hot-picks-stats">
-            <span>{totalProducts} products found</span>
-            {totalPages > 1 && <span> • Page {currentPage} of {totalPages}</span>}
-          </div>
+          <p>Discover amazing products with 4.5-5.0 star ratings from approved stores.</p>
         </div>
 
-        <div className="hot-picks-container">
+
+
+
+
+        <div className="products-container">
           {loading ? (
             <div className="loading-state">
               <p>Loading hot picks...</p>
@@ -88,41 +91,60 @@ function CustomerHotPicks() {
               <p>No hot picks found.</p>
             </div>
           ) : (
-            <div className="hot-picks-grid">
+            <div className="products-grid">
               {hotPicks.map((product) => {
                 const productLabel = getProductLabel(product.rating);
                 const productImage = product.imageUrl || heroPic;
                 
                 return (
-                  <div className="hot-pick-card" key={product._id}>
-                    <img 
-                      src={productImage} 
-                      alt={product.productName}
-                      onError={(e) => {
-                        e.target.src = heroPic;
-                      }}
-                    />
-                    <div className={`hot-pick-label ${productLabel.labelClass}`}>
-                      {productLabel.label}
+                  <div className="product-card" key={product._id}>
+                    <div className="product-image-container">
+                      <img 
+                        src={productImage} 
+                        alt={product.productName}
+                        className="product-image"
+                        onError={(e) => {
+                          e.target.src = heroPic;
+                        }}
+                      />
+                      <div className={`product-badge ${productLabel.labelClass}`}>
+                        {productLabel.label}
+                      </div>
                     </div>
-                    <div className="hot-pick-content">
-                      <div className="hot-pick-info">
-                        <h3>{product.productName}</h3>
-                        <p>{product.description}</p>
-                        <div className="hot-pick-rating">
-                          {starIcon}
-                          <span>{product.rating.toFixed(1)} ({product.totalReviews})</span>
-                        </div>
-                        <div className="hot-pick-price">
-                          {formatPrice(product.price)}
+                    
+                    <div className="product-info">
+                      <h3 className="product-name">{product.productName}</h3>
+                      
+                      <div className="product-rating">
+                        <div className="rating-container">
+                          <div className="stars">
+                            {[...Array(5)].map((_, i) => (
+                              <span key={i} className={`star ${i < Math.floor(product.rating) ? '' : 'empty'}`}>
+                                {i < Math.floor(product.rating) ? '★' : '☆'}
+                              </span>
+                            ))}
+                          </div>
+                          <span className="rating-value">({product.rating.toFixed(1)})</span>
                         </div>
                       </div>
-                      <button 
-                        className="hero-button hero-button-primary hot-pick-button" 
-                        onClick={() => navigate(`/product/${product._id}`)}
-                      >
-                        View Product
-                      </button>
+                      
+                      <div className="product-actions">
+                        <button 
+                          className="customer-view-store-visit-btn"
+                          onClick={() => navigate(`/product/${product._id}`)}
+                        >
+                          View Product
+                        </button>
+                        <div className="product-favorite-wrapper">
+                          <FavoriteButton
+                            productId={product._id}
+                            productName={product.productName}
+                            className="product-favorite-btn"
+                            size="medium"
+                            variant="default"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 );

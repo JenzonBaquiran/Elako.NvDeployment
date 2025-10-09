@@ -3139,6 +3139,78 @@ app.get("/api/customers/:customerId/following", async (req, res) => {
   }
 });
 
+// Follow/Unfollow store endpoint (Alternative URL pattern)
+app.post(
+  "/api/customers/:customerId/follow-store/:storeId",
+  async (req, res) => {
+    try {
+      const { customerId, storeId } = req.params;
+
+      console.log(
+        "Follow/unfollow toggle - Customer:",
+        customerId,
+        "Store:",
+        storeId
+      );
+
+      // Validate customer exists
+      const customer = await Customer.findById(customerId);
+      if (!customer) {
+        return res.status(404).json({
+          success: false,
+          error: "Customer not found",
+        });
+      }
+
+      // Validate store exists
+      const store = await MSME.findById(storeId);
+      if (!store) {
+        return res.status(404).json({
+          success: false,
+          error: "Store not found",
+        });
+      }
+
+      const isFollowing = customer.following.includes(storeId);
+
+      if (isFollowing) {
+        // Unfollow
+        customer.following = customer.following.filter(
+          (id) => id.toString() !== storeId
+        );
+        await customer.save();
+
+        res.json({
+          success: true,
+          action: "unfollowed",
+          message: `Unfollowed ${store.businessName}`,
+          following: false,
+        });
+      } else {
+        // Follow
+        customer.following.push(storeId);
+        await customer.save();
+
+        // Create notification for store owner
+        await createNotification(storeId, customerId, "store_follow");
+
+        res.json({
+          success: true,
+          action: "followed",
+          message: `Now following ${store.businessName}!`,
+          following: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling follow store:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error processing follow request",
+      });
+    }
+  }
+);
+
 // Store rating endpoint
 app.post("/api/stores/:storeId/rating", async (req, res) => {
   try {
@@ -4491,6 +4563,34 @@ app.get(
     }
   }
 );
+
+// Get favorites count for customer
+app.get("/api/customers/:customerId/favorites/count", async (req, res) => {
+  try {
+    const { customerId } = req.params;
+
+    const customer = await Customer.findById(customerId);
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        error: "Customer not found",
+      });
+    }
+
+    const count = customer.favorites ? customer.favorites.length : 0;
+
+    res.json({
+      success: true,
+      count,
+    });
+  } catch (error) {
+    console.error("Error fetching favorites count:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching favorites count",
+    });
+  }
+});
 
 // --- Notification Routes ---
 
@@ -6506,11 +6606,11 @@ app.get("/api/top-stores", async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 6;
 
-    // Fetch MSMEs with 4.5-5.0 average rating, approved status, and visible
+    // Fetch MSMEs with 4.0-5.0 average rating, approved status, and visible
     const topStores = await MSME.find({
       status: "approved",
       isVisible: true,
-      averageRating: { $gte: 4.5, $lte: 5.0 },
+      averageRating: { $gte: 4.0, $lte: 5.0 },
     })
       .sort({ averageRating: -1, totalRatings: -1, createdAt: -1 }) // Sort by rating desc, then by number of ratings, then by newest
       .limit(limit);
@@ -6690,14 +6790,14 @@ app.get("/api/top-stores/all", async (req, res) => {
     const totalCount = await MSME.countDocuments({
       status: "approved",
       isVisible: true,
-      averageRating: { $gte: 4.5, $lte: 5.0 },
+      averageRating: { $gte: 4.0, $lte: 5.0 },
     });
 
-    // Fetch all MSMEs with 4.5-5.0 average rating with pagination
+    // Fetch all MSMEs with 4.0-5.0 average rating with pagination
     const topStores = await MSME.find({
       status: "approved",
       isVisible: true,
-      averageRating: { $gte: 4.5, $lte: 5.0 },
+      averageRating: { $gte: 4.0, $lte: 5.0 },
     })
       .sort({ averageRating: -1, totalRatings: -1, createdAt: -1 }) // Sort by rating desc, then by number of ratings, then by newest
       .skip(skip)

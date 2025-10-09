@@ -1721,7 +1721,7 @@ body {
 }
 
 .provider-visit-btn:hover {
-  background: linear-gradient(135deg, #5a4fcf, #8b7afe);
+  background: #7ed957;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(108, 92, 231, 0.3);
 }

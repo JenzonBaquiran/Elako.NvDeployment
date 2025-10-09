@@ -10,7 +10,8 @@ const FavoriteButton = ({
   productName, 
   className = "", 
   size = "medium", 
-  variant = "default" 
+  variant = "default",
+  onToggle = null
 }) => {
   const { user, userType, isAuthenticated } = useAuth();
   const { showSuccess, showError } = useNotification();
@@ -74,6 +75,11 @@ const FavoriteButton = ({
       if (data.success) {
         setIsFavorite(data.isFavorite);
         showSuccess(data.message, data.action === 'added' ? 'Added to Favorites' : 'Removed from Favorites');
+        
+        // Call the onToggle callback if provided
+        if (onToggle) {
+          onToggle(data.isFavorite, data.action);
+        }
       } else {
         showError(data.error || 'Failed to update favorites', 'Error');
       }

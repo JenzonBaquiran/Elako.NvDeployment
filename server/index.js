@@ -6873,6 +6873,235 @@ app.get("/api/top-stores/all", async (req, res) => {
   }
 });
 
+// --- Hot Picks Routes (Top Rated Products) ---
+// Get top 4 products with 4.5-5.0 average rating
+app.get("/api/hot-picks", async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 4;
+
+    // Fetch products with 4.5-5.0 average rating, available, and visible
+    const hotProducts = await Product.find({
+      availability: true,
+      visible: true,
+      rating: { $gte: 4.5, $lte: 5.0 },
+    })
+      .populate("msmeId", "businessName username status")
+      .sort({ rating: -1, createdAt: -1 }) // Sort by rating desc, then by newest
+      .limit(limit);
+
+    // Filter out products from non-approved MSMEs
+    const filteredProducts = hotProducts.filter(
+      (product) => product.msmeId && product.msmeId.status === "approved"
+    );
+
+    // Format the response with product details
+    const formattedProducts = filteredProducts.map((product) => {
+      const averageRating = product.rating || 0;
+      const totalReviews = product.feedback ? product.feedback.length : 0;
+      const mainImage =
+        product.pictures && product.pictures.length > 0
+          ? product.pictures[0]
+          : product.picture;
+
+      return {
+        _id: product._id,
+        productId: product._id,
+        productName: product.productName,
+        description: product.description,
+        price: product.price,
+        category: product.category || "General",
+        availability: product.availability,
+        visible: product.visible,
+        // Image handling
+        mainImage: mainImage,
+        images: product.pictures || (product.picture ? [product.picture] : []),
+        imageUrl: mainImage
+          ? `http://localhost:1337/uploads/${mainImage}`
+          : null,
+        // Rating information
+        rating: averageRating,
+        averageRating: averageRating,
+        totalReviews: totalReviews,
+        feedback: product.feedback || [],
+        // MSME information
+        msme: {
+          _id: product.msmeId._id,
+          businessName: product.msmeId.businessName,
+          username: product.msmeId.username,
+          status: product.msmeId.status,
+        },
+        // Additional product details
+        hashtags: product.hashtags || [],
+        variants: product.variants || [],
+        sizeOptions: product.sizeOptions || [],
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+      };
+    });
+
+    res.json({
+      success: true,
+      products: formattedProducts,
+      total: formattedProducts.length,
+      message:
+        limit === 4
+          ? "Top 4 hot picks with 4.5-5.0 rating"
+          : `Top ${limit} hot picks with 4.5-5.0 rating`,
+    });
+  } catch (error) {
+    console.error("Error fetching hot picks:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch hot picks",
+    });
+  }
+});
+
+// Get all products with 4.5-5.0 average rating (for "View All" functionality)
+app.get("/api/hot-picks/all", async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12; // Default to 12 per page for better pagination
+    const skip = (page - 1) * limit;
+
+    // Get total count of top-rated products
+    const totalCountResult = await Product.aggregate([
+      {
+        $match: {
+          availability: true,
+          visible: true,
+          rating: { $gte: 4.5, $lte: 5.0 },
+        },
+      },
+      {
+        $lookup: {
+          from: "msmes",
+          localField: "msmeId",
+          foreignField: "_id",
+          as: "msme",
+        },
+      },
+      {
+        $unwind: "$msme",
+      },
+      {
+        $match: {
+          "msme.status": "approved",
+        },
+      },
+      {
+        $count: "total",
+      },
+    ]);
+
+    const totalCount =
+      totalCountResult.length > 0 ? totalCountResult[0].total : 0;
+
+    // Fetch all products with 4.5-5.0 average rating with pagination
+    const hotProducts = await Product.aggregate([
+      {
+        $match: {
+          availability: true,
+          visible: true,
+          rating: { $gte: 4.5, $lte: 5.0 },
+        },
+      },
+      {
+        $lookup: {
+          from: "msmes",
+          localField: "msmeId",
+          foreignField: "_id",
+          as: "msme",
+        },
+      },
+      {
+        $unwind: "$msme",
+      },
+      {
+        $match: {
+          "msme.status": "approved",
+        },
+      },
+      {
+        $sort: { rating: -1, createdAt: -1 },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: limit,
+      },
+    ]);
+
+    // Format the response with product details
+    const formattedProducts = hotProducts.map((product) => {
+      const averageRating = product.rating || 0;
+      const totalReviews = product.feedback ? product.feedback.length : 0;
+      const mainImage =
+        product.pictures && product.pictures.length > 0
+          ? product.pictures[0]
+          : product.picture;
+
+      return {
+        _id: product._id,
+        productId: product._id,
+        productName: product.productName,
+        description: product.description,
+        price: product.price,
+        category: product.category || "General",
+        availability: product.availability,
+        visible: product.visible,
+        // Image handling
+        mainImage: mainImage,
+        images: product.pictures || (product.picture ? [product.picture] : []),
+        imageUrl: mainImage
+          ? `http://localhost:1337/uploads/${mainImage}`
+          : null,
+        // Rating information
+        rating: averageRating,
+        averageRating: averageRating,
+        totalReviews: totalReviews,
+        feedback: product.feedback || [],
+        // MSME information
+        msme: {
+          _id: product.msme._id,
+          businessName: product.msme.businessName,
+          username: product.msme.username,
+          status: product.msme.status,
+        },
+        // Additional product details
+        hashtags: product.hashtags || [],
+        variants: product.variants || [],
+        sizeOptions: product.sizeOptions || [],
+        createdAt: product.createdAt,
+        updatedAt: product.updatedAt,
+      };
+    });
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    res.json({
+      success: true,
+      products: formattedProducts,
+      pagination: {
+        currentPage: page,
+        totalPages: totalPages,
+        totalCount: totalCount,
+        limit: limit,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+      message: "All hot picks with 4.5-5.0 rating",
+    });
+  } catch (error) {
+    console.error("Error fetching all hot picks:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch all hot picks",
+    });
+  }
+});
+
 // --- Start Server ---
 server.listen(port, () => {
   console.log(`🚀 Server running at http://localhost:${port}`);

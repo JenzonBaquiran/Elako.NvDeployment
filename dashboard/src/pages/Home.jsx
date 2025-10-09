@@ -15,13 +15,16 @@ function Home() {
   const { user } = useAuth();
   const [newStores, setNewStores] = useState([]);
   const [topStores, setTopStores] = useState([]);
+  const [hotPicks, setHotPicks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [topStoresLoading, setTopStoresLoading] = useState(true);
+  const [hotPicksLoading, setHotPicksLoading] = useState(true);
 
-  // Fetch new stores and top stores from backend
+  // Fetch new stores, top stores, and hot picks from backend
   useEffect(() => {
     fetchNewStores();
     fetchTopStores();
+    fetchHotPicks();
   }, []);
 
   const fetchNewStores = async () => {
@@ -63,6 +66,24 @@ function Home() {
     }
   };
 
+  const fetchHotPicks = async () => {
+    try {
+      // Fetch hot picks products with 4.5-5.0 rating, limit to 4
+      const hotPicksResponse = await fetch('http://localhost:1337/api/hot-picks?limit=4');
+      const hotPicksData = await hotPicksResponse.json();
+      
+      if (hotPicksData.success) {
+        setHotPicks(hotPicksData.products);
+      } else {
+        console.error('Failed to fetch hot picks:', hotPicksData.error);
+      }
+    } catch (error) {
+      console.error('Error fetching hot picks:', error);
+    } finally {
+      setHotPicksLoading(false);
+    }
+  };
+
   // Calculate days since joining
   const getDaysAgo = (dateString) => {
     const createdDate = new Date(dateString);
@@ -81,41 +102,18 @@ function Home() {
   const starIcon = <span style={{color: "#0097a7", fontSize: "1rem", marginRight: "0.25rem"}}>★</span>;
   const arrowIcon = <span style={{marginLeft: "0.5rem", fontSize: "1rem"}}>→</span>;
   
+  // Helper function to get product label based on rating
+  const getProductLabel = (rating, index) => {
+    if (rating === 5) return { label: "Hot", labelClass: "hot" };
+    if (rating >= 4.8) return { label: "Trending", labelClass: "trending" };
+    if (rating >= 4.5) return { label: "Popular", labelClass: "popular" };
+    return { label: "Featured", labelClass: "hot" };
+  };
 
-  const cards = [
-    {
-      label: "Hot",
-      labelClass: "hot",
-      title: "Social Media Management Pro",
-      desc: "Complete social media strategy and content creation",
-      rating: "4.9 (234)",
-      price: "$299/month"
-    },
-    {
-      label: "Trending",
-      labelClass: "trending",
-      title: "SEO Optimization Suite",
-      desc: "Boost your search rankings with advanced SEO tools",
-      rating: "4.8 (189)",
-      price: "$199/month"
-    },
-    {
-      label: "Popular",
-      labelClass: "popular",
-      title: "Email Marketing Automation",
-      desc: "Automated email campaigns that convert",
-      rating: "4.7 (156)",
-      price: "$149/month"
-    },
-    {
-      label: "Hot",
-      labelClass: "hot",
-      title: "PPC Campaign Management",
-      desc: "Expert Google Ads and Facebook Ads management",
-      rating: "4.9 (298)",
-      price: "$399/month"
-    }
-  ];
+  // Helper function to format price
+  const formatPrice = (price) => {
+    return `₱${price.toLocaleString()}`;
+  };
 
   return (
     <div>
@@ -127,7 +125,10 @@ function Home() {
           <h1></h1>
           <h2>Hot Picks</h2>
           <div className="hot-picks-viewall">
-            <button className="hero-button hero-button-outline">
+            <button 
+              className="hero-button hero-button-outline"
+              onClick={() => navigate('/customer/hot-picks')}
+            >
               View All 
             </button>
           </div>
@@ -135,24 +136,54 @@ function Home() {
      
         <div className="hot-picks-list-container">
           <div className="hot-picks-list">
-            {cards.map((card, idx) => (
-              <div className="hot-pick-card" key={idx} data-aos="zoom-in">
-                <img src={heroPic} alt="Service" />
-                <div className={`hot-pick-label ${card.labelClass}`}>{card.label}</div>
-                <h3>{card.title}</h3>
-                <p>{card.desc}</p>
-                <div className="hot-pick-rating">
-                  {starIcon}
-                  <span>{card.rating}</span>
-                </div>
-                <div className="hot-pick-price">
-                  {card.price}
-                </div>
-                <button className="hero-button hero-button-primary" style={{width: "100%", marginTop: "1rem"}}>
-                  View Product
-                </button>
+            {hotPicksLoading ? (
+              // Loading state
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px', gridColumn: '1 / -1' }}>
+                <p style={{ fontSize: '1.1rem', color: '#666' }}>Loading hot picks...</p>
               </div>
-            ))}
+            ) : hotPicks.length === 0 ? (
+              // No hot picks state
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px', gridColumn: '1 / -1' }}>
+                <p style={{ fontSize: '1.1rem', color: '#666' }}>No hot picks found.</p>
+              </div>
+            ) : (
+              // Display fetched hot picks
+              hotPicks.map((product, idx) => {
+                const productLabel = getProductLabel(product.rating, idx);
+                const productImage = product.imageUrl || heroPic;
+                
+                return (
+                  <div className="hot-pick-card" key={product._id} data-aos="zoom-in">
+                    <img 
+                      src={productImage} 
+                      alt={product.productName}
+                      onError={(e) => {
+                        e.target.src = heroPic; // Fallback to default image if product image fails
+                      }}
+                    />
+                    <div className={`hot-pick-label ${productLabel.labelClass}`}>
+                      {productLabel.label}
+                    </div>
+                    <h3>{product.productName}</h3>
+                    <p>{product.description}</p>
+                    <div className="hot-pick-rating">
+                      {starIcon}
+                      <span>{product.rating.toFixed(1)} ({product.totalReviews})</span>
+                    </div>
+                    <div className="hot-pick-price">
+                      {formatPrice(product.price)}
+                    </div>
+                    <button 
+                      className="hero-button hero-button-primary" 
+                      style={{width: "100%", marginTop: "1rem"}}
+                      onClick={() => navigate(`/customer/product/${product._id}`)}
+                    >
+                      View Product
+                    </button>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </section>

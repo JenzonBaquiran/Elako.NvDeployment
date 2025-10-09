@@ -6500,6 +6500,379 @@ app.post("/api/resend-otp", async (req, res) => {
   }
 });
 
+// --- Top Stores Routes ---
+// Get top 6 stores with 4.5-5.0 average rating
+app.get("/api/top-stores", async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 6;
+
+    // Fetch MSMEs with 4.5-5.0 average rating, approved status, and visible
+    const topStores = await MSME.find({
+      status: "approved",
+      isVisible: true,
+      averageRating: { $gte: 4.5, $lte: 5.0 },
+    })
+      .sort({ averageRating: -1, totalRatings: -1, createdAt: -1 }) // Sort by rating desc, then by number of ratings, then by newest
+      .limit(limit);
+
+    // Fetch dashboard information for each top store
+    const storesWithDashboards = await Promise.all(
+      topStores.map(async (msme) => {
+        try {
+          let dashboard = await Dashboard.findByMsmeId(msme._id);
+
+          // If no dashboard exists, create a minimal dashboard
+          if (!dashboard) {
+            dashboard = new Dashboard({
+              msmeId: msme._id,
+              businessName: msme.businessName,
+              description: "",
+              coverPhoto: null,
+              storeLogo: null,
+              contactNumber: msme.contactNumber || "",
+              location: msme.address || "",
+              googleMapsUrl: "",
+              coordinates: { lat: null, lng: null },
+              socialLinks: {
+                facebook: "",
+                instagram: "",
+                twitter: "",
+                website: "",
+              },
+              ecommercePlatforms: {
+                shopee: { enabled: false, url: "" },
+                lazada: { enabled: false, url: "" },
+                tiktok: { enabled: false, url: "" },
+              },
+              governmentApprovals: {
+                dole: false,
+                dost: false,
+                fda: false,
+                others: false,
+              },
+              rating: 0,
+              isPublic: true,
+            });
+
+            try {
+              await dashboard.save();
+            } catch (saveError) {
+              console.error(
+                `Error saving dashboard for ${msme.businessName}:`,
+                saveError
+              );
+            }
+          }
+
+          // Get product count for this store
+          const productCount = await Product.countDocuments({
+            msmeId: msme._id,
+          });
+
+          // Get follower count for this store
+          const followerCount = await Customer.countDocuments({
+            following: msme._id,
+          });
+
+          return {
+            _id: msme._id,
+            msmeId: msme._id,
+            businessName: dashboard.businessName || msme.businessName,
+            category: msme.category,
+            username: msme.username,
+            status: msme.status,
+            createdAt: msme.createdAt,
+            address: msme.address,
+            // Include MSME rating data
+            averageRating: msme.averageRating || 0,
+            totalRatings: msme.totalRatings || 0,
+            ratings: msme.ratings || [],
+            // Include store statistics
+            productCount: productCount,
+            followerCount: followerCount,
+            dashboard: {
+              businessName: dashboard.businessName || msme.businessName,
+              description: dashboard.description || "",
+              coverPhoto: dashboard.coverPhoto,
+              storeLogo: dashboard.storeLogo,
+              contactNumber:
+                dashboard.contactNumber || msme.contactNumber || "",
+              location: dashboard.location || msme.address || "",
+              socialLinks: dashboard.socialLinks || {
+                facebook: "",
+                instagram: "",
+                twitter: "",
+                website: "",
+              },
+              rating: msme.averageRating || 0,
+              totalRatings: msme.totalRatings || 0,
+              isPublic: dashboard.isPublic !== false,
+              createdAt: dashboard.createdAt,
+              updatedAt: dashboard.updatedAt,
+            },
+          };
+        } catch (error) {
+          console.error(
+            `Error fetching dashboard for ${msme.businessName}:`,
+            error
+          );
+
+          // Get product count and follower count even in error case
+          const productCount = await Product.countDocuments({
+            msmeId: msme._id,
+          }).catch(() => 0);
+          const followerCount = await Customer.countDocuments({
+            following: msme._id,
+          }).catch(() => 0);
+
+          return {
+            _id: msme._id,
+            msmeId: msme._id,
+            businessName: msme.businessName,
+            category: msme.category,
+            username: msme.username,
+            status: msme.status,
+            createdAt: msme.createdAt,
+            address: msme.address,
+            averageRating: msme.averageRating || 0,
+            totalRatings: msme.totalRatings || 0,
+            ratings: msme.ratings || [],
+            productCount: productCount,
+            followerCount: followerCount,
+            dashboard: {
+              businessName: msme.businessName,
+              description: "",
+              coverPhoto: null,
+              storeLogo: null,
+              contactNumber: msme.contactNumber || "",
+              location: msme.address || "",
+              socialLinks: {
+                facebook: "",
+                instagram: "",
+                twitter: "",
+                website: "",
+              },
+              rating: msme.averageRating || 0,
+              totalRatings: msme.totalRatings || 0,
+              isPublic: true,
+            },
+          };
+        }
+      })
+    );
+
+    res.json({
+      success: true,
+      stores: storesWithDashboards,
+      total: storesWithDashboards.length,
+      message:
+        limit === 6
+          ? "Top 6 stores with 4.5-5.0 rating"
+          : `Top ${limit} stores with 4.5-5.0 rating`,
+    });
+  } catch (error) {
+    console.error("Error fetching top stores:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch top stores",
+    });
+  }
+});
+
+// Get all stores with 4.5-5.0 average rating (for "View All" functionality)
+app.get("/api/top-stores/all", async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12; // Default to 12 per page for better pagination
+    const skip = (page - 1) * limit;
+
+    // Get total count of top-rated stores
+    const totalCount = await MSME.countDocuments({
+      status: "approved",
+      isVisible: true,
+      averageRating: { $gte: 4.5, $lte: 5.0 },
+    });
+
+    // Fetch all MSMEs with 4.5-5.0 average rating with pagination
+    const topStores = await MSME.find({
+      status: "approved",
+      isVisible: true,
+      averageRating: { $gte: 4.5, $lte: 5.0 },
+    })
+      .sort({ averageRating: -1, totalRatings: -1, createdAt: -1 }) // Sort by rating desc, then by number of ratings, then by newest
+      .skip(skip)
+      .limit(limit);
+
+    // Fetch dashboard information for each top store
+    const storesWithDashboards = await Promise.all(
+      topStores.map(async (msme) => {
+        try {
+          let dashboard = await Dashboard.findByMsmeId(msme._id);
+
+          // If no dashboard exists, create a minimal dashboard
+          if (!dashboard) {
+            dashboard = new Dashboard({
+              msmeId: msme._id,
+              businessName: msme.businessName,
+              description: "",
+              coverPhoto: null,
+              storeLogo: null,
+              contactNumber: msme.contactNumber || "",
+              location: msme.address || "",
+              googleMapsUrl: "",
+              coordinates: { lat: null, lng: null },
+              socialLinks: {
+                facebook: "",
+                instagram: "",
+                twitter: "",
+                website: "",
+              },
+              ecommercePlatforms: {
+                shopee: { enabled: false, url: "" },
+                lazada: { enabled: false, url: "" },
+                tiktok: { enabled: false, url: "" },
+              },
+              governmentApprovals: {
+                dole: false,
+                dost: false,
+                fda: false,
+                others: false,
+              },
+              rating: 0,
+              isPublic: true,
+            });
+
+            try {
+              await dashboard.save();
+            } catch (saveError) {
+              console.error(
+                `Error saving dashboard for ${msme.businessName}:`,
+                saveError
+              );
+            }
+          }
+
+          // Get product count for this store
+          const productCount = await Product.countDocuments({
+            msmeId: msme._id,
+          });
+
+          // Get follower count for this store
+          const followerCount = await Customer.countDocuments({
+            following: msme._id,
+          });
+
+          return {
+            _id: msme._id,
+            msmeId: msme._id,
+            businessName: dashboard.businessName || msme.businessName,
+            category: msme.category,
+            username: msme.username,
+            status: msme.status,
+            createdAt: msme.createdAt,
+            address: msme.address,
+            // Include MSME rating data
+            averageRating: msme.averageRating || 0,
+            totalRatings: msme.totalRatings || 0,
+            ratings: msme.ratings || [],
+            // Include store statistics
+            productCount: productCount,
+            followerCount: followerCount,
+            dashboard: {
+              businessName: dashboard.businessName || msme.businessName,
+              description: dashboard.description || "",
+              coverPhoto: dashboard.coverPhoto,
+              storeLogo: dashboard.storeLogo,
+              contactNumber:
+                dashboard.contactNumber || msme.contactNumber || "",
+              location: dashboard.location || msme.address || "",
+              socialLinks: dashboard.socialLinks || {
+                facebook: "",
+                instagram: "",
+                twitter: "",
+                website: "",
+              },
+              rating: msme.averageRating || 0,
+              totalRatings: msme.totalRatings || 0,
+              isPublic: dashboard.isPublic !== false,
+              createdAt: dashboard.createdAt,
+              updatedAt: dashboard.updatedAt,
+            },
+          };
+        } catch (error) {
+          console.error(
+            `Error fetching dashboard for ${msme.businessName}:`,
+            error
+          );
+
+          // Get product count and follower count even in error case
+          const productCount = await Product.countDocuments({
+            msmeId: msme._id,
+          }).catch(() => 0);
+          const followerCount = await Customer.countDocuments({
+            following: msme._id,
+          }).catch(() => 0);
+
+          return {
+            _id: msme._id,
+            msmeId: msme._id,
+            businessName: msme.businessName,
+            category: msme.category,
+            username: msme.username,
+            status: msme.status,
+            createdAt: msme.createdAt,
+            address: msme.address,
+            averageRating: msme.averageRating || 0,
+            totalRatings: msme.totalRatings || 0,
+            ratings: msme.ratings || [],
+            productCount: productCount,
+            followerCount: followerCount,
+            dashboard: {
+              businessName: msme.businessName,
+              description: "",
+              coverPhoto: null,
+              storeLogo: null,
+              contactNumber: msme.contactNumber || "",
+              location: msme.address || "",
+              socialLinks: {
+                facebook: "",
+                instagram: "",
+                twitter: "",
+                website: "",
+              },
+              rating: msme.averageRating || 0,
+              totalRatings: msme.totalRatings || 0,
+              isPublic: true,
+            },
+          };
+        }
+      })
+    );
+
+    const totalPages = Math.ceil(totalCount / limit);
+
+    res.json({
+      success: true,
+      stores: storesWithDashboards,
+      pagination: {
+        currentPage: page,
+        totalPages: totalPages,
+        totalCount: totalCount,
+        limit: limit,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+      message: "All stores with 4.5-5.0 rating",
+    });
+  } catch (error) {
+    console.error("Error fetching all top stores:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch all top stores",
+    });
+  }
+});
+
 // --- Start Server ---
 server.listen(port, () => {
   console.log(`🚀 Server running at http://localhost:${port}`);

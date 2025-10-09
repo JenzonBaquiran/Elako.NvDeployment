@@ -14,11 +14,14 @@ function Home() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [newStores, setNewStores] = useState([]);
+  const [topStores, setTopStores] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [topStoresLoading, setTopStoresLoading] = useState(true);
 
-  // Fetch new stores from backend with dashboard information
+  // Fetch new stores and top stores from backend
   useEffect(() => {
     fetchNewStores();
+    fetchTopStores();
   }, []);
 
   const fetchNewStores = async () => {
@@ -39,6 +42,24 @@ function Home() {
       console.error('Error fetching stores:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTopStores = async () => {
+    try {
+      // Fetch top stores with 4.5-5.0 rating, limit to 6
+      const topStoresResponse = await fetch('http://localhost:1337/api/top-stores?limit=6');
+      const topStoresData = await topStoresResponse.json();
+      
+      if (topStoresData.success) {
+        setTopStores(topStoresData.stores);
+      } else {
+        console.error('Failed to fetch top stores:', topStoresData.error);
+      }
+    } catch (error) {
+      console.error('Error fetching top stores:', error);
+    } finally {
+      setTopStoresLoading(false);
     }
   };
 
@@ -143,7 +164,7 @@ function Home() {
     <div className="top-stores-viewall">
       <button 
         className="hero-button hero-button-outline"
-        onClick={() => navigate('/customer/stores')}
+        onClick={() => navigate('/customer/top-stores')}
       >
         View All
       </button>
@@ -151,91 +172,61 @@ function Home() {
   </div>
   <div className="top-stores-list-container">
     <div className="top-stores-list">
-      {/* Example cards, replace with dynamic data as needed */}
-      <div className="top-stores-card">
-        <img src={heroPic} alt="Content Creation Studio" />
-        <div className="top-stores-label content">Content</div>
-        <h3>Content Creation Studio</h3>
-        <p>AI-powered content generation for all platforms</p>
-        <div className="top-stores-rating">★ 4.9 (412 reviews)</div>
-        <button 
-          className="hero-button hero-button-outline" 
-          style={{width: "100%", marginTop: "1rem"}}
-          onClick={() => navigate('/customer/stores')}
-        >
-          Visit Store
-        </button>
-      </div>
-      <div className="top-stores-card">
-        <img src={heroPic} alt="Analytics Pro Dashboard" />
-        <div className="top-stores-label analytics">Analytics</div>
-        <h3>Analytics Pro Dashboard</h3>
-        <p>Advanced marketing analytics and reporting</p>
-        <div className="top-stores-rating">★ 4.8 (356 reviews)</div>
-        <button 
-          className="hero-button hero-button-outline" 
-          style={{width: "100%", marginTop: "1rem"}}
-          onClick={() => navigate('/customer/stores')}
-        >
-          Visit Store
-        </button>
-      </div>
-      <div className="top-stores-card">
-        <img src={heroPic} alt="Influencer Connect" />
-        <div className="top-stores-label influencer">Influencer</div>
-        <h3>Influencer Connect</h3>
-        <p>Connect with top influencers in your niche</p>
-        <div className="top-stores-rating">★ 4.7 (289 reviews)</div>
-        <button 
-          className="hero-button hero-button-outline" 
-          style={{width: "100%", marginTop: "1rem"}}
-          onClick={() => navigate('/customer/stores')}
-        >
-          Visit Store
-        </button>
-      </div>
-      <div className="top-stores-card">
-        <img src={heroPic} alt="Brand Design Suite" />
-        <div className="top-stores-label design">Design</div>
-        <h3>Brand Design Suite</h3>
-        <p>Professional branding and design tools</p>
-        <div className="top-stores-rating">★ 4.8 (234 reviews)</div>
-        <button 
-          className="hero-button hero-button-outline" 
-          style={{width: "100%", marginTop: "1rem"}}
-          onClick={() => navigate('/customer/stores')}
-        >
-          Visit Store
-        </button>
-      </div>
-      <div className="top-stores-card">
-        <img src={heroPic} alt="Video Marketing Hub" />
-        <div className="top-stores-label video">Video</div>
-        <h3>Video Marketing Hub</h3>
-        <p>Create and distribute engaging video content</p>
-        <div className="top-stores-rating">★ 4.9 (178 reviews)</div>
-        <button 
-          className="hero-button hero-button-outline" 
-          style={{width: "100%", marginTop: "1rem"}}
-          onClick={() => navigate('/customer/stores')}
-        >
-          Visit Store
-        </button>
-      </div>
-      <div className="top-stores-card">
-        <img src={heroPic} alt="Conversion Optimizer" />
-        <div className="top-stores-label optimization">Optimization</div>
-        <h3>Conversion Optimizer</h3>
-        <p>A/B testing and conversion rate optimization</p>
-        <div className="top-stores-rating">★ 4.6 (145 reviews)</div>
-        <button 
-          className="hero-button hero-button-outline" 
-          style={{width: "100%", marginTop: "1rem"}}
-          onClick={() => navigate('/customer/stores')}
-        >
-          Visit Store
-        </button>
-      </div>
+      {topStoresLoading ? (
+        // Loading state
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px', gridColumn: '1 / -1' }}>
+          <p style={{ fontSize: '1.1rem', color: '#666' }}>Loading top stores...</p>
+        </div>
+      ) : topStores.length === 0 ? (
+        // No top stores state
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '200px', gridColumn: '1 / -1' }}>
+          <p style={{ fontSize: '1.1rem', color: '#666' }}>No top-rated stores found.</p>
+        </div>
+      ) : (
+        // Display fetched top stores with existing card structure
+        topStores.map((store) => {
+          const dashboard = store.dashboard;
+          const storeImage = dashboard?.coverPhoto 
+            ? `http://localhost:1337/uploads/${dashboard.coverPhoto}` 
+            : (dashboard?.storeLogo 
+                ? `http://localhost:1337/uploads/${dashboard.storeLogo}` 
+                : heroPic);
+          const businessName = dashboard?.businessName || store.businessName;
+          const description = dashboard?.description || 'High-quality MSME products and services';
+          const rating = store.averageRating || 0;
+          const totalRatings = store.totalRatings || 0;
+          const category = store.category || 'business';
+          
+          return (
+            <div className="top-stores-card" key={store._id}>
+              <img 
+                src={storeImage} 
+                alt={businessName}
+                onError={(e) => {
+                  e.target.src = heroPic; // Fallback to default image if store image fails to load
+                }}
+              />
+              <div className={`top-stores-label ${category.toLowerCase().replace(/\s+/g, '')}`}>
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </div>
+              <h3>{businessName}</h3>
+              <p>{description}</p>
+              <div className="top-stores-rating">
+                ★ {rating.toFixed(1)} ({totalRatings} review{totalRatings !== 1 ? 's' : ''})
+              </div>
+              <button 
+                className="hero-button hero-button-outline" 
+                style={{width: "100%", marginTop: "1rem"}}
+                onClick={() => {
+                  recordStoreView(store._id, user?._id, navigate);
+                }}
+              >
+                Visit Store
+              </button>
+            </div>
+          );
+        })
+      )}
     </div>
   </div>
 </section>

@@ -32,6 +32,7 @@ import CustomerNotifications from "./pages/CustomerNotifications";
 import ProductDetails from "./pages/ProductDetails";
 import ForgotPassword from "./pages/ForgotPassword";
 import AdminAuditLogs from "./pages/AdminAuditLogs";
+import AdminMsmeReport from "./pages/AdminMsmeReport";
 
 
 
@@ -101,6 +102,14 @@ function App() {
               element={
                 <ProtectedRoute allowedUserTypes={['admin']}>
                   <AdminAuditLogs />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin-msme-reports" 
+              element={
+                <ProtectedRoute allowedUserTypes={['admin']}>
+                  <AdminMsmeReport />
                 </ProtectedRoute>
               } 
             />

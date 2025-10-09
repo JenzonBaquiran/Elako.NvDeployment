@@ -15,6 +15,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ArticleIcon from '@mui/icons-material/Article';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 
 const AdminSidebar = ({ onSidebarToggle }) => {
   const { showSuccess } = useNotification();
@@ -163,6 +164,12 @@ const AdminSidebar = ({ onSidebarToggle }) => {
               <Link to="/admin-analytics" className={`admin-sidebar__nav-link ${location.pathname === '/admin-analytics' ? 'admin-sidebar__nav-link--active' : ''}`} title="Platform Analytics" onClick={handleIconClick}>
                 <AnalyticsIcon className="admin-sidebar__icon" />
                 <span className="admin-sidebar__text">MSME Analytics</span>
+              </Link>
+            </li>
+             <li className="admin-sidebar__nav-item">
+              <Link to="/admin-msme-reports" className={`admin-sidebar__nav-link ${location.pathname === '/admin-msme-reports' ? 'admin-sidebar__nav-link--active' : ''}`} title="MSME Reports" onClick={handleIconClick}>
+                <AssessmentIcon className="admin-sidebar__icon" />
+                <span className="admin-sidebar__text">MSME Reports</span>
               </Link>
             </li>
               <li className="admin-sidebar__nav-item">

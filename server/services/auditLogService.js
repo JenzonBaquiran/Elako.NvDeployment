@@ -1,4 +1,5 @@
 const AuditLog = require("../models/auditLog.model");
+const Admin = require("../models/admin.model");
 
 class AuditLogService {
   /**
@@ -118,7 +119,7 @@ class AuditLogService {
   }
 
   /**
-   * Get audit logs with pagination and filtering
+   * Get audit logs with pagination and filtering - Only displays logs from users with admin role
    */
   static async getLogs(filters = {}, pagination = {}) {
     try {
@@ -133,10 +134,58 @@ class AuditLogService {
         limit = 20,
       } = { ...filters, ...pagination };
 
+      // First, get all admin IDs with 'admin' role (excluding super-admin)
+      const adminUsers = await Admin.find({ role: "admin" })
+        .select("_id username")
+        .lean();
+      const adminIds = adminUsers.map((admin) => admin._id.toString());
+      const adminUsernames = adminUsers.map((admin) => admin.username);
+
       const query = {};
 
-      if (adminId) query.adminId = adminId;
-      if (adminUsername) query.adminUsername = new RegExp(adminUsername, "i");
+      // Only include logs from users with admin role
+      if (adminId) {
+        // Check if the specified adminId is in our allowed list
+        if (adminIds.includes(adminId)) {
+          query.adminId = adminId;
+        } else {
+          // If the adminId is not an admin role, return empty results
+          return {
+            logs: [],
+            pagination: {
+              current: parseInt(page),
+              total: 0,
+              count: 0,
+              limit: parseInt(limit),
+            },
+          };
+        }
+      } else {
+        // Filter to only show logs from admin role users
+        query.adminId = { $in: adminIds };
+      }
+
+      if (adminUsername) {
+        // Filter username search to only admin role users
+        const matchingUsernames = adminUsernames.filter((username) =>
+          username.toLowerCase().includes(adminUsername.toLowerCase())
+        );
+        if (matchingUsernames.length > 0) {
+          query.adminUsername = new RegExp(matchingUsernames.join("|"), "i");
+        } else {
+          // If no matching usernames found in admin role users, return empty
+          return {
+            logs: [],
+            pagination: {
+              current: parseInt(page),
+              total: 0,
+              count: 0,
+              limit: parseInt(limit),
+            },
+          };
+        }
+      }
+
       if (action) query.action = action;
       if (status) query.status = status;
 
@@ -173,7 +222,7 @@ class AuditLogService {
   }
 
   /**
-   * Get audit log statistics
+   * Get audit log statistics - Only includes logs from users with admin role
    */
   static async getStatistics(timeframe = "30d") {
     try {
@@ -195,10 +244,17 @@ class AuditLogService {
           break;
       }
 
+      // Get all admin IDs with 'admin' role (excluding super-admin)
+      const adminUsers = await Admin.find({ role: "admin" })
+        .select("_id")
+        .lean();
+      const adminIds = adminUsers.map((admin) => admin._id.toString());
+
       const stats = await AuditLog.aggregate([
         {
           $match: {
             createdAt: { $gte: startDate, $lte: endDate },
+            adminId: { $in: adminIds }, // Only include logs from admin role users
           },
         },
         {

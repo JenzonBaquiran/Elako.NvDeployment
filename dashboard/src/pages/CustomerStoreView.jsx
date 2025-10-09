@@ -76,6 +76,17 @@ const CustomerStoreView = () => {
     }
   }, [storeId]);
 
+  // Auto-slide functionality like BlogHero
+  useEffect(() => {
+    if (blogPosts.length > 1) {
+      const timer = setInterval(() => {
+        setCurrentBlogSlide((prevSlide) => (prevSlide + 1) % blogPosts.length);
+      }, 5000); // Change slide every 5 seconds
+
+      return () => clearInterval(timer);
+    }
+  }, [blogPosts.length]);
+
   const fetchStoreDetails = async () => {
     try {
       const response = await fetch(`http://localhost:1337/api/stores/${storeId}`);
@@ -292,99 +303,143 @@ const CustomerStoreView = () => {
     }
   };
 
-  const handleBlogPostClick = async (post) => {
-    console.log('🖱️ Blog post clicked:', post);
-    console.log('🎬 Media type:', post.mediaType);
-    console.log('🔗 Media URL:', post.mediaUrl);
+  // Handle blog post modal click - structured like BlogHero
+  const handleBlogPostClick = async (clickedPost) => {
+    console.log('🖱️ Blog post clicked:', clickedPost);
+    console.log('🎬 Media type:', clickedPost.mediaType);
+    console.log('🔗 Media URL:', clickedPost.mediaUrl);
     console.log('📄 Post content:', {
-      title: post.title,
-      subtitle: post.subtitle,
-      description: post.description,
-      category: post.category,
-      createdAt: post.createdAt,
-      views: post.views
+      title: clickedPost.title,
+      subtitle: clickedPost.subtitle,
+      description: clickedPost.description,
+      category: clickedPost.category,
+      createdAt: clickedPost.createdAt,
+      views: clickedPost.views,
+      _id: clickedPost._id
     });
     
+    // Create a fresh copy of the clicked post to avoid reference issues
+    const postCopy = {
+      _id: clickedPost._id,
+      title: clickedPost.title,
+      subtitle: clickedPost.subtitle,
+      description: clickedPost.description,
+      category: clickedPost.category,
+      mediaType: clickedPost.mediaType,
+      mediaUrl: clickedPost.mediaUrl,
+      createdAt: clickedPost.createdAt,
+      views: clickedPost.views,
+      msmeId: clickedPost.msmeId
+    };
+    
+    console.log('📝 Post copy created:', postCopy);
+    
+    // Immediately set the selected post and show modal
+    setSelectedBlogPost(postCopy);
+    setShowBlogModal(true);
+    
+    // Increment views in background (don't wait for it)
+    incrementMsmeBlogViews(clickedPost._id);
+  };
+
+  // Increment MSME blog post views - structured like BlogHero
+  const incrementMsmeBlogViews = async (postId) => {
     try {
-      // Try store-scoped endpoint first (preferred), fallback to generic endpoint
-      let response;
-      let data;
-
-      try {
-        response = await fetch(`http://localhost:1337/api/msme/${storeId}/blog-posts/${post._id}`);
-        if (!response.ok) {
-          // try non-store endpoint as fallback
-          response = await fetch(`http://localhost:1337/api/msme/blog-posts/${post._id}`);
-        }
-      } catch (err) {
-        // network error, try fallback
-        response = await fetch(`http://localhost:1337/api/msme/blog-posts/${post._id}`);
-      }
-
-      try {
-        data = await response.json();
-      } catch (err) {
-        console.warn('Failed to parse blog post response as JSON, using local post object', err);
-        data = null;
-      }
-
-      if (data && data.success) {
-        // Update the blog post with the new view count
-        const updatedPost = data.post;
-        console.log('Updated post from server:', updatedPost);
-        setSelectedBlogPost(updatedPost);
-
-        // Update the blog posts list to reflect the new view count
-        setBlogPosts(prevPosts => 
-          prevPosts.map(p => 
-            p._id === post._id ? { ...p, views: updatedPost.views } : p
-          )
-        );
-      } else {
-        // If incrementing fails or response wasn't parseable, still show the modal with original post
-        console.log('Using original post data due to server error or missing data:', data?.error || 'no data');
-        setSelectedBlogPost(post);
-      }
+      console.log('📈 Incrementing views for MSME blog post:', postId);
+      const response = await fetch(`http://localhost:1337/api/msme/blog-posts/${postId}`);
       
-      // Log media handling details
-      if (post.mediaType === 'youtube') {
-        const videoId = extractYouTubeId(post.mediaUrl);
-        console.log('🎥 YouTube video details:', {
-          originalUrl: post.mediaUrl,
-          extractedId: videoId,
-          thumbnailUrl: getYouTubeThumbnail(post.mediaUrl),
-          embedUrl: `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`,
-          isValidId: videoId && videoId.length === 11
-        });
-        
-        // Test if YouTube thumbnail is accessible
-        if (videoId) {
-          const thumbnailUrl = getYouTubeThumbnail(post.mediaUrl);
-          console.log('🖼️ Testing YouTube thumbnail accessibility:', thumbnailUrl);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.post) {
+          console.log('✅ Views incremented successfully, new count:', data.post.views);
+          
+          // Update the selected post with new view count if it's still the same post
+          setSelectedBlogPost(prevSelected => {
+            if (prevSelected && prevSelected._id === postId) {
+              return { ...prevSelected, views: data.post.views };
+            }
+            return prevSelected;
+          });
+          
+          // Update the blog posts list
+          setBlogPosts(prevPosts => 
+            prevPosts.map(p => 
+              p._id === postId ? { ...p, views: data.post.views } : p
+            )
+          );
         }
-      } else if (post.mediaType === 'video') {
-        console.log('🎬 Video file details:', {
-          filename: post.mediaUrl,
-          fullUrl: getBlogMediaUrl(post),
-          fileExists: post.mediaUrl ? true : false
-        });
-      } else if (post.mediaType === 'image') {
-        console.log('🖼️ Image file details:', {
-          filename: post.mediaUrl,
-          fullUrl: getBlogMediaUrl(post),
-          fileExists: post.mediaUrl ? true : false
-        });
-      } else {
-        console.log('❓ Unknown media type:', post.mediaType);
       }
-      
-      setShowBlogModal(true);
     } catch (error) {
-      console.error('Error incrementing blog post views:', error);
-      // Still show the modal even if view increment fails
-      setSelectedBlogPost(post);
-      setShowBlogModal(true);
+      console.error('❌ Error incrementing MSME blog post views:', error);
     }
+  };
+
+  // BlogHero-style helper functions for MSME blogs
+  const currentPost = blogPosts[currentBlogSlide];
+
+  // Handle slide change like BlogHero
+  const handleSlideChange = (index) => {
+    setCurrentBlogSlide(index);
+  };
+
+  // Get background image URL for blog (like BlogHero)
+  const getBackgroundImageForBlog = (post) => {
+    if (!post) return defaultStoreImg;
+    
+    if (post.mediaType === 'youtube') {
+      return getYouTubeThumbnail(post.mediaUrl);
+    }
+    
+    return getBlogMediaUrl(post);
+  };
+
+  // Render blog media like BlogHero
+  const renderBlogMedia = (post) => {
+    if (!post) return <img src={defaultStoreImg} alt="Default" className="store-blog-hero-image" />;
+    
+    switch (post.mediaType) {
+      case 'youtube':
+        const videoId = extractYouTubeId(post.mediaUrl);
+        return (
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
+            frameBorder="0"
+            allow="encrypted-media"
+            allowFullScreen
+            className="store-blog-hero-image"
+          ></iframe>
+        );
+      case 'video':
+        return (
+          <video
+            src={getBlogMediaUrl(post)}
+            className="store-blog-hero-image"
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        );
+      case 'image':
+      default:
+        return (
+          <img
+            src={getBlogMediaUrl(post)}
+            alt={post.title}
+            className="store-blog-hero-image"
+          />
+        );
+    }
+  };
+
+  // Format date for modal like BlogHero
+  const formatDateForModal = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }).toUpperCase();
   };
 
   const submitStoreRating = async () => {
@@ -598,146 +653,76 @@ const CustomerStoreView = () => {
     <div className="customer-store-view-container">
       <Header />
       
-      {/* Blog Section - Hero Style */}
-      <div 
-        className="store-blog-hero-section"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+      {/* Blog Section - BlogHero Style with MSME Data */}
+      <section 
+        className="store-blog-hero" 
+        style={{
+          backgroundImage: `url(${getBackgroundImageForBlog(currentPost)})`,
+        }}
       >
-        <div className="blog-hero-slider">
-          {(() => {
-            console.log('🎨 Rendering hero slider - Loading:', blogPostsLoading, 'Posts:', blogPosts.length);
-            return null;
-          })()}
-          {blogPostsLoading ? (
-            <div className="store-blog-slide active loading">
-              <div className="store-blog-container">
-                <div className="store-blog-content">
-                  <div className="store-blog-text-section">
-                    <h1 className="store-blog-title">Loading...</h1>
-                    <p className="store-blog-description">Fetching latest updates</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : blogPosts.length > 0 ? (
-            blogPosts.map((post, index) => (
-              <div 
-                key={post._id} 
-                className={`store-blog-slide ${index === currentBlogSlide ? 'active' : ''}`}
-                style={{
-                  backgroundImage: post.mediaType === 'youtube' 
-                    ? `url(${getYouTubeThumbnail(post.mediaUrl)})`
-                    : post.mediaType === 'image' && post.mediaUrl
-                    ? `url(${getBlogMediaUrl(post)})`
-                    : post.mediaType === 'video' && post.mediaUrl
-                    ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url(${defaultStoreImg})`
-                    : `url(${defaultStoreImg})`
-                }}
-              >
-                {post.mediaType === 'video' && (
-                  <div className="video-play-indicator">
-                    <div className="play-button">
-                      <svg width="60" height="60" viewBox="0 0 24 24" fill="white">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                    </div>
-                  </div>
-                )}
-                <div className="store-blog-container">
-                  <div className="store-blog-content">
-                    <div className="store-blog-text-section">
-                      <h1 className="store-blog-title">{post.title}</h1>
-                      
-                      <div className="store-blog-badges">
-                        <div className="store-blog-category-badge">
-                          {post.category}
-                        </div>
-                        {post.mediaType === 'video' && (
-                          <div className="store-blog-media-badge video">
-                            VIDEO
-                          </div>
-                        )}
-                        {post.mediaType === 'youtube' && (
-                          <div className="store-blog-media-badge youtube">
-                            YOUTUBE
-                          </div>
-                        )}
-                      </div>
-                      
-                      <p className="store-blog-description">
-                        {post.description && post.description.length > 200 
-                          ? post.description.substring(0, 200) + '...' 
-                          : post.description || ''
-                        }
-                      </p>
-                      
-                      <div className="store-blog-meta">
-                        <span className="store-blog-date">
-                          {new Date(post.createdAt).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          }).toUpperCase()}
-                        </span>
-                        <span className="store-blog-views">
-                          {post.views || 0} view{(post.views || 0) !== 1 ? 's' : ''}
-                        </span>
-                      </div>
-                      
-                      <div className="store-blog-actions">
-                        <button 
-                          className="store-blog-cta-primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            console.log('🖱️ READ MORE button clicked!', post);
-                            handleBlogPostClick(post);
-                          }}
-                        >
-                          READ MORE
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="store-blog-slide active no-posts">
-              <div className="store-blog-container">
-                <div className="store-blog-content">
-                  <div className="store-blog-text-section">
-                    <h1 className="store-blog-title">Welcome to {store?.businessName || 'Our Store'}</h1>
-                    <p className="store-blog-description">Stay tuned for our latest updates and stories</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+        {/* Background image with overlay */}
+        <div className="store-blog-hero-background">
+          <div className="store-blog-hero-background-image">
+            {renderBlogMedia(currentPost)}
+          </div>
         </div>
         
-        {/* Navigation Controls */}
+        <div className="store-blog-hero-container">
+          <div className="store-blog-hero-content">
+            <div className="store-blog-hero-text-section">
+              <h1 className="store-blog-hero-title">
+                {currentPost?.title || `Welcome to ${store?.businessName || 'Our Store'}`}
+              </h1>
+
+              {/* Category badge positioned below the title */}
+              <div className="store-blog-hero-badges">
+                <div className="store-blog-hero-category-badge">
+                  {currentPost?.category || 'STORE UPDATES'}
+                </div>
+              </div>
+
+              <h2 className="store-blog-hero-subtitle">
+                {currentPost?.subtitle || currentPost?.description || 'Stay tuned for our latest updates and stories'}
+              </h2>
+
+              <div className="store-blog-hero-actions">
+                <button 
+                  className="store-blog-hero-cta-primary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (currentPost) {
+                      handleBlogPostClick(currentPost);
+                    }
+                  }}
+                >
+                  READ MORE
+                  <span className="cta-arrow">→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation arrows */}
         {blogPosts.length > 1 && (
           <>
             <button 
-              className="store-blog-nav prev"
-              onClick={handlePrevBlogSlide}
+              className="store-blog-hero-nav prev"
+              onClick={() => handleSlideChange((currentBlogSlide - 1 + blogPosts.length) % blogPosts.length)}
               aria-label="Previous slide"
             >
-              &#8249;
+              ‹
             </button>
             <button 
-              className="store-blog-nav next"
-              onClick={handleNextBlogSlide}
+              className="store-blog-hero-nav next"
+              onClick={() => handleSlideChange((currentBlogSlide + 1) % blogPosts.length)}
               aria-label="Next slide"
             >
-              &#8250;
+              ›
             </button>
           </>
         )}
-      </div>
+      </section>
 
       <div className="customer-store-view-content has-blog-hero">
         {/* Back Button */}
@@ -1187,37 +1172,37 @@ const CustomerStoreView = () => {
 
 
 
-        {/* Blog Post Modal - Matching MSME Dashboard Style */}
+        {/* Blog Post Modal - BlogHero Style for MSME Data */}
         {showBlogModal && selectedBlogPost && (
-          <div className="blog-view-modal-overlay" onClick={() => setShowBlogModal(false)}>
-            <div className="blog-view-modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="store-blog-hero-modal-overlay" onClick={() => setShowBlogModal(false)}>
+            <div className="store-blog-hero-modal-content" onClick={(e) => e.stopPropagation()}>
               <button 
-                className="blog-view-modal-close"
+                className="store-blog-hero-modal-close"
                 onClick={() => setShowBlogModal(false)}
               >
                 ×
               </button>
               
-              <div className="blog-view-modal-header">
-                <h2 className="blog-view-modal-title">{selectedBlogPost.title}</h2>
-                <div className="blog-view-modal-meta">
-                  <span className="blog-view-modal-category">{selectedBlogPost.category}</span>
-                  <span className="blog-view-modal-date">
-                    {new Date(selectedBlogPost.createdAt).toLocaleDateString()}
+              <div className="store-blog-hero-modal-header">
+                <h2 className="store-blog-hero-modal-title">{selectedBlogPost.title}</h2>
+                <div className="store-blog-hero-modal-meta">
+                  <span className="store-blog-hero-modal-category">{selectedBlogPost.category}</span>
+                  <span className="store-blog-hero-modal-date">
+                    {formatDateForModal(selectedBlogPost.createdAt)}
                   </span>
-                  <span className="blog-view-modal-views">
+                  <span className="store-blog-hero-modal-views">
                     {selectedBlogPost.views || 0} view{(selectedBlogPost.views || 0) !== 1 ? 's' : ''}
                   </span>
                 </div>
               </div>
 
-              <div className="blog-view-modal-body">
+              <div className="store-blog-hero-modal-body">
                 {selectedBlogPost.mediaType === 'image' && selectedBlogPost.mediaUrl && (
-                  <div className="blog-view-modal-media">
+                  <div className="store-blog-hero-modal-media">
                     <img 
-                      src={`http://localhost:1337/uploads/${selectedBlogPost.mediaUrl}`} 
+                      src={getBlogMediaUrl(selectedBlogPost)} 
                       alt={selectedBlogPost.title}
-                      className="blog-view-modal-image"
+                      className="store-blog-hero-modal-image"
                       onError={(e) => {
                         console.error('Image failed to load:', e.target.src);
                         e.target.style.display = 'none';
@@ -1227,10 +1212,10 @@ const CustomerStoreView = () => {
                 )}
                 
                 {selectedBlogPost.mediaType === 'video' && selectedBlogPost.mediaUrl && (
-                  <div className="blog-view-modal-media">
+                  <div className="store-blog-hero-modal-media">
                     <video 
-                      src={`http://localhost:1337/uploads/${selectedBlogPost.mediaUrl}`}
-                      className="blog-view-modal-video"
+                      src={getBlogMediaUrl(selectedBlogPost)}
+                      className="store-blog-hero-modal-video"
                       controls
                       preload="metadata"
                       onError={(e) => {
@@ -1243,19 +1228,20 @@ const CustomerStoreView = () => {
                 )}
                 
                 {selectedBlogPost.mediaType === 'youtube' && selectedBlogPost.mediaUrl && (
-                  <div className="blog-view-modal-media">
+                  <div className="store-blog-hero-modal-media">
                     <iframe
-                      src={`https://www.youtube.com/embed/${extractYouTubeId(selectedBlogPost.mediaUrl)}?rel=0&modestbranding=1`}
+                      src={`https://www.youtube.com/embed/${extractYouTubeId(selectedBlogPost.mediaUrl)}?rel=0&modestbranding=1&showinfo=1&controls=1&fs=1&cc_load_policy=0&iv_load_policy=3&autohide=0`}
                       title={selectedBlogPost.title}
-                      className="blog-view-modal-youtube"
+                      className="store-blog-hero-modal-youtube"
                       frameBorder="0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
+                      loading="lazy"
                     />
                   </div>
                 )}
                 
-                <div className="blog-view-modal-text">
+                <div className="store-blog-hero-modal-text">
                   <h3>{selectedBlogPost.subtitle}</h3>
                   <p>{selectedBlogPost.description}</p>
                 </div>

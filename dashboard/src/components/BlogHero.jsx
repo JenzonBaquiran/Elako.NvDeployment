@@ -12,6 +12,8 @@ const BlogHero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [blogPosts, setBlogPosts] = useState([]);
+  const [showBlogModal, setShowBlogModal] = useState(false);
+  const [selectedBlogPost, setSelectedBlogPost] = useState(null);
 
   // Fetch blog posts from API
   useEffect(() => {
@@ -113,10 +115,63 @@ const BlogHero = () => {
     return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
   };
 
-  // Helper function to handle YouTube click
-  const handleYouTubeClick = (url) => {
-    if (url) {
-      window.open(url, '_blank');
+
+
+  // Handle blog post modal click
+  const handleBlogPostClick = async (post) => {
+    console.log('🖱️ Blog post clicked:', post);
+    
+    // Create a fresh copy of the clicked post
+    const postCopy = {
+      _id: post._id,
+      title: post.title,
+      subtitle: post.subtitle,
+      description: post.description,
+      category: post.category,
+      mediaType: post.mediaType,
+      mediaUrl: post.mediaUrl,
+      createdAt: post.createdAt,
+      views: post.views,
+      author: post.author,
+      readTime: post.readTime
+    };
+    
+    // Set the selected post and show modal
+    setSelectedBlogPost(postCopy);
+    setShowBlogModal(true);
+    
+    // Increment views in background
+    incrementBlogViews(post._id);
+  };
+
+  // Increment blog post views
+  const incrementBlogViews = async (postId) => {
+    try {
+      const response = await fetch(`http://localhost:1337/api/blog-posts/${postId}/increment-views`, {
+        method: 'POST'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.post) {
+          // Update the selected post with new view count
+          setSelectedBlogPost(prevSelected => {
+            if (prevSelected && prevSelected._id === postId) {
+              return { ...prevSelected, views: data.post.views };
+            }
+            return prevSelected;
+          });
+          
+          // Update the blog posts list
+          setBlogPosts(prevPosts => 
+            prevPosts.map(p => 
+              p._id === postId ? { ...p, views: data.post.views } : p
+            )
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error incrementing blog post views:', error);
     }
   };
 
@@ -206,10 +261,8 @@ const BlogHero = () => {
   return (
     <section 
       className="blog-hero" 
-      onClick={currentPost?.mediaType === 'youtube' ? () => handleYouTubeClick(currentPost.mediaUrl) : undefined}
       style={{
         backgroundImage: `url(${getBackgroundImage(currentPost)})`,
-        cursor: currentPost?.mediaType === 'youtube' ? 'pointer' : 'default'
       }}
     >
       {/* Background image with overlay */}
@@ -240,15 +293,12 @@ const BlogHero = () => {
             <div className="blog-hero-actions">
               <button 
                 className="blog-hero-cta-primary"
-                onClick={() => {
-                  if (currentPost?.mediaType === 'youtube') {
-                    handleYouTubeClick(currentPost.mediaUrl);
-                  } else {
-                    navigate('/blog');
-                  }
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleBlogPostClick(currentPost);
                 }}
               >
-                {currentPost?.mediaType === 'youtube' ? 'WATCH VIDEO' : 'READ MORE'}
+                READ MORE
                 <span className="cta-arrow">→</span>
               </button>
             </div>
@@ -271,6 +321,90 @@ const BlogHero = () => {
       >
         ›
       </button>
+
+      {/* Blog Post Modal */}
+      {showBlogModal && selectedBlogPost && (
+        <div className="blog-hero-modal-overlay" onClick={() => setShowBlogModal(false)}>
+          <div className="blog-hero-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button 
+              className="blog-hero-modal-close"
+              onClick={() => setShowBlogModal(false)}
+            >
+              ×
+            </button>
+            
+            <div className="blog-hero-modal-header">
+              <h2 className="blog-hero-modal-title">{selectedBlogPost.title}</h2>
+              <div className="blog-hero-modal-meta">
+                <span className="blog-hero-modal-category">{selectedBlogPost.category}</span>
+                <span className="blog-hero-modal-date">
+                  {formatDate(selectedBlogPost.createdAt)}
+                </span>
+                <span className="blog-hero-modal-views">
+                  {selectedBlogPost.views || 0} view{(selectedBlogPost.views || 0) !== 1 ? 's' : ''}
+                </span>
+              </div>
+            </div>
+
+            <div className="blog-hero-modal-body">
+              {selectedBlogPost.mediaType === 'image' && selectedBlogPost.mediaUrl && (
+                <div className="blog-hero-modal-media">
+                  <img 
+                    src={getMediaUrl(selectedBlogPost)} 
+                    alt={selectedBlogPost.title}
+                    className="blog-hero-modal-image"
+                    onError={(e) => {
+                      console.error('Image failed to load:', e.target.src);
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
+              
+              {selectedBlogPost.mediaType === 'video' && selectedBlogPost.mediaUrl && (
+                <div className="blog-hero-modal-media">
+                  <video 
+                    src={getMediaUrl(selectedBlogPost)}
+                    className="blog-hero-modal-video"
+                    controls
+                    preload="metadata"
+                    onError={(e) => {
+                      console.error('Video failed to load:', e.target.src);
+                    }}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              )}
+              
+              {selectedBlogPost.mediaType === 'youtube' && selectedBlogPost.mediaUrl && (
+                <div className="blog-hero-modal-media">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${getYouTubeVideoId(selectedBlogPost.mediaUrl)}?rel=0&modestbranding=1&showinfo=1&controls=1&fs=1&cc_load_policy=0&iv_load_policy=3&autohide=0`}
+                    title={selectedBlogPost.title}
+                    className="blog-hero-modal-youtube"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    loading="lazy"
+                  />
+                </div>
+              )}
+              
+              <div className="blog-hero-modal-text">
+                <h3>{selectedBlogPost.subtitle}</h3>
+                <p>{selectedBlogPost.description}</p>
+                {selectedBlogPost.author && (
+                  <div className="blog-hero-modal-author">
+                    <strong>By: {selectedBlogPost.author}</strong>
+                    {selectedBlogPost.readTime && <span> • {selectedBlogPost.readTime}</span>}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

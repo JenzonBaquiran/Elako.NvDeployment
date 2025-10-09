@@ -5049,6 +5049,41 @@ app.delete("/api/blog-posts/:id", async (req, res) => {
   }
 });
 
+// Increment blog post views
+app.post("/api/blog-posts/:id/increment-views", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const post = await BlogPost.findById(id);
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        error: "Blog post not found",
+      });
+    }
+
+    // Increment views
+    post.views = (post.views || 0) + 1;
+    await post.save();
+
+    res.json({
+      success: true,
+      message: "Views incremented successfully",
+      post: {
+        _id: post._id,
+        views: post.views,
+        title: post.title,
+      },
+    });
+  } catch (error) {
+    console.error("Error incrementing blog post views:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error incrementing views",
+    });
+  }
+});
+
 // --- MSME Blog Posts Routes ---
 const MsmeBlogPost = require("./models/msmeBlogPost.model");
 

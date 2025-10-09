@@ -1928,40 +1928,64 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  font-size: 1.2rem;
-  width: 40px;
-  height: 40px;
+  background: linear-gradient(135deg, #7ed957 0%, #5cb85c 100%);
+  border: none;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
+  font-size: 1.3rem;
+  color: white;
   cursor: pointer;
   transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(126, 217, 87, 0.4);
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.6;
 }
 
 .store-blog-nav:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-50%) scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  opacity: 0.9;
+  background: linear-gradient(135deg, #92fe76 0%, #7ed957 100%);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 20px rgba(126, 217, 87, 0.6);
+  color: white;
 }
 
 .store-blog-nav:active {
-  transform: translateY(-50%) scale(1.02);
+  transform: translateY(-50%) scale(1.05);
 }
 
 .store-blog-nav.prev {
   left: 2rem;
 }
 
+/* Enhanced Previous Button Styling */
+.store-blog-nav.prev:hover {
+  background: linear-gradient(135deg, #92fe76 0%, #7ed957 100%);
+  color: white;
+  transform: translateY(-50%) scale(1.1) translateX(3px);
+  box-shadow: 0 6px 20px rgba(126, 217, 87, 0.7);
+}
+
+.store-blog-nav.prev:active {
+  transform: translateY(-50%) scale(1.05) translateX(1px);
+}
+
 .store-blog-nav.next {
   right: 2rem;
+}
+
+/* Enhanced Next Button Styling */
+.store-blog-nav.next:hover {
+  background: linear-gradient(135deg, #92fe76 0%, #7ed957 100%);
+  color: white;
+  transform: translateY(-50%) scale(1.1) translateX(-3px);
+  box-shadow: 0 6px 20px rgba(126, 217, 87, 0.7);
+}
+
+.store-blog-nav.next:active {
+  transform: translateY(-50%) scale(1.05) translateX(-1px);
 }
 
 /* Hide navigation on hover over slider to prevent blocking content */
@@ -3210,16 +3234,17 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
+  background: linear-gradient(135deg, #7ed957 0%, #5cb85c 100%);
+  border: none;
   width: 60px;
   height: 60px;
+  border-radius: 50%;
   font-size: 24px;
+  color: white;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(126, 217, 87, 0.4);
   z-index: 5;
   display: flex;
   align-items: center;
@@ -3227,16 +3252,42 @@
 }
 
 .store-blog-hero-nav:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, #92fe76 0%, #7ed957 100%);
   transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 20px rgba(126, 217, 87, 0.6);
+  color: white;
 }
 
 .store-blog-hero-nav.prev {
   left: 2rem;
 }
 
+/* Enhanced Previous Button Styling */
+.store-blog-hero-nav.prev:hover {
+  background: linear-gradient(135deg, #92fe76 0%, #7ed957 100%);
+  color: white;
+  transform: translateY(-50%) scale(1.1) translateX(3px);
+  box-shadow: 0 6px 20px rgba(126, 217, 87, 0.7);
+}
+
+.store-blog-hero-nav.prev:active {
+  transform: translateY(-50%) scale(1.05) translateX(1px);
+}
+
 .store-blog-hero-nav.next {
   right: 2rem;
+}
+
+/* Enhanced Next Button Styling */
+.store-blog-hero-nav.next:hover {
+  background: linear-gradient(135deg, #92fe76 0%, #7ed957 100%);
+  color: white;
+  transform: translateY(-50%) scale(1.1) translateX(-3px);
+  box-shadow: 0 6px 20px rgba(126, 217, 87, 0.7);
+}
+
+.store-blog-hero-nav.next:active {
+  transform: translateY(-50%) scale(1.05) translateX(-1px);
 }
 
 /* BlogHero Modal Styles for CustomerStoreView */

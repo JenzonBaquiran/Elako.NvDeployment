@@ -1808,38 +1808,74 @@ body {
   position: absolute;
   top: 12px;
   left: 12px;
-  padding: 6px 12px;
-  border-radius: 20px;
+  padding: 8px 14px;
+  border-radius: 25px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: white;
-  text-transform: capitalize;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
 }
 
-.store-category-badge.food { background: #ff6b35; }
-.store-category-badge.technology { background: #00bcd4; }
-.store-category-badge.design { background: #00bcd4; }
-.store-category-badge.video { background: #00bcd4; }
-.store-category-badge.optimization { background: #ff9800; }
-.store-category-badge.artisan { background: #9c27b0; }
-.store-category-badge.agriculture { background: #4caf50; }
-.store-category-badge.retail { background: #2196f3; }
-.store-category-badge.services { background: #673ab7; }
-.store-category-badge.default { background: #00bcd4; }
+.store-category-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Unified #313131 color scheme for all categories */
+.store-category-badge.food, 
+.store-category-badge.technology,
+.store-category-badge.design,
+.store-category-badge.video,
+.store-category-badge.optimization,
+.store-category-badge.artisan,
+.store-category-badge.agriculture,
+.store-category-badge.retail,
+.store-category-badge.services,
+.store-category-badge.default { 
+  background: #313131;
+  box-shadow: 0 4px 12px rgba(49, 49, 49, 0.3);
+}
 
 /* New Badge for Recently Joined */
 .store-new-badge {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: #ff6b35;
+  background:#7ed957;
   color: white;
   font-size: 0.7rem;
-  font-weight: 700;
-  padding: 4px 8px;
-  border-radius: 12px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 18px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  box-shadow: 0 4px 12px rgba(49, 49, 49, 0.4);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  animation: pulse-glow 2s infinite;
+}
+
+.store-new-badge:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(49, 49, 49, 0.6);
+}
+
+/* Pulsing glow animation for NEW badge */
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 4px 12px rgba(49, 49, 49, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(49, 49, 49, 0.6);
+  }
+  100% {
+    box-shadow: 0 4px 12px rgba(49, 49, 49, 0.4);
+  }
 }
 
 /* Card Content */

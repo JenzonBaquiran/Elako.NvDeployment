@@ -399,16 +399,9 @@ const CustomerStoreView = () => {
     
     switch (post.mediaType) {
       case 'youtube':
-        const videoId = extractYouTubeId(post.mediaUrl);
-        return (
-          <iframe
-            src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`}
-            frameBorder="0"
-            allow="encrypted-media"
-            allowFullScreen
-            className="store-blog-hero-image"
-          ></iframe>
-        );
+        // For YouTube videos, we only use the thumbnail as background
+        // The actual video player is shown in the modal when clicked
+        return null;
       case 'video':
         return (
           <video

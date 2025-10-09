@@ -42,7 +42,8 @@ const BlogHero = () => {
           mediaType: "image",
           mediaUrl: "WEAVING.png",
           description: "Maria's weaving story proves that traditional crafts and digital innovation create perfect harmony for business success.",
-          featured: true
+          featured: true,
+          views: 0
         }
       ]);
     }
@@ -119,7 +120,8 @@ const BlogHero = () => {
 
   // Handle blog post modal click
   const handleBlogPostClick = async (post) => {
-    console.log('🖱️ Blog post clicked:', post);
+    console.log('🖱️ BlogHero: Blog post clicked:', post);
+    console.log('🔢 Current views before increment:', post.views || 0);
     
     // Create a fresh copy of the clicked post
     const postCopy = {
@@ -136,6 +138,8 @@ const BlogHero = () => {
       readTime: post.readTime
     };
     
+    console.log('📝 BlogHero: Post copy created:', postCopy);
+    
     // Set the selected post and show modal
     setSelectedBlogPost(postCopy);
     setShowBlogModal(true);
@@ -147,13 +151,17 @@ const BlogHero = () => {
   // Increment blog post views
   const incrementBlogViews = async (postId) => {
     try {
+      console.log('📈 Incrementing views for BlogHero post:', postId);
       const response = await fetch(`http://localhost:1337/api/blog-posts/${postId}/increment-views`, {
         method: 'POST'
       });
       
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ BlogHero views API response:', data);
         if (data.success && data.post) {
+          console.log('✅ Views incremented successfully, new count:', data.post.views);
+          
           // Update the selected post with new view count
           setSelectedBlogPost(prevSelected => {
             if (prevSelected && prevSelected._id === postId) {
@@ -169,9 +177,11 @@ const BlogHero = () => {
             )
           );
         }
+      } else {
+        console.error('❌ BlogHero views API failed:', response.status, response.statusText);
       }
     } catch (error) {
-      console.error('Error incrementing blog post views:', error);
+      console.error('❌ Error incrementing BlogHero views:', error);
     }
   };
 

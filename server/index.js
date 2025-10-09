@@ -5062,9 +5062,8 @@ app.post("/api/blog-posts/:id/increment-views", async (req, res) => {
       });
     }
 
-    // Increment views
-    post.views = (post.views || 0) + 1;
-    await post.save();
+    // Increment views using the model method
+    await post.incrementViews();
 
     res.json({
       success: true,

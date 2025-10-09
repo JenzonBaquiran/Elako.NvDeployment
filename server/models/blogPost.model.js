@@ -57,6 +57,10 @@ const blogPostSchema = new mongoose.Schema({
     enum: ["draft", "published"],
     default: "draft",
   },
+  views: {
+    type: Number,
+    default: 0,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -83,5 +87,11 @@ blogPostSchema.pre("save", async function (next) {
   }
   next();
 });
+
+// Static method to increment views
+blogPostSchema.methods.incrementViews = function () {
+  this.views += 1;
+  return this.save();
+};
 
 module.exports = mongoose.model("BlogPost", blogPostSchema);

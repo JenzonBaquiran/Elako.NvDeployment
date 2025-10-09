@@ -515,6 +515,9 @@ const BlogManagement = () => {
                     <div className="blog-post-meta">
                       <span className="category">{post.category}</span>
                       <span className="read-time">{post.readTime}</span>
+                      <span className="view-count">
+                        👁 {post.views || 0} view{(post.views || 0) !== 1 ? 's' : ''}
+                      </span>
                     </div>
                     
                     <h3 className="blog-post-title">{post.title}</h3>

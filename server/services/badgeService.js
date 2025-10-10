@@ -43,9 +43,8 @@ class BadgeService {
 
       // Calculate profile views for current week
       const profileViews = await PageView.countDocuments({
-        pageType: "store",
-        pageId: storeId,
-        createdAt: {
+        storeId: storeId,
+        viewDate: {
           $gte: badge.weekStart,
           $lte: badge.weekEnd,
         },
@@ -57,14 +56,9 @@ class BadgeService {
       const storeBlogPosts = await MSMEBlogPost.find({ msmeId: storeId });
       const blogPostIds = storeBlogPosts.map((post) => post._id);
 
-      const blogViews = await PageView.countDocuments({
-        pageType: "blog",
-        pageId: { $in: blogPostIds },
-        createdAt: {
-          $gte: badge.weekStart,
-          $lte: badge.weekEnd,
-        },
-      });
+      // Note: Current PageView model doesn't track blog views,
+      // so we'll set this to 0 for now or implement blog view tracking separately
+      const blogViews = 0;
       badge.criteria.blogViews.current = blogViews;
       badge.criteria.blogViews.met = blogViews >= 100;
 
@@ -103,15 +97,9 @@ class BadgeService {
       badge.criteria.ratingsGiven.current = ratingsGiven;
       badge.criteria.ratingsGiven.met = ratingsGiven >= 5;
 
-      // Calculate blog engagement (views) this week
-      const blogViews = await PageView.countDocuments({
-        userId: customerId,
-        pageType: "blog",
-        createdAt: {
-          $gte: badge.weekStart,
-          $lte: badge.weekEnd,
-        },
-      });
+      // Note: Current PageView model doesn't track blog views by customer,
+      // so we'll set this to 0 for now or implement blog engagement tracking separately
+      const blogViews = 0;
       badge.criteria.blogEngagement.current = blogViews;
       badge.criteria.blogEngagement.met = blogViews >= 5;
 
@@ -198,13 +186,12 @@ class BadgeService {
   // Helper method to find most loyal store
   async findMostLoyalStore(customerId, startDate, endDate) {
     try {
-      // Count interactions with each store (page views, purchases, ratings)
+      // Count interactions with each store (page views)
       const storeInteractions = await PageView.aggregate([
         {
           $match: {
-            userId: customerId,
-            pageType: "store",
-            createdAt: {
+            customerId: customerId,
+            viewDate: {
               $gte: startDate,
               $lte: endDate,
             },
@@ -212,7 +199,7 @@ class BadgeService {
         },
         {
           $group: {
-            _id: "$pageId",
+            _id: "$storeId",
             interactionCount: { $sum: 1 },
           },
         },
@@ -230,7 +217,7 @@ class BadgeService {
 
         // Only consider it a loyalty store if there are at least 3 interactions
         if (interactionCount >= 3) {
-          const store = await MSME.findById(storeId);
+          const store = await MSME.findOne({ _id: storeId });
           return {
             storeId: storeId,
             storeName: store ? store.businessName : "Unknown Store",

@@ -1,0 +1,291 @@
+/* Terms Agreement Modal Styles */
+.terms-agreement-modal .MuiDialog-paper {
+  max-height: 90vh;
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Apply Poppins font to all Material-UI components */
+.terms-agreement-modal * {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+.terms-agreement-modal .MuiTypography-root {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+.terms-agreement-modal .MuiButton-root {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+.terms-agreement-modal .MuiFormControlLabel-label {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+/* Prevent double scrollbars */
+.terms-agreement-modal .MuiDialog-container {
+  overflow-y: hidden !important;
+}
+
+.terms-agreement-modal .MuiDialog-paper {
+  overflow: hidden !important;
+}
+
+.terms-agreement-modal__header {
+  background: linear-gradient(135deg, #7ed957 0%, #6bc544 100%);
+  color: white;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.terms-agreement-modal__title {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.terms-agreement-modal__close-btn {
+  color: white !important;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+}
+
+.terms-agreement-modal__close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.terms-agreement-modal__content {
+  padding: 0 !important;
+  max-height: 60vh;
+  overflow: hidden !important;
+}
+
+/* Override Material-UI DialogContent default overflow */
+.terms-agreement-modal .MuiDialogContent-root {
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.terms-agreement-modal__scroll-container {
+  padding: 24px 24px 24px 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #7ed957 #f1f1f1;
+}
+
+.terms-agreement-modal__scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.terms-agreement-modal__scroll-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.terms-agreement-modal__scroll-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #7ed957 0%, #6bc544 100%);
+  border-radius: 4px;
+}
+
+.terms-agreement-modal__scroll-container::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #6bc544 0%, #5bb332 100%);
+}
+
+.terms-agreement-modal__effective-date {
+  background-color: #f8f9fa;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border-left: 4px solid #7ed957;
+  margin-bottom: 20px;
+  color: #313131;
+  font-family: 'Poppins', sans-serif;
+}
+
+.terms-agreement-modal__divider {
+  margin: 20px 0;
+  background-color: #e0e0e0;
+}
+
+.terms-agreement-modal__section-title {
+  color: #313131;
+  font-weight: 600;
+  margin: 24px 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #7ed957;
+  display: inline-block;
+  font-family: 'Poppins', sans-serif;
+}
+
+.terms-agreement-modal__subsection-title {
+  color: #313131;
+  font-weight: 600;
+  margin: 16px 0 8px 0;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.terms-agreement-modal__content p {
+  line-height: 1.6;
+  color: #313131;
+  margin-bottom: 16px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.terms-agreement-modal__actions {
+  background-color: #f8f9fa;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.terms-agreement-modal__checkbox-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.terms-agreement-modal__checkbox-label {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  font-family: 'Poppins', sans-serif;
+  color: #313131;
+}
+
+.terms-agreement-modal__checkbox {
+  color: #7ed957 !important;
+}
+
+.terms-agreement-modal__checkbox.Mui-checked {
+  color: #7ed957 !important;
+}
+
+.terms-agreement-modal__button-container {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 100%;
+}
+
+.terms-agreement-modal__cancel-btn {
+  color: #313131 !important;
+  border-color: #ddd !important;
+  padding: 10px 24px;
+  border-radius: 8px;
+  text-transform: none;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+}
+
+.terms-agreement-modal__cancel-btn:hover {
+  background-color: #f5f5f5;
+  border-color: #313131 !important;
+}
+
+.terms-agreement-modal__agree-btn {
+  background: linear-gradient(135deg, #7ed957 0%, #6bc544 100%) !important;
+  color: white !important;
+  padding: 10px 24px;
+  border-radius: 8px;
+  text-transform: none;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 4px 12px rgba(126, 217, 87, 0.3);
+  transition: all 0.3s ease;
+}
+
+.terms-agreement-modal__agree-btn:hover {
+  background: linear-gradient(135deg, #6bc544 0%, #5bb332 100%) !important;
+  box-shadow: 0 6px 16px rgba(126, 217, 87, 0.4);
+  transform: translateY(-1px);
+}
+
+.terms-agreement-modal__agree-btn:disabled {
+  background: #ccc !important;
+  color: #888 !important;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .terms-agreement-modal .MuiDialog-paper {
+    margin: 16px;
+    max-height: 95vh;
+  }
+  
+  .terms-agreement-modal__content {
+    max-height: 70vh;
+  }
+  
+  .terms-agreement-modal__scroll-container {
+    max-height: 70vh;
+    padding: 20px 16px 16px 16px;
+  }
+  
+  .terms-agreement-modal__header {
+    padding: 16px;
+  }
+  
+  .terms-agreement-modal__title {
+    font-size: 1.3rem;
+  }
+  
+  .terms-agreement-modal__actions {
+    padding: 16px;
+  }
+  
+  .terms-agreement-modal__button-container {
+    flex-direction: column;
+  }
+  
+  .terms-agreement-modal__cancel-btn,
+  .terms-agreement-modal__agree-btn {
+    width: 100%;
+  }
+}
+
+/* Improve readability */
+.terms-agreement-modal__content strong {
+  color: #313131;
+  font-family: 'Poppins', sans-serif;
+}
+
+.terms-agreement-modal__content em {
+  color: #7ed957;
+  font-style: normal;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+}
+
+
+/* Custom scrollbar for better UX */
+.terms-agreement-modal__scroll-container {
+  scroll-behavior: smooth;
+}
+
+/* Animation for modal */
+.terms-agreement-modal .MuiDialog-paper {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

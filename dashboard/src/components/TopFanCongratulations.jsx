@@ -168,7 +168,7 @@ const TopFanCongratulations = ({
                   {badgeData.criteria?.blogEngagement?.met ? '✅' : '❌'}
                 </span>
               </div>
-              {badgeData.loyaltyStore && (
+              {badgeData.loyaltyStore && badgeData.loyaltyStore.interactionCount > 0 && (
                 <div className="top-fan-congratulations__achievement">
                   <span className="top-fan-congratulations__achievement-icon">💖</span>
                   <span className="top-fan-congratulations__achievement-text">
@@ -186,7 +186,7 @@ const TopFanCongratulations = ({
               className="top-fan-congratulations__continue-btn"
               onClick={handleClose}
             >
-              Continue Shopping! 🛍️
+              Continue Browsing! 🛍️
             </button>
           </div>
 

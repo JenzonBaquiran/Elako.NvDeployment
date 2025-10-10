@@ -336,48 +336,50 @@ const CustomerFavorites = () => {
             Followed Stores ({followedStores.length})
           </button>
           
-          {/* TOP FAN Badge Test Button - Beside Followed Stores Tab */}
-          <button 
-            onClick={handleTestTopFanPopup}
-            disabled={badgeLoading}
-            className="customer-favorites__top-fan-test-btn"
-            style={{
-              background: badgeLoading 
-                ? 'linear-gradient(135deg, #ccc 0%, #999 50%, #ccc 100%)'
-                : 'linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%)',
-              color: '#333',
-              border: 'none',
-              padding: '10px 20px',
-              borderRadius: '8px',
-              cursor: badgeLoading ? 'not-allowed' : 'pointer',
-              fontWeight: 'bold',
-              fontSize: '13px',
-              boxShadow: badgeLoading 
-                ? '0 2px 8px rgba(0, 0, 0, 0.2)'
-                : '0 2px 8px rgba(255, 215, 0, 0.4)',
-              transition: 'all 0.3s ease',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              opacity: badgeLoading ? 0.7 : 1,
-              transform: badgeLoading ? 'scale(0.95)' : 'scale(1)',
-              marginLeft: 'auto'
-            }}
-            onMouseOver={(e) => {
-              if (!badgeLoading) {
-                e.target.style.transform = 'scale(1.05)';
-                e.target.style.boxShadow = '0 4px 12px rgba(255, 215, 0, 0.6)';
-              }
-            }}
-            onMouseOut={(e) => {
-              if (!badgeLoading) {
-                e.target.style.transform = 'scale(1)';
-                e.target.style.boxShadow = '0 2px 8px rgba(255, 215, 0, 0.4)';
-              }
-            }}
-          >
-            {badgeLoading ? '⏳ Testing...' : '👑 Test TOP FAN'}
-          </button>
+          {/* TOP FAN Badge Test Button - Only show when badge is active */}
+          {topFanBadgeData?.isActive && (
+            <button 
+              onClick={handleTestTopFanPopup}
+              disabled={badgeLoading}
+              className="customer-favorites__top-fan-test-btn"
+              style={{
+                background: badgeLoading 
+                  ? 'linear-gradient(135deg, #ccc 0%, #999 50%, #ccc 100%)'
+                  : 'linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%)',
+                color: '#333',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                cursor: badgeLoading ? 'not-allowed' : 'pointer',
+                fontWeight: 'bold',
+                fontSize: '13px',
+                boxShadow: badgeLoading 
+                  ? '0 2px 8px rgba(0, 0, 0, 0.2)'
+                  : '0 2px 8px rgba(255, 215, 0, 0.4)',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                opacity: badgeLoading ? 0.7 : 1,
+                transform: badgeLoading ? 'scale(0.95)' : 'scale(1)',
+                marginLeft: 'auto'
+              }}
+              onMouseOver={(e) => {
+                if (!badgeLoading) {
+                  e.target.style.transform = 'scale(1.05)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(255, 215, 0, 0.6)';
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!badgeLoading) {
+                  e.target.style.transform = 'scale(1)';
+                  e.target.style.boxShadow = '0 2px 8px rgba(255, 215, 0, 0.4)';
+                }
+              }}
+            >
+              {badgeLoading ? '⏳ Testing...' : '👑 TOP FAN BADGE'}
+            </button>
+          )}
         </div>
 
         <div className="customer-favorites__content-section">

@@ -26,7 +26,11 @@ const CustomerBadge = require("./models/customerBadge.model");
 
 // Import Services
 const CustomerNotificationService = require("./services/customerNotificationService");
-const { generateOTP, sendOTPEmail } = require("./services/emailService");
+const {
+  generateOTP,
+  sendOTPEmail,
+  sendWelcomeEmail,
+} = require("./services/emailService");
 const StoreActivityNotificationService = require("./services/storeActivityNotificationService");
 const AuditLogService = require("./services/auditLogService");
 const BadgeService = require("./services/badgeService");
@@ -211,6 +215,19 @@ app.post("/api/customers/register", async (req, res) => {
     });
 
     await customer.save();
+
+    // Send welcome email
+    try {
+      await sendWelcomeEmail(customer.email, customer.firstName, "customer");
+      console.log(`✅ Welcome email sent to new customer: ${customer.email}`);
+    } catch (emailError) {
+      console.error(
+        `❌ Failed to send welcome email to ${customer.email}:`,
+        emailError
+      );
+      // Continue with registration even if email fails
+    }
+
     res.status(201).json({
       success: true,
       message: "Customer registered successfully",
@@ -718,6 +735,19 @@ app.post(
       });
 
       await msme.save();
+
+      // Send welcome email
+      try {
+        await sendWelcomeEmail(msme.email, msme.businessName, "msme");
+        console.log(`✅ Welcome email sent to new MSME: ${msme.email}`);
+      } catch (emailError) {
+        console.error(
+          `❌ Failed to send welcome email to ${msme.email}:`,
+          emailError
+        );
+        // Continue with registration even if email fails
+      }
+
       res.status(201).json({
         success: true,
         message: "MSME registered successfully",
@@ -7434,9 +7464,9 @@ app.post("/api/badges/test/create-top-fan/:customerId", async (req, res) => {
         },
       },
       loyaltyStore: {
-        storeId: null,
-        storeName: "",
-        interactionCount: 0,
+        storeId: "msme001",
+        storeName: "Lola's Kakanin",
+        interactionCount: 8,
       },
     });
 

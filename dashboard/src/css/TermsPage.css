@@ -1,0 +1,196 @@
+/* Terms Page Styles */
+.terms-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 40px 20px;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Apply Poppins font to all Material-UI components in Terms Page */
+.terms-page * {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+.terms-page .MuiTypography-root {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+.terms-page .MuiButton-root {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+.terms-page .MuiPaper-root {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+.terms-page__container {
+  max-width: 800px;
+}
+
+.terms-page__paper {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.terms-page__header {
+  background: linear-gradient(135deg, #7ed957 0%, #6bc544 100%);
+  color: white;
+  padding: 30px 40px;
+  position: relative;
+}
+
+.terms-page__back-btn {
+  color: white !important;
+  margin-bottom: 16px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.terms-page__back-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.terms-page__title {
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+.terms-page__content {
+  padding: 40px;
+  max-height: 70vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #7ed957 #f1f1f1;
+}
+
+.terms-page__content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.terms-page__content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.terms-page__content::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #7ed957 0%, #6bc544 100%);
+  border-radius: 4px;
+}
+
+.terms-page__content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #6bc544 0%, #5bb332 100%);
+}
+
+.terms-page__effective-date {
+  background-color: #f8f9fa;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border-left: 4px solid #7ed957;
+  margin-bottom: 30px;
+  color: #313131;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.terms-page__section-title {
+  color: #313131;
+  font-weight: 600;
+  margin: 32px 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #7ed957;
+  display: inline-block;
+  font-family: 'Poppins', sans-serif;
+}
+
+.terms-page__subsection-title {
+  color: #313131;
+  font-weight: 600;
+  margin: 20px 0 12px 0;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.terms-page__content p {
+  line-height: 1.7;
+  color: #313131;
+  margin-bottom: 18px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.terms-page__footer {
+  background-color: #f8f9fa;
+  padding: 20px 40px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .terms-page {
+    padding: 20px 10px;
+  }
+  
+  .terms-page__header {
+    padding: 20px;
+  }
+  
+  .terms-page__content {
+    padding: 20px;
+    max-height: 80vh;
+  }
+  
+  .terms-page__footer {
+    padding: 16px 20px;
+  }
+  
+  .terms-page__title {
+    font-size: 1.5rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .terms-page {
+    background: white;
+    padding: 0;
+  }
+  
+  .terms-page__header {
+    background: #333 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .terms-page__back-btn {
+    display: none;
+  }
+  
+  .terms-page__content {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+/* Smooth scroll behavior */
+.terms-page__content {
+  scroll-behavior: smooth;
+}
+
+/* Improve readability */
+.terms-page__content strong {
+  color: #313131;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+}
+
+.terms-page__content em {
+  color: #7ed957;
+  font-style: normal;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+}

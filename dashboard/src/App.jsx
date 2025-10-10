@@ -35,6 +35,7 @@ import ProductDetails from "./pages/ProductDetails";
 import ForgotPassword from "./pages/ForgotPassword";
 import AdminAuditLogs from "./pages/AdminAuditLogs";
 import AdminMsmeReport from "./pages/AdminMsmeReport";
+import TermsPage from "./pages/TermsPage";
 
 
 
@@ -49,6 +50,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/terms" element={<TermsPage />} />
             
             {/* Admin Protected Routes */}
             <Route 

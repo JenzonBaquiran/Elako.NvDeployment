@@ -457,8 +457,105 @@ const sendStoreActivityEmail = async (
   }
 };
 
+// Send welcome email for new user registration
+const sendWelcomeEmail = async (email, userName, userType) => {
+  try {
+    const websiteURL = process.env.WEBSITE_URL || "http://localhost:3000";
+
+    const mailOptions = {
+      from: '"ELako.NV Team" <elakonv@gmail.com>',
+      to: email,
+      subject: "Welcome to ELako.Nv — Your Account Has Been Created",
+      html: `
+        <div style="font-family: 'Poppins', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #7ed957; font-family: 'Poppins', sans-serif; font-size: 2.2rem; margin-bottom: 10px;">ELako.Nv</h1>
+            <p style="color: #313131; font-size: 1rem;">Digital Marketing Solution For MSMEs</p>
+          </div>
+          
+          <div style="background-color: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <div style="text-align: center; margin-bottom: 25px;">
+              <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #7ed957 0%, #6bc544 100%); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">
+                <span style="color: white; font-size: 24px;">🎉</span>
+              </div>
+              <h2 style="color: #313131; font-family: 'Poppins', sans-serif; margin: 0; font-size: 1.5rem;">Welcome to ELako.Nv!</h2>
+            </div>
+            
+            <p style="color: #313131; line-height: 1.6; font-family: 'Poppins', sans-serif; margin-bottom: 20px;">
+              Hi <strong style="color: #7ed957;">${userName}</strong>,
+            </p>
+            
+            <p style="color: #313131; line-height: 1.6; font-family: 'Poppins', sans-serif; margin-bottom: 20px;">
+              Thank you for signing up on <strong>ELako.Nv</strong>!
+            </p>
+            
+            <p style="color: #313131; line-height: 1.6; font-family: 'Poppins', sans-serif; margin-bottom: 20px;">
+              Your ${
+                userType === "customer" ? "customer" : "MSME business"
+              } account has been successfully created using this email address: <strong style="color: #7ed957;">${email}</strong>
+            </p>
+            
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #7ed957; margin: 25px 0;">
+              <p style="color: #313131; line-height: 1.6; font-family: 'Poppins', sans-serif; margin: 0; font-size: 0.95rem;">
+                By creating your account, you've agreed to our <strong>Terms and Agreement</strong> and <strong>Privacy Policy</strong>.
+              </p>
+            </div>
+            
+            <p style="color: #313131; line-height: 1.6; font-family: 'Poppins', sans-serif; margin-bottom: 25px;">
+              You can access your account anytime at <a href="${websiteURL}" style="color: #7ed957; text-decoration: none; font-weight: 600;">${websiteURL}</a>
+            </p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${websiteURL}/login" style="background: linear-gradient(135deg, #7ed957 0%, #6bc544 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-family: 'Poppins', sans-serif; box-shadow: 0 4px 12px rgba(126, 217, 87, 0.3); transition: all 0.3s ease;">
+                Access Your Account
+              </a>
+            </div>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+              <p style="color: #313131; line-height: 1.6; font-family: 'Poppins', sans-serif; margin-bottom: 15px; font-size: 0.9rem;">
+                If you didn't create this account, please ignore this message or contact us immediately.
+              </p>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin-top: 30px; padding: 20px;">
+            <p style="color: #313131; font-family: 'Poppins', sans-serif; margin: 0 0 10px 0; font-weight: 600;">
+              Warm regards,<br>
+              <span style="color: #7ed957;">The ELako.Nv Team</span>
+            </p>
+            
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+              <p style="color: #313131; font-family: 'Poppins', sans-serif; margin: 5px 0; font-size: 0.9rem;">
+                📩 <a href="mailto:elakonv@gmail.com" style="color: #7ed957; text-decoration: none;">elakonv@gmail.com</a>
+              </p>
+              <p style="color: #313131; font-family: 'Poppins', sans-serif; margin: 5px 0; font-size: 0.9rem;">
+                📍 Nueva Vizcaya, Philippines
+              </p>
+            </div>
+          </div>
+          
+          <div style="text-align: center; color: #999; font-size: 12px; font-family: 'Poppins', sans-serif; margin-top: 20px;">
+            <p>&copy; 2025 ELako.Nv. All rights reserved.</p>
+          </div>
+        </div>
+      `,
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log(
+      `✅ Welcome email sent successfully to ${email} (${userType}):`,
+      result.messageId
+    );
+    return { success: true, messageId: result.messageId };
+  } catch (error) {
+    console.error(`❌ Error sending welcome email to ${email}:`, error);
+    return { success: false, error: error.message };
+  }
+};
+
 module.exports = {
   generateOTP,
   sendOTPEmail,
   sendStoreActivityEmail,
+  sendWelcomeEmail,
 };

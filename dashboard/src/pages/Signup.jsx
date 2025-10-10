@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { TextField, Button, IconButton, InputAdornment, MenuItem, Alert, CircularProgress } from "@mui/material";
 import { Visibility, VisibilityOff, PersonOutline, Apartment } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import TermsAgreementModal from "../components/TermsAgreementModal";
 import "../css/Signup.css";
 import logo from "../logos/Icon on dark with text.png";
 
@@ -12,6 +13,8 @@ function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [pendingSubmit, setPendingSubmit] = useState(null);
   const navigate = useNavigate();
 
   // Customer form state
@@ -58,17 +61,37 @@ function Signup() {
     setCertificateFiles(prev => ({ ...prev, [certificateType]: file }));
   };
 
+  const handleTermsAgreed = () => {
+    if (pendingSubmit === 'customer') {
+      processCustomerSubmit();
+    } else if (pendingSubmit === 'msme') {
+      processMsmeSubmit();
+    }
+    setPendingSubmit(null);
+  };
+
+  const handleTermsClosed = () => {
+    setShowTermsModal(false);
+    setPendingSubmit(null);
+  };
+
   const handleCustomerSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
     setSuccess("");
 
     if (customerData.password !== customerData.confirmPassword) {
       setError("Passwords do not match");
-      setLoading(false);
       return;
     }
+
+    // Show terms modal before proceeding
+    setPendingSubmit('customer');
+    setShowTermsModal(true);
+  };
+
+  const processCustomerSubmit = async () => {
+    setLoading(true);
 
     try {
       const { confirmPassword, ...submitData } = customerData;
@@ -95,22 +118,27 @@ function Signup() {
 
   const handleMsmeSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
     setSuccess("");
 
     if (msmeData.password !== msmeData.confirmPassword) {
       setError("Passwords do not match");
-      setLoading(false);
       return;
     }
 
     // Validate required certificate files
     if (!certificateFiles.mayorsPermit || !certificateFiles.bir || !certificateFiles.fda) {
       setError("Please upload all required certificates (Mayor's Permit, BIR, and FDA)");
-      setLoading(false);
       return;
     }
+
+    // Show terms modal before proceeding
+    setPendingSubmit('msme');
+    setShowTermsModal(true);
+  };
+
+  const processMsmeSubmit = async () => {
+    setLoading(true);
 
     try {
       const formData = new FormData();
@@ -326,6 +354,16 @@ function Signup() {
                     LOGIN
                   </a>
                 </p>
+                <p className="text" style={{ marginTop: "8px", fontSize: "12px", color: "#666" }}>
+                  By signing up, you agree to our{" "}
+                  <span 
+                    className="link" 
+                    onClick={() => setShowTermsModal(true)}
+                    style={{ cursor: "pointer", textDecoration: "underline", color: "#4CAF50" }}
+                  >
+                    Terms and Agreement
+                  </span>
+                </p>
               </form>
             )}
 
@@ -518,11 +556,29 @@ function Signup() {
                     LOGIN
                   </a>
                 </p>
+                <p className="text" style={{ marginTop: "8px", fontSize: "12px", color: "#666" }}>
+                  By signing up, you agree to our{" "}
+                  <span 
+                    className="link" 
+                    onClick={() => setShowTermsModal(true)}
+                    style={{ cursor: "pointer", textDecoration: "underline", color: "#4CAF50" }}
+                  >
+                    Terms and Agreement
+                  </span>
+                </p>
               </form>
             )}
           </div>
         </div>
       </div>
+
+      {/* Terms and Agreement Modal */}
+      <TermsAgreementModal
+        open={showTermsModal}
+        onClose={handleTermsClosed}
+        onAgree={handleTermsAgreed}
+        userType={activeTab}
+      />
     </div>
   );
 }

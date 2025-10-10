@@ -218,7 +218,7 @@ app.post("/api/customers/register", async (req, res) => {
 
     // Send welcome email
     try {
-      await sendWelcomeEmail(customer.email, customer.firstName, "customer");
+      await sendWelcomeEmail(customer.email, customer.firstname, "customer");
       console.log(`✅ Welcome email sent to new customer: ${customer.email}`);
     } catch (emailError) {
       console.error(

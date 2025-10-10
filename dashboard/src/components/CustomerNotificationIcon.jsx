@@ -62,15 +62,20 @@ const CustomerNotificationIcon = () => {
 
     try {
       setLoading(true);
+      console.log('🔍 Fetching notifications for user ID:', user._id);
+      console.log('📝 Full user object:', user);
       const response = await fetch(`http://localhost:1337/api/customer-notifications/${user._id}?limit=10`);
       const data = await response.json();
+      
+      console.log('📨 Notification API response:', data);
 
       if (data.success) {
         setNotifications(data.notifications);
         setUnreadCount(data.unreadCount);
+        console.log('✅ Notifications set:', data.notifications.length, 'unread:', data.unreadCount);
       }
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error('❌ Error fetching notifications:', error);
     } finally {
       setLoading(false);
     }
@@ -117,6 +122,8 @@ const CustomerNotificationIcon = () => {
         return 'Special Promotion!';
       case 'order':
         return 'Order Update';
+      case 'top_fan_badge':
+        return 'Badge Earned! 🎉';
       default:
         return 'Notification';
     }
@@ -490,6 +497,12 @@ const CustomerNotificationIcon = () => {
             📋
           </span>
         );
+      case 'top_fan_badge':
+        return (
+          <span className="customer-notification-icon__type-icon top-fan-badge">
+            👑
+          </span>
+        );
       default:
         return <ShoppingBagIcon className="customer-notification-icon__type-icon" />;
     }
@@ -782,7 +795,8 @@ const CustomerNotificationIcon = () => {
                           {notification.type === 'price_drop' ? '💰' : 
                            notification.type === 'availability_alert' ? '📦' : 
                            notification.type === 'promotion' ? '🎉' : 
-                           notification.type === 'order' ? '🛍️' : '🔔'}
+                           notification.type === 'order' ? '🛍️' : 
+                           notification.type === 'top_fan_badge' ? '👑' : '🔔'}
                         </Avatar>
                       </ListItemAvatar>
                     )}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import CustomerSidebar from './CustomerSidebar';
+import TopFanCongratulations from '../components/TopFanCongratulations';
 import '../css/CustomerProfile.css';
 import EditIcon from '@mui/icons-material/Edit';
 import PersonIcon from '@mui/icons-material/Person';
@@ -27,6 +28,11 @@ const CustomerProfile = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  
+  // TOP FAN Badge System State
+  const [showTopFanCongratulations, setShowTopFanCongratulations] = useState(false);
+  const [topFanBadgeData, setTopFanBadgeData] = useState(null);
+  const [badgeLoading, setBadgeLoading] = useState(false);
   const [profileData, setProfileData] = useState({
     id: '',
     fullName: '',
@@ -51,6 +57,10 @@ const CustomerProfile = () => {
   useEffect(() => {
     if (user && userType === 'customer') {
       fetchCustomerProfile();
+      // Check for TOP FAN badge after a short delay (simulating login flow)
+      setTimeout(() => {
+        checkTopFanStatus();
+      }, 2000);
     }
   }, [user, userType]);
 
@@ -256,6 +266,102 @@ const CustomerProfile = () => {
     }
   };
 
+  // TOP FAN Badge System Functions
+  const checkTopFanStatus = async () => {
+    if (!user?.id) return;
+
+    try {
+      setBadgeLoading(true);
+      
+      // First calculate/update the badge
+      const calculateResponse = await fetch(`http://localhost:1337/api/badges/customer/${user.id}/calculate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const calculateData = await calculateResponse.json();
+      console.log('Customer Badge Calculation Result:', calculateData);
+
+      if (calculateData.success && calculateData.badge) {
+        setTopFanBadgeData(calculateData.badge);
+
+        // Check if we should show congratulations (new badge and not shown before)
+        if (calculateData.isNewBadge && calculateData.badge.isActive) {
+          // Check localStorage to prevent showing multiple times per day
+          const lastShown = localStorage.getItem(`topfan-congratulations-${user.id}`);
+          const today = new Date().toDateString();
+          
+          if (lastShown !== today) {
+            console.log('Showing TOP FAN congratulations popup');
+            setShowTopFanCongratulations(true);
+            localStorage.setItem(`topfan-congratulations-${user.id}`, today);
+          } else {
+            console.log('TOP FAN congratulations already shown today');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking TOP FAN status:', error);
+    } finally {
+      setBadgeLoading(false);
+    }
+  };
+
+  const handleTopFanCongratulationsClose = () => {
+    setShowTopFanCongratulations(false);
+    if (topFanBadgeData?._id) {
+      markCelebrationShown();
+    }
+  };
+
+  const markCelebrationShown = async () => {
+    try {
+      const response = await fetch('http://localhost:1337/api/badges/celebration-shown', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          badgeType: 'customer',
+          badgeId: topFanBadgeData._id,
+        }),
+      });
+
+      if (response.ok) {
+        console.log('TOP FAN celebration marked as shown');
+      }
+    } catch (error) {
+      console.error('Error marking TOP FAN celebration as shown:', error);
+    }
+  };
+
+  const handleTestTopFanPopup = async () => {
+    console.log('Testing TOP FAN popup...');
+    setBadgeLoading(true);
+    
+    try {
+      // Force recalculate badge
+      await checkTopFanStatus();
+      
+      // Force show popup for testing (bypass localStorage check)
+      setTimeout(() => {
+        if (topFanBadgeData?.isActive) {
+          console.log('Forcing TOP FAN congratulations popup for testing');
+          setShowTopFanCongratulations(true);
+        } else {
+          alert('No active TOP FAN badge found. Customer needs to meet criteria first.');
+        }
+      }, 1000);
+    } catch (error) {
+      console.error('Error testing TOP FAN popup:', error);
+      alert('Error testing TOP FAN popup. Check console for details.');
+    } finally {
+      setBadgeLoading(false);
+    }
+  };
+
 
 
   const accountSettings = [
@@ -265,12 +371,18 @@ const CustomerProfile = () => {
       action: handleChangePassword,
       color: '#7ed957'
     },
-
     { 
       title: 'Notification Preferences', 
       icon: <NotificationsIcon />, 
       action: handleNotificationSettings,
       color: '#7ed957'
+    },
+    { 
+      title: 'Test TOP FAN Badge', 
+      icon: <span>👑</span>, 
+      action: handleTestTopFanPopup,
+      color: '#ffd700',
+      loading: badgeLoading
     },
     { 
       title: 'Delete Account', 
@@ -344,9 +456,26 @@ const CustomerProfile = () => {
                   <PersonIcon className="customer-profile__avatar-icon" />
                 </div>
                 <div className="customer-profile__basic-info">
-                  <h3 className="customer-profile__name">{profileData.fullName}</h3>
+                  <h3 className="customer-profile__name">
+                    {profileData.fullName}
+                    {topFanBadgeData?.isActive && (
+                      <span 
+                        className="customer-profile__badge-indicator"
+                        title={`${topFanBadgeData.badgeType === 'suki' ? 'SUKI' : 'TOP FAN'} Badge - Active until ${new Date(topFanBadgeData.expiresAt).toLocaleDateString()}`}
+                      >
+                        {topFanBadgeData.badgeType === 'suki' ? '💝' : '👑'}
+                      </span>
+                    )}
+                  </h3>
                   <p className="customer-profile__email">{profileData.email}</p>
-                  <span className="customer-profile__user-type">Customer</span>
+                  <span className="customer-profile__user-type">
+                    Customer
+                    {topFanBadgeData?.isActive && (
+                      <span className="customer-profile__badge-text">
+                        • {topFanBadgeData.badgeType === 'suki' ? 'SUKI Member' : 'TOP FAN'}
+                      </span>
+                    )}
+                  </span>
                 </div>
               </div>
 
@@ -509,21 +638,35 @@ const CustomerProfile = () => {
               {accountSettings.map((setting, index) => (
                 <div 
                   key={index} 
-                  className={`customer-profile__setting-card ${setting.color === '#dc3545' ? 'customer-profile__setting-card--danger' : ''}`}
-                  onClick={setting.action}
+                  className={`customer-profile__setting-card ${setting.color === '#dc3545' ? 'customer-profile__setting-card--danger' : ''} ${setting.loading ? 'customer-profile__setting-card--loading' : ''}`}
+                  onClick={setting.loading ? null : setting.action}
+                  style={{ 
+                    cursor: setting.loading ? 'not-allowed' : 'pointer',
+                    opacity: setting.loading ? 0.6 : 1
+                  }}
                 >
                   <div 
                     className="customer-profile__setting-icon" 
                     style={{ color: setting.color }}
                   >
-                    {setting.icon}
+                    {setting.loading ? '⏳' : setting.icon}
                   </div>
-                  <div className="customer-profile__setting-title">{setting.title}</div>
+                  <div className="customer-profile__setting-title">
+                    {setting.loading ? 'Loading...' : setting.title}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
+
+        {/* TOP FAN Congratulations Modal */}
+        <TopFanCongratulations
+          isVisible={showTopFanCongratulations}
+          onClose={handleTopFanCongratulationsClose}
+          badgeData={topFanBadgeData}
+          onMarkCelebrationShown={markCelebrationShown}
+        />
       </div>
     </div>
   );

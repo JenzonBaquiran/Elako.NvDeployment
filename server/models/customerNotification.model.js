@@ -13,7 +13,9 @@ const customerNotificationSchema = new mongoose.Schema(
     storeId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "MSME",
-      required: true,
+      required: function () {
+        return !["top_fan_badge"].includes(this.type);
+      },
     },
 
     // Product related to the notification
@@ -77,6 +79,7 @@ const customerNotificationSchema = new mongoose.Schema(
         "store_promotion",
         "order_status",
         "new_message",
+        "top_fan_badge",
       ],
       required: true,
     },
@@ -196,6 +199,30 @@ customerNotificationSchema.statics.markAllAsRead = function (customerId) {
 customerNotificationSchema.statics.getUnreadCount = function (customerId) {
   return this.countDocuments({ customerId, isRead: false });
 };
+
+// Static method to create TOP FAN badge notification
+customerNotificationSchema.statics.createTopFanBadgeNotification =
+  async function (customerId, badgeType, expiresAt) {
+    const badgeEmoji = badgeType === "suki" ? "💝" : "👑";
+    const badgeTitle = badgeType === "suki" ? "SUKI Member" : "TOP FAN";
+
+    return this.create({
+      customerId,
+      // Don't include storeId for badge notifications
+      type: "top_fan_badge",
+      title: `🎉 You earned a ${badgeTitle} Badge!`,
+      message: `Congratulations! Your engagement has earned you the prestigious ${badgeTitle} badge ${badgeEmoji}. Valid until ${new Date(
+        expiresAt
+      ).toLocaleDateString()}.`,
+      actionType: "custom_url",
+      actionUrl: "/customer-profile",
+      metadata: {
+        badgeType,
+        badgeEmoji,
+        expiresAt,
+      },
+    });
+  };
 
 module.exports = mongoose.model(
   "CustomerNotification",

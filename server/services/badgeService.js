@@ -1,5 +1,6 @@
 const StoreBadge = require("../models/storeBadge.model");
 const CustomerBadge = require("../models/customerBadge.model");
+const CustomerNotification = require("../models/customerNotification.model");
 const MSME = require("../models/msme.model");
 const Product = require("../models/product.model");
 const Customer = require("../models/customer.model");
@@ -129,8 +130,29 @@ class BadgeService {
         badge.badgeType = "top_fan"; // General top fan badge
       }
 
-      // Check if all criteria are met
+      // Check if all criteria are met and create notification if newly awarded
+      const wasActiveBeforeSave = badge.isActive;
       badge.checkCriteria();
+
+      // If badge became active (newly awarded), create notification
+      if (badge.isActive && !wasActiveBeforeSave && !badge.celebrationShown) {
+        try {
+          await CustomerNotification.createTopFanBadgeNotification(
+            customerId,
+            badge.badgeType,
+            badge.expiresAt
+          );
+          console.log(
+            `TOP FAN badge notification created for customer: ${customerId}`
+          );
+        } catch (notificationError) {
+          console.error(
+            "Error creating TOP FAN badge notification:",
+            notificationError
+          );
+          // Don't fail the badge calculation if notification fails
+        }
+      }
 
       await badge.save();
       return badge;

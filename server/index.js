@@ -7406,6 +7406,72 @@ app.post("/api/badges/admin/process-all", async (req, res) => {
   }
 });
 
+// Test endpoint: Create a customer badge with met criteria for testing
+app.post("/api/badges/test/create-top-fan/:customerId", async (req, res) => {
+  try {
+    const { customerId } = req.params;
+
+    // Create a badge with all criteria met for testing
+    const badge = await CustomerBadge.create({
+      customerId: customerId,
+      badgeType: "top_fan",
+      weekStart: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 1 week ago
+      weekEnd: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
+      isActive: true,
+      awardedAt: new Date(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
+      celebrationShown: false,
+      criteria: {
+        ratingsGiven: {
+          current: 10, // Exceeds requirement
+          required: 5,
+          met: true,
+        },
+        blogEngagement: {
+          current: 15, // Exceeds requirement
+          required: 5,
+          met: true,
+        },
+      },
+      loyaltyStore: {
+        storeId: null,
+        storeName: "",
+        interactionCount: 0,
+      },
+    });
+
+    // Create notification for the new badge
+    try {
+      await CustomerNotification.createTopFanBadgeNotification(
+        customerId,
+        badge.badgeType,
+        badge.expiresAt
+      );
+      console.log(
+        `Test TOP FAN badge notification created for customer: ${customerId}`
+      );
+    } catch (notificationError) {
+      console.error(
+        "Error creating test TOP FAN badge notification:",
+        notificationError
+      );
+    }
+
+    res.json({
+      success: true,
+      badge: badge,
+      isNewBadge: true,
+      message: "Test TOP FAN badge created successfully with notification",
+    });
+  } catch (error) {
+    console.error("Error creating test TOP FAN badge:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create test badge",
+    });
+  }
+});
+
 // Clean expired badges (for admin)
 app.post("/api/badges/admin/cleanup-expired", async (req, res) => {
   try {

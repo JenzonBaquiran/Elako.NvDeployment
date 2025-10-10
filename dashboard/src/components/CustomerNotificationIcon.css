@@ -777,3 +777,51 @@
   }
 }
 
+/* TOP FAN Badge Notification Styling */
+.customer-notification-icon__type-icon.top-fan-badge {
+  font-size: 1.2em;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5));
+  animation: crown-glow 2s ease-in-out infinite;
+}
+
+@keyframes crown-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+    transform: scale(1.1);
+  }
+}
+
+.customer-notification-icon__item--top-fan-badge {
+  background: linear-gradient(135deg, 
+    rgba(255, 215, 0, 0.1) 0%, 
+    rgba(255, 237, 78, 0.1) 100%) !important;
+  border-left: 4px solid #ffd700 !important;
+}
+
+.customer-notification-icon__item--top-fan-badge:hover {
+  background: linear-gradient(135deg, 
+    rgba(255, 215, 0, 0.15) 0%, 
+    rgba(255, 237, 78, 0.15) 100%) !important;
+}
+
+.customer-notification-icon__drawer-item--top-fan-badge {
+  background: linear-gradient(135deg, 
+    rgba(255, 215, 0, 0.08) 0%, 
+    rgba(255, 237, 78, 0.08) 100%) !important;
+  border-left: 3px solid #ffd700 !important;
+}
+
+.customer-notification-icon__drawer-avatar .customer-notification-icon__type-icon.top-fan-badge,
+.customer-notification-icon__drawer-avatar:has-text("👑") {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%) !important;
+  color: #333 !important;
+}
+

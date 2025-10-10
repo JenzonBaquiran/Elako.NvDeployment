@@ -112,6 +112,9 @@ function Login() {
         if (data.user.status === "approved") {
           const loginSuccess = login(data.user, 'msme');
           if (loginSuccess) {
+            // Clear congratulation status for today so it can show after login
+            localStorage.removeItem(`topStoreCongratulation_${data.user._id}`);
+            
             showSuccess("Login successful! Welcome back.", "Welcome");
             const from = location.state?.from?.pathname || '/msme-dashboard';
             navigate(from, { replace: true });

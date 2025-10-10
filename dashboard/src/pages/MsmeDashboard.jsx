@@ -4,6 +4,7 @@ import { Add, Message, Analytics, Settings } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
 import MsmeSidebar from './MsmeSidebar';
+import TopStoreCongratulations from '../components/TopStoreCongratulations';
 import '../css/MsmeDashboard.css';
 
 const MsmeDashboard = () => {
@@ -29,6 +30,8 @@ const MsmeDashboard = () => {
   });
   const [topProducts, setTopProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showCongratulations, setShowCongratulations] = useState(false);
+  const [topStoreBadgeData, setTopStoreBadgeData] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,6 +61,14 @@ const MsmeDashboard = () => {
     // Fetch analytics data and top products
     fetchAnalytics();
     fetchTopProducts();
+    
+    // For testing: Clear previous congratulation to see popup every time (remove in production)
+    localStorage.removeItem(`topStoreCongratulation_${user._id}`);
+    
+    // Check if store is a top store (with slight delay to let other data load)
+    setTimeout(() => {
+      checkTopStoreStatus();
+    }, 2000);
   }, [user]);
 
   const fetchAnalytics = async () => {
@@ -119,6 +130,41 @@ const MsmeDashboard = () => {
     }
   };
 
+  // Check if store is a top store and show congratulations automatically on login
+  const checkTopStoreStatus = async () => {
+    if (!user || !user._id) return;
+    
+    try {
+      const response = await fetch(`http://localhost:1337/api/badges/store/${user._id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        if (data.success && data.badge && data.badge.isActive) {
+          // Check if this is a new login (congratulations not shown today)
+          const lastCongratulationDate = localStorage.getItem(`topStoreCongratulation_${user._id}`);
+          const today = new Date().toDateString();
+          
+          // Show congratulations if not shown today
+          if (lastCongratulationDate !== today) {
+            setTopStoreBadgeData(data.badge);
+            setShowCongratulations(true);
+            
+            // Mark congratulation as shown for today
+            localStorage.setItem(`topStoreCongratulation_${user._id}`, today);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking top store status:', error);
+    }
+  };
+
   const getProductImageUrl = (product) => {
     if (product.picture) {
       return `http://localhost:1337/uploads/${product.picture}`;
@@ -157,12 +203,61 @@ const MsmeDashboard = () => {
               <h1>Welcome back, {businessName}!</h1>
               <p>Here's what's happening with your business today</p>
             </div>
-            <button 
-              className="msme-dashboard__customize-btn"
-              onClick={() => navigate('/msme-customize-dashboard')}
-            >
-              Customize Dashboard
-            </button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button 
+                className="msme-dashboard__customize-btn"
+                onClick={() => navigate('/msme-customize-dashboard')}
+              >
+                Customize Dashboard
+              </button>
+              
+              {/* Test Button to trigger congratulations popup */}
+              <button 
+                style={{
+                  background: 'linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%)',
+                  color: '#333',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  boxShadow: '0 4px 15px rgba(255, 215, 0, 0.3)',
+                  transition: 'all 0.3s ease'
+                }}
+                onClick={() => {
+                  const mockBadgeData = {
+                    _id: "test_badge_" + Date.now(),
+                    badgeType: "top_store", 
+                    isActive: true,
+                    awardedAt: new Date(),
+                    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                    criteria: {
+                      storeRating: { current: 4.8, required: 4.5, met: true },
+                      profileViews: { current: 287, required: 200, met: true },
+                      blogViews: { current: 142, required: 100, met: true }
+                    },
+                    achievements: [
+                      "Excellent customer ratings (4.8/5.0)",
+                      "High profile engagement (287+ views)",
+                      "Strong content performance (142+ blog views)"
+                    ]
+                  };
+                  
+                  setTopStoreBadgeData(mockBadgeData);
+                  setShowCongratulations(true);
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-2px) scale(1.05)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(255, 215, 0, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0) scale(1)';
+                  e.target.style.boxShadow = '0 4px 15px rgba(255, 215, 0, 0.3)';
+                }}
+              >
+                🏆 Test Top Store Celebration
+              </button>
+            </div>
           </div>
         </div>
         
@@ -374,6 +469,16 @@ const MsmeDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Top Store Congratulations Popup - Appears automatically when MSME logs in as top store */}
+      <TopStoreCongratulations
+        isVisible={showCongratulations}
+        onClose={() => setShowCongratulations(false)}
+        storeInfo={{
+          storeName: businessName
+        }}
+        badgeData={topStoreBadgeData}
+      />
     </div>
   );
 };

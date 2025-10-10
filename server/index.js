@@ -21,12 +21,15 @@ const BlogPost = require("./models/blogPost.model");
 const MsmeBlogPost = require("./models/msmeBlogPost.model");
 const Message = require("./models/message.model");
 const Conversation = require("./models/conversation.model");
+const StoreBadge = require("./models/storeBadge.model");
+const CustomerBadge = require("./models/customerBadge.model");
 
 // Import Services
 const CustomerNotificationService = require("./services/customerNotificationService");
 const { generateOTP, sendOTPEmail } = require("./services/emailService");
 const StoreActivityNotificationService = require("./services/storeActivityNotificationService");
 const AuditLogService = require("./services/auditLogService");
+const BadgeService = require("./services/badgeService");
 
 const fs = require("fs");
 
@@ -7210,6 +7213,274 @@ app.get("/api/hot-picks/all", async (req, res) => {
       error: "Failed to fetch all hot picks",
     });
   }
+});
+
+// ===== BADGE SYSTEM API ENDPOINTS =====
+
+// Get active store badge
+app.get("/api/badges/store/:storeId", async (req, res) => {
+  try {
+    const { storeId } = req.params;
+    const badge = await BadgeService.getActiveStoreBadge(storeId);
+
+    if (badge) {
+      res.json({
+        success: true,
+        badge: badge,
+      });
+    } else {
+      res.json({
+        success: false,
+        message: "No active badge found",
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching store badge:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch store badge",
+    });
+  }
+});
+
+// Get active customer badge
+app.get("/api/badges/customer/:customerId", async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    const badge = await BadgeService.getActiveCustomerBadge(customerId);
+
+    if (badge) {
+      res.json({
+        success: true,
+        badge: badge,
+      });
+    } else {
+      res.json({
+        success: false,
+        message: "No active badge found",
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching customer badge:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch customer badge",
+    });
+  }
+});
+
+// Calculate/update store badge
+app.post("/api/badges/store/:storeId/calculate", async (req, res) => {
+  try {
+    const { storeId } = req.params;
+    const badge = await BadgeService.calculateStoreBadge(storeId);
+
+    res.json({
+      success: true,
+      badge: badge,
+      isNewBadge: badge.isActive && !badge.celebrationShown,
+    });
+  } catch (error) {
+    console.error("Error calculating store badge:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to calculate store badge",
+    });
+  }
+});
+
+// Calculate/update customer badge
+app.post("/api/badges/customer/:customerId/calculate", async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    const badge = await BadgeService.calculateCustomerBadge(customerId);
+
+    res.json({
+      success: true,
+      badge: badge,
+      isNewBadge: badge.isActive && !badge.celebrationShown,
+    });
+  } catch (error) {
+    console.error("Error calculating customer badge:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to calculate customer badge",
+    });
+  }
+});
+
+// Mark celebration as shown
+app.post("/api/badges/celebration-shown", async (req, res) => {
+  try {
+    const { badgeType, badgeId } = req.body;
+
+    if (!badgeType || !badgeId) {
+      return res.status(400).json({
+        success: false,
+        message: "Badge type and ID are required",
+      });
+    }
+
+    await BadgeService.markCelebrationShown(badgeType, badgeId);
+
+    res.json({
+      success: true,
+      message: "Celebration marked as shown",
+    });
+  } catch (error) {
+    console.error("Error marking celebration as shown:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to mark celebration as shown",
+    });
+  }
+});
+
+// Get badge statistics
+app.get("/api/badges/stats", async (req, res) => {
+  try {
+    const activeStoreBadges = await StoreBadge.countDocuments({
+      isActive: true,
+    });
+    const activeCustomerBadges = await CustomerBadge.countDocuments({
+      isActive: true,
+    });
+
+    const totalStoreBadges = await StoreBadge.countDocuments();
+    const totalCustomerBadges = await CustomerBadge.countDocuments();
+
+    // Get this week's new badges
+    const weekStart = new Date();
+    weekStart.setHours(0, 0, 0, 0);
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+
+    const thisWeekStoreBadges = await StoreBadge.countDocuments({
+      awardedAt: { $gte: weekStart },
+    });
+
+    const thisWeekCustomerBadges = await CustomerBadge.countDocuments({
+      awardedAt: { $gte: weekStart },
+    });
+
+    res.json({
+      success: true,
+      stats: {
+        active: {
+          stores: activeStoreBadges,
+          customers: activeCustomerBadges,
+        },
+        total: {
+          stores: totalStoreBadges,
+          customers: totalCustomerBadges,
+        },
+        thisWeek: {
+          stores: thisWeekStoreBadges,
+          customers: thisWeekCustomerBadges,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching badge statistics:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch badge statistics",
+    });
+  }
+});
+
+// Manual badge processing (for admin)
+app.post("/api/badges/admin/process-all", async (req, res) => {
+  try {
+    await BadgeService.processAllBadges();
+
+    res.json({
+      success: true,
+      message: "Badge processing completed for all users",
+    });
+  } catch (error) {
+    console.error("Error processing all badges:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to process badges",
+    });
+  }
+});
+
+// Clean expired badges (for admin)
+app.post("/api/badges/admin/cleanup-expired", async (req, res) => {
+  try {
+    await BadgeService.cleanupExpiredBadges();
+
+    res.json({
+      success: true,
+      message: "Expired badges cleaned up successfully",
+    });
+  } catch (error) {
+    console.error("Error cleaning up expired badges:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to clean up expired badges",
+    });
+  }
+});
+
+// --- Badge System API Endpoints ---
+
+// Get store badge status
+app.get("/api/badges/store/:storeId", (req, res) => {
+  const { storeId } = req.params;
+
+  // For testing: Always return a top store badge so MSME users can see the congratulations
+  // In production, this would check the actual badge database and store criteria
+  const mockTopStoreBadge = {
+    success: true,
+    badge: {
+      _id: "mock_badge_id_" + storeId,
+      storeId: storeId,
+      badgeType: "top_store",
+      isActive: true,
+      awardedAt: new Date(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      criteria: {
+        storeRating: {
+          current: 4.8,
+          required: 4.5,
+          met: true,
+        },
+        profileViews: {
+          current: 287,
+          required: 200,
+          met: true,
+        },
+        blogViews: {
+          current: 142,
+          required: 100,
+          met: true,
+        },
+      },
+      celebrationShown: false,
+      weekStartDate: new Date().toISOString(),
+      achievements: [
+        "Excellent customer ratings (4.8/5.0)",
+        "High profile engagement (287+ views)",
+        "Strong content performance (142+ blog views)",
+      ],
+    },
+  };
+
+  console.log(`✨ Top Store Badge requested for store: ${storeId}`);
+  res.json(mockTopStoreBadge);
+});
+
+// Mark celebration as shown
+app.post("/api/badges/celebration-shown", (req, res) => {
+  const { badgeType, badgeId } = req.body;
+
+  // Mock response for celebration shown
+  res.json({
+    success: true,
+    message: "Celebration marked as shown",
+  });
 });
 
 // --- Start Server ---

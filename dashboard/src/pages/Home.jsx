@@ -4,6 +4,8 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import FloatingMessageIcon from '../components/FloatingMessageIcon';
 import BlogHero from '../components/BlogHero';
+import BadgeWrapper from '../components/BadgeWrapper';
+// import BadgeCelebration from '../components/BadgeCelebration';
 import { useAuth } from '../contexts/AuthContext';
 import { recordStoreView } from '../utils/storeViewTracker';
 import heroPic from '../pictures/IMG_6125.jpg';
@@ -232,35 +234,37 @@ function Home() {
           const category = store.category || 'business';
           
           return (
-            <div className="top-stores-card" key={store._id}>
-              <img 
-                src={storeImage} 
-                alt={businessName}
-                onError={(e) => {
-                  e.target.src = heroPic; // Fallback to default image if store image fails to load
-                }}
-              />
-              <div className={`top-stores-label ${category.toLowerCase().replace(/\s+/g, '')}`}>
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </div>
-              <div className="top-stores-content">
-                <div className="top-stores-info">
-                  <h3>{businessName}</h3>
-                  <p>{description}</p>
-                  <div className="top-stores-rating">
-                    ★ {rating.toFixed(1)} ({totalRatings} review{totalRatings !== 1 ? 's' : ''})
-                  </div>
-                </div>
-                <button 
-                  className="hero-button hero-button-outline top-stores-button" 
-                  onClick={() => {
-                    recordStoreView(store._id, user?._id, navigate);
+            <BadgeWrapper key={store._id} userType="store" userId={store._id}>
+              <div className="top-stores-card">
+                <img 
+                  src={storeImage} 
+                  alt={businessName}
+                  onError={(e) => {
+                    e.target.src = heroPic; // Fallback to default image if store image fails to load
                   }}
-                >
-                  Visit Store
-                </button>
+                />
+                <div className={`top-stores-label ${category.toLowerCase().replace(/\s+/g, '')}`}>
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </div>
+                <div className="top-stores-content">
+                  <div className="top-stores-info">
+                    <h3>{businessName}</h3>
+                    <p>{description}</p>
+                    <div className="top-stores-rating">
+                      ★ {rating.toFixed(1)} ({totalRatings} review{totalRatings !== 1 ? 's' : ''})
+                    </div>
+                  </div>
+                  <button 
+                    className="hero-button hero-button-outline top-stores-button" 
+                    onClick={() => {
+                      recordStoreView(store._id, user?._id, navigate);
+                    }}
+                  >
+                    Visit Store
+                  </button>
+                </div>
               </div>
-            </div>
+            </BadgeWrapper>
           );
         })
       )}
@@ -326,72 +330,74 @@ function Home() {
         console.log('---');
         
         return (
-          <div className="new-store-card" key={store.id || store._id}>
-            <div className="store-image-section">
-              <img 
-                className="store-main-image" 
-                src={storeLogo} 
-                alt={businessName}
-                onError={(e) => {
-                  e.target.src = heroPic; // Fallback to default image if logo fails to load
-                }}
-              />
-              <div className={`store-category-badge ${store.category?.toLowerCase().replace(/\s+/g, '') || 'default'}`}>
-                {store.category || 'Business'}
-              </div>
-              {isNewForTesting && (
-                <div className="store-new-badge">New</div>
-              )}
-            </div>
-            
-            <div className="store-content">
-              <h3 className="store-title">{businessName}</h3>
-              <p className="store-description">{description}</p>
-              
-              <div className="store-rating">
-                <div className="stars">
-                  {dashboard?.rating ? (
-                    <>
-                      {Array.from({ length: 5 }, (_, index) => (
-                        <span
-                          key={index}
-                          className={`star ${index < Math.floor(dashboard.rating) ? 'filled' : 'empty'}`}
-                        >
-                          ★
-                        </span>
-                      ))}
-                      <span className="rating-text">({dashboard.rating.toFixed(1)})</span>
-                    </>
-                  ) : (
-                    <>
-                      {Array.from({ length: 5 }, (_, index) => (
-                        <span key={index} className="star empty">★</span>
-                      ))}
-                      <span className="rating-text">(0.0)</span>
-                    </>
-                  )}
+          <BadgeWrapper key={store.id || store._id} userType="store" userId={store._id}>
+            <div className="new-store-card">
+              <div className="store-image-section">
+                <img 
+                  className="store-main-image" 
+                  src={storeLogo} 
+                  alt={businessName}
+                  onError={(e) => {
+                    e.target.src = heroPic; // Fallback to default image if logo fails to load
+                  }}
+                />
+                <div className={`store-category-badge ${store.category?.toLowerCase().replace(/\s+/g, '') || 'default'}`}>
+                  {store.category || 'Business'}
                 </div>
+                {isNewForTesting && (
+                  <div className="store-new-badge">New</div>
+                )}
               </div>
               
-              <div className="store-joined">
-                Joined {joinedDays}
+              <div className="store-content">
+                <h3 className="store-title">{businessName}</h3>
+                <p className="store-description">{description}</p>
+                
+                <div className="store-rating">
+                  <div className="stars">
+                    {dashboard?.rating ? (
+                      <>
+                        {Array.from({ length: 5 }, (_, index) => (
+                          <span
+                            key={index}
+                            className={`star ${index < Math.floor(dashboard.rating) ? 'filled' : 'empty'}`}
+                          >
+                            ★
+                          </span>
+                        ))}
+                        <span className="rating-text">({dashboard.rating.toFixed(1)})</span>
+                      </>
+                    ) : (
+                      <>
+                        {Array.from({ length: 5 }, (_, index) => (
+                          <span key={index} className="star empty">★</span>
+                        ))}
+                        <span className="rating-text">(0.0)</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="store-joined">
+                  Joined {joinedDays}
+                </div>
+                
+                <div className="store-location">
+                  <LocationOnIcon className="location-icon" />
+                  <span>{location}</span>
+                </div>
+                
+                <button 
+                  className="store-learn-btn"
+                  onClick={() => {
+                    recordStoreView(store._id, user?._id, navigate);
+                  }}
+                >
+                  Visit Store
+                </button>
               </div>
-              
-              <div className="store-location">
-                <LocationOnIcon className="location-icon" />
-                <span>{location}</span>
-              </div>
-              
-              <button 
-                className="store-learn-btn"
-                onClick={() => {
-                  recordStoreView(store._id, user?._id, navigate);
-                }}
-              >
-                Visit Store
-              </button>
             </div>
-          </div>
+          </BadgeWrapper>
         );
       })
     )}
@@ -400,6 +406,7 @@ function Home() {
 
       <Footer />
       <FloatingMessageIcon />
+      {/* <BadgeCelebration /> */}
     </div>
   );
 }

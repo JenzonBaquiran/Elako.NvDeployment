@@ -2113,3 +2113,422 @@ body {
     gap: 1rem;
   }
 }
+
+/* ===== BADGE SYSTEM STYLES ===== */
+
+/* Badge Container Positioning */
+.badge-container-overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.card-badge-container {
+  position: relative;
+}
+
+/* Top Store Badge on Cards */
+.card-top-store-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #ffd700, #ffb300);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 3px 10px rgba(255, 179, 0, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  animation: badge-shimmer 2s infinite;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* Top Fan/Suki Badge on Cards */
+.card-top-fan-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  animation: badge-shimmer 2s infinite;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.card-top-fan-badge.suki {
+  background: linear-gradient(135deg, #e91e63, #f06292);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(233, 30, 99, 0.5);
+}
+
+.card-top-fan-badge.top_fan {
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(108, 92, 231, 0.5);
+}
+
+/* Badge Shimmer Animation */
+@keyframes badge-shimmer {
+  0% {
+    box-shadow: 0 3px 10px rgba(255, 179, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 3px 15px rgba(255, 179, 0, 0.6);
+  }
+  100% {
+    box-shadow: 0 3px 10px rgba(255, 179, 0, 0.3);
+  }
+}
+
+/* Badge positioning for different card types */
+.hot-pick-card .badge-container-overlay,
+.top-stores-card .badge-container-overlay,
+.top-rated-card .badge-container-overlay,
+.recently-joined-card .badge-container-overlay,
+.service-provider-card .badge-container-overlay,
+.new-store-card .badge-container-overlay {
+  top: 8px;
+  right: 8px;
+}
+
+/* Multiple badges stacking */
+.badge-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+}
+
+/* Badge hover effects */
+.card-top-store-badge:hover,
+.card-top-fan-badge:hover {
+  transform: scale(1.05);
+  animation-duration: 1s;
+}
+
+/* Integration with existing card styles */
+.hot-pick-card:hover .card-top-store-badge,
+.top-stores-card:hover .card-top-store-badge {
+  transform: scale(1.1);
+}
+
+/* Badge tooltip on hover */
+.badge-tooltip {
+  position: absolute;
+  bottom: 120%;
+  right: 0;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.card-top-store-badge:hover .badge-tooltip,
+.card-top-fan-badge:hover .badge-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.badge-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 12px;
+  border: 4px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.9);
+}
+
+/* Mobile badge adjustments */
+@media (max-width: 768px) {
+  .card-top-store-badge,
+  .card-top-fan-badge {
+    font-size: 0.6rem;
+    padding: 3px 8px;
+  }
+
+  .badge-container-overlay {
+    top: 6px;
+    right: 6px;
+  }
+
+  .badge-tooltip {
+    font-size: 0.7rem;
+    padding: 6px 10px;
+  }
+}
+
+/* Badge celebration trigger styles */
+.badge-celebration-trigger {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+}
+
+/* Store/Customer profile badge display */
+.profile-badge-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 12px;
+  background: linear-gradient(135deg, #f8f9fa, #ffffff);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.profile-badge-container .top-store-badge,
+.profile-badge-container .top-fan-badge {
+  transform: scale(1.2);
+}
+
+.profile-badge-info {
+  flex: 1;
+}
+
+.profile-badge-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.profile-badge-info p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Badge Details Modal */
+.badge-details-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: modal-fade-in 0.3s ease-out;
+}
+
+.badge-details-content {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modal-scale-in 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-scale-in {
+  from { 
+    opacity: 0;
+    transform: scale(0.8) translateY(-20px); 
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1) translateY(0); 
+  }
+}
+
+.close-badge-details {
+  width: 100%;
+  background: #313131;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: all 0.2s ease;
+}
+
+.close-badge-details:hover {
+  background: #7ed957;
+  color: #313131;
+  transform: translateY(-1px);
+}
+
+/* Badge Management Component */
+.badge-management {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.badge-management h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 1.2rem;
+}
+
+.badge-actions {
+  margin-bottom: 20px;
+}
+
+.calculate-badge-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.calculate-badge-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.calculate-badge-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.current-badge-status {
+  margin-top: 16px;
+}
+
+.badge-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+/* Badge positioning helper classes */
+.badge-position-top-right {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+}
+
+.badge-position-top-left {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+}
+
+.badge-position-bottom-right {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 10;
+}
+
+.badge-position-bottom-left {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  z-index: 10;
+}
+
+/* Badge wrapper styles */
+.badge-wrapper {
+  position: relative;
+}
+
+.badge-overlay {
+  position: absolute;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+/* Enhanced card hover effects with badges */
+.card-with-badge:hover .badge-container-overlay {
+  transform: scale(1.05);
+}
+
+.card-with-badge:hover .card-top-store-badge,
+.card-with-badge:hover .card-top-fan-badge {
+  animation-duration: 1s;
+  box-shadow: 0 4px 20px rgba(255, 179, 0, 0.7);
+}
+
+/* Badge notification styles */
+.badge-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #28a745, #7ed957);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+  z-index: 1000;
+  animation: notification-slide-in 0.5s ease-out;
+}
+
+@keyframes notification-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Dark theme support for badges */
+@media (prefers-color-scheme: dark) {
+  .badge-details-content {
+    background: #2a2a2a;
+    color: white;
+  }
+  
+  .badge-management {
+    background: #333;
+  }
+  
+  .badge-management h3 {
+    color: white;
+  }
+  
+  .close-badge-details {
+    background: #555;
+  }
+  
+  .close-badge-details:hover {
+    background: #7ed957;
+    color: #333;
+  }
+}

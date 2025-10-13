@@ -6,8 +6,7 @@ import profileImg from '../assets/pic.jpg';
 
 const MsmeProfile = () => {
   const [sidebarState, setSidebarState] = useState({ isOpen: true, isMobile: false });
-  const [isEditingPersonal, setIsEditingPersonal] = useState(false);
-  const [isEditingBusiness, setIsEditingBusiness] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -19,10 +18,7 @@ const MsmeProfile = () => {
     address: '',
     businessDescription: '',
     category: '',
-    operatingHours: '',
     website: '',
-    specialties: [],
-    established: '',
     storeLogo: null
   });
   const [stats, setStats] = useState({
@@ -78,19 +74,14 @@ const MsmeProfile = () => {
     }));
   };
 
-  const handleSpecialtiesChange = (value) => {
-    const specialties = value.split(',').map(s => s.trim()).filter(s => s.length > 0);
-    setProfileData(prev => ({
-      ...prev,
-      specialties
-    }));
-  };
 
-  const handleSavePersonal = async () => {
+
+  const handleSave = async () => {
     try {
       setSaving(true);
       
-      const response = await fetch(`http://localhost:1337/api/msme/${user.id}/profile/personal`, {
+      // Update personal information
+      const personalResponse = await fetch(`http://localhost:1337/api/msme/${user.id}/profile/personal`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -104,54 +95,37 @@ const MsmeProfile = () => {
         })
       });
 
-      const data = await response.json();
+      const personalData = await personalResponse.json();
 
-      if (data.success) {
-        setProfileData(prev => ({ ...prev, ...data.profile }));
-        setIsEditingPersonal(false);
-        console.log('Personal information updated successfully');
-      } else {
-        console.error('Failed to update personal information:', data.error);
-        alert(data.error || 'Failed to update personal information');
-      }
-    } catch (error) {
-      console.error('Error updating personal information:', error);
-      alert('Network error. Please try again.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSaveBusiness = async () => {
-    try {
-      setSaving(true);
-      
-      const response = await fetch(`http://localhost:1337/api/msme/${user.id}/profile/business`, {
+      // Update business information (only category and website)
+      const businessResponse = await fetch(`http://localhost:1337/api/msme/${user.id}/profile/business`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           category: profileData.category,
-          established: profileData.established,
-          operatingHours: profileData.operatingHours,
-          website: profileData.website,
-          specialties: profileData.specialties
+          website: profileData.website
         })
       });
 
-      const data = await response.json();
+      const businessData = await businessResponse.json();
 
-      if (data.success) {
-        setProfileData(prev => ({ ...prev, ...data.profile }));
-        setIsEditingBusiness(false);
+      if (personalData.success && businessData.success) {
+        setProfileData(prev => ({ 
+          ...prev, 
+          ...personalData.profile,
+          ...businessData.profile
+        }));
+        setIsEditing(false);
         console.log('Business information updated successfully');
       } else {
-        console.error('Failed to update business information:', data.error);
-        alert(data.error || 'Failed to update business information');
+        const error = personalData.error || businessData.error || 'Failed to update information';
+        console.error('Failed to update information:', error);
+        alert(error);
       }
     } catch (error) {
-      console.error('Error updating business information:', error);
+      console.error('Error updating information:', error);
       alert('Network error. Please try again.');
     } finally {
       setSaving(false);
@@ -260,15 +234,15 @@ const MsmeProfile = () => {
           </div>
         </div>
 
-        <div className="msme-profile__content-grid">
-          <div className="msme-profile__card msme-profile__personal-info">
+        <div className="msme-profile__content-single">
+          <div className="msme-profile__card msme-profile__business-info">
             <div className="msme-profile__card-header">
-              <h3>Personal Information</h3>
+              <h3>Business Information</h3>
               <button 
                 className="msme-profile__edit-btn"
-                onClick={() => setIsEditingPersonal(!isEditingPersonal)}
+                onClick={() => setIsEditing(!isEditing)}
               >
-                {isEditingPersonal ? 'Cancel' : 'Edit'}
+                {isEditing ? 'Cancel' : 'Edit'}
               </button>
             </div>
             <div className="msme-profile__info-content">
@@ -300,7 +274,7 @@ const MsmeProfile = () => {
               <div className="msme-profile__info-fields">
                 <div className="msme-profile__field">
                   <label>Business Name</label>
-                  {isEditingPersonal ? (
+                  {isEditing ? (
                     <input
                       type="text"
                       value={profileData.businessName}
@@ -313,7 +287,7 @@ const MsmeProfile = () => {
                 </div>
                 <div className="msme-profile__field">
                   <label>Email Address</label>
-                  {isEditingPersonal ? (
+                  {isEditing ? (
                     <input
                       type="email"
                       value={profileData.email}
@@ -326,7 +300,7 @@ const MsmeProfile = () => {
                 </div>
                 <div className="msme-profile__field">
                   <label>Phone Number</label>
-                  {isEditingPersonal ? (
+                  {isEditing ? (
                     <input
                       type="tel"
                       value={profileData.contactNumber}
@@ -339,7 +313,7 @@ const MsmeProfile = () => {
                 </div>
                 <div className="msme-profile__field">
                   <label>Business Address</label>
-                  {isEditingPersonal ? (
+                  {isEditing ? (
                     <input
                       type="text"
                       value={profileData.address}
@@ -350,9 +324,39 @@ const MsmeProfile = () => {
                     <span>{profileData.address || 'Not provided'}</span>
                   )}
                 </div>
+                <div className="msme-profile__field">
+                  <label>Business Category</label>
+                  {isEditing ? (
+                    <select
+                      value={profileData.category}
+                      onChange={(e) => handleInputChange('category', e.target.value)}
+                      className="msme-profile__edit-input"
+                    >
+                      <option value="">Select Category</option>
+                      <option value="food">Food & Beverage</option>
+                      <option value="artisan">Artisan</option>
+                    </select>
+                  ) : (
+                    <span>{profileData.category === 'food' ? 'Food & Beverage' : profileData.category === 'artisan' ? 'Artisan' : 'Not provided'}</span>
+                  )}
+                </div>
+                <div className="msme-profile__field">
+                  <label>Website</label>
+                  {isEditing ? (
+                    <input
+                      type="url"
+                      value={profileData.website}
+                      onChange={(e) => handleInputChange('website', e.target.value)}
+                      className="msme-profile__edit-input"
+                      placeholder="https://your-website.com"
+                    />
+                  ) : (
+                    <span>{profileData.website || 'Not provided'}</span>
+                  )}
+                </div>
                 <div className="msme-profile__field msme-profile__field--full">
                   <label>Business Description</label>
-                  {isEditingPersonal ? (
+                  {isEditing ? (
                     <textarea
                       value={profileData.businessDescription}
                       onChange={(e) => handleInputChange('businessDescription', e.target.value)}
@@ -363,11 +367,11 @@ const MsmeProfile = () => {
                     <span>{profileData.businessDescription || 'Not provided'}</span>
                   )}
                 </div>
-                {isEditingPersonal && (
-                  <div className="msme-profile__edit-actions">
+                {isEditing && (
+                  <div className="msme-profile__edit-actions msme-profile__field--full">
                     <button 
                       className="msme-profile__save-btn"
-                      onClick={handleSavePersonal}
+                      onClick={handleSave}
                       disabled={saving}
                     >
                       {saving ? 'Saving...' : 'Save Changes'}
@@ -375,111 +379,6 @@ const MsmeProfile = () => {
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-
-          <div className="msme-profile__card msme-profile__business-info">
-            <div className="msme-profile__card-header">
-              <h3>Business Information</h3>
-              <button 
-                className="msme-profile__edit-btn"
-                onClick={() => setIsEditingBusiness(!isEditingBusiness)}
-              >
-                {isEditingBusiness ? 'Cancel' : 'Edit'}
-              </button>
-            </div>
-            <div className="msme-profile__business-content">
-              <div className="msme-profile__field">
-                <label>Business Category</label>
-                {isEditingBusiness ? (
-                  <select
-                    value={profileData.category}
-                    onChange={(e) => handleInputChange('category', e.target.value)}
-                    className="msme-profile__edit-input"
-                  >
-                    <option value="">Select Category</option>
-                    <option value="food">Food & Beverage</option>
-                    <option value="artisan">Artisan</option>
-                  </select>
-                ) : (
-                  <span>{profileData.category === 'food' ? 'Food & Beverage' : profileData.category === 'artisan' ? 'Artisan' : 'Not provided'}</span>
-                )}
-              </div>
-              <div className="msme-profile__field">
-                <label>Established</label>
-                {isEditingBusiness ? (
-                  <input
-                    type="number"
-                    value={profileData.established}
-                    onChange={(e) => handleInputChange('established', e.target.value)}
-                    className="msme-profile__edit-input"
-                    placeholder="Year established"
-                  />
-                ) : (
-                  <span>{profileData.established || 'Not provided'}</span>
-                )}
-              </div>
-              <div className="msme-profile__field">
-                <label>Operating Hours</label>
-                {isEditingBusiness ? (
-                  <input
-                    type="text"
-                    value={profileData.operatingHours}
-                    onChange={(e) => handleInputChange('operatingHours', e.target.value)}
-                    className="msme-profile__edit-input"
-                    placeholder="e.g., Mon-Sat: 8:00 AM - 6:00 PM"
-                  />
-                ) : (
-                  <span>{profileData.operatingHours || 'Not provided'}</span>
-                )}
-              </div>
-              <div className="msme-profile__field">
-                <label>Website</label>
-                {isEditingBusiness ? (
-                  <input
-                    type="url"
-                    value={profileData.website}
-                    onChange={(e) => handleInputChange('website', e.target.value)}
-                    className="msme-profile__edit-input"
-                    placeholder="https://your-website.com"
-                  />
-                ) : (
-                  <span>{profileData.website || 'Not provided'}</span>
-                )}
-              </div>
-              <div className="msme-profile__field msme-profile__field--full">
-                <label>Specialties</label>
-                {isEditingBusiness ? (
-                  <input
-                    type="text"
-                    value={profileData.specialties ? profileData.specialties.join(', ') : ''}
-                    onChange={(e) => handleSpecialtiesChange(e.target.value)}
-                    className="msme-profile__edit-input"
-                    placeholder="Enter specialties separated by commas"
-                  />
-                ) : (
-                  <div className="msme-profile__tags">
-                    {profileData.specialties && profileData.specialties.length > 0 ? (
-                      profileData.specialties.map((specialty, index) => (
-                        <span key={index} className="msme-profile__tag">{specialty}</span>
-                      ))
-                    ) : (
-                      <span>Not provided</span>
-                    )}
-                  </div>
-                )}
-              </div>
-              {isEditingBusiness && (
-                <div className="msme-profile__edit-actions msme-profile__field--full">
-                  <button 
-                    className="msme-profile__save-btn"
-                    onClick={handleSaveBusiness}
-                    disabled={saving}
-                  >
-                    {saving ? 'Saving...' : 'Save Changes'}
-                  </button>
-                </div>
-              )}
             </div>
           </div>
         </div>

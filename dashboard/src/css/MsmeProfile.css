@@ -147,6 +147,11 @@
   margin-bottom: 32px;
 }
 
+/* Single content layout */
+.msme-profile__content-single {
+  margin-bottom: 32px;
+}
+
 .msme-profile__card {
   background: white;
   border-radius: 12px;
@@ -489,6 +494,10 @@
   .msme-profile__content-grid {
     grid-template-columns: 1fr;
     gap: 16px;
+  }
+
+  .msme-profile__content-single {
+    margin-bottom: 16px;
   }
 
   .msme-profile__info-content {

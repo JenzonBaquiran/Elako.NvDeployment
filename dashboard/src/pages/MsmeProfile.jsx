@@ -10,6 +10,13 @@ const MsmeProfile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
   const [profileData, setProfileData] = useState({
     id: '',
     businessName: '',
@@ -179,6 +186,114 @@ const MsmeProfile = () => {
       setUploadingLogo(false);
       // Clear the file input
       event.target.value = '';
+    }
+  };
+
+  const handlePasswordInputChange = (field, value) => {
+    setPasswordData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleChangePassword = async () => {
+    // Validation
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      alert('Please fill in all password fields');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert('New password and confirm password do not match');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      alert('New password must be at least 6 characters long');
+      return;
+    }
+
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      alert('New password must be different from current password');
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      const response = await fetch(`http://localhost:1337/api/msme/${user.id}/change-password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Password changed successfully!');
+        setShowChangePasswordModal(false);
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+      } else {
+        alert(data.error || 'Failed to change password');
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
+      alert('Network error. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmText = prompt('Please type "DELETE" to confirm account deletion:');
+    
+    if (confirmText !== 'DELETE') {
+      alert('Account deletion cancelled. You must type "DELETE" exactly.');
+      return;
+    }
+
+    const finalConfirm = window.confirm(
+      'Are you absolutely sure you want to delete your account? This action cannot be undone. All your data, products, and business information will be permanently deleted.'
+    );
+
+    if (!finalConfirm) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      const response = await fetch(`http://localhost:1337/api/msme/${user.id}/delete-account`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Account deleted successfully. You will be redirected to the login page.');
+        // Redirect to login or handle logout
+        window.location.href = '/login';
+      } else {
+        alert(data.error || 'Failed to delete account');
+      }
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      alert('Network error. Please try again.');
+    } finally {
+      setSaving(false);
+      setShowDeleteAccountModal(false);
     }
   };
 
@@ -389,21 +504,131 @@ const MsmeProfile = () => {
               <h3>Account Settings</h3>
             </div>
             <div className="msme-profile__settings-grid">
-              <button className="msme-profile__setting-btn msme-profile__setting-btn--primary">
+              <button 
+                className="msme-profile__setting-btn msme-profile__setting-btn--primary"
+                onClick={() => setShowChangePasswordModal(true)}
+              >
                 Change Password
               </button>
-              <button className="msme-profile__setting-btn msme-profile__setting-btn--secondary">
-                Privacy Settings
-              </button>
-              <button className="msme-profile__setting-btn msme-profile__setting-btn--info">
-                Notification Preferences
-              </button>
-              <button className="msme-profile__setting-btn msme-profile__setting-btn--danger">
+              <button 
+                className="msme-profile__setting-btn msme-profile__setting-btn--danger"
+                onClick={() => setShowDeleteAccountModal(true)}
+              >
                 Delete Account
               </button>
             </div>
           </div>
         </div>
+
+        {/* Change Password Modal */}
+        {showChangePasswordModal && (
+          <div className="msme-profile__modal-overlay" onClick={() => setShowChangePasswordModal(false)}>
+            <div className="msme-profile__modal" onClick={(e) => e.stopPropagation()}>
+              <div className="msme-profile__modal-header">
+                <h3>Change Password</h3>
+                <button 
+                  className="msme-profile__modal-close"
+                  onClick={() => setShowChangePasswordModal(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="msme-profile__modal-content">
+                <div className="msme-profile__field">
+                  <label>Current Password</label>
+                  <input
+                    type="password"
+                    value={passwordData.currentPassword}
+                    onChange={(e) => handlePasswordInputChange('currentPassword', e.target.value)}
+                    className="msme-profile__edit-input"
+                    placeholder="Enter current password"
+                  />
+                </div>
+                <div className="msme-profile__field">
+                  <label>New Password</label>
+                  <input
+                    type="password"
+                    value={passwordData.newPassword}
+                    onChange={(e) => handlePasswordInputChange('newPassword', e.target.value)}
+                    className="msme-profile__edit-input"
+                    placeholder="Enter new password (min. 6 characters)"
+                  />
+                </div>
+                <div className="msme-profile__field">
+                  <label>Confirm New Password</label>
+                  <input
+                    type="password"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => handlePasswordInputChange('confirmPassword', e.target.value)}
+                    className="msme-profile__edit-input"
+                    placeholder="Confirm new password"
+                  />
+                </div>
+              </div>
+              <div className="msme-profile__modal-actions">
+                <button 
+                  className="msme-profile__modal-btn msme-profile__modal-btn--secondary"
+                  onClick={() => setShowChangePasswordModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="msme-profile__modal-btn msme-profile__modal-btn--primary"
+                  onClick={handleChangePassword}
+                  disabled={saving}
+                >
+                  {saving ? 'Changing...' : 'Change Password'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Account Modal */}
+        {showDeleteAccountModal && (
+          <div className="msme-profile__modal-overlay" onClick={() => setShowDeleteAccountModal(false)}>
+            <div className="msme-profile__modal msme-profile__modal--danger" onClick={(e) => e.stopPropagation()}>
+              <div className="msme-profile__modal-header">
+                <h3>Delete Account</h3>
+                <button 
+                  className="msme-profile__modal-close"
+                  onClick={() => setShowDeleteAccountModal(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="msme-profile__modal-content">
+                <div className="msme-profile__danger-warning">
+                  <h4>⚠️ Warning: This action cannot be undone!</h4>
+                  <p>Deleting your account will permanently remove:</p>
+                  <ul>
+                    <li>All your business information and profile data</li>
+                    <li>All products and product images</li>
+                    <li>All customer reviews and ratings</li>
+                    <li>All messages and conversations</li>
+                    <li>All analytics and performance data</li>
+                  </ul>
+                  <p><strong>This action is irreversible and cannot be undone.</strong></p>
+                </div>
+              </div>
+              <div className="msme-profile__modal-actions">
+                <button 
+                  className="msme-profile__modal-btn msme-profile__modal-btn--secondary"
+                  onClick={() => setShowDeleteAccountModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="msme-profile__modal-btn msme-profile__modal-btn--danger"
+                  onClick={handleDeleteAccount}
+                  disabled={saving}
+                >
+                  {saving ? 'Deleting...' : 'Delete Account'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

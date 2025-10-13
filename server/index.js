@@ -718,6 +718,9 @@ app.post(
         .toString(36)
         .substr(2, 9)}`;
 
+      // Hash password before storing
+      const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
       // Process uploaded certificate files
       const certificates = {
         mayorsPermit: req.files?.mayorsPermit
@@ -730,6 +733,7 @@ app.post(
 
       const msme = new MSME({
         ...req.body,
+        password: hashedPassword, // Use hashed password
         id,
         certificates,
       });
@@ -804,7 +808,26 @@ app.post("/api/msme/login", async (req, res) => {
 
   try {
     const msme = await MSME.findOne({ username });
-    if (!msme || msme.password !== password) {
+    if (!msme) {
+      return res
+        .status(401)
+        .json({ success: false, error: "Invalid credentials" });
+    }
+
+    // Check if password is hashed or plain text
+    const isPasswordHashed =
+      msme.password.startsWith("$2a$") || msme.password.startsWith("$2b$");
+    let isValidPassword = false;
+
+    if (isPasswordHashed) {
+      // Use bcrypt for hashed passwords
+      isValidPassword = await bcrypt.compare(password, msme.password);
+    } else {
+      // Direct comparison for plain text passwords
+      isValidPassword = password === msme.password;
+    }
+
+    if (!isValidPassword) {
       return res
         .status(401)
         .json({ success: false, error: "Invalid credentials" });
@@ -7692,6 +7715,179 @@ app.post("/api/badges/celebration-shown", (req, res) => {
     success: true,
     message: "Celebration marked as shown",
   });
+});
+
+// Change MSME password
+app.put("/api/msme/:id/change-password", async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // Validate required fields
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        error: "Current password and new password are required",
+      });
+    }
+
+    // Validate new password length
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        error: "New password must be at least 6 characters long",
+      });
+    }
+
+    // Find the MSME
+    const msme = await MSME.findOne({ id: req.params.id });
+    if (!msme) {
+      return res.status(404).json({
+        success: false,
+        error: "MSME not found",
+      });
+    }
+
+    // Check if password is hashed (starts with $2a$ or $2b$) or plain text
+    const isPasswordHashed =
+      msme.password.startsWith("$2a$") || msme.password.startsWith("$2b$");
+
+    let isValidPassword = false;
+
+    if (isPasswordHashed) {
+      // Use bcrypt for hashed passwords
+      isValidPassword = await bcrypt.compare(currentPassword, msme.password);
+    } else {
+      // Direct comparison for plain text passwords
+      isValidPassword = currentPassword === msme.password;
+    }
+
+    if (!isValidPassword) {
+      return res.status(400).json({
+        success: false,
+        error: "Current password is incorrect",
+      });
+    }
+
+    // Check if new password is different from current
+    let isSamePassword = false;
+
+    if (isPasswordHashed) {
+      isSamePassword = await bcrypt.compare(newPassword, msme.password);
+    } else {
+      isSamePassword = newPassword === msme.password;
+    }
+
+    if (isSamePassword) {
+      return res.status(400).json({
+        success: false,
+        error: "New password must be different from current password",
+      });
+    }
+
+    // Hash the new password
+    const saltRounds = 10;
+    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update the password
+    await MSME.findOneAndUpdate(
+      { id: req.params.id },
+      {
+        password: hashedNewPassword,
+        updatedAt: new Date(),
+      }
+    );
+
+    res.json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    console.error("Error changing MSME password:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error changing password",
+    });
+  }
+});
+
+// Delete MSME account
+app.delete("/api/msme/:id/delete-account", async (req, res) => {
+  try {
+    const msmeId = req.params.id;
+
+    // Find the MSME first
+    const msme = await MSME.findOne({ id: msmeId });
+    if (!msme) {
+      return res.status(404).json({
+        success: false,
+        error: "MSME not found",
+      });
+    }
+
+    const msmeObjectId = msme._id;
+
+    // Delete related data
+    await Promise.all([
+      // Delete dashboard data
+      Dashboard.deleteMany({ msmeId: msmeObjectId }),
+
+      // Delete products
+      Product.deleteMany({ msmeId: msmeObjectId }),
+
+      // Delete blog posts
+      BlogPost.deleteMany({ msmeId: msmeObjectId }),
+
+      // Delete messages
+      Message.deleteMany({
+        $or: [{ senderId: msmeObjectId }, { receiverId: msmeObjectId }],
+      }),
+
+      // Delete conversations
+      Conversation.deleteMany({
+        participants: msmeObjectId,
+      }),
+
+      // Delete notifications
+      Notification.deleteMany({ msmeId: msmeObjectId }),
+
+      // Delete customer notifications
+      CustomerNotification.deleteMany({ msmeId: msmeObjectId }),
+
+      // Delete page views
+      PageView.deleteMany({ storeId: msmeObjectId }),
+
+      // Delete customer badges related to this MSME
+      CustomerBadge.deleteMany({ msmeId: msmeObjectId }),
+
+      // Delete store badges
+      StoreBadge.deleteMany({ storeId: msmeObjectId }),
+
+      // Remove MSME from customer following lists
+      Customer.updateMany(
+        { following: msmeObjectId },
+        { $pull: { following: msmeObjectId } }
+      ),
+
+      // Delete audit logs
+      AuditLog.deleteMany({
+        $or: [{ userId: msmeObjectId }, { targetId: msmeObjectId }],
+      }),
+    ]);
+
+    // Finally, delete the MSME account
+    await MSME.findOneAndDelete({ id: msmeId });
+
+    res.json({
+      success: true,
+      message: "Account and all related data deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting MSME account:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error deleting account",
+    });
+  }
 });
 
 // --- Start Server ---

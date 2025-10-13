@@ -23,6 +23,9 @@ const TopStoreCongratulations = ({
 
   if (!isVisible) return null;
 
+  // Defensive: don't show congratulations if there's no active badge
+  if (!badgeData || !badgeData.isActive) return null;
+
   const handleClose = () => {
     setShowBalloons(false);
     setShowConfetti(false);

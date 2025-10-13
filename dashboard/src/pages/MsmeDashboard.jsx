@@ -62,9 +62,6 @@ const MsmeDashboard = () => {
     fetchAnalytics();
     fetchTopProducts();
     
-    // For testing: Clear previous congratulation to see popup every time (remove in production)
-    localStorage.removeItem(`topStoreCongratulation_${user._id}`);
-    
     // Check if store is a top store (with slight delay to let other data load)
     setTimeout(() => {
       checkTopStoreStatus();
@@ -144,21 +141,31 @@ const MsmeDashboard = () => {
 
       if (response.ok) {
         const data = await response.json();
-        
+
         if (data.success && data.badge && data.badge.isActive) {
+          // Always set badge data so the button shows
+          setTopStoreBadgeData(data.badge);
+          
           // Check if this is a new login (congratulations not shown today)
           const lastCongratulationDate = localStorage.getItem(`topStoreCongratulation_${user._id}`);
           const today = new Date().toDateString();
-          
+
           // Show congratulations if not shown today
           if (lastCongratulationDate !== today) {
-            setTopStoreBadgeData(data.badge);
             setShowCongratulations(true);
-            
+
             // Mark congratulation as shown for today
             localStorage.setItem(`topStoreCongratulation_${user._id}`, today);
           }
+        } else {
+          // No active badge returned - clear any cached badge and hide popup
+          setTopStoreBadgeData(null);
+          setShowCongratulations(false);
         }
+      } else {
+        // Non-OK response - ensure no stale celebration is shown
+        setTopStoreBadgeData(null);
+        setShowCongratulations(false);
       }
     } catch (error) {
       console.error('Error checking top store status:', error);
@@ -211,52 +218,35 @@ const MsmeDashboard = () => {
                 Customize Dashboard
               </button>
               
-              {/* Test Button to trigger congratulations popup */}
-              <button 
-                style={{
-                  background: 'linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%)',
-                  color: '#333',
-                  border: 'none',
-                  padding: '10px 20px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  boxShadow: '0 4px 15px rgba(255, 215, 0, 0.3)',
-                  transition: 'all 0.3s ease'
-                }}
-                onClick={() => {
-                  const mockBadgeData = {
-                    _id: "test_badge_" + Date.now(),
-                    badgeType: "top_store", 
-                    isActive: true,
-                    awardedAt: new Date(),
-                    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-                    criteria: {
-                      storeRating: { current: 4.8, required: 4.5, met: true },
-                      profileViews: { current: 287, required: 200, met: true },
-                      blogViews: { current: 142, required: 100, met: true }
-                    },
-                    achievements: [
-                      "Excellent customer ratings (4.8/5.0)",
-                      "High profile engagement (287+ views)",
-                      "Strong content performance (142+ blog views)"
-                    ]
-                  };
-                  
-                  setTopStoreBadgeData(mockBadgeData);
-                  setShowCongratulations(true);
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.transform = 'translateY(-2px) scale(1.05)';
-                  e.target.style.boxShadow = '0 6px 20px rgba(255, 215, 0, 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.transform = 'translateY(0) scale(1)';
-                  e.target.style.boxShadow = '0 4px 15px rgba(255, 215, 0, 0.3)';
-                }}
-              >
-                🏆 Badge Top Store 
-              </button>
+              {/* Top Store Badge Button - Only show if store has active badge */}
+              {topStoreBadgeData?.isActive && (
+                <button 
+                  style={{
+                    background: 'linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%)',
+                    color: '#333',
+                    border: 'none',
+                    padding: '10px 20px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    boxShadow: '0 4px 15px rgba(255, 215, 0, 0.3)',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onClick={() => {
+                    setShowCongratulations(true);
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-2px) scale(1.05)';
+                    e.target.style.boxShadow = '0 6px 20px rgba(255, 215, 0, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0) scale(1)';
+                    e.target.style.boxShadow = '0 4px 15px rgba(255, 215, 0, 0.3)';
+                  }}
+                >
+                  🏆 Badge Top Store 
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -471,14 +461,16 @@ const MsmeDashboard = () => {
       </div>
 
       {/* Top Store Congratulations Popup - Appears automatically when MSME logs in as top store */}
-      <TopStoreCongratulations
-        isVisible={showCongratulations}
-        onClose={() => setShowCongratulations(false)}
-        storeInfo={{
-          storeName: businessName
-        }}
-        badgeData={topStoreBadgeData}
-      />
+      {topStoreBadgeData?.isActive && (
+        <TopStoreCongratulations
+          isVisible={showCongratulations}
+          onClose={() => setShowCongratulations(false)}
+          storeInfo={{
+            storeName: businessName
+          }}
+          badgeData={topStoreBadgeData}
+        />
+      )}
     </div>
   );
 };

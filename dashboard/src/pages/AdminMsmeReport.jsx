@@ -22,6 +22,7 @@ const AdminMsmeReport = () => {
   
   // Data states
   const [msmeReports, setMsmeReports] = useState([]);
+  const [badgesData, setBadgesData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMsme, setSelectedMsme] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -42,7 +43,23 @@ const AdminMsmeReport = () => {
 
   useEffect(() => {
     fetchMsmeReports();
+    fetchBadgesData();
   }, [currentPage, performanceFilter, statusFilter, searchTerm]);
+
+  const fetchBadgesData = async () => {
+    try {
+      const response = await fetch('http://localhost:1337/api/badges/admin/stores');
+      const data = await response.json();
+      
+      if (data.success) {
+        setBadgesData(data.badges || []);
+      } else {
+        console.error('Failed to fetch badges data:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching badges data:', error);
+    }
+  };
 
   const fetchMsmeReports = async () => {
     try {
@@ -326,6 +343,26 @@ const AdminMsmeReport = () => {
     }
   };
 
+  // Helper function to get badge information for a store
+  const getStoreBadgeInfo = (storeId) => {
+    const badge = badgesData.find(badge => {
+      // Handle both string IDs and populated objects
+      const badgeStoreId = typeof badge.storeId === 'object' ? badge.storeId._id : badge.storeId;
+      return badgeStoreId === storeId;
+    });
+    
+    if (badge && badge.isActive) {
+      const weekStart = new Date(badge.weekStart).toLocaleDateString();
+      const weekEnd = new Date(badge.weekEnd).toLocaleDateString();
+      return {
+        hasActiveBadge: true,
+        weekRange: `${weekStart} - ${weekEnd}`,
+        awardedAt: badge.awardedAt
+      };
+    }
+    return { hasActiveBadge: false };
+  };
+
   // Calculate statistics from data
   const stats = {
     total: msmeReports.length,
@@ -507,6 +544,7 @@ const AdminMsmeReport = () => {
                   <th>Media Marketing</th>
                   <th>Product Performance</th>
                   <th>Store Performance</th>
+                  <th>Top Store Badge</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -514,7 +552,7 @@ const AdminMsmeReport = () => {
               <tbody>
                 {currentReports.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="admin-msme-reports__no-data">
+                    <td colSpan="8" className="admin-msme-reports__no-data">
                       No MSME reports found
                     </td>
                   </tr>
@@ -565,6 +603,23 @@ const AdminMsmeReport = () => {
                         <span className={`admin-msme-reports__rating-badge ${getRatingClass(report.storePerformanceCategory)}`}>
                           {report.storePerformanceCategory}
                         </span>
+                      </td>
+                      <td>
+                        {(() => {
+                          const badgeInfo = getStoreBadgeInfo(report._id);
+                          return badgeInfo.hasActiveBadge ? (
+                            <div className="admin-msme-reports__badge-info">
+                              <span className="admin-msme-reports__status-badge admin-msme-reports__status-badge--verified">
+                                🏆 Top Store
+                              </span>
+                              <div className="admin-msme-reports__badge-week">
+                                {badgeInfo.weekRange}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="admin-msme-reports__no-badge">No Badge</span>
+                          );
+                        })()}
                       </td>
                       <td>
                         <span className={`admin-msme-reports__status-badge ${getStatusClass(report.status)}`}>
@@ -713,6 +768,44 @@ const AdminMsmeReport = () => {
                   <div className="admin-msme-reports__modal-label">Response Rate</div>
                   <div className="admin-msme-reports__modal-value">{selectedMsme.responseRate || 'N/A'}%</div>
                 </div>
+              </div>
+
+              <div className="admin-msme-reports__modal-section">
+                <div className="admin-msme-reports__modal-section-title">Top Store Badge</div>
+                {(() => {
+                  const badgeInfo = getStoreBadgeInfo(selectedMsme._id);
+                  return badgeInfo.hasActiveBadge ? (
+                    <>
+                      <div className="admin-msme-reports__modal-field">
+                        <div className="admin-msme-reports__modal-label">Badge Status</div>
+                        <div className="admin-msme-reports__modal-value">
+                          <span className="admin-msme-reports__status-badge admin-msme-reports__status-badge--verified">
+                            🏆 Active Top Store Badge
+                          </span>
+                        </div>
+                      </div>
+                      <div className="admin-msme-reports__modal-field">
+                        <div className="admin-msme-reports__modal-label">Badge Week</div>
+                        <div className="admin-msme-reports__modal-value">{badgeInfo.weekRange}</div>
+                      </div>
+                      {badgeInfo.awardedAt && (
+                        <div className="admin-msme-reports__modal-field">
+                          <div className="admin-msme-reports__modal-label">Awarded At</div>
+                          <div className="admin-msme-reports__modal-value">
+                            {format(new Date(badgeInfo.awardedAt), 'yyyy-MM-dd HH:mm')}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="admin-msme-reports__modal-field">
+                      <div className="admin-msme-reports__modal-label">Badge Status</div>
+                      <div className="admin-msme-reports__modal-value">
+                        <span className="admin-msme-reports__no-badge">No Active Badge</span>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               <div className="admin-msme-reports__modal-section">

@@ -8,7 +8,8 @@ import {
   Business,
   Person,
   PendingActions,
-  Star
+  Star,
+  EmojiEvents
 } from "@mui/icons-material";
 import AdminSidebar from "./AdminSidebar";
 import "../css/AdminOverview.css";
@@ -19,7 +20,7 @@ const AdminOverview = () => {
     isMobile: false,
     isCollapsed: false
   });
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('activities');
   const [stats, setStats] = useState({
     totalUsers: 0,
     activeMsmes: 0,
@@ -27,8 +28,10 @@ const AdminOverview = () => {
     pendingApprovals: 0
   });
   const [activities, setActivities] = useState([]);
+  const [topStores, setTopStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activitiesLoading, setActivitiesLoading] = useState(false);
+  const [topStoresLoading, setTopStoresLoading] = useState(false);
   const navigate = useNavigate();
 
   // Fetch dashboard statistics
@@ -68,6 +71,25 @@ const AdminOverview = () => {
     }
   };
 
+  // Fetch top stores with active badges
+  const fetchTopStores = async () => {
+    setTopStoresLoading(true);
+    try {
+      const response = await fetch('http://localhost:1337/api/badges/admin/stores?isActive=true');
+      const data = await response.json();
+      
+      if (data.success) {
+        setTopStores(data.badges || []);
+      } else {
+        console.error('Failed to fetch top stores:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching top stores:', error);
+    } finally {
+      setTopStoresLoading(false);
+    }
+  };
+
   // Load stats when component mounts
   useEffect(() => {
     fetchDashboardStats();
@@ -77,6 +99,13 @@ const AdminOverview = () => {
   useEffect(() => {
     if (activeTab === 'activities' && activities.length === 0) {
       fetchRecentActivities();
+    }
+  }, [activeTab]);
+
+  // Fetch top stores when tab changes to performance
+  useEffect(() => {
+    if (activeTab === 'performance') {
+      fetchTopStores();
     }
   }, [activeTab]);
 
@@ -211,12 +240,6 @@ const AdminOverview = () => {
         {/* Tabs Section */}
         <div className="admin-overview__tabs">
           <button
-            className={`admin-overview__tab-button ${activeTab === 'overview' ? 'admin-overview__tab-button--active' : ''}`}
-            onClick={() => setActiveTab('overview')}
-          >
-            Overview
-          </button>
-          <button
             className={`admin-overview__tab-button ${activeTab === 'activities' ? 'admin-overview__tab-button--active' : ''}`}
             onClick={() => setActiveTab('activities')}
           >
@@ -238,49 +261,7 @@ const AdminOverview = () => {
 
         {/* Cards Section */}
         <div className="admin-overview__cards-section">
-          {activeTab === 'overview' && (
-            <div className="admin-overview__cards-grid">
-              <div className="admin-overview__overview-card">
-                <div className="admin-overview__card-header">
-                  <h3>System Health</h3>
-                </div>
-                <div className="admin-overview__card-content">
-                  <div className="admin-overview__health-item">
-                    <div className="admin-overview__health-indicator admin-overview__health-indicator--good"></div>
-                    <span>Server Status: Operational</span>
-                  </div>
-                  <div className="admin-overview__health-item">
-                    <div className="admin-overview__health-indicator admin-overview__health-indicator--good"></div>
-                    <span>Database: Connected</span>
-                  </div>
-                  <div className="admin-overview__health-item">
-                    <div className="admin-overview__health-indicator admin-overview__health-indicator--warning"></div>
-                    <span>Storage: 78% Full</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="admin-overview__overview-card">
-                <div className="admin-overview__card-header">
-                  <h3>Platform Metrics</h3>
-                </div>
-                <div className="admin-overview__card-content">
-                  <div className="admin-overview__metric-item">
-                    <span className="admin-overview__metric-label">Daily Active Users</span>
-                    <span className="admin-overview__metric-value">843</span>
-                  </div>
-                  <div className="admin-overview__metric-item">
-                    <span className="admin-overview__metric-label">Transactions Today</span>
-                    <span className="admin-overview__metric-value">₱125,400</span>
-                  </div>
-                  <div className="admin-overview__metric-item">
-                    <span className="admin-overview__metric-label">Revenue This Month</span>
-                    <span className="admin-overview__metric-value">₱2.1M</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+
 
           {activeTab === 'activities' && (
             <div className="admin-overview__activities-container">
@@ -343,95 +324,58 @@ const AdminOverview = () => {
 
           {activeTab === 'performance' && (
             <div className="admin-overview__cards-grid">
-              <div className="admin-overview__performance-card">
-                <div className="admin-overview__card-header">
-                  <div className="admin-overview__card-avatar">M</div>
-                  <div className="admin-overview__card-info">
-                    <h3 className="admin-overview__card-title">Maria's Kitchen</h3>
-                    <p className="admin-overview__card-email">maria.kitchen@food.com</p>
-                  </div>
-                  <div className="admin-overview__card-badges">
-                    <span className="admin-overview__category-badge">Food</span>
-                    <span className="admin-overview__status-badge admin-overview__status-badge--verified">#1</span>
-                  </div>
+              {topStoresLoading ? (
+                <div className="admin-overview__loading">Loading top stores with badges...</div>
+              ) : topStores.length === 0 ? (
+                <div className="admin-overview__no-activities">
+                  <p>No stores currently have active Top Store badges.</p>
                 </div>
-                <div className="admin-overview__card-metrics">
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">25</div>
-                    <div className="admin-overview__metric-label">Products</div>
-                  </div>
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">
-                      4.9 <Star className="admin-overview__rating-star" />
+              ) : (
+                topStores.map((badge, index) => {
+                  const store = badge.storeId || {};
+                  const weekStart = new Date(badge.weekStart).toLocaleDateString();
+                  const weekEnd = new Date(badge.weekEnd).toLocaleDateString();
+                  
+                  return (
+                    <div key={badge._id} className="admin-overview__performance-card">
+                      <div className="admin-overview__card-header">
+                        <div className="admin-overview__card-avatar">
+                          {store.businessName ? store.businessName.charAt(0).toUpperCase() : 'S'}
+                        </div>
+                        <div className="admin-overview__card-info">
+                          <h3 className="admin-overview__card-title">{store.businessName || 'Store Name'}</h3>
+                          <p className="admin-overview__card-email">{store.email || 'store@email.com'}</p>
+                        </div>
+                        <div className="admin-overview__card-badges">
+                          <span className="admin-overview__category-badge">{store.businessType || 'Business'}</span>
+                          <span className="admin-overview__status-badge admin-overview__status-badge--verified">
+                            <EmojiEvents sx={{ fontSize: 14, marginRight: '4px' }} />
+                            Top Store
+                          </span>
+                        </div>
+                      </div>
+                      <div className="admin-overview__card-metrics">
+                        <div className="admin-overview__metric">
+                          <div className="admin-overview__metric-value">
+                            {badge.criteria?.storeRating?.current?.toFixed(1) || 'N/A'}
+                          </div>
+                          <div className="admin-overview__metric-label">Store Rating</div>
+                        </div>
+                        <div className="admin-overview__metric">
+                          <div className="admin-overview__metric-value">
+                            {badge.criteria?.profileViews?.current || 0}
+                          </div>
+                          <div className="admin-overview__metric-label">Profile Views</div>
+                        </div>
+                        <div className="admin-overview__metric">
+                          <div className="admin-overview__metric-value">Badge Week</div>
+                          <div className="admin-overview__metric-label">{weekStart} - {weekEnd}</div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="admin-overview__metric-label">Rating</div>
-                  </div>
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">456</div>
-                    <div className="admin-overview__metric-label">Followers</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="admin-overview__performance-card">
-                <div className="admin-overview__card-header">
-                  <div className="admin-overview__card-avatar">N</div>
-                  <div className="admin-overview__card-info">
-                    <h3 className="admin-overview__card-title">Nueva Crafts</h3>
-                    <p className="admin-overview__card-email">nueva@crafts.ph</p>
-                  </div>
-                  <div className="admin-overview__card-badges">
-                    <span className="admin-overview__category-badge">Artisan</span>
-                    <span className="admin-overview__status-badge admin-overview__status-badge--verified">#2</span>
-                  </div>
-                </div>
-                <div className="admin-overview__card-metrics">
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">18</div>
-                    <div className="admin-overview__metric-label">Products</div>
-                  </div>
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">
-                      4.8 <Star className="admin-overview__rating-star" />
-                    </div>
-                    <div className="admin-overview__metric-label">Rating</div>
-                  </div>
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">312</div>
-                    <div className="admin-overview__metric-label">Followers</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="admin-overview__performance-card">
-                <div className="admin-overview__card-header">
-                  <div className="admin-overview__card-avatar">L</div>
-                  <div className="admin-overview__card-info">
-                    <h3 className="admin-overview__card-title">Local Delights</h3>
-                    <p className="admin-overview__card-email">local@delights.com</p>
-                  </div>
-                  <div className="admin-overview__card-badges">
-                    <span className="admin-overview__category-badge">Food</span>
-                    <span className="admin-overview__status-badge admin-overview__status-badge--verified">#3</span>
-                  </div>
-                </div>
-                <div className="admin-overview__card-metrics">
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">12</div>
-                    <div className="admin-overview__metric-label">Products</div>
-                  </div>
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">
-                      4.7 <Star className="admin-overview__rating-star" />
-                    </div>
-                    <div className="admin-overview__metric-label">Rating</div>
-                  </div>
-                  <div className="admin-overview__metric">
-                    <div className="admin-overview__metric-value">289</div>
-                    <div className="admin-overview__metric-label">Followers</div>
-                  </div>
-                </div>
-              </div>
+                  );
+                })
+              )}
             </div>
           )}
 

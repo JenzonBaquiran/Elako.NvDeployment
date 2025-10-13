@@ -2795,6 +2795,121 @@ app.get("/api/stores/:storeId/analytics", async (req, res) => {
   }
 });
 
+// Get product rating analytics for a specific store
+app.get("/api/stores/:storeId/analytics/products", async (req, res) => {
+  try {
+    const { storeId } = req.params;
+
+    // Validate store exists
+    const store = await MSME.findById(storeId);
+    if (!store) {
+      return res.status(404).json({
+        success: false,
+        error: "Store not found",
+      });
+    }
+
+    // Get all products for this store
+    const products = await Product.find({ msmeId: storeId });
+
+    if (!products || products.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          productRatings: [],
+          summary: {
+            totalProducts: 0,
+            averageRating: 0,
+            totalReviews: 0,
+          },
+        },
+      });
+    }
+
+    // Process each product's ratings over time
+    const productRatingsData = [];
+    let totalRating = 0;
+    let totalReviews = 0;
+
+    for (const product of products) {
+      if (product.feedback && product.feedback.length > 0) {
+        // Calculate ratings over the last 4 weeks for trend visualization
+        const now = new Date();
+        const weeks = [];
+
+        for (let i = 3; i >= 0; i--) {
+          const weekStart = new Date(
+            now.getTime() - (i + 1) * 7 * 24 * 60 * 60 * 1000
+          );
+          const weekEnd = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
+
+          const weekRatings = product.feedback.filter((fb) => {
+            const feedbackDate = new Date(fb.createdAt);
+            return feedbackDate >= weekStart && feedbackDate < weekEnd;
+          });
+
+          const weekAverage =
+            weekRatings.length > 0
+              ? weekRatings.reduce((sum, fb) => sum + fb.rating, 0) /
+                weekRatings.length
+              : 0;
+
+          weeks.push({
+            week: `Week ${4 - i}`,
+            rating: Math.round(weekAverage * 10) / 10,
+            reviewCount: weekRatings.length,
+          });
+        }
+
+        // Calculate overall product rating
+        const productRating =
+          product.feedback.reduce((sum, fb) => sum + fb.rating, 0) /
+          product.feedback.length;
+
+        productRatingsData.push({
+          productId: product._id,
+          productName: product.productName,
+          overallRating: Math.round(productRating * 10) / 10,
+          totalReviews: product.feedback.length,
+          weeklyData: weeks,
+          category: product.category || "Uncategorized",
+        });
+
+        totalRating += productRating;
+        totalReviews += product.feedback.length;
+      }
+    }
+
+    // Calculate summary statistics
+    const averageRating =
+      productRatingsData.length > 0
+        ? Math.round((totalRating / productRatingsData.length) * 10) / 10
+        : 0;
+
+    // Sort products by rating (highest first)
+    productRatingsData.sort((a, b) => b.overallRating - a.overallRating);
+
+    res.json({
+      success: true,
+      data: {
+        productRatings: productRatingsData,
+        summary: {
+          totalProducts: products.length,
+          ratedProducts: productRatingsData.length,
+          averageRating: averageRating,
+          totalReviews: totalReviews,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching product rating analytics:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching product rating analytics",
+    });
+  }
+});
+
 // Get all stores with dashboard information for customer view
 app.get("/api/stores", async (req, res) => {
   try {

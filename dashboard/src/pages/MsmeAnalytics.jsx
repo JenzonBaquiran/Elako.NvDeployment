@@ -26,11 +26,21 @@ const MsmeAnalytics = () => {
       trend: 0
     }
   });
+  const [productRatings, setProductRatings] = useState({
+    productRatings: [],
+    summary: {
+      totalProducts: 0,
+      ratedProducts: 0,
+      averageRating: 0,
+      totalReviews: 0
+    }
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user && user._id) {
       fetchAnalytics();
+      fetchProductRatings();
     }
   }, [user]);
 
@@ -50,6 +60,22 @@ const MsmeAnalytics = () => {
       showError('Failed to load analytics data', 'Error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchProductRatings = async () => {
+    try {
+      const response = await fetch(`http://localhost:1337/api/stores/${user._id}/analytics/products`);
+      const data = await response.json();
+
+      if (data.success) {
+        setProductRatings(data.data);
+      } else {
+        showError('Failed to load product ratings data', 'Error');
+      }
+    } catch (error) {
+      console.error('Error fetching product ratings:', error);
+      showError('Failed to load product ratings data', 'Error');
     }
   };
 
@@ -158,38 +184,48 @@ const MsmeAnalytics = () => {
           <div className="msme-analytics__chart-card">
             <div className="msme-analytics__chart-header">
               <h3>Product Rating Performance</h3>
-              <p>Performance by product rating</p>
+              <p>Performance by product rating - {productRatings.summary?.ratedProducts || 0} of {productRatings.summary?.totalProducts || 0} products rated</p>
             </div>
             <div className="msme-analytics__chart-container">
-              <LineChart
-                width={600}
-                height={300}
-                series={[
-                  {
-                    data: [28, 30, 32, 35, 33, 35],
-                    label: 'Buko Pie',
-                    color: '#313131',
-                  },
-                  {
-                    data: [20, 22, 24, 25, 26, 25],
-                    label: 'Coffee Beans',
-                    color: '#7ed957',
-                  },
-                  {
-                    data: [18, 19, 20, 20, 21, 20],
-                    label: 'Banana Chips',
-                    color: '#666666',
-                  },
-                ]}
-                xAxis={[
-                  {
-                    data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    scaleType: 'point',
-                  },
-                ]}
-                margin={{ top: 10, bottom: 30, left: 40, right: 10 }}
-              />
+              {loading || !productRatings.productRatings || productRatings.productRatings.length === 0 ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '300px', color: '#666' }}>
+                  {loading ? 'Loading product ratings...' : 'No product ratings available yet'}
+                </div>
+              ) : (
+                <LineChart
+                  width={600}
+                  height={300}
+                  series={productRatings.productRatings.slice(0, 5).map((product, index) => ({
+                    data: product.weeklyData?.map(week => week.rating * 10) || [0, 0, 0, 0], // Convert to scale of 0-50 for better visualization
+                    label: product.productName && product.productName.length > 15 ? product.productName.substring(0, 15) + '...' : product.productName || 'Unknown Product',
+                    color: ['#313131', '#7ed957', '#666666', '#ff6b6b', '#4ecdc4'][index % 5],
+                  }))}
+                  xAxis={[
+                    {
+                      data: productRatings.productRatings.length > 0 && productRatings.productRatings[0].weeklyData
+                        ? productRatings.productRatings[0].weeklyData.map(week => week.week)
+                        : ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                      scaleType: 'point',
+                    },
+                  ]}
+                  yAxis={[
+                    {
+                      label: 'Rating (scaled x10)',
+                      min: 0,
+                      max: 50,
+                    },
+                  ]}
+                  margin={{ top: 10, bottom: 30, left: 60, right: 10 }}
+                />
+              )}
             </div>
+            {productRatings.productRatings && productRatings.productRatings.length > 0 && (
+              <div style={{ padding: '10px', fontSize: '12px', color: '#666' }}>
+                <strong>Top Products:</strong> {productRatings.productRatings.slice(0, 3).map(p => 
+                  `${p.productName || 'Unknown'} (${p.overallRating || 0}★)`
+                ).join(', ')}
+              </div>
+            )}
           </div>
         </div>
 
@@ -207,15 +243,29 @@ const MsmeAnalytics = () => {
               <div className="msme-analytics__insight-item">
                 <div className="msme-analytics__insight-icon neutral">→</div>
                 <div className="msme-analytics__insight-content">
-                  <h4>Stable Product Performance</h4>
-                  <p>Buko Pie remains your top performer with consistent sales throughout the quarter.</p>
+                  <h4>{productRatings.productRatings && productRatings.productRatings.length > 0 ? 'Top Product Performance' : 'Product Performance'}</h4>
+                  <p>
+                    {productRatings.productRatings && productRatings.productRatings.length > 0 
+                      ? `${productRatings.productRatings[0].productName || 'Your top product'} is your top-rated product with ${productRatings.productRatings[0].overallRating || 0}★ rating.`
+                      : 'Add product reviews to track performance insights.'
+                    }
+                  </p>
                 </div>
               </div>
               <div className="msme-analytics__insight-item">
                 <div className="msme-analytics__insight-icon positive">★</div>
                 <div className="msme-analytics__insight-content">
-                  <h4>Excellent Customer Satisfaction</h4>
-                  <p>Your 4.8 rating reflects high customer satisfaction and quality products.</p>
+                  <h4>Customer Satisfaction</h4>
+                  <p>
+                    {productRatings.summary && productRatings.summary.averageRating > 0 
+                      ? `Your ${productRatings.summary.averageRating}★ average rating across ${productRatings.summary.totalReviews} reviews reflects ${
+                          productRatings.summary.averageRating >= 4.5 ? 'excellent' : 
+                          productRatings.summary.averageRating >= 4.0 ? 'good' : 
+                          productRatings.summary.averageRating >= 3.5 ? 'satisfactory' : 'needs improvement'
+                        } customer satisfaction.`
+                      : 'Encourage customers to leave reviews to track satisfaction levels.'
+                    }
+                  </p>
                 </div>
               </div>
             </div>

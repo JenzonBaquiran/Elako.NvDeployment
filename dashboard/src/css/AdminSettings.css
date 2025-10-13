@@ -116,7 +116,9 @@
 
 .admin-settings__profile-avatar {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  text-align: center;
   gap: 20px;
 }
 
@@ -264,27 +266,31 @@
   font-family: 'Poppins', sans-serif;
 }
 
-/* Account Options */
+/* Account Settings */
 .admin-settings__account-options {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
+  display: flex;
+  gap: 20px;
+  justify-content: stretch;
+  flex-wrap: wrap;
 }
 
 .admin-settings__settings-btn {
   background: white;
   border: 2px solid #313131;
-  padding: 16px 20px;
-  border-radius: 6px;
+  padding: 20px 32px;
+  border-radius: 8px;
   cursor: pointer;
   color: #313131;
   font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   text-align: center;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  flex: 1;
+  min-width: 180px;
+  white-space: nowrap;
 }
 
 .admin-settings__settings-btn:hover {
@@ -526,6 +532,160 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+/* Loading state */
+.admin-settings__loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: #666;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Modal styles */
+.admin-settings__modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.admin-settings__modal {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  max-width: 400px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.admin-settings__modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.admin-settings__modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #313131;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+.admin-settings__modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.admin-settings__modal-close:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.admin-settings__modal-form {
+  padding: 24px;
+}
+
+.admin-settings__form-field {
+  margin-bottom: 20px;
+}
+
+.admin-settings__form-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #313131;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+}
+
+.admin-settings__form-field input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.admin-settings__form-field input:focus {
+  outline: none;
+  border-color: #7ed957;
+  box-shadow: 0 0 0 3px rgba(126, 217, 87, 0.1);
+}
+
+.admin-settings__modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.admin-settings__modal-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.admin-settings__modal-btn--cancel {
+  background: #f8f9fa;
+  color: #666;
+  border: 1px solid #e9ecef;
+}
+
+.admin-settings__modal-btn--cancel:hover {
+  background: #313131;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(49, 49, 49, 0.3);
+  border-color: #313131;
+}
+
+.admin-settings__modal-btn--primary {
+  background: #313131;
+  color: white;
+  border: 1px solid #313131;
+}
+
+.admin-settings__modal-btn--primary:hover {
+  background: #7ed957;
+  color: #313131;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(126, 217, 87, 0.3);
+  border-color: #7ed957;
+}
+
+.admin-settings__modal-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 @media (max-width: 480px) {

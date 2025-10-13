@@ -1682,6 +1682,42 @@ app.put("/api/admin/msme/:id/update", async (req, res) => {
   }
 });
 
+// Get admin profile by ID
+app.get("/api/admin/:id/profile", async (req, res) => {
+  try {
+    const admin = await Admin.findById(req.params.id, { password: 0 });
+
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        error: "Admin not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      profile: {
+        id: admin._id,
+        username: admin.username,
+        firstname: admin.firstname,
+        lastname: admin.lastname,
+        fullName: `${admin.firstname} ${admin.lastname}`.trim(),
+        email: admin.email,
+        role: admin.role,
+        status: admin.status,
+        createdAt: admin.createdAt,
+        updatedAt: admin.updatedAt,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching admin profile:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error fetching profile",
+    });
+  }
+});
+
 // --- Admin Management Routes ---
 // Create new admin
 app.post("/api/admin/create", async (req, res) => {
@@ -1949,7 +1985,91 @@ app.put("/api/admin/admins/:id", async (req, res) => {
   }
 });
 
-// Delete admin
+// Change admin password
+app.put("/api/admin/:id/change-password", async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const adminId = req.params.id;
+
+    // Find admin
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({
+        success: false,
+        error: "Admin not found",
+      });
+    }
+
+    // Verify current password
+    const isValidPassword = await bcrypt.compare(
+      currentPassword,
+      admin.password
+    );
+    if (!isValidPassword) {
+      return res.status(400).json({
+        success: false,
+        error: "Current password is incorrect",
+      });
+    }
+
+    // Hash new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    await Admin.findByIdAndUpdate(adminId, {
+      password: hashedNewPassword,
+      updatedAt: new Date(),
+    });
+
+    res.json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  } catch (err) {
+    console.error("Error changing password:", err);
+    res.status(500).json({
+      success: false,
+      error: "Error changing password",
+    });
+  }
+});
+
+// Delete admin account (self-deletion)
+app.delete("/api/admin/:id", async (req, res) => {
+  try {
+    const adminId = req.params.id;
+
+    // Don't allow deletion of hardcoded admin
+    if (adminId === "admin") {
+      return res.status(400).json({
+        success: false,
+        error: "Cannot delete the main admin account",
+      });
+    }
+
+    const deletedAdmin = await Admin.findByIdAndDelete(adminId);
+
+    if (!deletedAdmin) {
+      return res.status(404).json({
+        success: false,
+        error: "Admin not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Account deleted successfully",
+    });
+  } catch (err) {
+    console.error("Error deleting admin account:", err);
+    res.status(500).json({
+      success: false,
+      error: "Error deleting account",
+    });
+  }
+});
+
+// Delete admin (admin management)
 app.delete("/api/admin/admins/:id", async (req, res) => {
   try {
     const adminId = req.params.id;

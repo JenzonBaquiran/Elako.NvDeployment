@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import MsmeSidebar from './MsmeSidebar';
+import Notification from '../components/Notification';
 import '../css/MsmeProfile.css';
 import profileImg from '../assets/pic.jpg';
 
@@ -11,11 +12,19 @@ const MsmeProfile = () => {
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
+  });
+  const [notification, setNotification] = useState({
+    isVisible: false,
+    type: 'info',
+    title: '',
+    message: '',
+    showConfirmButtons: false,
+    onConfirm: () => {},
+    onCancel: () => {}
   });
   const [profileData, setProfileData] = useState({
     id: '',
@@ -189,6 +198,22 @@ const MsmeProfile = () => {
     }
   };
 
+  const showNotification = (type, title, message, showConfirmButtons = false, onConfirm = () => {}, onCancel = () => {}) => {
+    setNotification({
+      isVisible: true,
+      type,
+      title,
+      message,
+      showConfirmButtons,
+      onConfirm,
+      onCancel
+    });
+  };
+
+  const hideNotification = () => {
+    setNotification(prev => ({ ...prev, isVisible: false }));
+  };
+
   const handlePasswordInputChange = (field, value) => {
     setPasswordData(prev => ({
       ...prev,
@@ -199,22 +224,22 @@ const MsmeProfile = () => {
   const handleChangePassword = async () => {
     // Validation
     if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
-      alert('Please fill in all password fields');
+      showNotification('error', 'Validation Error', 'Please fill in all password fields');
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('New password and confirm password do not match');
+      showNotification('error', 'Validation Error', 'New password and confirm password do not match');
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      alert('New password must be at least 6 characters long');
+      showNotification('error', 'Validation Error', 'New password must be at least 6 characters long');
       return;
     }
 
     if (passwordData.currentPassword === passwordData.newPassword) {
-      alert('New password must be different from current password');
+      showNotification('error', 'Validation Error', 'New password must be different from current password');
       return;
     }
 
@@ -235,7 +260,7 @@ const MsmeProfile = () => {
       const data = await response.json();
 
       if (data.success) {
-        alert('Password changed successfully!');
+        showNotification('success', 'Success', 'Password changed successfully!');
         setShowChangePasswordModal(false);
         setPasswordData({
           currentPassword: '',
@@ -243,31 +268,28 @@ const MsmeProfile = () => {
           confirmPassword: ''
         });
       } else {
-        alert(data.error || 'Failed to change password');
+        showNotification('error', 'Error', data.error || 'Failed to change password');
       }
     } catch (error) {
       console.error('Error changing password:', error);
-      alert('Network error. Please try again.');
+      showNotification('error', 'Error', 'Network error. Please try again.');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDeleteAccount = async () => {
-    const confirmText = prompt('Please type "DELETE" to confirm account deletion:');
-    
-    if (confirmText !== 'DELETE') {
-      alert('Account deletion cancelled. You must type "DELETE" exactly.');
-      return;
-    }
-
-    const finalConfirm = window.confirm(
-      'Are you absolutely sure you want to delete your account? This action cannot be undone. All your data, products, and business information will be permanently deleted.'
+  const handleDeleteAccount = () => {
+    showNotification(
+      'confirm',
+      'Delete Account',
+      'Are you sure you want to delete your account? This action cannot be undone. All your data, products, and business information will be permanently deleted.',
+      true,
+      confirmDeleteAccount,
+      () => {}
     );
+  };
 
-    if (!finalConfirm) {
-      return;
-    }
+  const confirmDeleteAccount = async () => {
 
     try {
       setSaving(true);
@@ -282,18 +304,19 @@ const MsmeProfile = () => {
       const data = await response.json();
 
       if (data.success) {
-        alert('Account deleted successfully. You will be redirected to the login page.');
-        // Redirect to login or handle logout
-        window.location.href = '/login';
+        showNotification('success', 'Success', 'Account deleted successfully. You will be redirected to the home page.');
+        // Redirect to home page
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
       } else {
-        alert(data.error || 'Failed to delete account');
+        showNotification('error', 'Error', data.error || 'Failed to delete account');
       }
     } catch (error) {
       console.error('Error deleting account:', error);
-      alert('Network error. Please try again.');
+      showNotification('error', 'Error', 'Network error. Please try again.');
     } finally {
       setSaving(false);
-      setShowDeleteAccountModal(false);
     }
   };
 
@@ -512,7 +535,7 @@ const MsmeProfile = () => {
               </button>
               <button 
                 className="msme-profile__setting-btn msme-profile__setting-btn--danger"
-                onClick={() => setShowDeleteAccountModal(true)}
+                onClick={handleDeleteAccount}
               >
                 Delete Account
               </button>
@@ -584,51 +607,18 @@ const MsmeProfile = () => {
           </div>
         )}
 
-        {/* Delete Account Modal */}
-        {showDeleteAccountModal && (
-          <div className="msme-profile__modal-overlay" onClick={() => setShowDeleteAccountModal(false)}>
-            <div className="msme-profile__modal msme-profile__modal--danger" onClick={(e) => e.stopPropagation()}>
-              <div className="msme-profile__modal-header">
-                <h3>Delete Account</h3>
-                <button 
-                  className="msme-profile__modal-close"
-                  onClick={() => setShowDeleteAccountModal(false)}
-                >
-                  ×
-                </button>
-              </div>
-              <div className="msme-profile__modal-content">
-                <div className="msme-profile__danger-warning">
-                  <h4>⚠️ Warning: This action cannot be undone!</h4>
-                  <p>Deleting your account will permanently remove:</p>
-                  <ul>
-                    <li>All your business information and profile data</li>
-                    <li>All products and product images</li>
-                    <li>All customer reviews and ratings</li>
-                    <li>All messages and conversations</li>
-                    <li>All analytics and performance data</li>
-                  </ul>
-                  <p><strong>This action is irreversible and cannot be undone.</strong></p>
-                </div>
-              </div>
-              <div className="msme-profile__modal-actions">
-                <button 
-                  className="msme-profile__modal-btn msme-profile__modal-btn--secondary"
-                  onClick={() => setShowDeleteAccountModal(false)}
-                >
-                  Cancel
-                </button>
-                <button 
-                  className="msme-profile__modal-btn msme-profile__modal-btn--danger"
-                  onClick={handleDeleteAccount}
-                  disabled={saving}
-                >
-                  {saving ? 'Deleting...' : 'Delete Account'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Notification Component */}
+        <Notification
+          type={notification.type}
+          title={notification.title}
+          message={notification.message}
+          isVisible={notification.isVisible}
+          onClose={hideNotification}
+          showConfirmButtons={notification.showConfirmButtons}
+          onConfirm={notification.onConfirm}
+          onCancel={notification.onCancel}
+          duration={4000}
+        />
       </div>
     </div>
   );

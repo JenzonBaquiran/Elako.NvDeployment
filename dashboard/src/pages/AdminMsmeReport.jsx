@@ -191,9 +191,7 @@ const AdminMsmeReport = () => {
           totalCustomers: 5,
           storeVisits: 850,
           customerRetention: 65,
-          responseRate: 85,
-          averageOrderValue: 1800,
-          monthlyRevenue: 95000
+          responseRate: 85
         },
         {
           _id: '2',
@@ -217,9 +215,7 @@ const AdminMsmeReport = () => {
           totalCustomers: 5,
           storeVisits: 720,
           customerRetention: 70,
-          responseRate: 90,
-          averageOrderValue: 2200,
-          monthlyRevenue: 75000
+          responseRate: 90
         },
         {
           _id: '3',
@@ -243,9 +239,7 @@ const AdminMsmeReport = () => {
           totalCustomers: 3,
           storeVisits: 480,
           customerRetention: 60,
-          responseRate: 75,
-          averageOrderValue: 1500,
-          monthlyRevenue: 45000
+          responseRate: 75
         }
       ];
 
@@ -702,6 +696,12 @@ const AdminMsmeReport = () => {
                     </span>
                   </div>
                 </div>
+                <div className="admin-msme-reports__modal-field">
+                  <div className="admin-msme-reports__modal-label">Last Activity</div>
+                  <div className="admin-msme-reports__modal-value">
+                    {format(new Date(selectedMsme.lastActivity), 'yyyy-MM-dd HH:mm')}
+                  </div>
+                </div>
               </div>
 
               <div className="admin-msme-reports__modal-section">
@@ -808,23 +808,7 @@ const AdminMsmeReport = () => {
                 })()}
               </div>
 
-              <div className="admin-msme-reports__modal-section">
-                <div className="admin-msme-reports__modal-section-title">Financial Metrics</div>
-                <div className="admin-msme-reports__modal-field">
-                  <div className="admin-msme-reports__modal-label">Average Order Value</div>
-                  <div className="admin-msme-reports__modal-value">₱{selectedMsme.averageOrderValue?.toLocaleString()}</div>
-                </div>
-                <div className="admin-msme-reports__modal-field">
-                  <div className="admin-msme-reports__modal-label">Monthly Revenue</div>
-                  <div className="admin-msme-reports__modal-value">₱{selectedMsme.monthlyRevenue?.toLocaleString()}</div>
-                </div>
-                <div className="admin-msme-reports__modal-field">
-                  <div className="admin-msme-reports__modal-label">Last Activity</div>
-                  <div className="admin-msme-reports__modal-value">
-                    {format(new Date(selectedMsme.lastActivity), 'yyyy-MM-dd HH:mm')}
-                  </div>
-                </div>
-              </div>
+
             </div>
           )}
         </div>

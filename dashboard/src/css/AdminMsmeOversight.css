@@ -447,6 +447,23 @@ input:checked + .admin-msme-oversight__toggle-slider:before {
   border: 1px solid #d1d5db;
 }
 
+.admin-msme-oversight__badge-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 6px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  border: 1px solid #fbbf24;
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
+  animation: subtle-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes subtle-glow {
+  from { box-shadow: 0 2px 4px rgba(255, 215, 0, 0.3); }
+  to { box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5), 0 0 15px rgba(255, 215, 0, 0.2); }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .admin-msme-oversight__content,

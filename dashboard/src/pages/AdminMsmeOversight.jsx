@@ -5,6 +5,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import StarIcon from '@mui/icons-material/Star';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 const AdminMsmeOversight = () => {
   const [sidebarState, setSidebarState] = useState({
@@ -26,6 +27,7 @@ const AdminMsmeOversight = () => {
   const [loadingCertificates, setLoadingCertificates] = useState(false);
   const [showCertificateViewer, setShowCertificateViewer] = useState(false);
   const [currentCertificate, setCurrentCertificate] = useState({ title: '', url: '' });
+  const [badgeData, setBadgeData] = useState([]);
 
   // Fetch MSMEs from API
   const fetchMsmes = async () => {
@@ -89,6 +91,29 @@ const AdminMsmeOversight = () => {
     }
   };
 
+  // Fetch badge data for stores
+  const fetchBadgeData = async () => {
+    try {
+      const response = await fetch('http://localhost:1337/api/badges/admin/stores?isActive=true');
+      const data = await response.json();
+      
+      if (data.success && data.badges) {
+        return data.badges;
+      } else {
+        console.error('Failed to fetch badge data:', data.error);
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching badge data:', error);
+      return [];
+    }
+  };
+
+  // Check if a store has an active badge
+  const hasActiveBadge = (msmeId) => {
+    return badgeData.some(badge => badge.storeId._id === msmeId);
+  };
+
   // Update MSME data with real statistics
   const updateMsmeWithStatistics = (msmes, statistics) => {
     return msmes.map(msme => {
@@ -107,15 +132,17 @@ const AdminMsmeOversight = () => {
     const fetchAllData = async () => {
       setLoading(true);
       try {
-        const [msmes, statistics] = await Promise.all([
+        const [msmes, statistics, badges] = await Promise.all([
           fetchMsmes(),
-          fetchMsmeStatistics()
+          fetchMsmeStatistics(),
+          fetchBadgeData()
         ]);
         
         // Update MSMEs with real statistics
         const updatedMsmes = updateMsmeWithStatistics(msmes, statistics);
         setMsmeData(updatedMsmes);
         setFilteredData(updatedMsmes);
+        setBadgeData(badges);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -133,7 +160,9 @@ const AdminMsmeOversight = () => {
     if (activeTab === 'pending') {
       filtered = filtered.filter(msme => msme.status === 'pending');
     } else if (activeTab === 'top') {
-      filtered = filtered.filter(msme => msme.rating >= 4.5);
+      // Show only stores that have active top badges
+      const badgeStoreIds = badgeData.map(badge => badge.storeId._id);
+      filtered = filtered.filter(msme => badgeStoreIds.includes(msme._id));
     } else if (activeTab === 'visibility') {
       // Show all for visibility controls tab
     }
@@ -281,7 +310,7 @@ const AdminMsmeOversight = () => {
     avgRating: msmeData.length > 0 ? 
       Math.round((msmeData.reduce((sum, m) => sum + (m.rating || 0), 0) / msmeData.length) * 10) / 10 : 0,
     pending: msmeData.filter(m => m.status === 'pending').length,
-    topPerformers: msmeData.filter(m => (m.rating || 0) >= 4.5).length
+    topPerformers: badgeData.length // Count stores with active top badges
   };
 
   return (
@@ -398,7 +427,7 @@ const AdminMsmeOversight = () => {
             className={`admin-msme-oversight__tab-button ${activeTab === 'top' ? 'admin-msme-oversight__tab-button--active' : ''}`}
             onClick={() => setActiveTab('top')}
           >
-            Top Performers ({stats.topPerformers})
+            Top Performers ({stats.topPerformers}) 🏆
           </button>
           <button
             className={`admin-msme-oversight__tab-button ${activeTab === 'visibility' ? 'admin-msme-oversight__tab-button--active' : ''}`}
@@ -435,6 +464,11 @@ const AdminMsmeOversight = () => {
                       <span className={`admin-msme-oversight__status-badge ${getStatusBadgeClass(msme.status)}`}>
                         {msme.status}
                       </span>
+                      {hasActiveBadge(msme._id) && (
+                        <span className="admin-msme-oversight__badge-indicator" title="Top Store Badge">
+                          <EmojiEventsIcon style={{ fontSize: '16px', color: '#ffd700' }} />
+                        </span>
+                      )}
                     </div>
                     <div className="admin-msme-oversight__visibility-toggle" onClick={(e) => e.stopPropagation()}>
                       <label className="admin-msme-oversight__toggle-switch">

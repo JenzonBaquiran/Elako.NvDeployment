@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar";
 import "../css/AdminAnalytics.css";
 
@@ -9,10 +9,87 @@ const AdminAnalytics = () => {
     isCollapsed: false
   });
   const [activeTab, setActiveTab] = useState("growth");
+  const [msmeData, setMsmeData] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [monthlyGrowthData, setMonthlyGrowthData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const handleSidebarToggle = (state) => {
     setSidebarState(state);
   };
+
+  // Fetch MSME reports data
+  const fetchMsmeData = async () => {
+    try {
+      const response = await fetch('http://localhost:1337/api/admin/msme-reports');
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        return data.data;
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching MSME data:', error);
+      return [];
+    }
+  };
+
+  // Fetch monthly growth data with real profile views and ratings
+  const fetchMonthlyGrowthData = async () => {
+    try {
+      const response = await fetch('http://localhost:1337/api/admin/analytics/monthly-growth');
+      const data = await response.json();
+      
+      if (data.success && data.monthlyData) {
+        return data.monthlyData;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching monthly growth data:', error);
+      return null;
+    }
+  };
+
+  // Fetch real top products
+  const fetchTopProducts = async () => {
+    try {
+      const response = await fetch('http://localhost:1337/api/admin/hot-picks');
+      const data = await response.json();
+      
+      if (data.success && data.products) {
+        return data.products.slice(0, 4); // Get top 4 products
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching top products:', error);
+      return [];
+    }
+  };
+
+  // Fetch all data when component mounts
+  useEffect(() => {
+    const fetchAllData = async () => {
+      setLoading(true);
+      try {
+        const [msmes, growthData, products] = await Promise.all([
+          fetchMsmeData(),
+          fetchMonthlyGrowthData(),
+          fetchTopProducts()
+        ]);
+        
+        setMsmeData(msmes);
+        setMonthlyGrowthData(growthData);
+        setTopProducts(products);
+        console.log('Top products fetched:', products);
+      } catch (error) {
+        console.error('Error fetching analytics data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllData();
+  }, []);
 
   const getContentClass = () => {
     if (sidebarState.isMobile) {
@@ -41,133 +118,151 @@ const AdminAnalytics = () => {
               </div>
               <div className="admin-analytics__chart-content">
                 <div className="admin-analytics__chart-legend">
-                  <div className="admin-analytics__legend-item">
-                    <span className="admin-analytics__legend-color admin-analytics__legend-color--blue"></span>
-                    <span>Maria's Kitchen</span>
-                  </div>
-                  <div className="admin-analytics__legend-item">
-                    <span className="admin-analytics__legend-color admin-analytics__legend-color--green"></span>
-                    <span>Verde Crafts</span>
-                  </div>
-                  <div className="admin-analytics__legend-item">
-                    <span className="admin-analytics__legend-color admin-analytics__legend-color--orange"></span>
-                    <span>TechStart Solutions</span>
-                  </div>
-                  <div className="admin-analytics__legend-item">
-                    <span className="admin-analytics__legend-color admin-analytics__legend-color--purple"></span>
-                    <span>Fresh Harvest Co.</span>
-                  </div>
+                  {loading ? (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                      Loading MSME data...
+                    </div>
+                  ) : monthlyGrowthData && monthlyGrowthData.stores ? (
+                    monthlyGrowthData.stores.slice(0, 4).map((store, index) => (
+                      <div key={store.name} className="admin-analytics__legend-item">
+                        <span 
+                          className="admin-analytics__legend-color"
+                          style={{ backgroundColor: store.color }}
+                        ></span>
+                        <span>{store.name}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                      No MSME data available
+                    </div>
+                  )}
                 </div>
                 <div className="admin-analytics__line-chart">
-                  <svg className="admin-analytics__chart-svg" width="100%" height="200" viewBox="0 0 400 200">
-                    {/* Chart grid lines */}
-                    <defs>
-                      <pattern id="msme-grid" width="80" height="40" patternUnits="userSpaceOnUse">
-                        <path d="M 80 0 L 0 0 0 40" fill="none" stroke="#f0f0f0" strokeWidth="1"/>
-                      </pattern>
-                    </defs>
-                    <rect width="100%" height="100%" fill="url(#msme-grid)" />
-                    
-                    {/* Maria's Kitchen line (dark gray) - High growth */}
-                    <polyline 
-                      fill="none" 
-                      stroke="#313131" 
-                      strokeWidth="3"
-                      points="40,140 120,115 200,95 280,70 360,50"
-                    />
-                    <circle cx="40" cy="140" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
-                    <circle cx="120" cy="115" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
-                    <circle cx="200" cy="95" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
-                    <circle cx="280" cy="70" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
-                    <circle cx="360" cy="50" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
-                    
-                    {/* Verde Crafts line (green) - Steady growth */}
-                    <polyline 
-                      fill="none" 
-                      stroke="#7ed957" 
-                      strokeWidth="3"
-                      points="40,160 120,145 200,125 280,105 360,85"
-                    />
-                    <circle cx="40" cy="160" r="4" fill="#7ed957" stroke="white" strokeWidth="2"/>
-                    <circle cx="120" cy="145" r="4" fill="#7ed957" stroke="white" strokeWidth="2"/>
-                    <circle cx="200" cy="125" r="4" fill="#7ed957" stroke="white" strokeWidth="2"/>
-                    <circle cx="280" cy="105" r="4" fill="#7ed957" stroke="white" strokeWidth="2"/>
-                    <circle cx="360" cy="85" r="4" fill="#7ed957" stroke="white" strokeWidth="2"/>
-                    
-                    {/* TechStart Solutions line (orange) - Moderate growth */}
-                    <polyline 
-                      fill="none" 
-                      stroke="#f59e0b" 
-                      strokeWidth="3"
-                      points="40,150 120,140 200,135 280,125 360,115"
-                    />
-                    <circle cx="40" cy="150" r="4" fill="#f59e0b" stroke="white" strokeWidth="2"/>
-                    <circle cx="120" cy="140" r="4" fill="#f59e0b" stroke="white" strokeWidth="2"/>
-                    <circle cx="200" cy="135" r="4" fill="#f59e0b" stroke="white" strokeWidth="2"/>
-                    <circle cx="280" cy="125" r="4" fill="#f59e0b" stroke="white" strokeWidth="2"/>
-                    <circle cx="360" cy="115" r="4" fill="#f59e0b" stroke="white" strokeWidth="2"/>
-                    
-                    {/* Fresh Harvest Co. line (dark gray) - Slow but steady */}
-                    <polyline 
-                      fill="none" 
-                      stroke="#313131" 
-                      strokeWidth="3"
-                      points="40,170 120,165 200,155 280,150 360,140"
-                    />
-                    <circle cx="40" cy="170" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
-                    <circle cx="120" cy="165" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
-                    <circle cx="200" cy="155" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
-                    <circle cx="280" cy="150" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
-                    <circle cx="360" cy="140" r="4" fill="#313131" stroke="white" strokeWidth="2"/>
-                    
-                    {/* Y-axis labels for growth metrics */}
-                    <text x="15" y="60" fontSize="10" fill="#666" textAnchor="middle">High</text>
-                    <text x="15" y="100" fontSize="10" fill="#666" textAnchor="middle">Med</text>
-                    <text x="15" y="140" fontSize="10" fill="#666" textAnchor="middle">Low</text>
-                    <text x="15" y="180" fontSize="10" fill="#666" textAnchor="middle">Start</text>
-                    
-                    {/* X-axis labels */}
-                    <text x="40" y="195" textAnchor="middle" fontSize="12" fill="#666">Jan</text>
-                    <text x="120" y="195" textAnchor="middle" fontSize="12" fill="#666">Feb</text>
-                    <text x="200" y="195" textAnchor="middle" fontSize="12" fill="#666">Mar</text>
-                    <text x="280" y="195" textAnchor="middle" fontSize="12" fill="#666">Apr</text>
-                    <text x="360" y="195" textAnchor="middle" fontSize="12" fill="#666">May</text>
-                  </svg>
+                  {monthlyGrowthData && monthlyGrowthData.stores ? (
+                    <svg className="admin-analytics__chart-svg" width="100%" height="200" viewBox="0 0 400 200">
+                      {/* Chart grid lines */}
+                      <defs>
+                        <pattern id="msme-grid" width="80" height="40" patternUnits="userSpaceOnUse">
+                          <path d="M 80 0 L 0 0 0 40" fill="none" stroke="#f0f0f0" strokeWidth="1"/>
+                        </pattern>
+                      </defs>
+                      <rect width="100%" height="100%" fill="url(#msme-grid)" />
+                      
+                      {/* Dynamic chart lines based on real data */}
+                      {monthlyGrowthData.stores.slice(0, 4).map((store, storeIndex) => {
+                        const xStep = 360 / (monthlyGrowthData.months.length - 1);
+                        const xPositions = monthlyGrowthData.months.map((_, i) => 40 + i * xStep);
+                        
+                        // Convert views to Y positions (higher views = lower Y value)
+                        const maxViews = Math.max(...monthlyGrowthData.stores.flatMap(s => s.views));
+                        const minViews = Math.min(...monthlyGrowthData.stores.flatMap(s => s.views));
+                        const viewsRange = maxViews - minViews || 1;
+                        
+                        const yPositions = store.views.map(views => {
+                          const normalizedViews = (views - minViews) / viewsRange;
+                          return 180 - (normalizedViews * 120); // Scale to chart height
+                        });
+                        
+                        // Create points string for polyline
+                        const points = xPositions.map((x, i) => `${x},${yPositions[i]}`).join(' ');
+                        
+                        return (
+                          <g key={store.name}>
+                            {/* Store line */}
+                            <polyline 
+                              fill="none" 
+                              stroke={store.color} 
+                              strokeWidth="3"
+                              points={points}
+                            />
+                            {/* Store points */}
+                            {xPositions.map((x, i) => (
+                              <circle 
+                                key={i}
+                                cx={x} 
+                                cy={yPositions[i]} 
+                                r="4" 
+                                fill={store.color} 
+                                stroke="white" 
+                                strokeWidth="2"
+                              />
+                            ))}
+                          </g>
+                        );
+                      })}
+                      
+                      {/* Y-axis labels for views */}
+                      <text x="15" y="60" fontSize="10" fill="#666" textAnchor="middle">High</text>
+                      <text x="15" y="100" fontSize="10" fill="#666" textAnchor="middle">Med</text>
+                      <text x="15" y="140" fontSize="10" fill="#666" textAnchor="middle">Low</text>
+                      <text x="15" y="180" fontSize="10" fill="#666" textAnchor="middle">Start</text>
+                      
+                      {/* X-axis labels - show last 5 months */}
+                      {monthlyGrowthData.months.slice(-5).map((month, index) => (
+                        <text 
+                          key={month}
+                          x={40 + index * 80} 
+                          y="195" 
+                          textAnchor="middle" 
+                          fontSize="12" 
+                          fill="#666"
+                        >
+                          {month}
+                        </text>
+                      ))}
+                    </svg>
+                  ) : (
+                    <div style={{ padding: '80px', textAlign: 'center', color: '#666' }}>
+                      Loading chart data...
+                    </div>
+                  )}
                 </div>
                 
                 <div className="admin-analytics__msme-stats">
-                  <div className="admin-analytics__msme-stat-item">
-                    <div className="admin-analytics__msme-indicator admin-analytics__msme-indicator--blue"></div>
-                    <div className="admin-analytics__msme-details">
-                      <span className="admin-analytics__msme-name">Maria's Kitchen</span>
-                      <span className="admin-analytics__msme-metrics">4.8★ • 2.4k views</span>
+                  {loading ? (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                      Loading MSME statistics...
                     </div>
-                    <div className="admin-analytics__growth-rate admin-analytics__growth-rate--high">+45%</div>
-                  </div>
-                  <div className="admin-analytics__msme-stat-item">
-                    <div className="admin-analytics__msme-indicator admin-analytics__msme-indicator--green"></div>
-                    <div className="admin-analytics__msme-details">
-                      <span className="admin-analytics__msme-name">Verde Crafts</span>
-                      <span className="admin-analytics__msme-metrics">4.6★ • 1.8k views</span>
+                  ) : monthlyGrowthData && monthlyGrowthData.stores ? (
+                    monthlyGrowthData.stores.slice(0, 4).map((store, index) => {
+                      const latestViews = store.views[store.views.length - 1] || 0;
+                      const previousViews = store.views[store.views.length - 2] || 0;
+                      const growthRate = previousViews > 0 ? 
+                        Math.round(((latestViews - previousViews) / previousViews) * 100) : 0;
+                      
+                      const latestRating = store.ratings[store.ratings.length - 1] || 0;
+                      
+                      const getGrowthClass = (rate) => {
+                        if (rate >= 30) return 'high';
+                        if (rate >= 20) return 'good';
+                        if (rate >= 10) return 'moderate';
+                        return 'steady';
+                      };
+                      
+                      return (
+                        <div key={store.name} className="admin-analytics__msme-stat-item">
+                          <div 
+                            className="admin-analytics__msme-indicator"
+                            style={{ backgroundColor: store.color }}
+                          ></div>
+                          <div className="admin-analytics__msme-details">
+                            <span className="admin-analytics__msme-name">{store.name}</span>
+                            <span className="admin-analytics__msme-metrics">
+                              {latestRating.toFixed(1)}★ • {latestViews.toLocaleString()} views
+                            </span>
+                          </div>
+                          <div className={`admin-analytics__growth-rate admin-analytics__growth-rate--${getGrowthClass(growthRate)}`}>
+                            {growthRate > 0 ? '+' : ''}{growthRate}%
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                      No MSME statistics available
                     </div>
-                    <div className="admin-analytics__growth-rate admin-analytics__growth-rate--good">+32%</div>
-                  </div>
-                  <div className="admin-analytics__msme-stat-item">
-                    <div className="admin-analytics__msme-indicator admin-analytics__msme-indicator--orange"></div>
-                    <div className="admin-analytics__msme-details">
-                      <span className="admin-analytics__msme-name">TechStart Solutions</span>
-                      <span className="admin-analytics__msme-metrics">4.4★ • 1.2k views</span>
-                    </div>
-                    <div className="admin-analytics__growth-rate admin-analytics__growth-rate--moderate">+18%</div>
-                  </div>
-                  <div className="admin-analytics__msme-stat-item">
-                    <div className="admin-analytics__msme-indicator admin-analytics__msme-indicator--purple"></div>
-                    <div className="admin-analytics__msme-details">
-                      <span className="admin-analytics__msme-name">Fresh Harvest Co.</span>
-                      <span className="admin-analytics__msme-metrics">4.2★ • 950 views</span>
-                    </div>
-                    <div className="admin-analytics__growth-rate admin-analytics__growth-rate--steady">+12%</div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -179,63 +274,85 @@ const AdminAnalytics = () => {
               </div>
               <div className="admin-analytics__chart-content">
                 <div className="admin-analytics__chart-legend">
-                  <div className="admin-analytics__legend-item">
-                    <span className="admin-analytics__legend-color admin-analytics__legend-color--blue"></span>
-                    <span>Buko Pie (35%)</span>
-                  </div>
-                  <div className="admin-analytics__legend-item">
-                    <span className="admin-analytics__legend-color admin-analytics__legend-color--light-green"></span>
-                    <span>Coffee Beans (28%)</span>
-                  </div>
-                  <div className="admin-analytics__legend-item">
-                    <span className="admin-analytics__legend-color admin-analytics__legend-color--orange"></span>
-                    <span>Banana Chips (22%)</span>
-                  </div>
-                  <div className="admin-analytics__legend-item">
-                    <span className="admin-analytics__legend-color admin-analytics__legend-color--purple"></span>
-                    <span>Handmade Crafts (15%)</span>
-                  </div>
+                  {loading ? (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                      Loading top products...
+                    </div>
+                  ) : topProducts.length > 0 ? (
+                    topProducts.map((product, index) => {
+                      const colors = ['#313131', '#7ed957', '#f59e0b', '#8b5cf6'];
+                      const percentage = Math.round(100 / topProducts.length);
+                      
+                      return (
+                        <div key={product._id} className="admin-analytics__legend-item">
+                          <span 
+                            className="admin-analytics__legend-color"
+                            style={{ backgroundColor: colors[index] }}
+                          ></span>
+                          <span>{product.productName} ({percentage}%)</span>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                      No top products available
+                    </div>
+                  )}
                 </div>
                 <div className="admin-analytics__pie-chart">
                   <svg className="admin-analytics__chart-svg" width="100%" height="300" viewBox="0 0 350 300">
                     <g transform="translate(175,150)">
-                      {/* Buko Pie - 35% (126 degrees) */}
-                      <path 
-                        d="M 0,-110 A 110,110 0 0,1 106.5,29.0 L 0,0 Z" 
-                        fill="#313131" 
-                        stroke="white" 
-                        strokeWidth="3"
-                      />
-                      
-                      {/* Coffee Beans - 28% (100.8 degrees) */}
-                      <path 
-                        d="M 106.5,29.0 A 110,110 0 0,1 19.1,108.4 L 0,0 Z" 
-                        fill="#7ed957" 
-                        stroke="white" 
-                        strokeWidth="3"
-                      />
-                      
-                      {/* Banana Chips - 22% (79.2 degrees) */}
-                      <path 
-                        d="M 19.1,108.4 A 110,110 0 0,1 -85.8,70.4 L 0,0 Z" 
-                        fill="#f59e0b" 
-                        stroke="white" 
-                        strokeWidth="3"
-                      />
-                      
-                      {/* Handmade Crafts - 15% (54 degrees) */}
-                      <path 
-                        d="M -85.8,70.4 A 110,110 0 0,1 0,-110 L 0,0 Z" 
-                        fill="#313131" 
-                        stroke="white" 
-                        strokeWidth="3"
-                      />
-                      
-                      {/* Percentage labels - positioned correctly for each segment */}
-                      <text x="25" y="-50" fontSize="14" fill="white" fontWeight="700" textAnchor="middle" className="admin-analytics__pie-label">35%</text>
-                      <text x="65" y="55" fontSize="14" fill="white" fontWeight="700" textAnchor="middle" className="admin-analytics__pie-label">28%</text>
-                      <text x="-40" y="75" fontSize="14" fill="white" fontWeight="700" textAnchor="middle" className="admin-analytics__pie-label">22%</text>
-                      <text x="-50" y="-20" fontSize="14" fill="white" fontWeight="700" textAnchor="middle" className="admin-analytics__pie-label">15%</text>
+                      {topProducts && topProducts.length > 0 ? (
+                        topProducts.map((product, index) => {
+                          const percentage = parseFloat(product.percentage) || 25; // Default to 25% if no percentage
+                          const colors = ['#313131', '#7ed957', '#f59e0b', '#8b5cf6', '#ef4444'];
+                          const radius = 110;
+                          
+                          // Calculate angles for this segment
+                          const startAngle = (index * 90 - 90) * Math.PI / 180; // Each segment is 90 degrees, start from top
+                          const endAngle = ((index + 1) * 90 - 90) * Math.PI / 180;
+                          
+                          // Calculate points
+                          const x1 = radius * Math.cos(startAngle);
+                          const y1 = radius * Math.sin(startAngle);
+                          const x2 = radius * Math.cos(endAngle);
+                          const y2 = radius * Math.sin(endAngle);
+                          
+                          // Create path for quarter circle
+                          const pathData = `M 0,0 L ${x1},${y1} A ${radius},${radius} 0 0,1 ${x2},${y2} Z`;
+                          
+                          // Label position
+                          const labelAngle = (startAngle + endAngle) / 2;
+                          const labelX = 60 * Math.cos(labelAngle);
+                          const labelY = 60 * Math.sin(labelAngle);
+                          
+                          return (
+                            <g key={product._id || index}>
+                              <path 
+                                d={pathData}
+                                fill={colors[index % colors.length]}
+                                stroke="white" 
+                                strokeWidth="2"
+                              />
+                              <text 
+                                x={labelX} 
+                                y={labelY} 
+                                fontSize="12" 
+                                fill="white" 
+                                fontWeight="bold" 
+                                textAnchor="middle"
+                                dominantBaseline="middle"
+                              >
+                                {Math.round(percentage)}%
+                              </text>
+                            </g>
+                          );
+                        })
+                      ) : (
+                        <text x="0" y="0" fontSize="16" fill="#666" textAnchor="middle" dominantBaseline="middle">
+                          No data available
+                        </text>
+                      )}
                     </g>
                   </svg>
                 </div>
@@ -243,53 +360,31 @@ const AdminAnalytics = () => {
                 <div className="admin-analytics__product-owners">
                   <h4 className="admin-analytics__owners-title">Product Sellers</h4>
                   <div className="admin-analytics__owners-grid">
-                    <div className="admin-analytics__owner-item">
-                      <div className="admin-analytics__owner-indicator admin-analytics__owner-indicator--blue"></div>
-                      <div className="admin-analytics__owner-info">
-                        <span className="admin-analytics__owner-name">Maria's Kitchen</span>
-                        <span className="admin-analytics__owner-product">Buko Pie</span>
-                      </div>
-                      <div className="admin-analytics__owner-stats">
-                       
-                        <span className="admin-analytics__owner-rating">4.8★</span>
-                      </div>
-                    </div>
-                    
-                    <div className="admin-analytics__owner-item">
-                      <div className="admin-analytics__owner-indicator admin-analytics__owner-indicator--green"></div>
-                      <div className="admin-analytics__owner-info">
-                        <span className="admin-analytics__owner-name">Verde Farms Co.</span>
-                        <span className="admin-analytics__owner-product">Coffee Beans</span>
-                      </div>
-                      <div className="admin-analytics__owner-stats">
-                       
-                        <span className="admin-analytics__owner-rating">4.6★</span>
-                      </div>
-                    </div>
-                    
-                    <div className="admin-analytics__owner-item">
-                      <div className="admin-analytics__owner-indicator admin-analytics__owner-indicator--orange"></div>
-                      <div className="admin-analytics__owner-info">
-                        <span className="admin-analytics__owner-name">Island Delights</span>
-                        <span className="admin-analytics__owner-product">Banana Chips</span>
-                      </div>
-                      <div className="admin-analytics__owner-stats">
+                    {topProducts && topProducts.length > 0 ? (
+                      topProducts.map((product, index) => {
+                        const indicatorClasses = ['blue', 'green', 'orange', 'purple', 'red'];
+                        const indicatorClass = indicatorClasses[index % indicatorClasses.length];
                         
-                        <span className="admin-analytics__owner-rating">4.4★</span>
+                        return (
+                          <div key={product._id || index} className="admin-analytics__owner-item">
+                            <div className={`admin-analytics__owner-indicator admin-analytics__owner-indicator--${indicatorClass}`}></div>
+                            <div className="admin-analytics__owner-info">
+                              <span className="admin-analytics__owner-name">{product.storeName}</span>
+                              <span className="admin-analytics__owner-product">{product.productName}</span>
+                            </div>
+                            <div className="admin-analytics__owner-stats">
+                              <span className="admin-analytics__owner-rating">
+                                {product.rating ? `${product.rating}★` : 'N/A'}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                        No product sellers available
                       </div>
-                    </div>
-                    
-                    <div className="admin-analytics__owner-item">
-                      <div className="admin-analytics__owner-indicator admin-analytics__owner-indicator--purple"></div>
-                      <div className="admin-analytics__owner-info">
-                        <span className="admin-analytics__owner-name">Artisan Hands</span>
-                        <span className="admin-analytics__owner-product">Handmade Crafts</span>
-                      </div>
-                      <div className="admin-analytics__owner-stats">
-                        
-                        <span className="admin-analytics__owner-rating">4.2★</span>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>

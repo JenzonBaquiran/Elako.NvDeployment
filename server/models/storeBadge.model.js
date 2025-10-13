@@ -33,12 +33,12 @@ const storeBadgeSchema = new mongoose.Schema(
       },
       profileViews: {
         current: { type: Number, default: 0 },
-        required: { type: Number, default: 200 },
+        required: { type: Number, default: 50 },
         met: { type: Boolean, default: false },
       },
       blogViews: {
         current: { type: Number, default: 0 },
-        required: { type: Number, default: 100 },
+        required: { type: Number, default: 20 },
         met: { type: Boolean, default: false },
       },
     },

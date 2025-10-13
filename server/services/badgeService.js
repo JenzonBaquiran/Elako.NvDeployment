@@ -24,9 +24,9 @@ class BadgeService {
 
       // Calculate store rating
       const store = await MSME.findById(storeId);
-      if (store && store.rating) {
-        badge.criteria.storeRating.current = store.rating;
-        badge.criteria.storeRating.met = store.rating >= 4.5;
+      if (store && store.averageRating) {
+        badge.criteria.storeRating.current = store.averageRating;
+        badge.criteria.storeRating.met = store.averageRating >= 4.5;
       }
 
       // Calculate product ratings average
@@ -50,17 +50,18 @@ class BadgeService {
         },
       });
       badge.criteria.profileViews.current = profileViews;
-      badge.criteria.profileViews.met = profileViews >= 200;
+      badge.criteria.profileViews.met =
+        profileViews >= badge.criteria.profileViews.required;
 
       // Calculate blog views for store's blog posts
       const storeBlogPosts = await MSMEBlogPost.find({ msmeId: storeId });
-      const blogPostIds = storeBlogPosts.map((post) => post._id);
 
-      // Note: Current PageView model doesn't track blog views,
-      // so we'll set this to 0 for now or implement blog view tracking separately
-      const blogViews = 0;
+      // For now, use blog post count * 10 as a proxy for blog views
+      // In the future, implement proper blog view tracking
+      const blogViews = storeBlogPosts.length * 10;
       badge.criteria.blogViews.current = blogViews;
-      badge.criteria.blogViews.met = blogViews >= 100;
+      badge.criteria.blogViews.met =
+        blogViews >= badge.criteria.blogViews.required;
 
       // Check if all criteria are met
       badge.checkCriteria();

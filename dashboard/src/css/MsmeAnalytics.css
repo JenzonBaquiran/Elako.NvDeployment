@@ -234,6 +234,7 @@
   color: #333;
   margin: 0 0 20px 0;
   font-family: 'Poppins', sans-serif;
+  text-align: center;
 }
 
 .msme-analytics__insights-list {
@@ -244,11 +245,14 @@
 
 .msme-analytics__insight-item {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 16px;
   padding: 16px;
   background: #f8f9fa;
   border-radius: 8px;
   transition: all 0.2s ease;
+  text-align: center;
 }
 
 .msme-analytics__insight-item:hover {
@@ -283,12 +287,21 @@
   color: white;
 }
 
+.msme-analytics__insight-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
 .msme-analytics__insight-content h4 {
   font-size: 14px;
   font-weight: 600;
   color: #333;
   margin: 0 0 4px 0;
   font-family: 'Poppins', sans-serif;
+  text-align: center;
 }
 
 .msme-analytics__insight-content p {
@@ -297,6 +310,7 @@
   margin: 0;
   line-height: 1.4;
   font-family: 'Poppins', sans-serif;
+  text-align: center;
 }
 
 /* Mobile responsiveness */

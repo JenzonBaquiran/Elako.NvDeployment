@@ -170,7 +170,7 @@ body {
 }
 
 .email-popup-content {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ffffff;
   border-radius: 12px;
   max-width: 500px;
   width: 90%;
@@ -180,12 +180,12 @@ body {
 }
 
 .email-popup-header {
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #313131 0%, #404040 100%);
   padding: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .email-popup-header h3 {
@@ -217,7 +217,7 @@ body {
 
 .email-popup-body {
   padding: 30px 20px;
-  color: white;
+  color: #313131;
 }
 
 .email-popup-body p {
@@ -234,26 +234,27 @@ body {
 .email-popup-footer {
   padding: 20px;
   text-align: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
 }
 
 .email-popup-btn {
-  background: white;
-  color: #667eea;
+  background: linear-gradient(135deg, #313131 0%, #404040 100%);
+  color: white;
   border: none;
   padding: 12px 30px;
-  border-radius: 25px;
+  border-radius: 8px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(49, 49, 49, 0.3);
 }
 
 .email-popup-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-  background: #f8f9ff;
+  background: linear-gradient(135deg, #7ed957 0%, #6bc544 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(126, 217, 87, 0.4);
 }
 
 @keyframes fadeIn {
@@ -288,7 +289,7 @@ body {
 }
 
 .terms-popup-content {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: #ffffff;
   border-radius: 12px;
   max-width: 600px;
   width: 90%;
@@ -301,12 +302,12 @@ body {
 }
 
 .terms-popup-header {
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #313131 0%, #404040 100%);
   padding: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid #e0e0e0;
   flex-shrink: 0;
 }
 
@@ -339,7 +340,7 @@ body {
 
 .terms-popup-body {
   padding: 20px;
-  color: white;
+  color: #313131;
   overflow-y: auto;
   flex-grow: 1;
 }
@@ -350,42 +351,46 @@ body {
 
 .terms-section h4 {
   margin: 0 0 8px 0;
-  color: white;
+  color: #313131;
   font-size: 1.1rem;
   font-weight: 600;
+  border-bottom: 2px solid #7ed957;
+  padding-bottom: 4px;
+  display: inline-block;
 }
 
 .terms-section p {
   margin: 0;
   line-height: 1.6;
   font-size: 0.95rem;
-  opacity: 0.95;
+  color: #313131;
 }
 
 .terms-popup-footer {
   padding: 20px;
   text-align: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
   flex-shrink: 0;
 }
 
 .terms-popup-btn {
-  background: white;
-  color: #4facfe;
+  background: linear-gradient(135deg, #313131 0%, #404040 100%);
+  color: white;
   border: none;
   padding: 12px 30px;
-  border-radius: 25px;
+  border-radius: 8px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(49, 49, 49, 0.3);
 }
 
 .terms-popup-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-  background: #f8f9ff;
+  background: linear-gradient(135deg, #7ed957 0%, #6bc544 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(126, 217, 87, 0.4);
 }
 
 /* Mobile responsive popup */
@@ -461,14 +466,14 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 20px 25px;
-  border-bottom: 1px solid #eee;
-  background-color: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+  background: linear-gradient(135deg, #313131 0%, #404040 100%);
   border-radius: 12px 12px 0 0;
 }
 
 .about-popup-header h3 {
   margin: 0;
-  color: #333;
+  color: white;
   font-size: 1.4rem;
   font-weight: 600;
 }
@@ -478,7 +483,7 @@ body {
   border: none;
   font-size: 28px;
   font-weight: bold;
-  color: #666;
+  color: white;
   cursor: pointer;
   padding: 0;
   width: 30px;
@@ -491,8 +496,8 @@ body {
 }
 
 .about-popup-close:hover {
-  background-color: #f0f0f0;
-  color: #333;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
 }
 
 .about-popup-body {
@@ -509,11 +514,11 @@ body {
 }
 
 .about-section h4 {
-  color: #333;
+  color: #313131;
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 10px;
-  border-bottom: 2px solid #007bff;
+  border-bottom: 2px solid #7ed957;
   padding-bottom: 5px;
 }
 
@@ -527,6 +532,9 @@ body {
 .about-section ul {
   color: #555;
   font-size: 0.95rem;
+  list-style: none;
+  padding-left: 0;
+  text-align: center;
 }
 
 .about-section ul li {
@@ -543,19 +551,22 @@ body {
 }
 
 .about-popup-btn {
-  background-color: #007bff;
+  background: linear-gradient(135deg, #313131 0%, #404040 100%);
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
+  padding: 12px 30px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(49, 49, 49, 0.3);
 }
 
 .about-popup-btn:hover {
-  background-color: #0056b3;
+  background: linear-gradient(135deg, #7ed957 0%, #6bc544 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(126, 217, 87, 0.4);
 }
 
 /* Mobile responsiveness for About popup */

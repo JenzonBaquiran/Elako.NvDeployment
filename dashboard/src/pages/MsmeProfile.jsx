@@ -135,15 +135,15 @@ const MsmeProfile = () => {
           ...businessData.profile
         }));
         setIsEditing(false);
-        console.log('Business information updated successfully');
+        showNotification('success', 'Success', 'Business information updated successfully!');
       } else {
         const error = personalData.error || businessData.error || 'Failed to update information';
         console.error('Failed to update information:', error);
-        alert(error);
+        showNotification('error', 'Error', error);
       }
     } catch (error) {
       console.error('Error updating information:', error);
-      alert('Network error. Please try again.');
+      showNotification('error', 'Network Error', 'Network error. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -155,13 +155,13 @@ const MsmeProfile = () => {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      showNotification('error', 'Invalid File Type', 'Please select an image file');
       return;
     }
 
     // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB');
+      showNotification('error', 'File Too Large', 'File size must be less than 5MB');
       return;
     }
 
@@ -184,14 +184,14 @@ const MsmeProfile = () => {
           storeLogo: data.storeLogo
         }));
         console.log('Store logo updated successfully');
-        alert('Store logo updated successfully!');
+        showNotification('success', 'Success', 'Store logo updated successfully!');
       } else {
         console.error('Failed to update store logo:', data.error);
-        alert(data.error || 'Failed to update store logo');
+        showNotification('error', 'Upload Failed', data.error || 'Failed to update store logo');
       }
     } catch (error) {
       console.error('Error uploading store logo:', error);
-      alert('Network error. Please try again.');
+      showNotification('error', 'Network Error', 'Network error. Please try again.');
     } finally {
       setUploadingLogo(false);
       // Clear the file input

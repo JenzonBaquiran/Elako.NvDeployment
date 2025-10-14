@@ -11,7 +11,6 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import InfoIcon from '@mui/icons-material/Info';
 import SecurityIcon from '@mui/icons-material/Security';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 import SaveIcon from '@mui/icons-material/Save';
@@ -261,11 +260,6 @@ const CustomerProfile = () => {
     console.log('Change password');
   };
 
-  const handleNotificationSettings = () => {
-    // Navigate to notification settings
-    console.log('Notification preferences');
-  };
-
   const handleDeleteAccount = () => {
     // Handle account deletion with confirmation
     if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
@@ -344,52 +338,12 @@ const CustomerProfile = () => {
     }
   };
 
-  const handleTestTopFanPopup = async () => {
-    console.log('Testing TOP FAN popup...');
-    setBadgeLoading(true);
-    
-    try {
-      // Force recalculate badge
-      await checkTopFanStatus();
-      
-      // Force show popup for testing (bypass localStorage check)
-      setTimeout(() => {
-        if (topFanBadgeData?.isActive) {
-          console.log('Forcing TOP FAN congratulations popup for testing');
-          setShowTopFanCongratulations(true);
-        } else {
-          alert('No active TOP FAN badge found. Customer needs to meet criteria first.');
-        }
-      }, 1000);
-    } catch (error) {
-      console.error('Error testing TOP FAN popup:', error);
-      alert('Error testing TOP FAN popup. Check console for details.');
-    } finally {
-      setBadgeLoading(false);
-    }
-  };
-
-
-
   const accountSettings = [
     { 
       title: 'Change Password', 
       icon: <SecurityIcon />, 
       action: handleChangePassword,
       color: '#7ed957'
-    },
-    { 
-      title: 'Notification Preferences', 
-      icon: <NotificationsIcon />, 
-      action: handleNotificationSettings,
-      color: '#7ed957'
-    },
-    { 
-      title: 'Test TOP FAN Badge', 
-      icon: <span>👑</span>, 
-      action: handleTestTopFanPopup,
-      color: '#ffd700',
-      loading: badgeLoading
     },
     { 
       title: 'Delete Account', 

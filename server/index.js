@@ -330,11 +330,29 @@ app.get("/api/customers/:id/profile", async (req, res) => {
     const reviewsGiven =
       reviewCount.length > 0 ? reviewCount[0].totalReviews : 0;
 
+    // Calculate valid favorite products (only count products that still exist)
+    let validFavoriteCount = 0;
+    if (customer.favorites && customer.favorites.length > 0) {
+      const validFavorites = await Product.find({
+        _id: { $in: customer.favorites }
+      });
+      validFavoriteCount = validFavorites.length;
+    }
+
+    // Calculate valid followed stores (only count MSMEs that still exist)
+    let validFollowingCount = 0;
+    if (customer.following && customer.following.length > 0) {
+      const validFollowing = await MSME.find({
+        _id: { $in: customer.following }
+      });
+      validFollowingCount = validFollowing.length;
+    }
+
     // Calculate additional profile statistics
     const stats = {
       reviewsGiven: reviewsGiven,
-      followedStores: customer.following ? customer.following.length : 0,
-      favoriteProducts: customer.favorites ? customer.favorites.length : 0,
+      followedStores: validFollowingCount,
+      favoriteProducts: validFavoriteCount,
       memberSince: customer.createdAt
         ? new Date(customer.createdAt).getFullYear()
         : new Date().getFullYear(),

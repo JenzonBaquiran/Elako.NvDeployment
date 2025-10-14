@@ -281,6 +281,21 @@
 .user-management__table-wrapper {
   overflow-x: auto;
   overflow-y: visible;
+  position: relative;
+  z-index: 1;
+  padding-bottom: 60px; /* Add space for dropdowns at bottom */
+}
+
+/* Ensure table doesn't create stacking context issues */
+.user-management__table {
+  position: relative;
+  z-index: auto;
+}
+
+/* Ensure table section has enough space for dropdowns */
+.user-management__table-section {
+  overflow: visible;
+  padding-bottom: 40px;
 }
 
 .user-management__table {
@@ -288,6 +303,43 @@
   border-collapse: collapse;
   table-layout: fixed;
   overflow: hidden;
+}
+
+/* Table column widths */
+.user-management__table th:nth-child(1), /* User */
+.user-management__table td:nth-child(1) {
+  width: 25%;
+  min-width: 200px;
+}
+
+.user-management__table th:nth-child(2), /* Type */
+.user-management__table td:nth-child(2) {
+  width: 12%;
+  min-width: 100px;
+}
+
+.user-management__table th:nth-child(3), /* Status */
+.user-management__table td:nth-child(3) {
+  width: 15%;
+  min-width: 120px;
+}
+
+.user-management__table th:nth-child(4), /* Join Date */
+.user-management__table td:nth-child(4) {
+  width: 15%;
+  min-width: 120px;
+}
+
+.user-management__table th:nth-child(5), /* Activity */
+.user-management__table td:nth-child(5) {
+  width: 15%;
+  min-width: 120px;
+}
+
+.user-management__table th:nth-child(6), /* Actions */
+.user-management__table td:nth-child(6) {
+  width: 18%;
+  min-width: 100px;
 }
 
 .user-management__table th {
@@ -303,6 +355,11 @@
   padding: 12px 16px;
   border-bottom: 1px solid #eee;
   font-family: 'Poppins', sans-serif;
+  overflow: visible;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  vertical-align: top;
 }
 
 .user-management__user-cell {
@@ -340,6 +397,8 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  text-align: left;
+  align-items: flex-start;
 }
 
 .user-management__user-name {
@@ -347,12 +406,14 @@
   font-weight: 600;
   font-family: 'Poppins', sans-serif;
   font-size: 14px;
+  text-align: left;
 }
 
 .user-management__user-email {
   color: #6b7280;
   font-size: 12px;
   font-family: 'Poppins', sans-serif;
+  text-align: left;
 }
 
 .user-management__user-username {
@@ -361,6 +422,7 @@
   font-family: 'Poppins', sans-serif;
   font-style: italic;
   margin-top: 2px;
+  text-align: left;
 }
 
 .user-management__type-badge {
@@ -448,7 +510,7 @@
   color: #fff;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
   transition: all 0.2s ease;
   display: flex;
@@ -456,12 +518,38 @@
   justify-content: center;
   width: 32px;
   height: 32px;
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+  line-height: 1;
+  text-align: center;
 }
 
 .user-management__more-btn:hover {
   background: #7ed957;
   border-color: #7ed957;
   transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(126, 217, 87, 0.3);
+}
+
+.user-management__more-btn:focus {
+  background: #7ed957;
+  border-color: #7ed957;
+  outline: 2px solid rgba(126, 217, 87, 0.3);
+  outline-offset: 2px;
+}
+
+.user-management__more-btn:active {
+  background: #6bc74a;
+  border-color: #6bc74a;
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(126, 217, 87, 0.4);
+}
+
+/* When dropdown is active */
+.user-management__actions.active .user-management__more-btn {
+  background: #7ed957;
+  border-color: #7ed957;
   box-shadow: 0 2px 8px rgba(126, 217, 87, 0.3);
 }
 
@@ -473,9 +561,9 @@
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  z-index: 1001;
+  z-index: 999999 !important;
   min-width: 140px;
-  overflow: hidden;
+  overflow: visible;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
@@ -486,26 +574,80 @@
 /* Ensure dropdown appears above table content */
 .user-management__actions {
   position: relative;
-  z-index: 10;
+  z-index: 999998 !important;
+  isolation: isolate;
+}
+
+/* Ensure table rows don't interfere with dropdowns */
+.user-management__table tbody tr {
+  position: relative;
+  z-index: 1;
+}
+
+.user-management__table tbody tr:hover {
+  z-index: 2;
+}
+
+/* Force dropdown to be on top layer */
+.user-management__actions .user-management__dropdown {
+  position: absolute !important;
+  z-index: 9999999 !important;
 }
 
 /* Alternative positioning when dropdown would be cut off */
 .user-management__dropdown--up {
-  top: auto;
-  bottom: 100%;
-  margin-top: 0;
-  margin-bottom: 8px;
-  transform: translateY(10px);
+  top: auto !important;
+  bottom: 100% !important;
+  margin-top: 0 !important;
+  margin-bottom: 8px !important;
+  transform: translateY(10px) !important;
 }
 
 .user-management__dropdown--up.show {
-  transform: translateY(0);
+  transform: translateY(0) !important;
+}
+
+/* Force dropdown to stay within viewport */
+.user-management__dropdown {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Ensure dropdown appears above table when at bottom */
+.user-management__table tbody tr:last-child .user-management__dropdown,
+.user-management__table tbody tr:nth-last-child(2) .user-management__dropdown,
+.user-management__table tbody tr:nth-last-child(3) .user-management__dropdown {
+  top: auto !important;
+  bottom: 100% !important;
+  margin-top: 0 !important;
+  margin-bottom: 8px !important;
+  transform: translateY(10px) !important;
+}
+
+.user-management__table tbody tr:last-child .user-management__dropdown.show,
+.user-management__table tbody tr:nth-last-child(2) .user-management__dropdown.show,
+.user-management__table tbody tr:nth-last-child(3) .user-management__dropdown.show {
+  transform: translateY(0) !important;
+}
+
+/* Additional safety for single row tables */
+.user-management__table tbody:has(tr:only-child) .user-management__dropdown {
+  top: auto !important;
+  bottom: 100% !important;
+  margin-top: 0 !important;
+  margin-bottom: 8px !important;
+  transform: translateY(10px) !important;
+}
+
+.user-management__table tbody:has(tr:only-child) .user-management__dropdown.show {
+  transform: translateY(0) !important;
 }
 
 .user-management__dropdown.show {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+  z-index: 9999999 !important;
 }
 
 .user-management__dropdown-item {

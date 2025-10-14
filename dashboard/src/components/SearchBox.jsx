@@ -261,21 +261,7 @@ const SearchBox = ({ placeholder = "Search for services, products, or stores... 
                   </div>
                 </div>
               ))}
-              
-              {query && (
-                <div 
-                  className="search-suggestion-item search-suggestion-disabled"
-                >
-                  <div className="search-suggestion-icon">
-                    <SearchIcon className="suggestion-icon" />
-                  </div>
-                  <div className="search-suggestion-content">
-                    <div className="search-suggestion-title">
-                      Search results temporarily unavailable
-                    </div>
-                  </div>
-                </div>
-              )}
+
             </>
           ) : query.length > 0 ? (
             <div className="search-suggestions-empty">

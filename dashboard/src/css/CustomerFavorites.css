@@ -378,7 +378,9 @@
 .customer-favorites__stores-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 40px!important;  
+  gap: 2rem !important;
+  row-gap: 4em !important;
+  column-gap: 2rem !important;
 }
 
 .customer-favorites__store-card {
@@ -559,10 +561,6 @@
   gap: 40px;
 }
 
-.customer-favorites__stores-grid {
-  gap: 40px;
-}
-
 @media (max-width: 768px) {
   .customer-favorites__content {
     gap: 28px;
@@ -570,7 +568,9 @@
 
   .customer-favorites__products-grid,
   .customer-favorites__stores-grid {
-    gap: 36px;
+    gap: 1.5rem !important;
+    row-gap: 1.5rem !important;
+    column-gap: 1.5rem !important;
   }
 
   .customer-favorites__header-content {

@@ -33,7 +33,7 @@
 }
 
 .terms-agreement-modal__header {
-  background: linear-gradient(135deg, #7ed957 0%, #6bc544 100%);
+  background: linear-gradient(135deg, #313131 0%, #404040 100%);
   color: white;
   padding: 20px 24px;
   display: flex;
@@ -193,19 +193,19 @@
 }
 
 .terms-agreement-modal__agree-btn {
-  background: linear-gradient(135deg, #7ed957 0%, #6bc544 100%) !important;
+  background: linear-gradient(135deg, #313131 0%, #404040 100%) !important;
   color: white !important;
   padding: 10px 24px;
   border-radius: 8px;
   text-transform: none;
   font-weight: 600;
   font-family: 'Poppins', sans-serif;
-  box-shadow: 0 4px 12px rgba(126, 217, 87, 0.3);
+  box-shadow: 0 4px 12px rgba(49, 49, 49, 0.3);
   transition: all 0.3s ease;
 }
 
 .terms-agreement-modal__agree-btn:hover {
-  background: linear-gradient(135deg, #6bc544 0%, #5bb332 100%) !important;
+  background: linear-gradient(135deg, #7ed957 0%, #6bc544 100%) !important;
   box-shadow: 0 6px 16px rgba(126, 217, 87, 0.4);
   transform: translateY(-1px);
 }

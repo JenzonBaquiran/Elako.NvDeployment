@@ -90,6 +90,14 @@ const CustomerFavorites = () => {
     setFavoriteProducts(prev => prev.filter(product => product._id !== productId));
   };
 
+  const handleFavoriteStatusChanged = (productId, isFavorite, action) => {
+    if (!isFavorite && action === 'removed') {
+      handleFavoriteRemoved(productId);
+    }
+    // If needed in the future, we could handle adding products here too
+    // though it's uncommon to add favorites from the favorites page
+  };
+
   const handleSidebarToggle = (state) => {
     setSidebarState(state);
   };
@@ -417,6 +425,9 @@ const CustomerFavorites = () => {
                             className="customer-favorites__favorite-btn"
                             size="medium"
                             variant="overlay"
+                            onToggle={(isFavorite, action) => {
+                              handleFavoriteStatusChanged(product._id, isFavorite, action);
+                            }}
                           />
                         </div>
                         <div className="customer-favorites__product-info">

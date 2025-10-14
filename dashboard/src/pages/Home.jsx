@@ -76,7 +76,12 @@ function Home() {
   const fetchHotPicks = async () => {
     try {
       // Fetch hot picks products with 4.5-5.0 rating, limit to 4
-      const hotPicksResponse = await fetch('http://localhost:1337/api/hot-picks?limit=4');
+      // Include customer ID if user is logged in for favorite status
+      const url = user && user._id 
+        ? `http://localhost:1337/api/hot-picks?limit=4&customerId=${user._id}`
+        : 'http://localhost:1337/api/hot-picks?limit=4';
+      
+      const hotPicksResponse = await fetch(url);
       const hotPicksData = await hotPicksResponse.json();
       
       if (hotPicksData.success) {

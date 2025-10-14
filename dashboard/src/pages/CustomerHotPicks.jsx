@@ -20,7 +20,7 @@ function CustomerHotPicks() {
 
   useEffect(() => {
     fetchAllHotPicks();
-  }, [currentPage]);
+  }, [currentPage, user]);
 
   // Scroll to top when component mounts
   useEffect(() => {
@@ -32,7 +32,12 @@ function CustomerHotPicks() {
       setLoading(true);
       console.log('Fetching all hot picks, page:', currentPage);
       
-      const response = await fetch(`http://localhost:1337/api/hot-picks/all?page=${currentPage}&limit=12`);
+      // Include customer ID if user is logged in for favorite status
+      const url = user && user._id 
+        ? `http://localhost:1337/api/hot-picks/all?page=${currentPage}&limit=12&customerId=${user._id}`
+        : `http://localhost:1337/api/hot-picks/all?page=${currentPage}&limit=12`;
+      
+      const response = await fetch(url);
       const data = await response.json();
       
       if (data.success) {

@@ -2297,7 +2297,7 @@ app.post("/api/products", upload.array("pictures", 10), async (req, res) => {
 // Get all products
 app.get("/api/products", async (req, res) => {
   try {
-    const { msmeId, category, availability } = req.query;
+    const { msmeId, category, availability, customerId } = req.query;
 
     let filter = {};
     if (msmeId) filter.msmeId = msmeId;
@@ -2309,9 +2309,15 @@ app.get("/api/products", async (req, res) => {
       "businessName username"
     );
 
+    // Add favorite status to products
+    const productsWithFavoriteStatus = await addFavoriteStatusToProducts(
+      products,
+      customerId
+    );
+
     res.json({
       success: true,
-      products,
+      products: productsWithFavoriteStatus,
     });
   } catch (err) {
     console.error("Error fetching products:", err);
@@ -7226,6 +7232,26 @@ const addFollowStatusToStores = async (stores, customerId) => {
   }));
 };
 
+// Helper function to add favorite status to products
+const addFavoriteStatusToProducts = async (products, customerId) => {
+  let favoriteProductIds = [];
+  if (customerId) {
+    try {
+      const customer = await Customer.findById(customerId);
+      if (customer && customer.favorites) {
+        favoriteProductIds = customer.favorites.map((id) => id.toString());
+      }
+    } catch (error) {
+      console.error("Error fetching customer favorite status:", error);
+    }
+  }
+
+  return products.map((product) => ({
+    ...product,
+    isFavorite: favoriteProductIds.includes(product._id.toString()),
+  }));
+};
+
 // --- Top Stores Routes ---
 // Get top 6 stores with 4.5-5.0 average rating
 app.get("/api/top-stores", async (req, res) => {
@@ -7618,6 +7644,7 @@ app.get("/api/top-stores/all", async (req, res) => {
 app.get("/api/hot-picks", async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 4;
+    const customerId = req.query.customerId; // Optional customer ID for favorite status
 
     // Fetch ALL products with 4.5-5.0 average rating, available, and visible
     const allHotProducts = await Product.find({
@@ -7689,10 +7716,16 @@ app.get("/api/hot-picks", async (req, res) => {
       };
     });
 
+    // Add favorite status to products
+    const productsWithFavoriteStatus = await addFavoriteStatusToProducts(
+      formattedProducts,
+      customerId
+    );
+
     res.json({
       success: true,
-      products: formattedProducts,
-      total: formattedProducts.length,
+      products: productsWithFavoriteStatus,
+      total: productsWithFavoriteStatus.length,
       message:
         limit === 4
           ? "Top 4 hot picks with 4.5-5.0 rating"
@@ -7712,6 +7745,7 @@ app.get("/api/hot-picks/all", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12; // Default to 12 per page for better pagination
+    const customerId = req.query.customerId; // Optional customer ID for favorite status
     const skip = (page - 1) * limit;
 
     // Get total count of top-rated products
@@ -7830,9 +7864,15 @@ app.get("/api/hot-picks/all", async (req, res) => {
 
     const totalPages = Math.ceil(totalCount / limit);
 
+    // Add favorite status to products
+    const productsWithFavoriteStatus = await addFavoriteStatusToProducts(
+      formattedProducts,
+      customerId
+    );
+
     res.json({
       success: true,
-      products: formattedProducts,
+      products: productsWithFavoriteStatus,
       pagination: {
         currentPage: page,
         totalPages: totalPages,

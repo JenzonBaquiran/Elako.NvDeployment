@@ -40,103 +40,155 @@ const MsmeReviews = () => {
   const [selectedRating, setSelectedRating] = useState('all');
   const [sortBy, setSortBy] = useState('name');
 
-  // Fetch store reviews and products on component mount
+  // Fetch store products on component mount (reviews are embedded in products)
   useEffect(() => {
+    console.log('=== USER AUTH STATUS ===');
+    console.log('isAuthenticated:', isAuthenticated);
+    console.log('userType:', userType);
+    console.log('user:', user);
+    console.log('user._id:', user?._id);
+    console.log('user.businessName:', user?.businessName);
+    
     if (isAuthenticated && userType === 'msme' && user?._id) {
-      fetchStoreReviews();
       fetchStoreProducts();
+    } else {
+      console.log('Not fetching products - authentication check failed');
     }
   }, [isAuthenticated, userType, user]);
 
-  const fetchStoreReviews = async () => {
-    setLoading(true);
-    try {
-      console.log('Fetching reviews for store:', user._id);
-      const response = await fetch(`http://localhost:1337/api/stores/${user._id}/reviews`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+  // Calculate stats from products with feedback (like ProductDetails does)
+  const calculateStatsFromProducts = (products) => {
+    let allReviews = [];
+    
+    // Extract all feedback from all products
+    products.forEach(product => {
+      if (product.feedback && Array.isArray(product.feedback)) {
+        product.feedback.forEach(feedback => {
+          allReviews.push({
+            ...feedback,
+            productId: product._id,
+            productName: product.productName
+          });
+        });
       }
+    });
+
+    console.log('All reviews extracted from products:', allReviews.length);
+    
+    // Calculate overall stats
+    const stats = {
+      totalReviews: allReviews.length,
+      averageRating: 0,
+      ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+    };
+
+    if (allReviews.length > 0) {
+      const totalRating = allReviews.reduce((sum, review) => sum + review.rating, 0);
+      stats.averageRating = Math.round((totalRating / allReviews.length) * 10) / 10;
       
-      const data = await response.json();
-      console.log('Store reviews API response:', data);
-      
-      if (data.success) {
-        console.log('Reviews found:', data.reviews ? data.reviews.length : 0);
-        setReviews(data.reviews || []);
-        calculateStats(data.reviews || []);
-      } else {
-        console.log('API error:', data.error);
-        // Don't show error for no reviews, it's normal
-        if (!data.error.includes('No products') && !data.error.includes('No reviews')) {
-          showError('Failed to load your store reviews', 'Error');
+      // Count rating distribution
+      allReviews.forEach(review => {
+        if (review.rating >= 1 && review.rating <= 5) {
+          stats.ratingDistribution[review.rating]++;
         }
-      }
-    } catch (error) {
-      console.error('Error fetching store reviews:', error);
-      showError('Failed to load your store reviews', 'Error');
-    } finally {
-      setLoading(false);
+      });
     }
+
+    setStats(stats);
+    setReviews(allReviews);
+    return allReviews;
   };
 
   const fetchStoreProducts = async () => {
     setLoadingProducts(true);
     try {
-      console.log('Fetching products for store:', user._id);
-      const response = await fetch(`http://localhost:1337/api/products?msmeId=${user._id}`);
+      console.log('=== USER DEBUG INFO ===');
+      console.log('Full user object:', user);
+      console.log('user._id:', user._id);
+      console.log('user.id:', user.id);
+      console.log('user.username:', user.username);
+      console.log('user.businessName:', user.businessName);
+      console.log('========================');
+      
+      // Try MongoDB _id first (should be: 68ded9143255b574542dacdd)
+      let userIdToUse = user._id || user.id;
+      console.log('First attempt with ID:', userIdToUse);
+      
+      let response = await fetch(`http://localhost:1337/api/products?msmeId=${userIdToUse}`);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const data = await response.json();
+      let data = await response.json();
+      
+      // If no products found and we have a different ID to try
+      if (data.success && (!data.products || data.products.length === 0) && user._id !== user.id) {
+        console.log('No products found with first ID, trying alternate ID:', user.id);
+        userIdToUse = user.id;
+        const altResponse = await fetch(`http://localhost:1337/api/products?msmeId=${userIdToUse}`);
+        if (altResponse.ok) {
+          data = await altResponse.json();
+        }
+      }
       console.log('Store products API response:', data);
       
-      if (data.success) {
+      if (data.success && data.products) {
         console.log('Products found:', data.products.length);
-        // Log feedback data for debugging
-        data.products.forEach(product => {
-          console.log(`Product: ${product.productName}, Feedback:`, product.feedback);
+        console.log('Raw API response products:', JSON.stringify(data.products, null, 2));
+        
+        // Log product data for debugging
+        data.products.forEach((product, index) => {
+          console.log(`\n=== PRODUCT ${index + 1} DEBUG ===`);
+          console.log('Raw product object keys:', Object.keys(product));
+          console.log('productName value:', product.productName);
+          console.log('productName type:', typeof product.productName);
+          console.log('Full product:', product);
+          console.log(`Product: ${product.productName || 'MISSING NAME'}`);
+          console.log(`- ID: ${product._id}`);
+          console.log(`- Availability: ${product.availability}`);
+          console.log(`- Price: ${product.price}`);
+          console.log(`- Category: ${product.category}`);
+          console.log(`- Description: ${product.description ? product.description.substring(0, 50) + '...' : 'No description'}`);
+          console.log(`- Feedback count: ${product.feedback ? product.feedback.length : 0}`);
+          console.log('==============================\n');
         });
+        console.log('🎯 ABOUT TO SET PRODUCTS:');
+        console.log('data.products:', data.products);
+        console.log('data.products length:', data.products.length);
+        
         setProducts(data.products);
+        
+        console.log('🎯 PRODUCTS SET! Current products state will be:', data.products);
+        
+        // Calculate stats from the fetched products with embedded feedback
+        calculateStatsFromProducts(data.products);
       } else {
-        console.log('API error:', data.error);
-        showError('Failed to load your store products', 'Error');
+        console.log('No products found or API error:', data.error);
+        setProducts([]); // Set empty array instead of showing error
+        setStats({
+          totalReviews: 0,
+          averageRating: 0,
+          ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+        });
+        setReviews([]);
       }
     } catch (error) {
       console.error('Error fetching store products:', error);
       showError('Failed to load your store products', 'Error');
-    } finally {
-      setLoadingProducts(false);
-    }
-  };
-
-  const calculateStats = (reviewsData) => {
-    if (!reviewsData || reviewsData.length === 0) {
+      setProducts([]);
       setStats({
         totalReviews: 0,
         averageRating: 0,
         ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
       });
-      return;
+      setReviews([]);
+    } finally {
+      setLoadingProducts(false);
     }
-
-    const totalReviews = reviewsData.length;
-    const totalRating = reviewsData.reduce((sum, review) => sum + review.rating, 0);
-    const averageRating = totalRating / totalReviews;
-    
-    const ratingDistribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    reviewsData.forEach(review => {
-      ratingDistribution[review.rating]++;
-    });
-
-    setStats({
-      totalReviews,
-      averageRating: Math.round(averageRating * 10) / 10,
-      ratingDistribution
-    });
   };
+
+
 
   const handleSidebarToggle = (state) => {
     setSidebarState(state);
@@ -167,9 +219,16 @@ const MsmeReviews = () => {
     navigate(`/product/${productId}`);
   };
 
-  const getProductImageUrl = (imagePath) => {
-    if (imagePath) {
-      return `http://localhost:1337/uploads/${imagePath}`;
+  const getProductImageUrl = (product) => {
+    if (!product) return null;
+    
+    // Handle new multiple images format (like ProductDetails)
+    if (product.pictures && product.pictures.length > 0) {
+      return `http://localhost:1337/uploads/${product.pictures[0]}`;
+    }
+    // Fallback to single picture format
+    else if (product.picture) {
+      return `http://localhost:1337/uploads/${product.picture}`;
     }
     return null;
   };
@@ -192,30 +251,28 @@ const MsmeReviews = () => {
   };
 
   const handleProductClick = (product) => {
-    // Get reviews for this specific product from both sources
-    let productReviews = [];
+    console.log('Product clicked:', product);
+    console.log('Product availability:', product.availability);
+    console.log('Product feedback:', product.feedback);
     
-    // First, try to get reviews from the global reviews array (from store reviews API)
-    const globalProductReviews = reviews.filter(review => 
-      review.productId && review.productId.toString() === product._id.toString()
-    );
-    
-    // Then, get reviews from the product's feedback array
-    const productFeedbackReviews = product.feedback ? product.feedback.map(feedback => ({
-      _id: feedback._id || `feedback_${Date.now()}_${Math.random()}`,
+    // Get reviews from product's embedded feedback array (like ProductDetails does)
+    const productReviews = product.feedback ? product.feedback.map((feedback, index) => ({
+      _id: feedback._id || `feedback_${product._id}_${index}_${Date.now()}`,
       productId: product._id,
       product: {
         productName: product.productName,
         picture: product.picture,
       },
-      customer: feedback.userId ? null : { firstname: feedback.user ? feedback.user.split(' ')[0] : 'Anonymous', lastname: feedback.user ? feedback.user.split(' ').slice(1).join(' ') : '' },
+      customer: feedback.userId ? null : { 
+        firstname: feedback.user ? feedback.user.split(' ')[0] : 'Anonymous', 
+        lastname: feedback.user ? feedback.user.split(' ').slice(1).join(' ') : '' 
+      },
       rating: feedback.rating,
       comment: feedback.comment,
       createdAt: feedback.createdAt || new Date(),
     })) : [];
     
-    // Combine both sources, preferring global reviews if they exist
-    productReviews = globalProductReviews.length > 0 ? globalProductReviews : productFeedbackReviews;
+    console.log('Product reviews found:', productReviews.length);
     
     // Calculate product-specific stats
     const productStats = {
@@ -227,8 +284,13 @@ const MsmeReviews = () => {
     };
 
     productReviews.forEach(review => {
-      productStats.ratingDistribution[review.rating]++;
+      if (review.rating >= 1 && review.rating <= 5) {
+        productStats.ratingDistribution[review.rating]++;
+      }
     });
+
+    console.log('Final product reviews:', productReviews.length);
+    console.log('Product stats:', productStats);
 
     setSelectedProduct({
       ...product,
@@ -250,19 +312,25 @@ const MsmeReviews = () => {
 
   // Filter and search logic
   const getFilteredProducts = () => {
+    if (!products || !Array.isArray(products)) {
+      console.log('No products or not array:', products);
+      return [];
+    }
+    
+    console.log('Total products before filtering:', products.length);
     let filtered = [...products];
 
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(product =>
-        product.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+        (product.productName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (product.description || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     // Category filter
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(product => product.category === selectedCategory);
+      filtered = filtered.filter(product => product.category && product.category === selectedCategory);
     }
 
     // Rating filter
@@ -285,9 +353,11 @@ const MsmeReviews = () => {
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'name':
-          return a.productName.localeCompare(b.productName);
+          const aName = a.productName || '';
+          const bName = b.productName || '';
+          return aName.localeCompare(bName);
         case 'price':
-          return a.price - b.price;
+          return (a.price || 0) - (b.price || 0);
         case 'rating':
           const aRating = a.feedback?.length > 0 
             ? a.feedback.reduce((sum, fb) => sum + fb.rating, 0) / a.feedback.length 
@@ -303,6 +373,15 @@ const MsmeReviews = () => {
       }
     });
 
+    console.log('Filtered products:', filtered.length);
+    
+    // Check for duplicate IDs that could cause React key warnings
+    const ids = filtered.map(p => p._id);
+    const duplicateIds = ids.filter((id, index) => ids.indexOf(id) !== index);
+    if (duplicateIds.length > 0) {
+      console.warn('Duplicate product IDs found:', duplicateIds);
+    }
+    
     return filtered;
   };
 
@@ -421,7 +500,15 @@ const MsmeReviews = () => {
             </div>
           ) : (
             <div className="msme-reviews__products-grid">
-              {getFilteredProducts().map((product) => {
+              {getFilteredProducts().map((product, index) => {
+                // Debug: Log product data being rendered
+                console.log('Rendering product:', {
+                  id: product._id,
+                  name: product.productName,
+                  businessName: user?.businessName,
+                  feedback: product.feedback
+                });
+                
                 // Calculate average rating from feedback
                 const feedbackRatings = product.feedback || [];
                 const avgRating = feedbackRatings.length > 0 
@@ -430,25 +517,25 @@ const MsmeReviews = () => {
                 
                 return (
                   <div 
-                    key={product._id} 
+                    key={product._id || `product-${index}`} 
                     className="msme-reviews__product-card"
                   >
                     {/* Product Image */}
                     <div className="msme-reviews__product-image-container">
-                      {getProductImageUrl(product.picture) ? (
+                      {getProductImageUrl(product) ? (
                         <img 
-                          src={getProductImageUrl(product.picture)} 
-                          alt={product.productName}
+                          src={getProductImageUrl(product)} 
+                          alt={product.productName || 'Product'}
                           className="msme-reviews__product-card-img"
                         />
                       ) : (
-                        <div className="msme-reviews__product-placeholder">No Image</div>
+                        <div className="msme-reviews__product-image-placeholder">No Image</div>
                       )}
                     </div>
 
                     {/* Product Info */}
                     <div className="msme-reviews__product-card-content">
-                      <h4 className="msme-reviews__product-card-name">{product.productName}</h4>
+                      <h4 className="msme-reviews__product-card-name">{product.productName || 'Unnamed Product'}</h4>
                       <p className="msme-reviews__product-card-store">{user?.businessName || 'Your Store'}</p>
                       
                       {/* Rating Stars */}
@@ -512,10 +599,10 @@ const MsmeReviews = () => {
             <div className="msme-reviews__modal-content">
               <div className="msme-reviews__modal-product-info">
                 <div className="msme-reviews__modal-image">
-                  {getProductImageUrl(selectedProduct.picture) ? (
+                  {getProductImageUrl(selectedProduct) ? (
                     <img 
-                      src={getProductImageUrl(selectedProduct.picture)} 
-                      alt={selectedProduct.productName}
+                      src={getProductImageUrl(selectedProduct)} 
+                      alt={selectedProduct.productName || 'Product'}
                       className="msme-reviews__modal-img"
                     />
                   ) : (
@@ -528,7 +615,7 @@ const MsmeReviews = () => {
                   <p className="msme-reviews__modal-description">{selectedProduct.description}</p>
                   <p className="msme-reviews__modal-price">₱{selectedProduct.price}</p>
                   <p className="msme-reviews__modal-availability">
-                    Status: {selectedProduct.availability ? 'Available' : 'Unavailable'}
+                    Status: {selectedProduct.availability === true ? 'Available' : selectedProduct.availability === false ? 'Unavailable' : 'Unknown'}
                   </p>
                 </div>
               </div>

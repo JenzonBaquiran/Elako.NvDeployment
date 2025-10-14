@@ -7425,7 +7425,7 @@ const addFavoriteStatusToProducts = async (products, customerId) => {
   }
 
   return products.map((product) => ({
-    ...product,
+    ...(product.toObject ? product.toObject() : product),
     isFavorite: favoriteProductIds.includes(product._id.toString()),
   }));
 };

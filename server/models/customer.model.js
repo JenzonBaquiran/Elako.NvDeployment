@@ -15,6 +15,7 @@ const CustomerSchema = new mongoose.Schema(
     userType: { type: String, default: "customer" },
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "MSME" }],
+    termsAcceptedAt: { type: Date, default: Date.now }, // When terms were accepted during signup
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },

@@ -164,6 +164,7 @@
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   border-left: 3px solid transparent;
+  text-align: left;
 }
 
 .msme-messages__conversation-item:hover {
@@ -196,14 +197,17 @@
 .msme-messages__conversation-info {
   flex: 1;
   min-width: 0;
+  text-align: left;
+  align-items: flex-start;
 }
 
 .msme-messages__conversation-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   margin-bottom: 4px;
   position: relative;
+  gap: 8px;
 }
 
 .msme-messages__conversation-name {
@@ -215,6 +219,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: left;
+  flex: 1;
 }
 
 .msme-messages__conversation-time {
@@ -222,6 +228,7 @@
   color: #6b7280;
   font-family: 'Poppins', sans-serif;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .msme-messages__unread-indicator {
@@ -241,6 +248,7 @@
   color: #313131;
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
+  text-align: left;
 }
 
 .msme-messages__last-message {
@@ -251,6 +259,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: left;
 }
 
 .msme-messages__no-conversations {

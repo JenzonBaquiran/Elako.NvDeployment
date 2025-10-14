@@ -26,7 +26,11 @@ const TermsPage = () => {
 
           <Box className="terms-page__content">
             <Typography variant="body2" className="terms-page__effective-date">
-              <strong>Effective Date:</strong> October 10, 2025
+              <strong>Effective Date:</strong> September 5, 2025
+            </Typography>
+
+            <Typography variant="body2" className="terms-page__acceptance-note" style={{ marginBottom: '16px', padding: '12px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+              <strong>Terms Acceptance:</strong> By signing up for ELako.Nv, you automatically accept these terms on the date of your account creation. This acceptance is recorded in your account information.
             </Typography>
             
             <Typography variant="body1" paragraph>

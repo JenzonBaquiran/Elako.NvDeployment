@@ -355,6 +355,7 @@ app.get("/api/customers/:id/profile", async (req, res) => {
           customer.bio || "Love discovering unique products from local MSMEs!",
         createdAt: customer.createdAt,
         updatedAt: customer.updatedAt,
+        termsAcceptedAt: customer.termsAcceptedAt,
         stats: stats,
       },
     });
@@ -976,6 +977,7 @@ app.get("/api/msme/:id/profile", async (req, res) => {
         storeLogo: dashboard?.storeLogo || null,
         createdAt: msme.createdAt,
         updatedAt: msme.updatedAt,
+        termsAcceptedAt: msme.termsAcceptedAt,
       },
       stats: stats,
     });

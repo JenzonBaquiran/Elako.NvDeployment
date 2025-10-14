@@ -54,7 +54,7 @@ const TermsAgreementModal = ({ open, onClose, onAgree, userType }) => {
       <DialogContent className="terms-agreement-modal__content">
         <Box className="terms-agreement-modal__scroll-container">
           <Typography variant="body2" className="terms-agreement-modal__effective-date">
-            <strong>Effective Date:</strong> October 10, 2025
+            <strong>Effective Date:</strong> September 5, 2025
           </Typography>
           
           <Typography variant="body1" paragraph>

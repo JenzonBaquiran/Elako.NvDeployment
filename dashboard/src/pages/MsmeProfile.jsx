@@ -35,7 +35,8 @@ const MsmeProfile = () => {
     businessDescription: '',
     category: '',
     website: '',
-    storeLogo: null
+    storeLogo: null,
+    termsAcceptedAt: null
   });
   const [stats, setStats] = useState({
     profileViews: 0,
@@ -369,6 +370,15 @@ const MsmeProfile = () => {
           <div className="msme-profile__stat-box">
             <div className="msme-profile__stat-value">{stats.profileComplete}%</div>
             <div className="msme-profile__stat-label">Profile Complete</div>
+          </div>
+          <div className="msme-profile__stat-box">
+            <div className="msme-profile__stat-value">
+              {profileData.termsAcceptedAt 
+                ? new Date(profileData.termsAcceptedAt).toLocaleDateString()
+                : 'Not available'
+              }
+            </div>
+            <div className="msme-profile__stat-label">Terms Accepted</div>
           </div>
         </div>
 

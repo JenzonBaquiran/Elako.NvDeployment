@@ -44,6 +44,7 @@ const MSMESchema = new mongoose.Schema(
     averageRating: { type: Number, default: 0 },
     totalRatings: { type: Number, default: 0 },
 
+    termsAcceptedAt: { type: Date, default: Date.now }, // When terms were accepted during signup
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },

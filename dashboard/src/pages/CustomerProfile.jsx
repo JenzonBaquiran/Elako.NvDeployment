@@ -42,7 +42,8 @@ const CustomerProfile = () => {
     contactNumber: '',
     address: '',
     bio: '',
-    username: ''
+    username: '',
+    termsAcceptedAt: null
   });
   const [statsData, setStatsData] = useState([
     { label: 'Reviews Given', value: '0' },
@@ -94,15 +95,21 @@ const CustomerProfile = () => {
           contactNumber: data.profile.contactNumber,
           address: data.profile.address,
           bio: data.profile.bio,
-          username: data.profile.username
+          username: data.profile.username,
+          termsAcceptedAt: data.profile.termsAcceptedAt
         });
 
         // Update stats data
+        const termsAcceptedDate = data.profile.termsAcceptedAt 
+          ? new Date(data.profile.termsAcceptedAt).toLocaleDateString()
+          : 'Not available';
+        
         setStatsData([
           { label: 'Reviews Given', value: data.profile.stats.reviewsGiven.toString() },
           { label: 'Followed Stores', value: data.profile.stats.followedStores.toString() },
           { label: 'Favorite Products', value: data.profile.stats.favoriteProducts.toString() },
-          { label: 'Member Since', value: data.profile.stats.memberSince.toString() }
+          { label: 'Member Since', value: data.profile.stats.memberSince.toString() },
+          { label: 'Terms Accepted', value: termsAcceptedDate }
         ]);
       } else {
         console.error('Failed to fetch profile:', data.error);

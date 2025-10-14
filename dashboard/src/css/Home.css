@@ -363,12 +363,7 @@ body {
   justify-content: flex-start; /* Align title content to the left */
 }
 
-h2 {
-  font-size: 30px;
-  font-weight: bold;
-  color: var(--foreground);
-  margin: 0;
-}
+
 /* Responsive title spacing */
 @media (min-width: 640px) {
   .hot-picks-title,

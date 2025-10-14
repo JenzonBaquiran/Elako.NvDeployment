@@ -13,6 +13,7 @@ import { useAuth } from "../contexts/AuthContext";
 import NotificationIcon from "../components/NotificationIcon";
 import CustomerNotificationIcon from "../components/CustomerNotificationIcon";
 import NavbarNotificationPanel from "../components/NavbarNotificationPanel";
+import SearchBox from "../components/SearchBox";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -82,16 +83,10 @@ function Header() {
 
           {/* Search Bar - Hidden on mobile */}
           <div className="search-section">
-            <div className="search-container">
-              <input
-                type="text"
-                placeholder="Search for services, products, or stores..."
-                className="search-input"
-              />
-              <button className="search-button">
-                <SearchIcon fontSize="small" />
-              </button>
-            </div>
+            <SearchBox 
+              placeholder="Search for services, products, or stores..."
+              className="navbar-search"
+            />
           </div>
 
           {/* Navigation - Desktop */}
@@ -144,16 +139,11 @@ function Header() {
 
         {/* Mobile Search */}
         <div className="mobile-search">
-          <div className="search-container">
-            <input
-              type="text"
-              placeholder="Search..."
-              className="search-input"
-            />
-            <button className="search-button">
-              <SearchIcon fontSize="small" />
-            </button>
-          </div>
+          <SearchBox 
+            placeholder="Search..."
+            className="navbar-search-mobile"
+            isMobile={true}
+          />
         </div>
 
         {/* Mobile Menu */}

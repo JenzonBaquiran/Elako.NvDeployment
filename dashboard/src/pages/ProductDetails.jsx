@@ -235,7 +235,32 @@ const ProductDetails = () => {
             </div>
 
             {/* Store Information */}
-           
+            {product.msmeId && (
+              <div className="product-details-store-info">
+                <h4>From Store</h4>
+                <div className="product-details-store-card">
+                  <div className="product-details-store-details">
+                    <div className="product-details-store-name">
+                      {product.msmeId.businessName || 'Store Name'}
+                    </div>
+                    <div className="product-details-store-category">
+                      {product.msmeId.category === 'artisan' ? '🎨 Artist' : '🍽️ Food Store'}
+                    </div>
+                    {product.msmeId.averageRating > 0 && (
+                      <div className="product-details-store-rating">
+                        ★ {product.msmeId.averageRating.toFixed(1)}
+                      </div>
+                    )}
+                  </div>
+                  <button 
+                    className="product-details-view-store-btn"
+                    onClick={() => navigate(`/store/${product.msmeId._id}`)}
+                  >
+                    View Store
+                  </button>
+                </div>
+              </div>
+            )}
           
           </div>
         </div>

@@ -95,6 +95,10 @@ body {
   margin: 0 2rem;
 }
 
+.search-section .navbar-search {
+  width: 100%;
+}
+
 .search-container {
   position: relative;
   width: 100%;

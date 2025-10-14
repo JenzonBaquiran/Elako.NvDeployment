@@ -212,11 +212,13 @@ function App() {
             <Route 
               path="/customer/store/:storeId" 
               element={
-                <ProtectedRoute allowedUserTypes={['customer']}>
+                <ProtectedRoute allowedUserTypes={['customer', 'msme', 'admin']}>
                   <CustomerStoreView />
                 </ProtectedRoute>
               } 
             />
+            {/* Public store viewing route */}
+            <Route path="/store/:storeId" element={<CustomerStoreView />} />
             <Route 
               path="/customer-favorites" 
               element={
@@ -289,6 +291,8 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            {/* Public product viewing route */}
+            <Route path="/products/:productId" element={<ProductDetails />} />
           </Routes>
         </BrowserRouter>
       </NotificationProvider>

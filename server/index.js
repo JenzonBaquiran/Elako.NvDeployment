@@ -2333,7 +2333,7 @@ app.get("/api/products/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate(
       "msmeId",
-      "businessName username"
+      "businessName username category averageRating"
     );
 
     if (!product) {
@@ -2723,6 +2723,184 @@ app.get("/api/products/search/hashtag/:hashtag", async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Error searching products",
+    });
+  }
+});
+
+// Universal search endpoint for products, stores, and MSMEs
+app.get("/api/search", async (req, res) => {
+  try {
+    const { q: query, type, limit = 10 } = req.query;
+
+    if (!query || query.length < 1) {
+      return res.json({
+        success: true,
+        suggestions: [],
+        results: {
+          products: [],
+          stores: [],
+          total: 0,
+        },
+      });
+    }
+
+    const searchLimit = Math.min(parseInt(limit), 20); // Max 20 results
+    const results = {
+      products: [],
+      stores: [],
+      total: 0,
+    };
+
+    // Search products if type is 'all' or 'products'
+    if (!type || type === "all" || type === "products") {
+      let products = [];
+
+      // Check if it's a hashtag search
+      if (query.startsWith("#")) {
+        const hashtag = query.substring(1).toLowerCase().trim();
+
+        // First, find products with the exact hashtag
+        products = await Product.find({
+          $and: [
+            { visible: true },
+            { availability: true },
+            { hashtags: hashtag },
+          ],
+        })
+          .populate("msmeId", "businessName username category")
+          .sort({ createdAt: -1 });
+
+        // If we have products with this hashtag, get all hashtags from these products
+        if (products.length > 0) {
+          const allHashtags = [...new Set(products.flatMap((p) => p.hashtags))];
+
+          // Find all products that share any of these hashtags (variations)
+          products = await Product.find({
+            $and: [
+              { visible: true },
+              { availability: true },
+              { hashtags: { $in: allHashtags } },
+            ],
+          })
+            .populate("msmeId", "businessName username category")
+            .sort({ createdAt: -1 });
+        }
+      } else {
+        // Regular search
+        const productSearchRegex = new RegExp(query, "i");
+        products = await Product.find({
+          $and: [
+            { visible: true },
+            { availability: true },
+            {
+              $or: [
+                { productName: productSearchRegex },
+                { description: productSearchRegex },
+                { category: productSearchRegex },
+                { hashtags: { $elemMatch: { $regex: productSearchRegex } } },
+              ],
+            },
+          ],
+        })
+          .populate("msmeId", "businessName username category")
+          .limit(searchLimit)
+          .sort({ createdAt: -1 });
+      }
+
+      results.products = products.map((product) => ({
+        _id: product._id,
+        type: "product",
+        name: product.productName,
+        description: product.description,
+        price: product.price,
+        imageUrl:
+          product.pictures && product.pictures.length > 0
+            ? product.pictures[0]
+            : null,
+        category: product.category,
+        storeName: product.msmeId?.businessName,
+        storeId: product.msmeId?._id,
+        storeCategory: product.msmeId?.category,
+        storeRating: product.msmeId?.averageRating || 0,
+        storeUsername: product.msmeId?.username,
+        rating: product.rating || 0,
+        hashtags: product.hashtags,
+      }));
+    }
+
+    // Search stores/MSMEs if type is 'all' or 'stores' or 'artists'
+    if (!type || type === "all" || type === "stores" || type === "artists") {
+      const storeSearchRegex = new RegExp(query, "i");
+      const stores = await MSME.find({
+        $and: [
+          { status: "approved" },
+          {
+            $or: [
+              { businessName: storeSearchRegex },
+              { username: storeSearchRegex },
+              { category: storeSearchRegex },
+              { businessDescription: storeSearchRegex },
+              { specialties: { $elemMatch: { $regex: storeSearchRegex } } },
+            ],
+          },
+        ],
+      })
+        .limit(searchLimit)
+        .sort({ createdAt: -1 });
+
+      results.stores = stores.map((store) => ({
+        _id: store._id,
+        type: store.category === "artisan" ? "artist" : "store",
+        name: store.businessName,
+        username: store.username,
+        description: store.businessDescription,
+        category: store.category,
+        businessType: store.category,
+        location: store.address,
+        imageUrl: store.businessPicture,
+        rating: store.averageRating || 0,
+        followers: store.followers?.length || 0,
+      }));
+    }
+
+    results.total = results.products.length + results.stores.length;
+
+    // Generate suggestions for autocomplete (first 5 items of each type)
+    const suggestions = [];
+
+    // Add product suggestions
+    results.products.slice(0, 5).forEach((product) => {
+      suggestions.push({
+        type: "product",
+        title: product.name,
+        subtitle: `₱${product.price} • ${product.storeName}`,
+        id: product._id,
+        imageUrl: product.imageUrl,
+      });
+    });
+
+    // Add store/artist suggestions
+    results.stores.slice(0, 5).forEach((store) => {
+      suggestions.push({
+        type: store.type,
+        title: store.name,
+        subtitle: store.businessType || store.category,
+        id: store._id,
+        imageUrl: store.imageUrl,
+      });
+    });
+
+    res.json({
+      success: true,
+      query,
+      suggestions: suggestions.slice(0, 10), // Limit to 10 suggestions
+      results,
+    });
+  } catch (err) {
+    console.error("Error in universal search:", err);
+    res.status(500).json({
+      success: false,
+      error: "Error performing search",
     });
   }
 });

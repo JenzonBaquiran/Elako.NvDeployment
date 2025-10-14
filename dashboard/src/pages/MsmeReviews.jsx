@@ -34,25 +34,12 @@ const MsmeReviews = () => {
     ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
   });
   
-  // Search and filter states
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedRating, setSelectedRating] = useState('all');
-  const [sortBy, setSortBy] = useState('name');
+
 
   // Fetch store products on component mount (reviews are embedded in products)
   useEffect(() => {
-    console.log('=== USER AUTH STATUS ===');
-    console.log('isAuthenticated:', isAuthenticated);
-    console.log('userType:', userType);
-    console.log('user:', user);
-    console.log('user._id:', user?._id);
-    console.log('user.businessName:', user?.businessName);
-    
     if (isAuthenticated && userType === 'msme' && user?._id) {
       fetchStoreProducts();
-    } else {
-      console.log('Not fetching products - authentication check failed');
     }
   }, [isAuthenticated, userType, user]);
 
@@ -72,8 +59,6 @@ const MsmeReviews = () => {
         });
       }
     });
-
-    console.log('All reviews extracted from products:', allReviews.length);
     
     // Calculate overall stats
     const stats = {
@@ -102,17 +87,8 @@ const MsmeReviews = () => {
   const fetchStoreProducts = async () => {
     setLoadingProducts(true);
     try {
-      console.log('=== USER DEBUG INFO ===');
-      console.log('Full user object:', user);
-      console.log('user._id:', user._id);
-      console.log('user.id:', user.id);
-      console.log('user.username:', user.username);
-      console.log('user.businessName:', user.businessName);
-      console.log('========================');
-      
-      // Try MongoDB _id first (should be: 68ded9143255b574542dacdd)
+      // Try MongoDB _id first
       let userIdToUse = user._id || user.id;
-      console.log('First attempt with ID:', userIdToUse);
       
       let response = await fetch(`http://localhost:1337/api/products?msmeId=${userIdToUse}`);
       
@@ -124,48 +100,20 @@ const MsmeReviews = () => {
       
       // If no products found and we have a different ID to try
       if (data.success && (!data.products || data.products.length === 0) && user._id !== user.id) {
-        console.log('No products found with first ID, trying alternate ID:', user.id);
         userIdToUse = user.id;
         const altResponse = await fetch(`http://localhost:1337/api/products?msmeId=${userIdToUse}`);
         if (altResponse.ok) {
           data = await altResponse.json();
         }
       }
-      console.log('Store products API response:', data);
       
       if (data.success && data.products) {
-        console.log('Products found:', data.products.length);
-        console.log('Raw API response products:', JSON.stringify(data.products, null, 2));
-        
-        // Log product data for debugging
-        data.products.forEach((product, index) => {
-          console.log(`\n=== PRODUCT ${index + 1} DEBUG ===`);
-          console.log('Raw product object keys:', Object.keys(product));
-          console.log('productName value:', product.productName);
-          console.log('productName type:', typeof product.productName);
-          console.log('Full product:', product);
-          console.log(`Product: ${product.productName || 'MISSING NAME'}`);
-          console.log(`- ID: ${product._id}`);
-          console.log(`- Availability: ${product.availability}`);
-          console.log(`- Price: ${product.price}`);
-          console.log(`- Category: ${product.category}`);
-          console.log(`- Description: ${product.description ? product.description.substring(0, 50) + '...' : 'No description'}`);
-          console.log(`- Feedback count: ${product.feedback ? product.feedback.length : 0}`);
-          console.log('==============================\n');
-        });
-        console.log('🎯 ABOUT TO SET PRODUCTS:');
-        console.log('data.products:', data.products);
-        console.log('data.products length:', data.products.length);
-        
         setProducts(data.products);
-        
-        console.log('🎯 PRODUCTS SET! Current products state will be:', data.products);
         
         // Calculate stats from the fetched products with embedded feedback
         calculateStatsFromProducts(data.products);
       } else {
-        console.log('No products found or API error:', data.error);
-        setProducts([]); // Set empty array instead of showing error
+        setProducts([]);
         setStats({
           totalReviews: 0,
           averageRating: 0,
@@ -251,10 +199,6 @@ const MsmeReviews = () => {
   };
 
   const handleProductClick = (product) => {
-    console.log('Product clicked:', product);
-    console.log('Product availability:', product.availability);
-    console.log('Product feedback:', product.feedback);
-    
     // Get reviews from product's embedded feedback array (like ProductDetails does)
     const productReviews = product.feedback ? product.feedback.map((feedback, index) => ({
       _id: feedback._id || `feedback_${product._id}_${index}_${Date.now()}`,
@@ -272,7 +216,7 @@ const MsmeReviews = () => {
       createdAt: feedback.createdAt || new Date(),
     })) : [];
     
-    console.log('Product reviews found:', productReviews.length);
+
     
     // Calculate product-specific stats
     const productStats = {
@@ -289,8 +233,7 @@ const MsmeReviews = () => {
       }
     });
 
-    console.log('Final product reviews:', productReviews.length);
-    console.log('Product stats:', productStats);
+
 
     setSelectedProduct({
       ...product,
@@ -310,86 +253,7 @@ const MsmeReviews = () => {
     return Math.round((productStats.ratingDistribution[rating] / productStats.totalReviews) * 100);
   };
 
-  // Filter and search logic
-  const getFilteredProducts = () => {
-    if (!products || !Array.isArray(products)) {
-      console.log('No products or not array:', products);
-      return [];
-    }
-    
-    console.log('Total products before filtering:', products.length);
-    let filtered = [...products];
 
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter(product =>
-        (product.productName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (product.description || '').toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Category filter
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(product => product.category && product.category === selectedCategory);
-    }
-
-    // Rating filter
-    if (selectedRating !== 'all') {
-      filtered = filtered.filter(product => {
-        const feedbackRatings = product.feedback || [];
-        const avgRating = feedbackRatings.length > 0 
-          ? feedbackRatings.reduce((sum, fb) => sum + fb.rating, 0) / feedbackRatings.length
-          : 0;
-        
-        if (selectedRating === '4+') return avgRating >= 4;
-        if (selectedRating === '3+') return avgRating >= 3;
-        if (selectedRating === '2+') return avgRating >= 2;
-        if (selectedRating === '1+') return avgRating >= 1;
-        return true;
-      });
-    }
-
-    // Sort products
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          const aName = a.productName || '';
-          const bName = b.productName || '';
-          return aName.localeCompare(bName);
-        case 'price':
-          return (a.price || 0) - (b.price || 0);
-        case 'rating':
-          const aRating = a.feedback?.length > 0 
-            ? a.feedback.reduce((sum, fb) => sum + fb.rating, 0) / a.feedback.length 
-            : 0;
-          const bRating = b.feedback?.length > 0 
-            ? b.feedback.reduce((sum, fb) => sum + fb.rating, 0) / b.feedback.length 
-            : 0;
-          return bRating - aRating;
-        case 'newest':
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        default:
-          return 0;
-      }
-    });
-
-    console.log('Filtered products:', filtered.length);
-    
-    // Check for duplicate IDs that could cause React key warnings
-    const ids = filtered.map(p => p._id);
-    const duplicateIds = ids.filter((id, index) => ids.indexOf(id) !== index);
-    if (duplicateIds.length > 0) {
-      console.warn('Duplicate product IDs found:', duplicateIds);
-    }
-    
-    return filtered;
-  };
-
-  // Get unique categories from products
-  const getCategories = () => {
-    const categories = products.map(product => product.category).filter(Boolean);
-    return [...new Set(categories)];
-  };
 
   // Show login message if not authenticated
   if (!isAuthenticated || userType !== 'msme') {
@@ -424,62 +288,6 @@ const MsmeReviews = () => {
           <div className="msme-reviews__products-header">
             <h2> Review's and Ratings</h2>
             <p>Click on any product to view its reviews and ratings</p>
-            
-            {/* Search and Filter Controls */}
-            <div className="msme-reviews__controls">
-              {/* Search Bar */}
-              <div className="msme-reviews__search">
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="msme-reviews__search-input"
-                />
-              </div>
-
-              {/* Filters */}
-              <div className="msme-reviews__filters">
-                {/* Category Filter */}
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="msme-reviews__filter-select"
-                >
-                  <option value="all">All Categories</option>
-                  {getCategories().map(category => (
-                    <option key={category} value={category}>
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
-                    </option>
-                  ))}
-                </select>
-
-                {/* Rating Filter */}
-                <select
-                  value={selectedRating}
-                  onChange={(e) => setSelectedRating(e.target.value)}
-                  className="msme-reviews__filter-select"
-                >
-                  <option value="all">All Ratings</option>
-                  <option value="4+">4+ Stars</option>
-                  <option value="3+">3+ Stars</option>
-                  <option value="2+">2+ Stars</option>
-                  <option value="1+">1+ Stars</option>
-                </select>
-
-                {/* Sort By */}
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="msme-reviews__filter-select"
-                >
-                  <option value="name">Sort by Name</option>
-                  <option value="price">Sort by Price</option>
-                  <option value="rating">Sort by Rating</option>
-                  <option value="newest">Sort by Newest</option>
-                </select>
-              </div>
-            </div>
           </div>
           
           {loadingProducts ? (
@@ -492,22 +300,10 @@ const MsmeReviews = () => {
               <h3>No products found</h3>
               <p>You haven't added any products yet. Add products to see their reviews here.</p>
             </div>
-          ) : getFilteredProducts().length === 0 ? (
-            <div className="msme-reviews__empty">
-              <GridViewIcon className="msme-reviews__empty-icon" />
-              <h3>No products match your filters</h3>
-              <p>Try adjusting your search terms or filters to find products.</p>
-            </div>
           ) : (
             <div className="msme-reviews__products-grid">
-              {getFilteredProducts().map((product, index) => {
-                // Debug: Log product data being rendered
-                console.log('Rendering product:', {
-                  id: product._id,
-                  name: product.productName,
-                  businessName: user?.businessName,
-                  feedback: product.feedback
-                });
+              {products.map((product, index) => {
+
                 
                 // Calculate average rating from feedback
                 const feedbackRatings = product.feedback || [];

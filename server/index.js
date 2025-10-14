@@ -1514,6 +1514,68 @@ app.get("/api/admin/recent-activities", async (req, res) => {
   }
 });
 
+// Delete customer account (customer self-delete)
+app.delete("/api/customers/:id/delete-account", async (req, res) => {
+  try {
+    const customerId = req.params.id;
+
+    // Find the customer first
+    const customer = await Customer.findOne({ id: customerId });
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        error: "Customer not found",
+      });
+    }
+
+    const customerObjectId = customer._id;
+
+    // Delete related data
+    await Promise.all([
+      // Delete messages
+      Message.deleteMany({
+        $or: [{ senderId: customerObjectId }, { receiverId: customerObjectId }],
+      }),
+
+      // Delete conversations
+      Conversation.deleteMany({
+        participants: customerObjectId,
+      }),
+
+      // Delete customer notifications
+      CustomerNotification.deleteMany({ customerId: customerObjectId }),
+
+      // Delete customer badges
+      CustomerBadge.deleteMany({ customerId: customerObjectId }),
+
+      // Remove customer from MSME followers lists
+      MSME.updateMany(
+        { followers: customerObjectId },
+        { $pull: { followers: customerObjectId } }
+      ),
+
+      // Delete audit logs
+      AuditLog.deleteMany({
+        $or: [{ userId: customerObjectId }, { targetId: customerObjectId }],
+      }),
+    ]);
+
+    // Finally, delete the customer account
+    await Customer.findOneAndDelete({ id: customerId });
+
+    res.json({
+      success: true,
+      message: "Account and all related data deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting customer account:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error deleting account",
+    });
+  }
+});
+
 // Delete customer (admin only)
 app.delete("/api/admin/customers/:id", async (req, res) => {
   try {

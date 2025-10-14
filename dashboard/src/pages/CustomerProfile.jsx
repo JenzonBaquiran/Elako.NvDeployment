@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import CustomerSidebar from './CustomerSidebar';
 import TopFanCongratulations from '../components/TopFanCongratulations';
+import Notification from '../components/Notification';
 import '../css/CustomerProfile.css';
 import EditIcon from '@mui/icons-material/Edit';
 import PersonIcon from '@mui/icons-material/Person';
@@ -27,6 +28,21 @@ const CustomerProfile = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [notification, setNotification] = useState({
+    isVisible: false,
+    type: 'info',
+    title: '',
+    message: '',
+    showConfirmButtons: false,
+    onConfirm: () => {},
+    onCancel: () => {}
+  });
   
   // TOP FAN Badge System State
   const [showTopFanCongratulations, setShowTopFanCongratulations] = useState(false);
@@ -255,15 +271,128 @@ const CustomerProfile = () => {
     }
   };
 
-  const handleChangePassword = () => {
-    // Navigate to change password or show modal
-    console.log('Change password');
+  const showNotification = (type, title, message, showConfirmButtons = false, onConfirm = () => {}, onCancel = () => {}) => {
+    setNotification({
+      isVisible: true,
+      type,
+      title,
+      message,
+      showConfirmButtons,
+      onConfirm,
+      onCancel
+    });
+  };
+
+  const hideNotification = () => {
+    setNotification(prev => ({ ...prev, isVisible: false }));
+  };
+
+  const handlePasswordInputChange = (field, value) => {
+    setPasswordData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleChangePassword = async () => {
+    // Validation
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      showNotification('error', 'Validation Error', 'Please fill in all password fields');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      showNotification('error', 'Validation Error', 'New password and confirm password do not match');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      showNotification('error', 'Validation Error', 'New password must be at least 6 characters long');
+      return;
+    }
+
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      showNotification('error', 'Validation Error', 'New password must be different from current password');
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      const response = await fetch(`http://localhost:1337/api/customers/${user.id}/change-password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showNotification('success', 'Success', 'Password changed successfully!');
+        setShowChangePasswordModal(false);
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+      } else {
+        showNotification('error', 'Error', data.error || 'Failed to change password');
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
+      showNotification('error', 'Error', 'Network error. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChangePasswordAction = () => {
+    setShowChangePasswordModal(true);
   };
 
   const handleDeleteAccount = () => {
-    // Handle account deletion with confirmation
-    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      console.log('Delete account');
+    showNotification(
+      'confirm',
+      'Delete Account',
+      'Are you sure you want to delete your account? This action cannot be undone. All your data, reviews, and personal information will be permanently deleted.',
+      true,
+      confirmDeleteAccount,
+      () => {}
+    );
+  };
+
+  const confirmDeleteAccount = async () => {
+    try {
+      setSaving(true);
+
+      const response = await fetch(`http://localhost:1337/api/customers/${user.id}/delete-account`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showNotification('success', 'Success', 'Account deleted successfully. You will be redirected to the home page.');
+        // Redirect to home page after a delay
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
+      } else {
+        showNotification('error', 'Error', data.error || 'Failed to delete account');
+      }
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      showNotification('error', 'Error', 'Network error. Please try again.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -342,14 +471,16 @@ const CustomerProfile = () => {
     { 
       title: 'Change Password', 
       icon: <SecurityIcon />, 
-      action: handleChangePassword,
-      color: '#7ed957'
+      action: handleChangePasswordAction,
+      color: '#7ed957',
+      loading: false
     },
     { 
       title: 'Delete Account', 
       icon: <DeleteIcon />, 
       action: handleDeleteAccount,
-      color: '#dc3545'
+      color: '#dc3545',
+      loading: saving
     }
   ];
 
@@ -621,12 +752,89 @@ const CustomerProfile = () => {
           </div>
         </div>
 
+        {/* Change Password Modal */}
+        {showChangePasswordModal && (
+          <div className="customer-profile__modal-overlay" onClick={() => setShowChangePasswordModal(false)}>
+            <div className="customer-profile__modal" onClick={(e) => e.stopPropagation()}>
+              <div className="customer-profile__modal-header">
+                <h3>Change Password</h3>
+                <button 
+                  className="customer-profile__modal-close"
+                  onClick={() => setShowChangePasswordModal(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="customer-profile__modal-content">
+                <div className="customer-profile__field">
+                  <label>Current Password</label>
+                  <input
+                    type="password"
+                    value={passwordData.currentPassword}
+                    onChange={(e) => handlePasswordInputChange('currentPassword', e.target.value)}
+                    className="customer-profile__edit-input"
+                    placeholder="Enter current password"
+                  />
+                </div>
+                <div className="customer-profile__field">
+                  <label>New Password</label>
+                  <input
+                    type="password"
+                    value={passwordData.newPassword}
+                    onChange={(e) => handlePasswordInputChange('newPassword', e.target.value)}
+                    className="customer-profile__edit-input"
+                    placeholder="Enter new password (min. 6 characters)"
+                  />
+                </div>
+                <div className="customer-profile__field">
+                  <label>Confirm New Password</label>
+                  <input
+                    type="password"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => handlePasswordInputChange('confirmPassword', e.target.value)}
+                    className="customer-profile__edit-input"
+                    placeholder="Confirm new password"
+                  />
+                </div>
+              </div>
+              <div className="customer-profile__modal-actions">
+                <button 
+                  className="customer-profile__modal-btn customer-profile__modal-btn--secondary"
+                  onClick={() => setShowChangePasswordModal(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="customer-profile__modal-btn customer-profile__modal-btn--primary"
+                  onClick={handleChangePassword}
+                  disabled={saving}
+                >
+                  {saving ? 'Changing...' : 'Change Password'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* TOP FAN Congratulations Modal */}
         <TopFanCongratulations
           isVisible={showTopFanCongratulations}
           onClose={handleTopFanCongratulationsClose}
           badgeData={topFanBadgeData}
           onMarkCelebrationShown={markCelebrationShown}
+        />
+
+        {/* Notification Component */}
+        <Notification
+          type={notification.type}
+          title={notification.title}
+          message={notification.message}
+          isVisible={notification.isVisible}
+          onClose={hideNotification}
+          showConfirmButtons={notification.showConfirmButtons}
+          onConfirm={notification.onConfirm}
+          onCancel={notification.onCancel}
+          duration={4000}
         />
       </div>
     </div>

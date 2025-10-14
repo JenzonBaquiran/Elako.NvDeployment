@@ -21,9 +21,6 @@ function CustomerTopStores() {
 
   useEffect(() => {
     fetchAllTopStores();
-    if (user && user._id) {
-      fetchFollowedStores();
-    }
   }, [currentPage, user]);
 
   // Scroll to top when component mounts
@@ -36,7 +33,12 @@ function CustomerTopStores() {
       setLoading(true);
       console.log('Fetching all top stores, page:', currentPage);
       
-      const response = await fetch(`http://localhost:1337/api/top-stores/all?page=${currentPage}&limit=16`);
+      // Include customer ID if user is logged in for follow status
+      const url = user && user._id 
+        ? `http://localhost:1337/api/top-stores/all?page=${currentPage}&limit=16&customerId=${user._id}`
+        : `http://localhost:1337/api/top-stores/all?page=${currentPage}&limit=16`;
+      
+      const response = await fetch(url);
       const data = await response.json();
       
       if (data.success) {
@@ -46,6 +48,12 @@ function CustomerTopStores() {
         setTopStores(data.stores);
         setTotalStores(data.total);
         setTotalPages(Math.ceil(data.total / 16));
+        
+        // Extract follow status from API response
+        if (user && user._id) {
+          const followedIds = data.stores.filter(store => store.isFollowing).map(store => store._id);
+          setFollowedStores(followedIds);
+        }
       } else {
         console.error('Failed to fetch all top stores:', data.error);
       }
@@ -53,22 +61,6 @@ function CustomerTopStores() {
       console.error('Error fetching all top stores:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Fetch followed stores
-  const fetchFollowedStores = async () => {
-    if (!user || !user._id) return;
-    
-    try {
-      const response = await fetch(`http://localhost:1337/api/customers/${user._id}/followed-stores`);
-      const data = await response.json();
-      
-      if (data.success) {
-        setFollowedStores(data.followedStores.map(store => store._id));
-      }
-    } catch (error) {
-      console.error('Error fetching followed stores:', error);
     }
   };
 
@@ -99,9 +91,17 @@ function CustomerTopStores() {
       if (data.success) {
         if (action === 'follow') {
           setFollowedStores(prev => [...prev, store._id]);
+          // Update the isFollowing status in the topStores array
+          setTopStores(prev => prev.map(s => 
+            s._id === store._id ? { ...s, isFollowing: true } : s
+          ));
           showSuccess(`Now following ${store.businessName || store.storeName}`, 'Success');
         } else {
           setFollowedStores(prev => prev.filter(id => id !== store._id));
+          // Update the isFollowing status in the topStores array
+          setTopStores(prev => prev.map(s => 
+            s._id === store._id ? { ...s, isFollowing: false } : s
+          ));
           showSuccess(`Unfollowed ${store.businessName || store.storeName}`, 'Success');
         }
       } else {
@@ -177,7 +177,7 @@ function CustomerTopStores() {
                   : store.dashboard?.storeLogo 
                     ? `http://localhost:1337/uploads/${store.dashboard.storeLogo}` 
                     : heroPic;
-                const isFollowed = followedStores.includes(store._id);
+                const isFollowed = store.isFollowing || false;
                 
                 return (
                   <div className="top-store-card" key={store._id}>

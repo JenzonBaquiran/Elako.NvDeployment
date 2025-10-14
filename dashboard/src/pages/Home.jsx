@@ -27,7 +27,7 @@ function Home() {
     fetchNewStores();
     fetchTopStores();
     fetchHotPicks();
-  }, []);
+  }, [user]); // Re-fetch when user changes (login/logout)
 
   const fetchNewStores = async () => {
     try {
@@ -53,7 +53,12 @@ function Home() {
   const fetchTopStores = async () => {
     try {
       // Fetch top stores with 4.5-5.0 rating, limit to 6
-      const topStoresResponse = await fetch('http://localhost:1337/api/top-stores?limit=6');
+      // Include customer ID if user is logged in for follow status
+      const url = user && user._id 
+        ? `http://localhost:1337/api/top-stores?limit=6&customerId=${user._id}`
+        : 'http://localhost:1337/api/top-stores?limit=6';
+      
+      const topStoresResponse = await fetch(url);
       const topStoresData = await topStoresResponse.json();
       
       if (topStoresData.success) {

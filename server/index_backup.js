@@ -7206,26 +7206,6 @@ app.post("/api/resend-otp", async (req, res) => {
   }
 });
 
-// Helper function to add follow status to stores
-const addFollowStatusToStores = async (stores, customerId) => {
-  let followedStoreIds = [];
-  if (customerId) {
-    try {
-      const customer = await Customer.findById(customerId);
-      if (customer && customer.following) {
-        followedStoreIds = customer.following.map((id) => id.toString());
-      }
-    } catch (error) {
-      console.error("Error fetching customer follow status:", error);
-    }
-  }
-
-  return stores.map((store) => ({
-    ...store,
-    isFollowing: followedStoreIds.includes(store._id.toString()),
-  }));
-};
-
 // --- Top Stores Routes ---
 // Get top 6 stores with 4.5-5.0 average rating
 app.get("/api/top-stores", async (req, res) => {
@@ -7241,6 +7221,19 @@ app.get("/api/top-stores", async (req, res) => {
     })
       .sort({ averageRating: -1, totalRatings: -1, createdAt: -1 }) // Sort by rating desc, then by number of ratings, then by newest
       .limit(limit);
+
+    // Get customer's followed stores if customerId is provided
+    let followedStoreIds = [];
+    if (customerId) {
+      try {
+        const customer = await Customer.findById(customerId);
+        if (customer && customer.following) {
+          followedStoreIds = customer.following.map(id => id.toString());
+        }
+      } catch (error) {
+        console.error("Error fetching customer follow status:", error);
+      }
+    }
 
     // Fetch dashboard information for each top store
     const storesWithDashboards = await Promise.all(
@@ -7388,16 +7381,10 @@ app.get("/api/top-stores", async (req, res) => {
       })
     );
 
-    // Add follow status to stores
-    const storesWithFollowStatus = await addFollowStatusToStores(
-      storesWithDashboards,
-      customerId
-    );
-
     res.json({
       success: true,
-      stores: storesWithFollowStatus,
-      total: storesWithFollowStatus.length,
+      stores: storesWithDashboards,
+      total: storesWithDashboards.length,
       message:
         limit === 6
           ? "Top 6 stores with 4.5-5.0 rating"
@@ -7417,7 +7404,6 @@ app.get("/api/top-stores/all", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12; // Default to 12 per page for better pagination
-    const customerId = req.query.customerId; // Optional customer ID for follow status
     const skip = (page - 1) * limit;
 
     // Get total count of top-rated stores
@@ -7585,15 +7571,9 @@ app.get("/api/top-stores/all", async (req, res) => {
 
     const totalPages = Math.ceil(totalCount / limit);
 
-    // Add follow status to stores
-    const storesWithFollowStatus = await addFollowStatusToStores(
-      storesWithDashboards,
-      customerId
-    );
-
     res.json({
       success: true,
-      stores: storesWithFollowStatus,
+      stores: storesWithDashboards,
       pagination: {
         currentPage: page,
         totalPages: totalPages,

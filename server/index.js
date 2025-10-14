@@ -334,7 +334,7 @@ app.get("/api/customers/:id/profile", async (req, res) => {
     let validFavoriteCount = 0;
     if (customer.favorites && customer.favorites.length > 0) {
       const validFavorites = await Product.find({
-        _id: { $in: customer.favorites }
+        _id: { $in: customer.favorites },
       });
       validFavoriteCount = validFavorites.length;
     }
@@ -343,7 +343,7 @@ app.get("/api/customers/:id/profile", async (req, res) => {
     let validFollowingCount = 0;
     if (customer.following && customer.following.length > 0) {
       const validFollowing = await MSME.find({
-        _id: { $in: customer.following }
+        _id: { $in: customer.following },
       });
       validFollowingCount = validFollowing.length;
     }

@@ -11,7 +11,6 @@ import {
   Inventory,
   EmojiEvents,
   Feedback,
-  Growth,
   TrendingDown,
   Refresh
 } from '@mui/icons-material';

@@ -1352,7 +1352,36 @@ input:checked + .toggle-slider:before {
   transition: transform 0.3s ease;
 }
 
-.blog-card:hover .blog-thumbnail {
+/* Blog media preview styles for videos */
+.blog-media-preview {
+  width: 100%;
+  height: 100%;
+}
+
+.blog-media-preview iframe,
+.blog-media-preview video,
+.blog-media-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: none;
+  transition: transform 0.3s ease;
+}
+
+.blog-media-preview.youtube iframe {
+  aspect-ratio: 16/9;
+  height: 100%;
+  object-fit: cover;
+}
+
+.blog-media-preview.video video {
+  object-fit: cover;
+}
+
+.blog-card:hover .blog-thumbnail,
+.blog-card:hover .blog-media-preview iframe,
+.blog-card:hover .blog-media-preview video,
+.blog-card:hover .blog-media-preview img {
   transform: scale(1.05);
 }
 

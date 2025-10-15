@@ -301,6 +301,46 @@ const MsmeCustomizeDashboard = () => {
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
+  // Render media preview function like admin blog management
+  const renderBlogMediaPreview = (blog) => {
+    switch (blog.mediaType) {
+      case 'youtube':
+        let videoId;
+        if (blog.mediaUrl.includes('youtube.com')) {
+          videoId = blog.mediaUrl.split('v=')[1]?.split('&')[0];
+        } else if (blog.mediaUrl.includes('youtu.be')) {
+          videoId = blog.mediaUrl.split('/').pop().split('?')[0];
+        } else {
+          videoId = blog.mediaUrl.split('/').pop();
+        }
+        return (
+          <div className="blog-media-preview youtube">
+            <iframe
+              src={`https://www.youtube.com/embed/${videoId}`}
+              frameBorder="0"
+              allowFullScreen
+              className="blog-thumbnail"
+            ></iframe>
+          </div>
+        );
+      case 'video':
+        return (
+          <div className="blog-media-preview video">
+            <video controls className="blog-thumbnail">
+              <source src={`http://localhost:1337/uploads/${blog.mediaUrl}`} type="video/mp4" />
+            </video>
+          </div>
+        );
+      case 'image':
+      default:
+        return (
+          <div className="blog-media-preview image">
+            <img src={`http://localhost:1337/uploads/${blog.mediaUrl}`} alt={blog.title} className="blog-thumbnail" />
+          </div>
+        );
+    }
+  };
+
   const handleSidebarToggle = (stateOrIsOpen, isMobile = false) => {
     if (typeof stateOrIsOpen === 'object') {
       setSidebarState({ 
@@ -892,28 +932,7 @@ const MsmeCustomizeDashboard = () => {
                 {blogPosts.map((blog) => (
                   <div key={blog._id} className="blog-card">
                     <div className="blog-media" onClick={() => handleViewBlog(blog)}>
-                      {blog.mediaType === 'youtube' ? (
-                        <img 
-                          src={getYouTubeThumbnail(blog.mediaUrl)} 
-                          alt={blog.title}
-                          className="blog-thumbnail"
-                          onError={(e) => {
-                            // Fallback to different quality thumbnails
-                            const videoId = extractYouTubeId(blog.mediaUrl);
-                            if (e.target.src.includes('maxresdefault')) {
-                              e.target.src = `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
-                            } else if (e.target.src.includes('mqdefault')) {
-                              e.target.src = `https://img.youtube.com/vi/${videoId}/sddefault.jpg`;
-                            }
-                          }}
-                        />
-                      ) : (
-                        <img 
-                          src={getBlogMediaUrl(blog)} 
-                          alt={blog.title}
-                          className="blog-thumbnail"
-                        />
-                      )}
+                      {renderBlogMediaPreview(blog)}
                       <div className="blog-media-type">
                         {blog.mediaType === 'youtube' && '▶️ Video'}
                         {blog.mediaType === 'video' && '🎥 Video'}

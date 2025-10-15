@@ -110,10 +110,6 @@ const MsmeAnalytics = () => {
               <h1>Growth & Analytics</h1>
               <p>Track your business performance and growth opportunities.</p>
             </div>
-            <div className="msme-analytics__actions">
-              <button className="msme-analytics__export-btn">Export Report</button>
-              <button className="msme-analytics__filter-btn">Filter Data</button>
-            </div>
           </div>
         </div>
 

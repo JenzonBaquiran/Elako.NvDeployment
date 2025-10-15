@@ -394,6 +394,7 @@
   background: #f8f9fa;
   border-radius: 8px;
   transition: all 0.2s ease;
+  align-items: flex-start;
 }
 
 .msme-dashboard__insight-item:hover {
@@ -410,6 +411,17 @@
   background: #313131;
   border-radius: 8px;
   flex-shrink: 0;
+  color: white;
+}
+
+.msme-dashboard__insight-icon svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.msme-dashboard__insight-content {
+  flex: 1;
 }
 
 .msme-dashboard__insight-content h4 {

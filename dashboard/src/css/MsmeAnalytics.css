@@ -154,10 +154,20 @@
   transition: all 0.3s ease;
 }
 
+.msme-analytics__chart-card--clickable {
+  cursor: pointer;
+}
+
 .msme-analytics__chart-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   border-color: #313131;
+}
+
+.msme-analytics__chart-card--clickable:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+  border-color: #7ed957;
 }
 
 .msme-analytics__chart-header {
@@ -178,6 +188,20 @@
   color: #666;
   margin: 0;
   font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__click-hint {
+  font-size: 11px;
+  color: #7ed957;
+  margin-top: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.msme-analytics__chart-card--clickable:hover .msme-analytics__click-hint {
+  opacity: 1;
 }
 
 .msme-analytics__chart-container {
@@ -378,4 +402,233 @@
     height: 36px;
     font-size: 16px;
   }
+
+  .msme-analytics__modal-content {
+    width: 95vw;
+    max-width: 95vw;
+    height: 90vh;
+    max-height: 90vh;
+  }
+
+  .msme-analytics__expanded-chart {
+    overflow-x: auto;
+  }
+
+  .msme-analytics__detailed-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .msme-analytics__product-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Modal Styles */
+.msme-analytics__modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.msme-analytics__modal-content {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 90vw;
+  max-width: 1000px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.msme-analytics__modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #f8f9fa;
+  border-radius: 16px 16px 0 0;
+}
+
+.msme-analytics__modal-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__modal-close {
+  background: none;
+  border: none;
+  font-size: 32px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.msme-analytics__modal-close:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.msme-analytics__modal-body {
+  padding: 24px;
+}
+
+.msme-analytics__expanded-chart {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+
+.msme-analytics__detailed-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.msme-analytics__detail-stat {
+  text-align: center;
+}
+
+.msme-analytics__detail-stat h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #666;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+}
+
+.msme-analytics__detail-stat p {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #313131;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__product-details {
+  margin-bottom: 24px;
+}
+
+.msme-analytics__product-details h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__product-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+.msme-analytics__product-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.msme-analytics__product-rank {
+  background: #313131;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 12px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__product-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__product-stats {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.msme-analytics__rating {
+  font-size: 12px;
+  font-weight: 600;
+  color: #7ed957;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__reviews {
+  font-size: 12px;
+  color: #666;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__insights-detailed {
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.msme-analytics__insights-detailed h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__insights-detailed ul {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.msme-analytics__insights-detailed li {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.msme-analytics__no-data {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
 }

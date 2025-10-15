@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Add, Message, Analytics, Settings } from '@mui/icons-material';
+import { 
+  Add, 
+  Message, 
+  Analytics, 
+  Settings,
+  TrendingUp,
+  Star,
+  Group,
+  Inventory,
+  EmojiEvents,
+  Feedback,
+  Growth,
+  TrendingDown,
+  Refresh
+} from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
 import MsmeSidebar from './MsmeSidebar';
@@ -29,6 +43,15 @@ const MsmeDashboard = () => {
     }
   });
   const [topProducts, setTopProducts] = useState([]);
+  const [productRatings, setProductRatings] = useState({
+    productRatings: [],
+    summary: {
+      totalProducts: 0,
+      ratedProducts: 0,
+      averageRating: 0,
+      totalReviews: 0
+    }
+  });
   const [loading, setLoading] = useState(true);
   const [showCongratulations, setShowCongratulations] = useState(false);
   const [topStoreBadgeData, setTopStoreBadgeData] = useState(null);
@@ -58,9 +81,10 @@ const MsmeDashboard = () => {
 
     fetchBusinessName();
     
-    // Fetch analytics data and top products
+    // Fetch analytics data, top products, and product ratings
     fetchAnalytics();
     fetchTopProducts();
+    fetchProductRatings();
     
     // Check if store is a top store (with slight delay to let other data load)
     setTimeout(() => {
@@ -124,6 +148,44 @@ const MsmeDashboard = () => {
     } catch (error) {
       console.error('Error fetching top products:', error);
       setTopProducts([]);
+    }
+  };
+
+  const fetchProductRatings = async () => {
+    if (!user || !user._id) return;
+    
+    try {
+      const response = await fetch(`http://localhost:1337/api/stores/${user._id}/analytics/products`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setProductRatings(data.data);
+        } else {
+          console.log('No product ratings found');
+          setProductRatings({
+            productRatings: [],
+            summary: { totalProducts: 0, ratedProducts: 0, averageRating: 0, totalReviews: 0 }
+          });
+        }
+      } else {
+        console.error('Failed to fetch product ratings');
+        setProductRatings({
+          productRatings: [],
+          summary: { totalProducts: 0, ratedProducts: 0, averageRating: 0, totalReviews: 0 }
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching product ratings:', error);
+      setProductRatings({
+        productRatings: [],
+        summary: { totalProducts: 0, ratedProducts: 0, averageRating: 0, totalReviews: 0 }
+      });
     }
   };
 
@@ -198,6 +260,109 @@ const MsmeDashboard = () => {
     return sidebarState.isOpen 
       ? 'msme-dashboard__content msme-dashboard__content--sidebar-open' 
       : 'msme-dashboard__content msme-dashboard__content--sidebar-collapsed';
+  };
+
+  // Generate dynamic business insights based on analytics data
+  const generateBusinessInsights = () => {
+    const insights = [];
+
+    // Peak engagement insight based on page views
+    if (analytics.pageViews.dailyBreakdown && analytics.pageViews.dailyBreakdown.length > 0) {
+      const peakDay = analytics.pageViews.dailyBreakdown.reduce((max, day) => 
+        day.count > max.count ? day : max, analytics.pageViews.dailyBreakdown[0]
+      );
+      const peakDayName = new Date(peakDay._id).toLocaleDateString('en-US', { weekday: 'long' });
+      
+      insights.push({
+        icon: <TrendingUp />,
+        title: "Peak Customer Engagement", 
+        description: `Most customer interactions occur on ${peakDayName}s with ${peakDay.count} views`
+      });
+    } else if (analytics.pageViews.today > 0) {
+      insights.push({
+        icon: <Group />,
+        title: "Customer Engagement",
+        description: `You received ${analytics.pageViews.today} profile views today`
+      });
+    } else {
+      insights.push({
+        icon: <Analytics />,
+        title: "Boost Engagement",
+        description: "Consider updating your store profile to attract more customers"
+      });
+    }
+
+    // Product performance insight
+    if (productRatings.productRatings && productRatings.productRatings.length > 0) {
+      const topProduct = productRatings.productRatings[0];
+      insights.push({
+        icon: <Star />,
+        title: "Top Product Performance",
+        description: `${topProduct.productName} is your top-rated product with ${topProduct.overallRating}★ rating`
+      });
+    } else if (topProducts && topProducts.length > 0) {
+      const topProduct = topProducts[0];
+      insights.push({
+        icon: <EmojiEvents />,
+        title: "Product Excellence",
+        description: `${topProduct.productName} leads with ${topProduct.rating.toFixed(1)}★ rating`
+      });
+    } else {
+      insights.push({
+        icon: <Inventory />,
+        title: "Product Opportunity",
+        description: "Add more products and encourage customer reviews to boost visibility"
+      });
+    }
+
+    // Rating trend insight
+    if (analytics.ratings.trend !== 0 && analytics.ratings.totalRatings > 0) {
+      const trend = parseFloat(analytics.ratings.trend);
+      if (trend > 0) {
+        insights.push({
+          icon: <TrendingUp />, 
+          title: "Rising Customer Satisfaction",
+          description: `Your ratings improved by ${trend} stars this week - keep up the great work!`
+        });
+      } else {
+        insights.push({
+          icon: <Refresh />,
+          title: "Focus on Quality",
+          description: "Consider reviewing recent feedback to maintain high customer satisfaction"
+        });
+      }
+    } else if (analytics.ratings.currentAverage >= 4.5) {
+      insights.push({
+        icon: <Star />,
+        title: "Excellent Reputation",
+        description: `Your ${analytics.ratings.currentAverage.toFixed(1)}★ rating reflects excellent customer satisfaction`
+      });
+    } else if (analytics.ratings.totalRatings === 0) {
+      insights.push({
+        icon: <Feedback />,
+        title: "Gather Feedback",
+        description: "Encourage customers to rate your store to build trust and visibility"
+      });
+    }
+
+    // Growth opportunity based on followers vs views
+    const followerRatio = analytics.followers > 0 ? (analytics.pageViews.total / analytics.followers) : 0;
+    if (followerRatio > 10 && analytics.followers < 50) {
+      insights.push({
+        icon: <TrendingUp />,
+        title: "Growth Opportunity", 
+        description: "High profile views with room to convert more visitors into followers"
+      });
+    } else if (analytics.followers > analytics.pageViews.weekly) {
+      insights.push({
+        icon: <EmojiEvents />,
+        title: "Strong Loyalty",
+        description: "You have more followers than weekly views - great customer retention!"
+      });
+    }
+
+    // Return first 2 insights for dashboard display
+    return insights.slice(0, 2);
   };
 
   return (
@@ -344,20 +509,21 @@ const MsmeDashboard = () => {
           <div className="msme-dashboard__card">
             <h3>Business Insights</h3>
             <div className="msme-dashboard__insights-list">
-              <div className="msme-dashboard__insight-item">
-                <div className="msme-dashboard__insight-icon"></div>
-                <div className="msme-dashboard__insight-content">
-                  <h4>Peak Customer Engagement</h4>
-                  <p>Most customer interactions occur between 2-4 PM</p>
-                </div>
-              </div>
-              <div className="msme-dashboard__insight-item">
-                <div className="msme-dashboard__insight-icon"></div>
-                <div className="msme-dashboard__insight-content">
-                  <h4>Growth Opportunity</h4>
-                  <p>Consider adding more coffee varieties to boost sales</p>
-                </div>
-              </div>
+              {loading ? (
+                <div className="msme-dashboard__loading">Loading insights...</div>
+              ) : (
+                generateBusinessInsights().map((insight, index) => (
+                  <div key={index} className="msme-dashboard__insight-item">
+                    <div className="msme-dashboard__insight-icon">
+                      {insight.icon}
+                    </div>
+                    <div className="msme-dashboard__insight-content">
+                      <h4>{insight.title}</h4>
+                      <p>{insight.description}</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

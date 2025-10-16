@@ -90,12 +90,34 @@ const FloatingMessageIcon = () => {
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
-    setCurrentView('faq');
-    setChatMessages(prev => [...prev, {
-      type: 'bot',
-      message: `Here are the frequently asked questions for ${faqData[category].title}:`,
-      timestamp: new Date()
-    }]);
+    // Add user message showing they selected this category
+    setChatMessages(prev => [
+      ...prev,
+      {
+        type: 'user',
+        message: faqData[category].title,
+        timestamp: new Date()
+      },
+      {
+        type: 'bot',
+        message: `Here are the frequently asked questions for ${faqData[category].title}:`,
+        timestamp: new Date()
+      }
+    ]);
+    
+    // Add each question as a clickable option in the chat
+    setTimeout(() => {
+      setChatMessages(prev => [
+        ...prev,
+        {
+          type: 'bot',
+          message: 'questions',
+          timestamp: new Date(),
+          isQuestionsList: true,
+          category: category
+        }
+      ]);
+    }, 500);
   };
 
   const handleQuestionSelect = (question, answer) => {
@@ -142,10 +164,7 @@ const FloatingMessageIcon = () => {
   };
 
   const goBack = () => {
-    if (currentView === 'faq') {
-      setCurrentView('welcome');
-      setSelectedCategory('');
-    } else if (currentView === 'contact') {
+    if (currentView === 'contact') {
       setCurrentView('welcome');
     }
   };
@@ -183,7 +202,21 @@ const FloatingMessageIcon = () => {
         <div className="chat-messages">
           {chatMessages.map((msg, index) => (
             <div key={index} className={`message ${msg.type}-message`}>
-              <p>{msg.message}</p>
+              {msg.isQuestionsList ? (
+                <div className="chat-questions-list">
+                  {faqData[msg.category].questions.map((item, qIndex) => (
+                    <button
+                      key={qIndex}
+                      className="chat-question-btn"
+                      onClick={() => handleQuestionSelect(item.question, item.answer)}
+                    >
+                      {item.question}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p>{msg.message}</p>
+              )}
             </div>
           ))}
           <div ref={messagesEndRef} />
@@ -196,25 +229,7 @@ const FloatingMessageIcon = () => {
     </div>
   );
 
-  const renderFAQView = () => (
-    <div className="faq-questions">
-      <div className="faq-header">
-        <button className="back-btn" onClick={goBack}>← Back</button>
-        <h4>{faqData[selectedCategory].title}</h4>
-      </div>
-      <div className="questions-list">
-        {faqData[selectedCategory].questions.map((item, index) => (
-          <button
-            key={index}
-            className="question-btn"
-            onClick={() => handleQuestionSelect(item.question, item.answer)}
-          >
-            {item.question}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
+
 
   const renderContactView = () => (
     <div className="contact-info">
@@ -267,7 +282,6 @@ const FloatingMessageIcon = () => {
             {/* FAQ Content */}
             <div className="faq-content">
               {currentView === 'welcome' && renderWelcomeView()}
-              {currentView === 'faq' && renderFAQView()}
               {currentView === 'contact' && renderContactView()}
             </div>
           </div>

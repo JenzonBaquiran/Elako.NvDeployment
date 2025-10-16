@@ -61,6 +61,38 @@ function Signup() {
     setCertificateFiles(prev => ({ ...prev, [certificateType]: file }));
   };
 
+  const clearCustomerForm = () => {
+    setCustomerData({
+      firstname: "",
+      middlename: "",
+      lastname: "",
+      email: "",
+      contactNumber: "",
+      address: "",
+      username: "",
+      password: "",
+      confirmPassword: ""
+    });
+  };
+
+  const clearMsmeForm = () => {
+    setMsmeData({
+      clientProfilingNumber: "",
+      category: "",
+      businessName: "",
+      email: "",
+      username: "",
+      password: "",
+      confirmPassword: "",
+      tinNumber: ""
+    });
+    setCertificateFiles({
+      mayorsPermit: null,
+      bir: null,
+      fda: null
+    });
+  };
+
   const handleTermsAgreed = () => {
     if (pendingSubmit === 'customer') {
       processCustomerSubmit();
@@ -108,9 +140,13 @@ function Signup() {
         setTimeout(() => navigate("/login"), 2000);
       } else {
         setError(data.error || data.errors?.join(", ") || "Registration failed");
+        clearCustomerForm();
+        setShowTermsModal(false);
       }
     } catch (error) {
       setError("Network error. Please try again.");
+      clearCustomerForm();
+      setShowTermsModal(false);
     } finally {
       setLoading(false);
     }
@@ -168,9 +204,13 @@ function Signup() {
         setTimeout(() => navigate("/login"), 2000);
       } else {
         setError(data.error || data.errors?.join(", ") || "Registration failed");
+        clearMsmeForm();
+        setShowTermsModal(false);
       }
     } catch (error) {
       setError("Network error. Please try again.");
+      clearMsmeForm();
+      setShowTermsModal(false);
     } finally {
       setLoading(false);
     }

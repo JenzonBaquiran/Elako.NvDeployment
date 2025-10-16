@@ -400,6 +400,26 @@ body,
   font-family: 'Poppins', Arial, Helvetica, sans-serif !important;
 }
 
+/* Apply Poppins font to Material-UI Alert components */
+.MuiAlert-root,
+.MuiAlert-message,
+.MuiAlert-icon,
+.MuiAlert-action {
+  font-family: 'Poppins', Arial, Helvetica, sans-serif !important;
+}
+
+/* Apply Poppins font to all Material-UI components in signup page */
+.signup-container .MuiTypography-root,
+.signup-container .MuiButton-root,
+.signup-container .MuiTextField-root,
+.signup-container .MuiFormControl-root,
+.signup-container .MuiInputBase-root,
+.signup-container .MuiInputLabel-root,
+.signup-container .MuiMenuItem-root,
+.signup-container .MuiSelect-root {
+  font-family: 'Poppins', Arial, Helvetica, sans-serif !important;
+}
+
 /* Link styles */
 .link {
   color: #666 !important;

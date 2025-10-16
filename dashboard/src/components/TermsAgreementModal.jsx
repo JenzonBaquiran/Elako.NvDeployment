@@ -22,6 +22,7 @@ const TermsAgreementModal = ({ open, onClose, onAgree, userType }) => {
     if (agreed) {
       onAgree();
       onClose();
+      setAgreed(false); // Reset checkbox after agreeing
     }
   };
 
@@ -29,6 +30,13 @@ const TermsAgreementModal = ({ open, onClose, onAgree, userType }) => {
     setAgreed(false);
     onClose();
   };
+
+  // Reset checkbox when modal opens
+  React.useEffect(() => {
+    if (open) {
+      setAgreed(false);
+    }
+  }, [open]);
 
   return (
     <Dialog 

@@ -704,7 +704,7 @@ const MsmeCustomizeDashboard = () => {
 
             {/* Location Section */}
             <div className="location-enhanced-section">
-              <h4>Location</h4>
+              <h4>Store Location (Embedded Google Maps)</h4>
               {editMode ? (
                 <div className="location-input-group">
                   <input
@@ -712,28 +712,52 @@ const MsmeCustomizeDashboard = () => {
                     name="googleMapsUrl"
                     value={dashboardData.googleMapsUrl || ''}
                     onChange={handleInputChange}
-                    placeholder="Paste your Google Maps link here (e.g., https://maps.google.com/...)"
+                    placeholder="Paste your Google Maps EMBED link here (e.g., https://www.google.com/maps/embed?pb=...)"
                     className="specific-address-input"
                   />
                   <div className="location-help-text">
-                    <small>💡 Go to Google Maps, search your location, click "Share" and paste the link here</small>
+                    <small>
+                      � <strong>How to get embedded Google Maps link:</strong><br/>
+                      1. Go to <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer">Google Maps</a><br/>
+                      2. Search and find your store location<br/>
+                      3. Click "Share" button<br/>
+                      4. Click "Embed a map" tab<br/>
+                      5. Copy the link from the iframe src (starts with https://www.google.com/maps/embed?pb=...)
+                    </small>
                   </div>
+                  {dashboardData.googleMapsUrl && (
+                    <div className="location-preview">
+                      <small>📍 Preview:</small>
+                      <iframe
+                        src={dashboardData.googleMapsUrl}
+                        width="100%"
+                        height="200"
+                        style={{border: 0, borderRadius: '8px', marginTop: '8px'}}
+                        allowFullScreen=""
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Location Preview"
+                      />
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="location-display">
                   {dashboardData.googleMapsUrl ? (
                     <div className="address-with-map">
-                      <button
-                        onClick={() => {
-                          window.open(dashboardData.googleMapsUrl, '_blank');
-                        }}
-                        className="view-on-maps-btn"
-                      >
-                         View Location on Google Maps
-                      </button>
+                      <iframe
+                        src={dashboardData.googleMapsUrl}
+                        width="100%"
+                        height="250"
+                        style={{border: 0, borderRadius: '8px'}}
+                        allowFullScreen=""
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Store Location"
+                      />
                     </div>
                   ) : (
-                    <p className="no-address">No location provided</p>
+                    <p className="no-address">No location provided. Click "Edit Profile" to add your store location.</p>
                   )}
                 </div>
               )}

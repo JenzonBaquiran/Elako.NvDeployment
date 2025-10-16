@@ -27,6 +27,31 @@ import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AudiotrackIcon from '@mui/icons-material/Audiotrack';
 
+// Helper function to handle embedded Google Maps URLs
+const handleEmbedUrl = (url) => {
+  if (!url) return null;
+  
+  console.log('Processing embed URL:', url);
+  
+  // If it's already an embed URL, use it directly
+  if (url.includes('/embed') || url.includes('pb=!1m')) {
+    console.log('URL is already embed format');
+    return url;
+  }
+  
+  // If it's an iframe HTML code, extract the src
+  if (url.includes('<iframe') && url.includes('src=')) {
+    const srcMatch = url.match(/src="([^"]+)"/);
+    if (srcMatch) {
+      console.log('Extracted iframe src URL:', srcMatch[1]);
+      return srcMatch[1];
+    }
+  }
+  
+  // For non-embed URLs, let them know they need to use embed format
+  console.warn('URL is not in embed format. MSME owner should use embedded Google Maps URL.');
+  return null;
+};
 
 const CustomerStoreView = () => {
   const { storeId } = useParams();
@@ -748,19 +773,23 @@ const CustomerStoreView = () => {
           
           {/* Store Logo and Info Section */}
           <div className="store-info-section">
-            <div className="store-logo-container">
-              <img 
-                src={getStoreImageUrl(store)} 
-                alt={store.businessName}
-                className="store-logo-main"
-                onError={(e) => {
-                  e.target.src = store.category === 'food' ? foodStoreImg : defaultStoreImg;
-                }}
-              />
-            </div>
-            
-            <div className="store-details">
-              <h1 className="store-name">{store.businessName}</h1>
+            <div className="store-main-content">
+              <div className="store-details">
+                <div className="store-header-section">
+                  <div className="store-name-with-logo">
+                    <div className="store-logo-container-left">
+                      <img 
+                        src={getStoreImageUrl(store)} 
+                        alt={store.businessName}
+                        className="store-logo-main"
+                        onError={(e) => {
+                          e.target.src = store.category === 'food' ? foodStoreImg : defaultStoreImg;
+                        }}
+                      />
+                    </div>
+                    <h1 className="store-name">{store.businessName}</h1>
+                  </div>
+                </div>
               
               {/* Username */}
               <div className="store-detail-row username-row">
@@ -774,18 +803,11 @@ const CustomerStoreView = () => {
               )}
               
               <div className="store-meta">
-                {/* Location - prioritize Google Maps URL, fallback to regular location */}
-                {dashboard.googleMapsUrl ? (
+                {/* Location - only show as text, removed View Location link */}
+                {(dashboard.googleMapsUrl || dashboard.location) && (
                   <div className="store-detail-row">
                     <LocationOnIcon className="detail-icon location-icon" />
-                    <a href={dashboard.googleMapsUrl} target="_blank" rel="noopener noreferrer" className="social-link">
-                       View Location on Google Maps
-                    </a>
-                  </div>
-                ) : dashboard.location && (
-                  <div className="store-detail-row">
-                    <LocationOnIcon className="detail-icon location-icon" />
-                    <span>{dashboard.location}</span>
+                    <span>{dashboard.location || 'Location available'}</span>
                   </div>
                 )}
                 
@@ -861,17 +883,20 @@ const CustomerStoreView = () => {
                     </a>
                   </div>
                 )}
-                
-                {/* Store Rating */}
-                <div className="store-rating">
+              </div>
+              
+              {/* Bottom Section with Rating (left) and Actions (right) */}
+              <div className="store-bottom-section">
+                {/* Store Rating - Bottom Left */}
+                <div className="store-rating-bottom">
                   {renderStarRating(store.averageRating || 0)}
                   {store.totalRatings > 0 && (
                     <span className="total-ratings">({store.totalRatings} rating{store.totalRatings !== 1 ? 's' : ''})</span>
                   )}
                 </div>
-              </div>
-              
-              <div className="store-actions">
+                
+                {/* Store Actions - Bottom Center/Right */}
+                <div className="store-actions">
                 <FollowButton 
                   storeId={storeId} 
                   storeName={store?.businessName}
@@ -898,8 +923,52 @@ const CustomerStoreView = () => {
                   <ChatIcon />
                   CHAT
                 </button>
+                </div>
               </div>
             </div>
+            </div>
+            
+            {/* Google Maps Embed Section - Upper Right */}
+            {dashboard.googleMapsUrl && handleEmbedUrl(dashboard.googleMapsUrl) && (
+              <div className="store-location-embed-right">
+                {console.log('Original Google Maps URL:', dashboard.googleMapsUrl)}
+                {console.log('Processed Embed URL:', handleEmbedUrl(dashboard.googleMapsUrl))}
+                <iframe
+                  src={handleEmbedUrl(dashboard.googleMapsUrl)}
+                  width="100%"
+                  height="250"
+                  style={{border: 0}}
+                  allowFullScreen=""
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Store Location"
+                  className="google-maps-embed"
+                  onError={(e) => {
+                    console.error('Maps iframe failed to load:', e);
+                  }}
+                  onLoad={(e) => {
+                    console.log('Maps iframe loaded successfully');
+                  }}
+                />
+              </div>
+            )}
+            
+            {/* Message when no valid embed URL */}
+            {dashboard.googleMapsUrl && !handleEmbedUrl(dashboard.googleMapsUrl) && (
+              <div className="store-location-embed-right" style={{
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                background: '#f8f9fa', 
+                borderRadius: '8px',
+                border: '2px dashed #ddd'
+              }}>
+                <div style={{textAlign: 'center', padding: '20px', color: '#666'}}>
+                  <p style={{margin: 0, fontSize: '14px'}}>📍 Location URL needs to be in embed format</p>
+                  <small>Store owner should use embedded Google Maps link</small>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

@@ -805,9 +805,36 @@
 
 .location-input-group {
   display: flex;
+  flex-direction: column;
   gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
+}
+
+.location-preview {
+  margin-top: 15px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.location-preview small {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.location-help-text {
+  margin-top: 8px;
+  padding: 12px;
+  background: #f0f8ff;
+  border-radius: 6px;
+  border-left: 4px solid #007bff;
+}
+
+.location-help-text small {
+  color: #333;
+  line-height: 1.4;
 }
 
 .specific-address-input {

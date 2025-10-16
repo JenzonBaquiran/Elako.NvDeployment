@@ -105,16 +105,58 @@
 /* Store Info Section */
 .store-info-section {
   display: flex;
+  justify-content: space-between;
   padding: 20px;
   gap: 20px;
   background: white;
   border-radius: 0 0 16px 16px; /* Only round bottom corners */
+  position: relative;
 }
 
-.store-logo-container {
+.store-main-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin-right: 320px; /* Leave space for the map on the right */
+}
+
+.store-header-section {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.store-name-with-logo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.store-logo-container-left {
   flex-shrink: 0;
 }
 
+.store-logo-container-left .store-logo-main {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #28a745;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Legacy logo container - now unused */
+.store-logo-container {
+  display: none;
+}
+
+/* Default logo styling - overridden by specific containers */
 .store-logo-main {
   width: 120px;
   height: 120px;
@@ -134,6 +176,7 @@
   display: flex;
   flex-direction: column;
   text-align: left;
+  width: 100%;
 }
 
 .store-name {
@@ -299,9 +342,46 @@
   text-align: left;
 }
 
+/* Google Maps Embed Styling - Upper Right */
+.store-location-embed-right {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 300px;
+  height: 250px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  background: #f8f9fa;
+  padding: 4px;
+  z-index: 10;
+}
+
+.google-maps-embed {
+  border-radius: 8px;
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+/* Bottom Section with Rating and Actions */
+.store-bottom-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #e9ecef;
+}
+
+.store-rating-bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .store-actions {
-  margin-top: auto;
-  align-self: flex-end;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1007,6 +1087,47 @@
     width: 100px;
     height: 100px;
     margin: 0 auto;
+  }
+
+  .store-main-content {
+    margin-right: 0;
+    flex-direction: column;
+  }
+
+  .store-header-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .store-name-with-logo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .store-logo-container-left .store-logo-main {
+    width: 50px;
+    height: 50px;
+  }
+
+  .store-location-embed-right {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 100%;
+    height: 180px;
+    margin: 16px 0;
+    padding: 2px;
+  }
+
+  .google-maps-embed {
+    height: 100%;
+  }
+
+  .store-bottom-section {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
   }
 
   .store-actions {

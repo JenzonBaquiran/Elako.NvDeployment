@@ -1167,32 +1167,52 @@
 
 .add-size-form {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
-  padding: 12px;
+  padding: 16px;
   background-color: #f9fafb;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
+  flex-wrap: wrap;
 }
 
 .size-input {
-  flex: 1;
-  padding: 8px 12px !important;
-  border: 1px solid #d1d5db !important;
-  border-radius: 6px !important;
-  font-size: 14px !important;
+  flex: 2;
+  min-width: 200px;
+  padding: 14px 16px !important;
+  border: 2px solid #d1d5db !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
   margin-bottom: 0 !important;
+  background-color: white !important;
+  color: #000 !important;
+  outline: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.size-input:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
 }
 
 .unit-select {
-  padding: 8px 12px !important;
-  border: 1px solid #d1d5db !important;
-  border-radius: 6px !important;
-  font-size: 14px !important;
+  flex: 1;
+  min-width: 100px;
+  padding: 14px 16px !important;
+  border: 2px solid #d1d5db !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
   background-color: white !important;
   cursor: pointer !important;
   margin-bottom: 0 !important;
-  min-width: 80px;
+  color: #000 !important;
+  outline: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.unit-select:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
 }
 
 .add-size-btn,
@@ -1219,34 +1239,38 @@
   background-color: #313131;
   color: white;
   border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: 14px 20px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   transition: all 0.2s ease;
   white-space: nowrap;
+  min-width: 80px;
 }
 
 .add-btn:hover {
   background-color: #484848;
+  transform: translateY(-1px);
 }
 
 .cancel-btn {
   background-color: #6b7280;
   color: white;
   border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: 14px 20px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   transition: all 0.2s ease;
   white-space: nowrap;
+  min-width: 80px;
 }
 
 .cancel-btn:hover {
   background-color: #4b5563;
+  transform: translateY(-1px);
 }
 
 .remove-btn {
@@ -1329,17 +1353,25 @@
   .add-variant-form {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
+    padding: 16px;
   }
   
   .add-size-form .size-input,
   .add-size-form .unit-select {
     width: 100%;
+    min-width: unset;
+    flex: none;
+  }
+  
+  .size-input {
+    min-width: unset !important;
   }
   
   .add-btn,
   .cancel-btn {
     width: 100%;
-    margin-top: 8px;
+    margin-top: 0;
   }
 }
 

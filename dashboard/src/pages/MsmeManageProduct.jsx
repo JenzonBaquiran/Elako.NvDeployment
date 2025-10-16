@@ -966,11 +966,23 @@ const MsmeManageProduct = () => {
                       {showSizeForm ? (
                         <div className="add-size-form">
                           <input
-                            type="number"
+                            type="text"
                             value={currentSize.size}
-                            onChange={(e) => setCurrentSize(prev => ({ ...prev, size: e.target.value }))}
-                            placeholder="Size"
+                            onChange={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setCurrentSize(prev => ({ ...prev, size: e.target.value }));
+                            }}
+                            onKeyDown={(e) => {
+                              e.stopPropagation();
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                addSizeOption();
+                              }
+                            }}
+                            placeholder="Size (e.g., 250, 500)"
                             className="size-input"
+                            autoFocus
                           />
                           <select
                             value={currentSize.unit}

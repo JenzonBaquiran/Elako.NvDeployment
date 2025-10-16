@@ -11,8 +11,6 @@ import '../components/StoreImage.css';
 import defaultStoreImg from '../assets/pic.jpg';
 import foodStoreImg from '../assets/shakshouka.jpg';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
 const CustomerViewStore = () => {
   const navigate = useNavigate();
@@ -24,20 +22,24 @@ const CustomerViewStore = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [followedStores, setFollowedStores] = useState(new Set());
-  const [favoritedStores, setFavoritedStores] = useState(new Set());
 
-  // Fetch stores on component mount
+  // Fetch stores on component mount and when user changes
   useEffect(() => {
     fetchStores();
     // Scroll to top when component mounts
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+  }, [user]); // Added user as dependency to refetch when user logs in/out
 
   // API Functions
   const fetchStores = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:1337/api/stores');
+      // Build URL with optional customerId to exclude followed stores
+      const url = user?._id 
+        ? `http://localhost:1337/api/stores?customerId=${user._id}`
+        : 'http://localhost:1337/api/stores';
+        
+      const response = await fetch(url);
       const data = await response.json();
       
       if (data.success && Array.isArray(data.stores)) {
@@ -186,18 +188,6 @@ const CustomerViewStore = () => {
     }
   };
 
-  const handleFavoriteToggle = (store) => {
-    const newFavoritedStores = new Set(favoritedStores);
-    if (favoritedStores.has(store._id)) {
-      newFavoritedStores.delete(store._id);
-      showSuccess(`Removed ${store.businessName} from favorites`, 'Success');
-    } else {
-      newFavoritedStores.add(store._id);
-      showSuccess(`Added ${store.businessName} to favorites`, 'Success');
-    }
-    setFavoritedStores(newFavoritedStores);
-  };
-
 
 
   const renderStarRating = (rating) => {
@@ -334,16 +324,6 @@ const CustomerViewStore = () => {
                     <div className="customer-view-store-top-content">
                       <div className="store-name-section">
                         <h3>{store.businessName}</h3>
-                        <button 
-                          className={`favorite-heart-btn ${favoritedStores.has(store._id) ? 'favorited' : ''}`}
-                          onClick={() => handleFavoriteToggle(store)}
-                          title={favoritedStores.has(store._id) ? 'Remove from favorites' : 'Add to favorites'}
-                        >
-                          {favoritedStores.has(store._id) ? 
-                            <FavoriteIcon /> : 
-                            <FavoriteBorderIcon />
-                          }
-                        </button>
                       </div>
                       <p className="customer-view-store-username">@{store.username}</p>
                       

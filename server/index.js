@@ -3322,15 +3322,42 @@ app.get("/api/stores/:storeId/analytics/products", async (req, res) => {
 // Get all stores with dashboard information for customer view
 app.get("/api/stores", async (req, res) => {
   try {
+    const { customerId } = req.query; // Get customerId from query params
+
     // Fetch all visible and approved MSMEs
     const msmes = await MSME.find({
       status: "approved",
       isVisible: true,
     }).sort({ createdAt: -1 });
 
+    // If customerId is provided, get customer's following list to exclude
+    let excludeStoreIds = [];
+    if (customerId) {
+      try {
+        const customer = await Customer.findById(customerId).select(
+          "following"
+        );
+        if (customer && customer.following) {
+          excludeStoreIds = customer.following.map((id) => id.toString());
+        }
+      } catch (customerError) {
+        console.warn(
+          "Warning: Could not fetch customer following list:",
+          customerError
+        );
+        // Continue without exclusion if customer lookup fails
+      }
+    }
+
+    // Filter out followed stores if exclusion list exists
+    const filteredMsmes =
+      excludeStoreIds.length > 0
+        ? msmes.filter((msme) => !excludeStoreIds.includes(msme._id.toString()))
+        : msmes;
+
     // Fetch dashboard information for each MSME
     const storesWithDashboards = await Promise.all(
-      msmes.map(async (msme) => {
+      filteredMsmes.map(async (msme) => {
         try {
           let dashboard = await Dashboard.findByMsmeId(msme._id);
 

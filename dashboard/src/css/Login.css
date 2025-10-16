@@ -280,4 +280,42 @@ body,
   font-family: 'Poppins', Arial, Helvetica, sans-serif !important;
 }
 
+/* Apply Poppins to Material-UI Typography components */
+.MuiTypography-root,
+.MuiTypography-h5,
+.MuiTypography-body2,
+.MuiTypography-caption,
+.MuiButton-root,
+.MuiInputLabel-root,
+.MuiSelect-root,
+.MuiMenuItem-root,
+.MuiFormControl-root,
+.MuiInputBase-root,
+.MuiOutlinedInput-root {
+  font-family: 'Poppins', Arial, Helvetica, sans-serif !important;
+}
+
+/* Specific styling for forgot password page typography */
+.login-form .MuiTypography-h5 {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 600 !important;
+  color: #333 !important;
+}
+
+.login-form .MuiTypography-body2 {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 400 !important;
+  color: #666 !important;
+}
+
+.login-form .MuiButton-root {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 500 !important;
+}
+
+.login-form .MuiTypography-caption {
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 400 !important;
+}
+
 

@@ -13,7 +13,6 @@ import {
   Paper,
   Divider
 } from "@mui/material";
-import { ArrowBack } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
 import "../css/Login.css";
@@ -203,10 +202,10 @@ function ForgotPassword() {
 
   const renderStep1 = () => (
     <form onSubmit={handleSendOTP}>
-      <Typography variant="h5" gutterBottom align="center" style={{ marginBottom: "20px", color: "#333" }}>
+      <Typography variant="h5" gutterBottom align="center" style={{ marginBottom: "20px", color: "#333", fontFamily: "'Poppins', sans-serif", fontWeight: 600 }}>
         Forgot Password
       </Typography>
-      <Typography variant="body2" align="center" style={{ marginBottom: "30px", color: "#666" }}>
+      <Typography variant="body2" align="center" style={{ marginBottom: "30px", color: "#666", fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}>
         Enter your email address and account type to receive an OTP for password reset
       </Typography>
 
@@ -236,6 +235,23 @@ function ForgotPassword() {
         </Select>
       </FormControl>
 
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: "20px" }}>
+        <Button
+          onClick={() => navigate("/login")}
+          style={{ 
+            textTransform: "none",
+            color: "#666",
+            fontFamily: "'Poppins', sans-serif",
+            fontWeight: 500,
+            padding: "8px 0",
+            minWidth: "auto",
+            fontSize: "14px"
+          }}
+        >
+          Back to Login
+        </Button>
+      </div>
+
       {loading && (
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
           <CircularProgress size={30} style={{ color: '#313131' }} />
@@ -247,20 +263,23 @@ function ForgotPassword() {
         variant="contained" 
         className="login-btn"
         disabled={loading}
-        fullWidth
-        style={{ marginBottom: "20px" }}
+        style={{ 
+          marginBottom: "20px",
+          display: "block",
+          margin: "20px auto"
+        }}
       >
-        Send OTP
+        SEND OTP
       </Button>
     </form>
   );
 
   const renderStep2 = () => (
     <form onSubmit={handleVerifyOTP}>
-      <Typography variant="h5" gutterBottom align="center" style={{ marginBottom: "20px", color: "#333" }}>
+      <Typography variant="h5" gutterBottom align="center" style={{ marginBottom: "20px", color: "#333", fontFamily: "'Poppins', sans-serif", fontWeight: 600 }}>
         Verify OTP & Reset Password
       </Typography>
-      <Typography variant="body2" align="center" style={{ marginBottom: "20px", color: "#666" }}>
+      <Typography variant="body2" align="center" style={{ marginBottom: "20px", color: "#666", fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}>
         Enter the 6-digit OTP sent to {formData.email}
       </Typography>
 
@@ -280,7 +299,7 @@ function ForgotPassword() {
       />
 
       <Divider style={{ margin: "20px 0" }}>
-        <Typography variant="caption" color="textSecondary">
+        <Typography variant="caption" color="textSecondary" style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 500 }}>
           Enter New Password
         </Typography>
       </Divider>
@@ -319,12 +338,14 @@ function ForgotPassword() {
           style={{ 
             color: canResend ? "#4CAF50" : "#999",
             textTransform: "none",
-            fontSize: "12px"
+            fontSize: "12px",
+            fontFamily: "'Poppins', sans-serif",
+            fontWeight: 500
           }}
         >
           {canResend ? "Resend OTP" : `Resend in ${otpTimer}s`}
         </Button>
-        <Typography variant="caption" color="textSecondary">
+        <Typography variant="caption" color="textSecondary" style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}>
           OTP expires in 10 minutes
         </Typography>
       </Box>
@@ -355,19 +376,6 @@ function ForgotPassword() {
             <div className="logo-container">
               <img src={logo} alt="Logo" className="brand-logo" />
             </div>
-            
-            <Button
-              startIcon={<ArrowBack />}
-              onClick={() => navigate("/login")}
-              style={{ 
-                marginBottom: "20px", 
-                textTransform: "none",
-                color: "#666",
-                alignSelf: "flex-start"
-              }}
-            >
-              Back to Login
-            </Button>
 
             {step === 1 && renderStep1()}
             {step === 2 && renderStep2()}

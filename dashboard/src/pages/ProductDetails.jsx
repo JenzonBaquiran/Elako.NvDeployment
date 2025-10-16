@@ -292,6 +292,23 @@ const ProductDetails = () => {
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Display variant and size information */}
+                  {(fb.selectedVariant || fb.selectedSize) && (
+                    <div className="product-details-feedback-selection">
+                      {fb.selectedVariant && (
+                        <span className="product-details-feedback-variant">
+                          <strong>Variant:</strong> {fb.selectedVariant.name}
+                        </span>
+                      )}
+                      {fb.selectedSize && (
+                        <span className="product-details-feedback-size">
+                          <strong>Size:</strong> {fb.selectedSize.size} {fb.selectedSize.unit}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  
                   <p className="product-details-feedback-comment">"{fb.comment}"</p>
                 </div>
               ))}
@@ -311,6 +328,45 @@ const ProductDetails = () => {
             </div>
           ) : (
             <>
+              {/* Variant Selection for Review (if product has variants) */}
+              {product.variants && product.variants.length > 0 && (
+                <div className="product-details-review-variant-selection">
+                  <h4>Select Variant to Review:</h4>
+                  <div className="product-details-review-variants-list">
+                    {product.variants.map((variant) => (
+                      <button
+                        key={variant.id}
+                        className={`product-details-review-variant-btn ${selectedVariant?.id === variant.id ? 'selected' : ''}`}
+                        onClick={() => setSelectedVariant(variant)}
+                      >
+                        {variant.name}
+                      </button>
+                    ))}
+                  </div>
+                  {!selectedVariant && (
+                    <p className="product-details-variant-required">Please select a variant to review.</p>
+                  )}
+                </div>
+              )}
+
+              {/* Size Selection for Review (if product has sizes) */}
+              {product.sizeOptions && product.sizeOptions.length > 0 && (
+                <div className="product-details-review-size-selection">
+                  <h4>Select Size to Review:</h4>
+                  <div className="product-details-review-sizes-list">
+                    {product.sizeOptions.map((size) => (
+                      <button
+                        key={size.id}
+                        className={`product-details-review-size-btn ${selectedSize?.id === size.id ? 'selected' : ''}`}
+                        onClick={() => setSelectedSize(size)}
+                      >
+                        {size.size} {size.unit}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="product-details-rating-input">
                 {[1,2,3,4,5].map(star => (
                   <span
@@ -335,6 +391,12 @@ const ProductDetails = () => {
               
               <button
                 onClick={async () => {
+                  // Validation: Check if variant is required but not selected
+                  if (product.variants && product.variants.length > 0 && !selectedVariant) {
+                    setSubmitError('Please select a variant to review.');
+                    return;
+                  }
+
                   setSubmitting(true);
                   setSubmitError(null);
                   setSubmitSuccess(false);
@@ -350,7 +412,9 @@ const ProductDetails = () => {
                         rating, 
                         comment, 
                         user: userName,
-                        userId: userId
+                        userId: userId,
+                        selectedVariant: selectedVariant,
+                        selectedSize: selectedSize
                       })
                     });
                     

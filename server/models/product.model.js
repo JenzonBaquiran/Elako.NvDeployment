@@ -86,6 +86,21 @@ const productSchema = new mongoose.Schema(
         userId: { type: String, required: false }, // Store customer ID for reference
         comment: { type: String, required: true },
         rating: { type: Number, required: true, min: 1, max: 5 },
+        selectedVariant: {
+          type: {
+            id: String,
+            name: String,
+          },
+          required: false,
+        }, // Store selected variant for this review
+        selectedSize: {
+          type: {
+            id: String,
+            size: Number,
+            unit: String,
+          },
+          required: false,
+        }, // Store selected size for this review
         createdAt: { type: Date, default: Date.now },
       },
     ],

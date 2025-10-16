@@ -1633,6 +1633,9 @@ app.post("/api/products/:productId/feedback", async (req, res) => {
         .json({ success: false, error: "Product not found" });
     }
 
+    // Extract variant and size information if provided
+    const { selectedVariant, selectedSize } = req.body;
+
     // Add feedback to product
     if (!Array.isArray(product.feedback)) product.feedback = [];
     product.feedback.push({
@@ -1640,6 +1643,8 @@ app.post("/api/products/:productId/feedback", async (req, res) => {
       userId: userId || null,
       comment,
       rating,
+      selectedVariant: selectedVariant || null,
+      selectedSize: selectedSize || null,
       createdAt: new Date(),
     });
 
@@ -4942,6 +4947,8 @@ app.get("/api/customers/:customerId/reviews", async (req, res) => {
           comment: feedback.comment,
           createdAt: feedback.createdAt,
           store: product.msmeId,
+          selectedVariant: feedback.selectedVariant || null,
+          selectedSize: feedback.selectedSize || null,
         });
       });
     });

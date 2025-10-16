@@ -214,6 +214,8 @@ const MsmeReviews = () => {
       rating: feedback.rating,
       comment: feedback.comment,
       createdAt: feedback.createdAt || new Date(),
+      selectedVariant: feedback.selectedVariant || null,
+      selectedSize: feedback.selectedSize || null,
     })) : [];
     
 
@@ -481,6 +483,23 @@ const MsmeReviews = () => {
                             {formatDate(review.createdAt)}
                           </div>
                         </div>
+                        
+                        {/* Display variant and size information */}
+                        {(review.selectedVariant || review.selectedSize) && (
+                          <div className="msme-reviews__modal-review-selection">
+                            {review.selectedVariant && (
+                              <span className="msme-reviews__modal-variant-badge">
+                                <strong>Variant:</strong> {review.selectedVariant.name}
+                              </span>
+                            )}
+                            {review.selectedSize && (
+                              <span className="msme-reviews__modal-size-badge">
+                                <strong>Size:</strong> {review.selectedSize.size} {review.selectedSize.unit}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        
                         <div className="msme-reviews__modal-review-content">
                           <p>"{review.comment}"</p>
                         </div>

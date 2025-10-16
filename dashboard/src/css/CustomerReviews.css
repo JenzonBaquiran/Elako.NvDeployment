@@ -216,6 +216,33 @@
   font-family: 'Poppins', sans-serif;
 }
 
+/* Product variant and size selection display */
+.customer-reviews__product-selection {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.customer-reviews__variant-badge,
+.customer-reviews__size-badge {
+  background-color: #7ed957;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 500;
+  border: 1px solid #6bc946;
+  font-family: 'Poppins', sans-serif;
+  white-space: nowrap;
+}
+
+.customer-reviews__variant-badge strong,
+.customer-reviews__size-badge strong {
+  color: white;
+  font-weight: 600;
+}
+
 .customer-reviews__rating {
   display: flex;
   align-items: center;
@@ -380,6 +407,17 @@
   
   .customer-reviews__product-image {
     align-self: center;
+  }
+  
+  .customer-reviews__product-selection {
+    gap: 6px;
+    margin-top: 4px;
+  }
+  
+  .customer-reviews__variant-badge,
+  .customer-reviews__size-badge {
+    font-size: 9px;
+    padding: 2px 6px;
   }
 }
 

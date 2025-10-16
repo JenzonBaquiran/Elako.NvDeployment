@@ -462,6 +462,97 @@
   font-style: normal;
 }
 
+/* Feedback variant/size selection display */
+.product-details-feedback-selection {
+  display: flex;
+  gap: 16px;
+  margin: 8px 0 12px 0;
+  flex-wrap: wrap;
+}
+
+.product-details-feedback-variant,
+.product-details-feedback-size {
+  background: #7ed957;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #6bc946;
+}
+
+.product-details-feedback-variant strong,
+.product-details-feedback-size strong {
+  color: white;
+  font-weight: 600;
+}
+
+/* Review form variant/size selection */
+.product-details-review-variant-selection,
+.product-details-review-size-selection {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.product-details-review-variant-selection h4,
+.product-details-review-size-selection h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.product-details-review-variants-list,
+.product-details-review-sizes-list {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.product-details-review-variant-btn,
+.product-details-review-size-btn {
+  background: white;
+  border: 2px solid #e9ecef;
+  color: #495057;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: capitalize;
+}
+
+.product-details-review-variant-btn:hover,
+.product-details-review-size-btn:hover {
+  border-color: #7ed957;
+  background: #f8fff5;
+  color: #333;
+}
+
+.product-details-review-variant-btn.selected,
+.product-details-review-size-btn.selected {
+  background: #7ed957;
+  border-color: #7ed957;
+  color: white;
+  font-weight: 600;
+}
+
+.product-details-variant-required {
+  color: #dc3545;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 8px 0 0 0;
+  padding: 8px 12px;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+}
+
 .product-details-no-feedback {
   color: #6c757d;
   font-style: italic;
@@ -946,6 +1037,36 @@
   .product-details-size-btn {
     padding: 6px 12px;
     font-size: 13px;
+  }
+  
+  /* Review variant/size selection mobile styles */
+  .product-details-review-variant-selection,
+  .product-details-review-size-selection {
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .product-details-review-variants-list,
+  .product-details-review-sizes-list {
+    gap: 8px;
+  }
+  
+  .product-details-review-variant-btn,
+  .product-details-review-size-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .product-details-feedback-selection {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .product-details-feedback-variant,
+  .product-details-feedback-size {
+    width: fit-content;
   }
   
   .product-details-store-section {

@@ -275,6 +275,23 @@ const CustomerReviews = () => {
                         <p className="customer-reviews__store-name">
                           {review.store?.businessName || 'Unknown Store'}
                         </p>
+                        
+                        {/* Display variant and size information */}
+                        {(review.selectedVariant || review.selectedSize) && (
+                          <div className="customer-reviews__product-selection">
+                            {review.selectedVariant && (
+                              <span className="customer-reviews__variant-badge">
+                                <strong>Variant:</strong> {review.selectedVariant.name}
+                              </span>
+                            )}
+                            {review.selectedSize && (
+                              <span className="customer-reviews__size-badge">
+                                <strong>Size:</strong> {review.selectedSize.size} {review.selectedSize.unit}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        
                         <div className="customer-reviews__rating">
                           {editingReview === review._id ? (
                             renderStars(

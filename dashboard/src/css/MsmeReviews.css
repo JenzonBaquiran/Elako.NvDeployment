@@ -871,6 +871,33 @@
   color: #555;
 }
 
+/* Modal review variant and size selection display */
+.msme-reviews__modal-review-selection {
+  display: flex;
+  gap: 12px;
+  margin: 12px 0;
+  flex-wrap: wrap;
+}
+
+.msme-reviews__modal-variant-badge,
+.msme-reviews__modal-size-badge {
+  background-color: #7ed957;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid #6bc946;
+  font-family: 'Poppins', sans-serif;
+  white-space: nowrap;
+}
+
+.msme-reviews__modal-variant-badge strong,
+.msme-reviews__modal-size-badge strong {
+  color: white;
+  font-weight: 600;
+}
+
 /* Tablet Responsiveness */
 @media (max-width: 1024px) {
   .msme-reviews__products-grid {
@@ -1213,5 +1240,16 @@
 
   .msme-reviews__modal-image {
     height: 200px;
+  }
+  
+  .msme-reviews__modal-review-selection {
+    gap: 8px;
+    margin: 8px 0;
+  }
+  
+  .msme-reviews__modal-variant-badge,
+  .msme-reviews__modal-size-badge {
+    font-size: 10px;
+    padding: 3px 8px;
   }
 }

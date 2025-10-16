@@ -771,132 +771,93 @@ const CustomerStoreView = () => {
             />
           </div>
           
-          {/* Store Logo and Info Section */}
+          {/* Store Logo and Info Section - New Two Column Layout */}
           <div className="store-info-section">
-            <div className="store-main-content">
-              <div className="store-details">
-                <div className="store-header-section">
-                  <div className="store-name-with-logo">
-                    <div className="store-logo-container-left">
-                      <img 
-                        src={getStoreImageUrl(store)} 
-                        alt={store.businessName}
-                        className="store-logo-main"
-                        onError={(e) => {
-                          e.target.src = store.category === 'food' ? foodStoreImg : defaultStoreImg;
-                        }}
-                      />
+            {/* Left Column - Logo, Header & Google Maps */}
+            <div className="store-left-column">
+              {/* Store Header with Logo, Name and Username - Top of Left Column */}
+              <div className="store-header-left">
+                <div className="store-name-with-logo-left">
+                  <div className="store-logo-container-left">
+                    <img 
+                      src={getStoreImageUrl(store)} 
+                      alt={store.businessName}
+                      className="store-logo-main"
+                      onError={(e) => {
+                        e.target.src = store.category === 'food' ? foodStoreImg : defaultStoreImg;
+                      }}
+                    />
+                  </div>
+                  <div className="store-name-username-container">
+                    <h1 className="store-name-left">{store.businessName}</h1>
+                    <div className="username-row-left">
+                      <PersonIcon className="detail-icon username-icon" />
+                      <span className="username-text">@{store.username}</span>
                     </div>
-                    <h1 className="store-name">{store.businessName}</h1>
                   </div>
                 </div>
-              
-              {/* Username */}
-              <div className="store-detail-row username-row">
-                <PersonIcon className="detail-icon username-icon" />
-                <span className="username-text">@{store.username}</span>
               </div>
-              
-              {/* Description */}
-              {dashboard.description && (
-                <p className="store-description">{dashboard.description}</p>
+
+              {/* Google Maps - Below Header */}
+              {dashboard.googleMapsUrl && handleEmbedUrl(dashboard.googleMapsUrl) ? (
+                <div className="store-location-embed-left">
+                  {console.log('Original Google Maps URL:', dashboard.googleMapsUrl)}
+                  {console.log('Processed Embed URL:', handleEmbedUrl(dashboard.googleMapsUrl))}
+                  <iframe
+                    src={handleEmbedUrl(dashboard.googleMapsUrl)}
+                    width="100%"
+                    height="350"
+                    style={{border: 0}}
+                    allowFullScreen=""
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Store Location"
+                    className="google-maps-embed"
+                    onError={(e) => {
+                      console.error('Maps iframe failed to load:', e);
+                    }}
+                    onLoad={(e) => {
+                      console.log('Maps iframe loaded successfully');
+                    }}
+                  />
+                </div>
+              ) : dashboard.googleMapsUrl && !handleEmbedUrl(dashboard.googleMapsUrl) ? (
+                <div className="store-location-embed-left" style={{
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  background: '#f8f9fa', 
+                  borderRadius: '8px',
+                  border: '2px dashed #ddd',
+                  height: '350px'
+                }}>
+                  <div style={{textAlign: 'center', padding: '20px', color: '#666'}}>
+                    <p style={{margin: 0, fontSize: '14px'}}>📍 Location URL needs to be in embed format</p>
+                    <small>Store owner should use embedded Google Maps link</small>
+                  </div>
+                </div>
+              ) : (
+                <div className="store-location-embed-left" style={{
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  background: '#f8f9fa', 
+                  borderRadius: '8px',
+                  border: '2px dashed #ddd',
+                  height: '350px'
+                }}>
+                  <div style={{textAlign: 'center', padding: '20px', color: '#666'}}>
+                    <p style={{margin: 0, fontSize: '14px'}}>📍 No location provided</p>
+                    <small>Store location will appear here</small>
+                  </div>
+                </div>
               )}
-              
-              <div className="store-meta">
-                {/* Location - only show as text, removed View Location link */}
-                {(dashboard.googleMapsUrl || dashboard.location) && (
-                  <div className="store-detail-row">
-                    <LocationOnIcon className="detail-icon location-icon" />
-                    <span>{dashboard.location || 'Location available'}</span>
-                  </div>
-                )}
-                
-                {/* Contact Number - prioritize dashboard contact number, fallback to store contact number */}
-                {(dashboard.contactNumber || store.contactNumber) && (
-                  <div className="store-detail-row">
-                    <PhoneIcon className="detail-icon contact-icon" />
-                    <span>{dashboard.contactNumber || store.contactNumber}</span>
-                  </div>
-                )}
+            </div>
 
-                {/* Social Media Links */}
-                {dashboard.socialLinks?.facebook && (
-                  <div className="store-detail-row">
-                    <FacebookIcon className="detail-icon facebook-icon" />
-                    <a href={dashboard.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="social-link">
-                      Facebook
-                    </a>
-                  </div>
-                )}
-                
-                {dashboard.socialLinks?.instagram && (
-                  <div className="store-detail-row">
-                    <InstagramIcon className="detail-icon instagram-icon" />
-                    <a href={dashboard.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="social-link">
-                      Instagram
-                    </a>
-                  </div>
-                )}
-                
-                {dashboard.socialLinks?.twitter && (
-                  <div className="store-detail-row">
-                    <TwitterIcon className="detail-icon twitter-icon" />
-                    <a href={dashboard.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="social-link">
-                      Twitter
-                    </a>
-                  </div>
-                )}
-                
-                {dashboard.socialLinks?.website && (
-                  <div className="store-detail-row">
-                    <LanguageIcon className="detail-icon website-icon" />
-                    <a href={dashboard.socialLinks.website} target="_blank" rel="noopener noreferrer" className="social-link">
-                      Website
-                    </a>
-                  </div>
-                )}
-
-                {/* E-commerce Platforms */}
-                {dashboard.ecommercePlatforms?.shopee?.url && (
-                  <div className="store-detail-row">
-                    <ShoppingBagIcon className="detail-icon shopee-icon" />
-                    <a href={dashboard.ecommercePlatforms.shopee.url} target="_blank" rel="noopener noreferrer" className="social-link">
-                      Shopee Store
-                    </a>
-                  </div>
-                )}
-                
-                {dashboard.ecommercePlatforms?.lazada?.url && (
-                  <div className="store-detail-row">
-                    <ShoppingCartIcon className="detail-icon lazada-icon" />
-                    <a href={dashboard.ecommercePlatforms.lazada.url} target="_blank" rel="noopener noreferrer" className="social-link">
-                      Lazada Store
-                    </a>
-                  </div>
-                )}
-                
-                {dashboard.ecommercePlatforms?.tiktok?.url && (
-                  <div className="store-detail-row">
-                    <AudiotrackIcon className="detail-icon tiktok-icon" />
-                    <a href={dashboard.ecommercePlatforms.tiktok.url} target="_blank" rel="noopener noreferrer" className="social-link">
-                      TikTok Shop
-                    </a>
-                  </div>
-                )}
-              </div>
-              
-              {/* Bottom Section with Rating (left) and Actions (right) */}
-              <div className="store-bottom-section">
-                {/* Store Rating - Bottom Left */}
-                <div className="store-rating-bottom">
-                  {renderStarRating(store.averageRating || 0)}
-                  {store.totalRatings > 0 && (
-                    <span className="total-ratings">({store.totalRatings} rating{store.totalRatings !== 1 ? 's' : ''})</span>
-                  )}
-                </div>
-                
-                {/* Store Actions - Bottom Center/Right */}
-                <div className="store-actions">
+            {/* Right Column - Store Information */}
+            <div className="store-right-column">
+              {/* Action Buttons - Top Right */}
+              <div className="store-actions-top">
                 <FollowButton 
                   storeId={storeId} 
                   storeName={store?.businessName}
@@ -923,52 +884,107 @@ const CustomerStoreView = () => {
                   <ChatIcon />
                   CHAT
                 </button>
+              </div>
+
+              {/* Store Details */}
+              <div className="store-details-right">
+                {/* Description */}
+                {dashboard.description && (
+                  <p className="store-description">{dashboard.description}</p>
+                )}
+                
+                <div className="store-meta">
+                  {/* Location - only show as text, removed View Location link */}
+                  {(dashboard.googleMapsUrl || dashboard.location) && (
+                    <div className="store-detail-row">
+                      <LocationOnIcon className="detail-icon location-icon" />
+                      <span>{dashboard.location || 'Location available'}</span>
+                    </div>
+                  )}
+                  
+                  {/* Contact Number - prioritize dashboard contact number, fallback to store contact number */}
+                  {(dashboard.contactNumber || store.contactNumber) && (
+                    <div className="store-detail-row">
+                      <PhoneIcon className="detail-icon contact-icon" />
+                      <span>{dashboard.contactNumber || store.contactNumber}</span>
+                    </div>
+                  )}
+
+                  {/* Social Media Links */}
+                  {dashboard.socialLinks?.facebook && (
+                    <div className="store-detail-row">
+                      <FacebookIcon className="detail-icon facebook-icon" />
+                      <a href={dashboard.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="social-link">
+                        Facebook
+                      </a>
+                    </div>
+                  )}
+                  
+                  {dashboard.socialLinks?.instagram && (
+                    <div className="store-detail-row">
+                      <InstagramIcon className="detail-icon instagram-icon" />
+                      <a href={dashboard.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="social-link">
+                        Instagram
+                      </a>
+                    </div>
+                  )}
+                  
+                  {dashboard.socialLinks?.twitter && (
+                    <div className="store-detail-row">
+                      <TwitterIcon className="detail-icon twitter-icon" />
+                      <a href={dashboard.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="social-link">
+                        Twitter
+                      </a>
+                    </div>
+                  )}
+                  
+                  {dashboard.socialLinks?.website && (
+                    <div className="store-detail-row">
+                      <LanguageIcon className="detail-icon website-icon" />
+                      <a href={dashboard.socialLinks.website} target="_blank" rel="noopener noreferrer" className="social-link">
+                        Website
+                      </a>
+                    </div>
+                  )}
+
+                  {/* E-commerce Platforms */}
+                  {dashboard.ecommercePlatforms?.shopee?.url && (
+                    <div className="store-detail-row">
+                      <ShoppingBagIcon className="detail-icon shopee-icon" />
+                      <a href={dashboard.ecommercePlatforms.shopee.url} target="_blank" rel="noopener noreferrer" className="social-link">
+                        Shopee Store
+                      </a>
+                    </div>
+                  )}
+                  
+                  {dashboard.ecommercePlatforms?.lazada?.url && (
+                    <div className="store-detail-row">
+                      <ShoppingCartIcon className="detail-icon lazada-icon" />
+                      <a href={dashboard.ecommercePlatforms.lazada.url} target="_blank" rel="noopener noreferrer" className="social-link">
+                        Lazada Store
+                      </a>
+                    </div>
+                  )}
+                  
+                  {dashboard.ecommercePlatforms?.tiktok?.url && (
+                    <div className="store-detail-row">
+                      <AudiotrackIcon className="detail-icon tiktok-icon" />
+                      <a href={dashboard.ecommercePlatforms.tiktok.url} target="_blank" rel="noopener noreferrer" className="social-link">
+                        TikTok Shop
+                      </a>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Store Rating - Bottom of right column */}
+                <div className="store-rating-bottom">
+                  {renderStarRating(store.averageRating || 0)}
+                  {store.totalRatings > 0 && (
+                    <span className="total-ratings">({store.totalRatings} rating{store.totalRatings !== 1 ? 's' : ''})</span>
+                  )}
                 </div>
               </div>
             </div>
-            </div>
-            
-            {/* Google Maps Embed Section - Upper Right */}
-            {dashboard.googleMapsUrl && handleEmbedUrl(dashboard.googleMapsUrl) && (
-              <div className="store-location-embed-right">
-                {console.log('Original Google Maps URL:', dashboard.googleMapsUrl)}
-                {console.log('Processed Embed URL:', handleEmbedUrl(dashboard.googleMapsUrl))}
-                <iframe
-                  src={handleEmbedUrl(dashboard.googleMapsUrl)}
-                  width="100%"
-                  height="250"
-                  style={{border: 0}}
-                  allowFullScreen=""
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title="Store Location"
-                  className="google-maps-embed"
-                  onError={(e) => {
-                    console.error('Maps iframe failed to load:', e);
-                  }}
-                  onLoad={(e) => {
-                    console.log('Maps iframe loaded successfully');
-                  }}
-                />
-              </div>
-            )}
-            
-            {/* Message when no valid embed URL */}
-            {dashboard.googleMapsUrl && !handleEmbedUrl(dashboard.googleMapsUrl) && (
-              <div className="store-location-embed-right" style={{
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                background: '#f8f9fa', 
-                borderRadius: '8px',
-                border: '2px dashed #ddd'
-              }}>
-                <div style={{textAlign: 'center', padding: '20px', color: '#666'}}>
-                  <p style={{margin: 0, fontSize: '14px'}}>📍 Location URL needs to be in embed format</p>
-                  <small>Store owner should use embedded Google Maps link</small>
-                </div>
-              </div>
-            )}
           </div>
         </div>
 

@@ -102,22 +102,120 @@
   object-fit: cover;
 }
 
-/* Store Info Section */
+/* Store Info Section - Two Column Layout */
 .store-info-section {
   display: flex;
-  justify-content: space-between;
+  gap: 24px;
   padding: 20px;
-  gap: 20px;
   background: white;
   border-radius: 0 0 16px 16px; /* Only round bottom corners */
   position: relative;
+  min-height: 400px;
 }
 
-.store-main-content {
+/* Left Column - Google Maps */
+.store-left-column {
+  flex: 1.2; /* Slightly larger for the maps */
+  min-width: 0; /* Prevent overflow */
   display: flex;
-  flex: 1;
   flex-direction: column;
-  margin-right: 320px; /* Leave space for the map on the right */
+  gap: 16px;
+}
+
+/* Store Header in Left Column - No Background */
+.store-header-left {
+  padding: 0;
+  margin-bottom: 16px;
+}
+
+.store-name-with-logo-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.store-name-username-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.store-name-left {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Username styling in left column */
+.username-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.username-row-left .username-icon {
+  font-size: 18px !important;
+  color: #666 !important;
+}
+
+.store-location-embed-left {
+  width: 100%;
+  height: 350px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.store-location-embed-left iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 12px;
+}
+
+/* Right Column - Store Information */
+.store-right-column {
+  flex: 1; /* Smaller for store info */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0; /* Prevent overflow */
+}
+
+/* Action Buttons at Top Right */
+.store-actions-top {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+/* Store Details Container */
+.store-details-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Store Rating at Bottom */
+.store-rating-bottom {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Legacy styles for backward compatibility */
+.store-main-content {
+  display: none; /* Hidden in new layout */
 }
 
 .store-header-section {
@@ -1071,53 +1169,75 @@
 @media (max-width: 768px) {
   .customer-store-view-content {
     margin-top: 64px; /* Slightly smaller margin for mobile navbar */
-  }
-  .customer-store-view-content {
     padding: 16px;
     max-width: 100%;
   }
 
+  /* Mobile: Stack columns vertically */
   .store-info-section {
     flex-direction: column;
-    text-align: center;
-    gap: 15px;
+    gap: 20px;
+    min-height: auto;
   }
 
-  .store-logo-main {
-    width: 100px;
-    height: 100px;
-    margin: 0 auto;
+  /* Left column (maps) takes full width on mobile */
+  .store-left-column {
+    flex: none;
+    order: 2; /* Show maps below store info on mobile */
+    gap: 12px;
   }
 
-  .store-main-content {
-    margin-right: 0;
-    flex-direction: column;
+  .store-header-left {
+    padding: 0;
+    margin-bottom: 12px;
   }
 
-  .store-header-section {
-    flex-direction: column;
-    align-items: flex-start;
+  .store-name-left {
+    font-size: 1.5rem;
   }
 
-  .store-name-with-logo {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+  .username-row-left {
+    font-size: 0.85rem;
   }
 
+  .store-location-embed-left {
+    height: 250px; /* Smaller height on mobile */
+  }
+
+  /* Right column (store info) takes full width on mobile */
+  .store-right-column {
+    flex: none;
+    order: 1; /* Show store info above maps on mobile */
+  }
+
+  /* Action buttons stack or wrap on mobile */
+  .store-actions-top {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Logo and name adjustments for mobile */
   .store-logo-container-left .store-logo-main {
     width: 50px;
     height: 50px;
   }
 
-  .store-location-embed-right {
-    position: relative;
-    top: auto;
-    right: auto;
-    width: 100%;
-    height: 180px;
-    margin: 16px 0;
-    padding: 2px;
+  .store-name {
+    font-size: 1.5rem;
+  }
+
+  /* Legacy styles - hide in new layout */
+  .store-main-content {
+    display: none;
+  }
+
+  .store-header-section {
+    margin-bottom: 12px;
+  }
+
+  .store-name-with-logo {
+    gap: 12px;
   }
 
   .google-maps-embed {

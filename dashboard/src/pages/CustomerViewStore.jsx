@@ -34,10 +34,8 @@ const CustomerViewStore = () => {
   const fetchStores = async () => {
     setLoading(true);
     try {
-      // Build URL with optional customerId to exclude followed stores
-      const url = user?._id 
-        ? `http://localhost:1337/api/stores?customerId=${user._id}`
-        : 'http://localhost:1337/api/stores';
+      // For Browse Stores page, show ALL stores (don't exclude followed stores)
+      const url = 'http://localhost:1337/api/stores';
         
       const response = await fetch(url);
       const data = await response.json();

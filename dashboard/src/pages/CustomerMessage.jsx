@@ -32,6 +32,7 @@ const CustomerMessage = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [readConversations, setReadConversations] = useState(new Set()); // Track read conversations
   const [notification, setNotification] = useState({
     isVisible: false,
     type: 'info',
@@ -82,6 +83,18 @@ const CustomerMessage = () => {
       };
       console.log('✅ Setting current user from AuthContext:', currentUserData);
       setCurrentUser(currentUserData);
+      
+      // Load persisted read conversations from localStorage
+      const savedReadConversations = localStorage.getItem(`readConversations_customer_${currentUserData.id}`);
+      if (savedReadConversations) {
+        try {
+          const readSet = new Set(JSON.parse(savedReadConversations));
+          setReadConversations(readSet);
+          console.log('📁 Loaded persisted read conversations for customer:', Array.from(readSet));
+        } catch (error) {
+          console.error('Error loading read conversations:', error);
+        }
+      }
     } else {
       console.log('❌ User not authenticated or not a customer');
       setCurrentUser(null);
@@ -170,13 +183,33 @@ const CustomerMessage = () => {
             ? { ...conv, unreadCount: (conv.unreadCount || 0) + 1 }
             : conv
         ));
+        
+        // Remove from read conversations since there's a new message
+        setReadConversations(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(data.conversationId);
+          
+          // Update localStorage
+          if (currentUser) {
+            localStorage.setItem(`readConversations_customer_${currentUser.id}`, JSON.stringify(Array.from(newSet)));
+          }
+          
+          return newSet;
+        });
       });
 
       // Load conversations on mount
       loadConversations();
 
+      // Set up periodic refresh of conversations to keep unread counts in sync
+      const conversationRefreshInterval = setInterval(() => {
+        console.log('🔄 Periodic refresh of customer conversations...');
+        loadConversations();
+      }, 15000); // Refresh every 15 seconds
+
       return () => {
         socketService.disconnect();
+        clearInterval(conversationRefreshInterval);
       };
     }
   }, [currentUser]); // Removed selectedChat dependency to prevent reloading on chat selection
@@ -230,7 +263,23 @@ const CustomerMessage = () => {
         currentUser.id, 
         currentUser.userType
       );
-      setConversations(convs);
+      console.log('📥 Loaded customer conversations with unread counts:', convs.map(c => ({ 
+        id: c._id, 
+        store: getStoreName(c.otherParticipant),
+        unreadCount: c.unreadCount 
+      })));
+      
+      // AGGRESSIVE FIX: If we have a selected chat OR the conversation is in our read set, force its unread count to 0
+      const updatedConvs = convs.map(conv => {
+        const shouldForceZero = (selectedChat && conv._id === selectedChat._id) || readConversations.has(conv._id);
+        if (shouldForceZero) {
+          console.log(`🔧 FORCING customer conversation ${conv._id} unread count to 0 (selected: ${selectedChat?._id === conv._id}, read: ${readConversations.has(conv._id)})`);
+          return { ...conv, unreadCount: 0 };
+        }
+        return conv;
+      });
+      
+      setConversations(updatedConvs);
     } catch (error) {
       console.error('Error loading conversations:', error);
     } finally {
@@ -292,30 +341,90 @@ const CustomerMessage = () => {
       // Join conversation room for real-time updates
       socketService.joinConversation(conversationId);
       
+      // DEBUG: Log all message details to understand the issue
+      console.log('🔍 DEBUG: All messages in customer conversation:', messages.map(msg => ({
+        id: msg._id,
+        senderId: msg.senderId,
+        receiverId: msg.receiverId,
+        currentUserId: currentUser.id,
+        isRead: msg.isRead,
+        message: msg.message.substring(0, 50) + '...',
+        isOwn: (msg.senderId._id || msg.senderId) === currentUser.id
+      })));
+      
       // Mark messages as read and update unread count
-      const unreadMessages = messages.filter(msg => msg.receiverId === currentUser.id && !msg.isRead);
-      console.log(`🔍 Conversation ${conversationId} - Found ${unreadMessages.length} unread messages`);
+      const unreadMessages = messages.filter(msg => {
+        const isReceivedByMe = msg.receiverId === currentUser.id;
+        const isNotRead = !msg.isRead;
+        const isSentByMe = (msg.senderId._id || msg.senderId) === currentUser.id;
+        console.log('🔍 Customer message check:', {
+          messageId: msg._id,
+          senderId: msg.senderId._id || msg.senderId,
+          receiverId: msg.receiverId,
+          currentUserId: currentUser.id,
+          isReceivedByMe,
+          isSentByMe,
+          isRead: msg.isRead,
+          isNotRead,
+          shouldMarkAsRead: isReceivedByMe && isNotRead && !isSentByMe
+        });
+        // Only mark messages as read if they were received by me AND not sent by me
+        return isReceivedByMe && isNotRead && !isSentByMe;
+      });
+      
+      console.log(`🔍 Customer conversation ${conversationId} - Found ${unreadMessages.length} unread messages out of ${messages.length} total messages`);
+      console.log('🔍 Current customer user ID being used:', currentUser.id);
       
       if (unreadMessages.length > 0) {
         try {
-          console.log(`🔄 Marking ${unreadMessages.length} messages as read...`);
-          await messageService.markMessagesAsRead(conversationId, currentUser.id);
+          console.log(`🔄 Customer marking ${unreadMessages.length} messages as read for user ${currentUser.id}...`);
+          const readResult = await messageService.markMessagesAsRead(conversationId, currentUser.id);
+          console.log('✅ Customer API call to mark messages as read completed:', readResult);
+          
           socketService.markMessagesRead({
             conversationId,
             userId: currentUser.id
           });
           
-          // Update the conversation's unread count in the local state after successful API call
-          setConversations(prev => prev.map(conv =>
-            conv._id === conversationId ? { ...conv, unreadCount: 0 } : conv
-          ));
+          // FORCE reload conversations from server to get fresh unread counts
+          console.log('🔄 FORCE reloading customer conversations from server...');
+          setTimeout(async () => {
+            try {
+              const freshConvs = await messageService.getUserConversations(
+                currentUser.id, 
+                currentUser.userType
+              );
+              console.log('✅ Fresh customer conversations loaded after marking as read:', freshConvs.map(c => ({ 
+                id: c._id, 
+                store: getStoreName(c.otherParticipant),
+                unreadCount: c.unreadCount 
+              })));
+              
+              // EXTRA FIX: Force the current conversation to have 0 unread count
+              const updatedConvs = freshConvs.map(conv => {
+                if (conv._id === conversationId) {
+                  console.log(`🔧 FORCING customer conversation ${conversationId} unread count to 0`);
+                  return { ...conv, unreadCount: 0 };
+                }
+                return conv;
+              });
+              
+              setConversations(updatedConvs);
+            } catch (error) {
+              console.error('❌ Error force reloading customer conversations:', error);
+            }
+          }, 1000); // Delay to ensure backend has processed the read update
           
-          console.log(`✅ Marked ${unreadMessages.length} messages as read and updated conversation unread count to 0`);
+          console.log(`✅ Customer successfully marked ${unreadMessages.length} messages as read`);
         } catch (error) {
-          console.error('❌ Error marking messages as read:', error);
+          console.error('❌ Customer error marking messages as read:', error);
         }
       } else {
-        console.log(`ℹ️ No unread messages found in conversation ${conversationId}`);
+        console.log(`ℹ️ No unread messages found in customer conversation ${conversationId}`);
+        // Still ensure unread count is 0
+        setConversations(prev => prev.map(conv =>
+          conv._id === conversationId ? { ...conv, unreadCount: 0 } : conv
+        ));
       }
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -344,7 +453,7 @@ const CustomerMessage = () => {
   };
 
   const handleChatSelect = (conversation) => {
-    console.log(`🎯 Chat selected:`, {
+    console.log(`🎯 Customer chat selected:`, {
       conversationId: conversation._id,
       storeName: getStoreName(conversation.otherParticipant),
       currentUnreadCount: conversation.unreadCount,
@@ -354,14 +463,23 @@ const CustomerMessage = () => {
     setSelectedChat(conversation);
     setMessages([]);
     
-    // Force update the unread count to 0 immediately (optimistic update)
-    console.log(`🔄 Forcing unread count to 0 for conversation ${conversation._id}`);
+    // Mark this conversation as read in our local tracking AND persist it
+    const newReadConversations = new Set([...readConversations, conversation._id]);
+    setReadConversations(newReadConversations);
+    
+    // Persist to localStorage
+    if (currentUser) {
+      localStorage.setItem(`readConversations_customer_${currentUser.id}`, JSON.stringify(Array.from(newReadConversations)));
+      console.log('💾 Persisted customer read conversation to localStorage:', conversation._id);
+    }
+    
+    // FORCE immediate clear of unread count - no matter what
+    console.log(`🔄 FORCING customer unread count to 0 for conversation ${conversation._id}`);
     setConversations(prev => prev.map(conv =>
       conv._id === conversation._id ? { ...conv, unreadCount: 0 } : conv
     ));
     
     loadMessages(conversation._id);
-    // Note: unread count will be reset in loadMessages after messages are actually marked as read
   };
 
   const handleDeleteConversation = () => {
@@ -635,7 +753,7 @@ const CustomerMessage = () => {
                       <span className="customer-messages__conversation-time">
                         {formatTime(conversation.lastActivity)}
                       </span>
-                      {conversation.unreadCount > 0 && selectedChat?._id !== conversation._id && (
+                      {conversation.unreadCount > 0 && selectedChat?._id !== conversation._id && !readConversations.has(conversation._id) && (
                         <div className="customer-messages__unread-indicator">
                           {conversation.unreadCount}
                         </div>

@@ -34,6 +34,7 @@ const MsmeDashboard = () => {
       dailyBreakdown: []
     },
     followers: 0,
+    followersToday: 0,
     ratings: {
       currentAverage: 0,
       totalRatings: 0,
@@ -440,7 +441,7 @@ const MsmeDashboard = () => {
             </div>
             <div className="msme-dashboard__stat-label">Followers</div>
             <div className="msme-dashboard__stat-change positive">
-              Monthly: {loading ? '...' : analytics.pageViews.monthly}
+              New today: {loading ? '...' : (analytics.followersToday || 0)}
             </div>
           </div>
           <div className="msme-dashboard__stat-box">

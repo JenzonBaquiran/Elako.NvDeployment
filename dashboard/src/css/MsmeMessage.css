@@ -333,6 +333,7 @@
   font-weight: 600;
   color: #1f2937;
   font-family: 'Poppins', sans-serif;
+  text-align: left;
 }
 
 .msme-messages__chat-type {
@@ -341,6 +342,7 @@
   color: #313131;
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
+  text-align: left;
 }
 
 .msme-messages__chat-actions {

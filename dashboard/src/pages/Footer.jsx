@@ -45,10 +45,22 @@ function Footer() {
       <p> Digital Marketing  Solution For The Micro, Small, and 
         Medium Enterprises MSME's in Nueva Vizcaya</p>
         
-        <div style={{  gap: '30px', marginTop: 10 }}>
-          <FacebookIcon style={{ color: 'white', fontSize: 30, cursor: 'pointer' }} />
-          <InstagramIcon style={{ color: 'white', fontSize: 30, cursor: 'pointer' }} />
-          <EmailIcon style={{ color: 'white', fontSize: 30, cursor: 'pointer' }} />
+        <div style={{ display: 'flex', gap: '20px', marginTop: 10, justifyContent: 'flex-start' }}>
+          <a href="https://www.facebook.com/ELako.NV" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>
+            <FacebookIcon style={{ color: 'white', fontSize: 30, cursor: 'pointer', transition: 'color 0.3s ease' }} 
+                         onMouseEnter={(e) => e.target.style.color = '#7ed957'}
+                         onMouseLeave={(e) => e.target.style.color = 'white'} />
+          </a>
+          <a href="https://www.instagram.com/elako.nv/" target="_blank" rel="noopener noreferrer" style={{ color: 'white' }}>
+            <InstagramIcon style={{ color: 'white', fontSize: 30, cursor: 'pointer', transition: 'color 0.3s ease' }} 
+                          onMouseEnter={(e) => e.target.style.color = '#7ed957'}
+                          onMouseLeave={(e) => e.target.style.color = 'white'} />
+          </a>
+          <a href="mailto:elakonv@gmail.com" style={{ color: 'white' }}>
+            <EmailIcon style={{ color: 'white', fontSize: 30, cursor: 'pointer', transition: 'color 0.3s ease' }} 
+                      onMouseEnter={(e) => e.target.style.color = '#7ed957'}
+                      onMouseLeave={(e) => e.target.style.color = 'white'} />
+          </a>
         </div>
 
     </div>

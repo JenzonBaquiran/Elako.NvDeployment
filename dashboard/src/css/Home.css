@@ -2546,3 +2546,172 @@ body {
     color: #333;
   }
 }
+
+/* Enhanced Card Hover Effects - Gradient Border Animation */
+
+/* Container Hover Effects - Blur Other Cards */
+.hot-picks-list:hover .hot-pick-card:not(:hover),
+.top-rated-list:hover .top-rated-card:not(:hover),
+.top-stores-list:hover .top-stores-card:not(:hover),
+.recently-joined-list:hover .recently-joined-card:not(:hover),
+.new-stores-list:hover .new-store-card:not(:hover),
+.service-providers-grid:hover .new-store-card:not(:hover),
+.service-providers-grid:hover .service-provider-card:not(:hover) {
+  filter: blur(2px);
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+/* Reset blur when not hovering over container */
+.hot-picks-list .hot-pick-card,
+.top-rated-list .top-rated-card,
+.top-stores-list .top-stores-card,
+.recently-joined-list .recently-joined-card,
+.new-stores-list .new-store-card,
+.service-providers-grid .new-store-card,
+.service-providers-grid .service-provider-card {
+  filter: blur(0px);
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+
+/* Gradient Border Hover Effects */
+.hot-pick-card,
+.top-rated-card,
+.top-stores-card,
+.recently-joined-card,
+.new-store-card,
+.service-provider-card {
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.hot-pick-card::before,
+.top-rated-card::before,
+.top-stores-card::before,
+.recently-joined-card::before,
+.new-store-card::before,
+.service-provider-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, 
+    #7ed957, 
+    #4caf50, 
+    #7ed957, 
+    #4caf50
+  );
+  background-size: 300% 300%;
+  z-index: -1;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  animation: gradient-border 3s ease-in-out infinite;
+}
+
+.hot-pick-card:hover::before,
+.top-rated-card:hover::before,
+.top-stores-card:hover::before,
+.recently-joined-card:hover::before,
+.new-store-card:hover::before,
+.service-provider-card:hover::before {
+  opacity: 0;
+}
+
+/* Gradient Border Animation */
+@keyframes gradient-border {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Enhanced Glow Effect on Hover */
+.hot-pick-card:hover,
+.top-rated-card:hover,
+.top-stores-card:hover,
+.recently-joined-card:hover,
+.new-store-card:hover,
+.service-provider-card:hover {
+  box-shadow: 
+    0 0 20px rgba(126, 217, 87, 0.3),
+    0 0 40px rgba(126, 217, 87, 0.2),
+    0 0 60px rgba(126, 217, 87, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.1);
+  border-color: transparent;
+  background: #ffffff;
+}
+
+/* Shimmer Effect on Images */
+.hot-pick-card img,
+.top-rated-card img,
+.top-stores-card img,
+.new-store-card img {
+  position: relative;
+  overflow: hidden;
+}
+
+.hot-pick-card img::after,
+.top-rated-card img::after,
+.top-stores-card img::after,
+.new-store-card img::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.hot-pick-card:hover img::after,
+.top-rated-card:hover img::after,
+.top-stores-card:hover img::after,
+.new-store-card:hover img::after {
+  left: 100%;
+}
+
+/* Enhanced Text Effects on Hover */
+.hot-pick-card:hover h3,
+.top-rated-card:hover h3,
+.top-stores-card:hover h3,
+.recently-joined-card:hover h3,
+.new-store-card:hover h3 {
+  color: #4caf50;
+  transition: color 0.3s ease;
+}
+
+/* Button Glow Effect */
+.hot-pick-card:hover .hero-button,
+.top-stores-card:hover .hero-button,
+.recently-joined-card:hover .visit-store-btn,
+.new-store-card:hover .visit-store-btn {
+  box-shadow: 0 0 15px rgba(126, 217, 87, 0.5);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Provider Card Enhanced Effects */
+.service-provider-card:hover .provider-name {
+  color: #4caf50;
+  transition: color 0.3s ease;
+}
+
+.service-provider-card:hover .provider-logo {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}

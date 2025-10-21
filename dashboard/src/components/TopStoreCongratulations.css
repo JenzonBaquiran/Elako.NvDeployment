@@ -260,6 +260,7 @@
 /* Action Buttons */
 .congratulations-actions {
   display: flex;
+  justify-content: center;
   gap: 16px;
   margin-top: 32px;
   flex-wrap: wrap;
@@ -291,6 +292,7 @@
 .continue-button {
   background: linear-gradient(135deg, #28a745 0%, #7ed957 100%);
   color: white;
+  min-width: 200px;
 }
 
 .continue-button:hover {

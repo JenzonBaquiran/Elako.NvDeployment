@@ -44,10 +44,10 @@ const TopFanCongratulations = ({
 
   if (!isVisible) return null;
 
-  // Generate balloons for decoration
+  // Generate balloons for decoration - floating outside modal
   const balloons = [];
-  for (let i = 0; i < 15; i++) {
-    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#fd79a8', '#a29bfe'];
+  for (let i = 0; i < 20; i++) {
+    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#fd79a8', '#a29bfe', '#fdcb6e', '#e17055'];
     const color = colors[i % colors.length];
     balloons.push(
       <div
@@ -55,9 +55,9 @@ const TopFanCongratulations = ({
         className="top-fan-congratulations__balloon"
         style={{
           '--balloon-color': color,
-          left: `${Math.random() * 100}%`,
-          animationDelay: `${Math.random() * 2}s`,
-          animationDuration: `${3 + Math.random() * 2}s`
+          left: `${5 + Math.random() * 90}%`,
+          animationDelay: `${Math.random() * 5}s`,
+          animationDuration: `${6 + Math.random() * 4}s`
         }}
       />
     );
@@ -87,10 +87,14 @@ const TopFanCongratulations = ({
       className="top-fan-congratulations__overlay" 
       onClick={handleBackdropClick}
     >
+      {/* Balloons floating outside the modal */}
+      <div className="top-fan-congratulations__balloons-container">
+        {balloons}
+      </div>
+
       <div className="top-fan-congratulations__modal">
-        {/* Animated Background Elements */}
+        {/* Confetti inside modal */}
         <div className="top-fan-congratulations__decorations">
-          {balloons}
           {confetti}
         </div>
 

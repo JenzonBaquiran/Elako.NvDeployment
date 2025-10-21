@@ -146,13 +146,6 @@ const TopStoreCongratulations = ({
 
           {/* Action Buttons */}
           <div className="congratulations-actions">
-            <button className="share-button" onClick={() => {
-              // Could implement social sharing here
-              alert('Share functionality coming soon!');
-            }}>
-              📱 Share Achievement
-            </button>
-            
             <button className="continue-button" onClick={handleClose}>
               Continue to Dashboard
             </button>

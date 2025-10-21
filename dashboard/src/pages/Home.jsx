@@ -133,13 +133,16 @@ function Home() {
       <BlogHero />
       <section className="hot-picks">
         <div className="hot-picks-header" data-aos="fade-right">
-          {/* <span className="hot-pick-icon">🔥</span> */}
+          {/* <span className="top-rated-icon">⭐</span> */}
           <h1></h1>
-          <h2>Hot Picks</h2>
+          <h2>Top Rated Products</h2>
           <div className="hot-picks-viewall">
             <button 
               className="hero-button hero-button-outline"
-              onClick={() => navigate('/customer/hot-picks')}
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                navigate('/customer/hot-picks');
+              }}
             >
               View All 
             </button>
@@ -190,7 +193,10 @@ function Home() {
                       </div>
                       <button 
                         className="hero-button hero-button-primary hot-pick-button" 
-                        onClick={() => navigate(`/product/${product._id}`)}
+                        onClick={() => {
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                          navigate(`/product/${product._id}`);
+                        }}
                       >
                         View Product
                       </button>

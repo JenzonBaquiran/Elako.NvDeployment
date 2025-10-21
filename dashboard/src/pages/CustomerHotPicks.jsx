@@ -86,7 +86,7 @@ function CustomerHotPicks() {
           >
             ← Back to Home
           </button>
-          <h1>All Hot Picks</h1>
+          <h1>All Top Rated Products</h1>
           <p>Discover amazing products with 4.5-5.0 star ratings from approved stores.</p>
         </div>
 

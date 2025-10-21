@@ -32,6 +32,11 @@ const ProductDetails = () => {
     }
   }, [productId]);
 
+  // Scroll to top when component mounts or productId changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [productId]);
+
   // Helper function to get all available images
   const getAllImages = () => {
     if (!product) return [];

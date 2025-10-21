@@ -13,6 +13,7 @@ const AdminAnalytics = () => {
   const [topProducts, setTopProducts] = useState([]);
   const [monthlyGrowthData, setMonthlyGrowthData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [expandedChart, setExpandedChart] = useState(null); // 'growth' or 'products'
 
   const handleSidebarToggle = (state) => {
     setSidebarState(state);
@@ -100,6 +101,14 @@ const AdminAnalytics = () => {
       : 'admin-analytics__content admin-analytics__content--sidebar-collapsed';
   };
 
+  const handleChartClick = (chartType) => {
+    setExpandedChart(chartType);
+  };
+
+  const closeExpandedChart = () => {
+    setExpandedChart(null);
+  };
+
   return (
     <div className="admin-analytics">
       <AdminSidebar onSidebarToggle={handleSidebarToggle} />
@@ -111,10 +120,11 @@ const AdminAnalytics = () => {
 
         <div className="admin-analytics__charts-section">
           <div className="admin-analytics__chart-container">
-            <div className="admin-analytics__chart-box">
+            <div className="admin-analytics__chart-box admin-analytics__chart-box--clickable" onClick={() => handleChartClick('growth')}>
               <div className="admin-analytics__chart-header">
                 <h3>MSME Growth Tracking</h3>
                 <p>Individual MSME performance based on ratings and profile views</p>
+                <div className="admin-analytics__click-hint">Click to expand details</div>
               </div>
               <div className="admin-analytics__chart-content">
                 <div className="admin-analytics__chart-legend">
@@ -267,10 +277,11 @@ const AdminAnalytics = () => {
               </div>
             </div>
 
-            <div className="admin-analytics__chart-box">
+            <div className="admin-analytics__chart-box admin-analytics__chart-box--clickable" onClick={() => handleChartClick('products')}>
               <div className="admin-analytics__chart-header">
                 <h3>Top Picks Products</h3>
                 <p>Most popular products by customer preference</p>
+                <div className="admin-analytics__click-hint">Click to expand details</div>
               </div>
               <div className="admin-analytics__chart-content">
                 <div className="admin-analytics__chart-legend">
@@ -395,6 +406,285 @@ const AdminAnalytics = () => {
         
 
       </div>
+
+      {/* Expanded Growth Chart Modal */}
+      {expandedChart === 'growth' && (
+        <div className="admin-analytics__modal-overlay" onClick={closeExpandedChart}>
+          <div className="admin-analytics__modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-analytics__modal-header">
+              <h2>MSME Growth Tracking - Detailed Analysis</h2>
+              <button className="admin-analytics__modal-close" onClick={closeExpandedChart}>×</button>
+            </div>
+            <div className="admin-analytics__modal-body">
+              {loading || !monthlyGrowthData ? (
+                <div className="admin-analytics__no-data">
+                  Loading MSME growth data...
+                </div>
+              ) : (
+                <>
+                  <div className="admin-analytics__expanded-chart">
+                    <svg className="admin-analytics__chart-svg" width="100%" height="400" viewBox="0 0 800 400">
+                      {/* Enhanced chart grid lines */}
+                      <defs>
+                        <pattern id="expanded-grid" width="80" height="40" patternUnits="userSpaceOnUse">
+                          <path d="M 80 0 L 0 0 0 40" fill="none" stroke="#f0f0f0" strokeWidth="1"/>
+                        </pattern>
+                      </defs>
+                      <rect width="100%" height="100%" fill="url(#expanded-grid)" />
+                      
+                      {/* Enhanced dynamic chart lines */}
+                      {monthlyGrowthData.stores.map((store, storeIndex) => {
+                        const xStep = 720 / (monthlyGrowthData.months.length - 1);
+                        const xPositions = monthlyGrowthData.months.map((_, i) => 60 + i * xStep);
+                        
+                        const maxViews = Math.max(...monthlyGrowthData.stores.flatMap(s => s.views));
+                        const minViews = Math.min(...monthlyGrowthData.stores.flatMap(s => s.views));
+                        const viewsRange = maxViews - minViews || 1;
+                        
+                        const yPositions = store.views.map(views => {
+                          const normalizedViews = (views - minViews) / viewsRange;
+                          return 360 - (normalizedViews * 280); // Larger scale for expanded view
+                        });
+                        
+                        const points = xPositions.map((x, i) => `${x},${yPositions[i]}`).join(' ');
+                        
+                        return (
+                          <g key={store.name}>
+                            <polyline 
+                              fill="none" 
+                              stroke={store.color} 
+                              strokeWidth="4"
+                              points={points}
+                            />
+                            {xPositions.map((x, i) => (
+                              <circle 
+                                key={i}
+                                cx={x} 
+                                cy={yPositions[i]} 
+                                r="6" 
+                                fill={store.color} 
+                                stroke="white" 
+                                strokeWidth="3"
+                              />
+                            ))}
+                          </g>
+                        );
+                      })}
+                      
+                      {/* Enhanced Y-axis labels */}
+                      <text x="30" y="80" fontSize="12" fill="#666" textAnchor="middle">High</text>
+                      <text x="30" y="160" fontSize="12" fill="#666" textAnchor="middle">Medium</text>
+                      <text x="30" y="240" fontSize="12" fill="#666" textAnchor="middle">Low</text>
+                      <text x="30" y="320" fontSize="12" fill="#666" textAnchor="middle">Start</text>
+                      
+                      {/* Enhanced X-axis labels */}
+                      {monthlyGrowthData.months.map((month, index) => (
+                        <text 
+                          key={month}
+                          x={60 + index * (720 / (monthlyGrowthData.months.length - 1))} 
+                          y="385" 
+                          textAnchor="middle" 
+                          fontSize="14" 
+                          fill="#666"
+                        >
+                          {month}
+                        </text>
+                      ))}
+                    </svg>
+                  </div>
+                  <div className="admin-analytics__detailed-stats">
+                    <div className="admin-analytics__detail-stat">
+                      <h4>Total MSMEs</h4>
+                      <p>{monthlyGrowthData.stores.length}</p>
+                    </div>
+                    <div className="admin-analytics__detail-stat">
+                      <h4>Average Growth</h4>
+                      <p>{Math.round(monthlyGrowthData.stores.reduce((acc, store) => {
+                        const latest = store.views[store.views.length - 1] || 0;
+                        const previous = store.views[store.views.length - 2] || 0;
+                        return acc + (previous > 0 ? ((latest - previous) / previous) * 100 : 0);
+                      }, 0) / monthlyGrowthData.stores.length)}%</p>
+                    </div>
+                    <div className="admin-analytics__detail-stat">
+                      <h4>Top Performer</h4>
+                      <p>{monthlyGrowthData.stores.reduce((max, store) => 
+                        store.views[store.views.length - 1] > max.views[max.views.length - 1] ? store : max, 
+                        monthlyGrowthData.stores[0]
+                      ).name}</p>
+                    </div>
+                    <div className="admin-analytics__detail-stat">
+                      <h4>Total Views</h4>
+                      <p>{monthlyGrowthData.stores.reduce((total, store) => 
+                        total + store.views.reduce((sum, views) => sum + views, 0), 0
+                      ).toLocaleString()}</p>
+                    </div>
+                  </div>
+                  <div className="admin-analytics__insights-detailed">
+                    <h3>Growth Insights</h3>
+                    <ul>
+                      <li>Top growing MSME: {monthlyGrowthData.stores.reduce((max, store) => {
+                        const latest = store.views[store.views.length - 1] || 0;
+                        const previous = store.views[store.views.length - 2] || 0;
+                        const maxLatest = max.views[max.views.length - 1] || 0;
+                        const maxPrevious = max.views[max.views.length - 2] || 0;
+                        const storeGrowth = previous > 0 ? ((latest - previous) / previous) * 100 : 0;
+                        const maxGrowth = maxPrevious > 0 ? ((maxLatest - maxPrevious) / maxPrevious) * 100 : 0;
+                        return storeGrowth > maxGrowth ? store : max;
+                      }, monthlyGrowthData.stores[0]).name}</li>
+                      <li>Average monthly growth rate: {Math.round(monthlyGrowthData.stores.reduce((acc, store) => {
+                        const latest = store.views[store.views.length - 1] || 0;
+                        const previous = store.views[store.views.length - 2] || 0;
+                        return acc + (previous > 0 ? ((latest - previous) / previous) * 100 : 0);
+                      }, 0) / monthlyGrowthData.stores.length)}%</li>
+                      <li>Peak performance months: {monthlyGrowthData.months.slice(-2).join(' and ')}</li>
+                      <li>Overall trend: {monthlyGrowthData.stores.reduce((acc, store) => {
+                        const latest = store.views[store.views.length - 1] || 0;
+                        const first = store.views[0] || 0;
+                        return acc + (first > 0 ? ((latest - first) / first) * 100 : 0);
+                      }, 0) / monthlyGrowthData.stores.length > 0 ? 'Positive growth across all MSMEs' : 'Mixed growth patterns'}</li>
+                    </ul>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Expanded Products Chart Modal */}
+      {expandedChart === 'products' && (
+        <div className="admin-analytics__modal-overlay" onClick={closeExpandedChart}>
+          <div className="admin-analytics__modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-analytics__modal-header">
+              <h2>Top Picks Products - Detailed Analysis</h2>
+              <button className="admin-analytics__modal-close" onClick={closeExpandedChart}>×</button>
+            </div>
+            <div className="admin-analytics__modal-body">
+              {loading || !topProducts || topProducts.length === 0 ? (
+                <div className="admin-analytics__no-data">
+                  {loading ? 'Loading top products data...' : 'No top products available yet'}
+                </div>
+              ) : (
+                <>
+                  <div className="admin-analytics__expanded-chart">
+                    <svg className="admin-analytics__chart-svg" width="100%" height="500" viewBox="0 0 600 500">
+                      <g transform="translate(300,250)">
+                        {topProducts.map((product, index) => {
+                          const percentage = parseFloat(product.percentage) || (100 / topProducts.length);
+                          const colors = ['#313131', '#7ed957', '#f59e0b', '#8b5cf6', '#ef4444'];
+                          const radius = 150; // Larger radius for expanded view
+                          
+                          // Calculate angles for this segment
+                          const segmentAngle = (100 / topProducts.length) * 3.6; // Convert percentage to degrees
+                          const startAngle = (index * segmentAngle - 90) * Math.PI / 180;
+                          const endAngle = ((index + 1) * segmentAngle - 90) * Math.PI / 180;
+                          
+                          // Calculate points
+                          const x1 = radius * Math.cos(startAngle);
+                          const y1 = radius * Math.sin(startAngle);
+                          const x2 = radius * Math.cos(endAngle);
+                          const y2 = radius * Math.sin(endAngle);
+                          
+                          // Large arc flag for segments > 180 degrees
+                          const largeArc = segmentAngle > 180 ? 1 : 0;
+                          
+                          const pathData = `M 0,0 L ${x1},${y1} A ${radius},${radius} 0 ${largeArc},1 ${x2},${y2} Z`;
+                          
+                          // Label position
+                          const labelAngle = (startAngle + endAngle) / 2;
+                          const labelX = 80 * Math.cos(labelAngle);
+                          const labelY = 80 * Math.sin(labelAngle);
+                          
+                          return (
+                            <g key={product._id || index}>
+                              <path 
+                                d={pathData}
+                                fill={colors[index % colors.length]}
+                                stroke="white" 
+                                strokeWidth="3"
+                              />
+                              <text 
+                                x={labelX} 
+                                y={labelY} 
+                                fontSize="16" 
+                                fill="white" 
+                                fontWeight="bold" 
+                                textAnchor="middle"
+                                dominantBaseline="middle"
+                              >
+                                {Math.round(percentage)}%
+                              </text>
+                            </g>
+                          );
+                        })}
+                      </g>
+                    </svg>
+                  </div>
+                  <div className="admin-analytics__detailed-stats">
+                    <div className="admin-analytics__detail-stat">
+                      <h4>Total Products</h4>
+                      <p>{topProducts.length}</p>
+                    </div>
+                    <div className="admin-analytics__detail-stat">
+                      <h4>Top Rated</h4>
+                      <p>{topProducts[0]?.rating ? `${topProducts[0].rating}★` : 'N/A'}</p>
+                    </div>
+                    <div className="admin-analytics__detail-stat">
+                      <h4>Categories</h4>
+                      <p>{new Set(topProducts.map(p => p.category).filter(Boolean)).size || 'Various'}</p>
+                    </div>
+                    <div className="admin-analytics__detail-stat">
+                      <h4>Active Stores</h4>
+                      <p>{new Set(topProducts.map(p => p.storeName).filter(Boolean)).size}</p>
+                    </div>
+                  </div>
+                  <div className="admin-analytics__product-breakdown">
+                    <h3>Product Performance Breakdown</h3>
+                    <div className="admin-analytics__product-grid">
+                      {topProducts.map((product, index) => {
+                        const colors = ['#313131', '#7ed957', '#f59e0b', '#8b5cf6', '#ef4444'];
+                        const percentage = Math.round(100 / topProducts.length);
+                        
+                        return (
+                          <div key={product._id || index} className="admin-analytics__product-card">
+                            <div 
+                              className="admin-analytics__product-indicator"
+                              style={{ backgroundColor: colors[index % colors.length] }}
+                            ></div>
+                            <div className="admin-analytics__product-info">
+                              <h4>{product.productName}</h4>
+                              <p className="admin-analytics__product-store">by {product.storeName}</p>
+                              <div className="admin-analytics__product-stats">
+                                <span className="admin-analytics__product-rating">
+                                  {product.rating ? `${product.rating}★` : 'No rating'}
+                                </span>
+                                <span className="admin-analytics__product-percentage">
+                                  {percentage}% share
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="admin-analytics__insights-detailed">
+                    <h3>Product Insights</h3>
+                    <ul>
+                      <li>Most popular product: {topProducts[0]?.productName || 'N/A'} by {topProducts[0]?.storeName || 'Unknown Store'}</li>
+                      <li>Average rating across top products: {topProducts.filter(p => p.rating).length > 0 ? 
+                        (topProducts.filter(p => p.rating).reduce((sum, p) => sum + parseFloat(p.rating), 0) / 
+                        topProducts.filter(p => p.rating).length).toFixed(1) + '★' : 'No ratings available'}</li>
+                      <li>Market distribution: {topProducts.length > 3 ? 'Competitive market with diverse products' : 'Market dominated by few key products'}</li>
+                      <li>Store participation: {new Set(topProducts.map(p => p.storeName).filter(Boolean)).size} unique stores contributing to top picks</li>
+                    </ul>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

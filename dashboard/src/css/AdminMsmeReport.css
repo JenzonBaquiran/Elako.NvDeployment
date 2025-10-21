@@ -18,6 +18,13 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  /* Hide scrollbar for main content */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.admin-msme-reports__content::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 
 .admin-msme-reports__content--sidebar-open {

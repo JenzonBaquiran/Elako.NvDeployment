@@ -135,7 +135,7 @@ function Home() {
         <div className="hot-picks-header" data-aos="fade-right">
           {/* <span className="top-rated-icon">⭐</span> */}
           <h1></h1>
-          <h2>Top Rated Products</h2>
+          <h2> HOT PICKS</h2>
           <div className="hot-picks-viewall">
             <button 
               className="hero-button hero-button-outline"
@@ -212,7 +212,7 @@ function Home() {
   <div className="top-stores-header">
     {/* <span className="top-stores-icon">🏅</span> */}
     <h1></h1>
-    <h2>Top Stores</h2>
+    <h2>TOP STORES</h2>
     <div className="top-stores-viewall">
       <button 
         className="hero-button hero-button-outline"
@@ -290,7 +290,7 @@ function Home() {
 <section className="service-providers-section">
   <div className="service-providers-header">
     <div className="service-providers-title">
-      <h2>New Stores</h2>
+      <h2>NEW STORES</h2>
     </div>
     <div className="recently-joined-viewall">
        <button 

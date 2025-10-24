@@ -262,6 +262,26 @@ const CustomerStoreView = () => {
     return defaultStoreImg;
   };
 
+  // Calculate product rating from feedback
+  const getProductRating = (product) => {
+    // If product has a direct rating field, use it
+    if (product.rating && typeof product.rating === 'number') {
+      return product.rating;
+    }
+
+    // If no direct rating but has feedback, calculate from feedback
+    if (product.feedback && product.feedback.length > 0) {
+      const validRatings = product.feedback.filter(fb => fb.rating && typeof fb.rating === 'number');
+      if (validRatings.length > 0) {
+        const sum = validRatings.reduce((acc, fb) => acc + fb.rating, 0);
+        return sum / validRatings.length;
+      }
+    }
+
+    // Default to 0 if no rating data
+    return 0;
+  };
+
   // Blog slider navigation handlers
   const handleNextBlogSlide = () => {
     setCurrentBlogSlide((prevSlide) => (prevSlide + 1) % blogPosts.length);
@@ -677,78 +697,22 @@ const CustomerStoreView = () => {
     <div className="customer-store-view-container">
       <Header />
       
-      {/* Blog Section - BlogHero Style with MSME Data */}
-      <section 
-        className="store-blog-hero" 
-        style={{
-          backgroundImage: `url(${getBackgroundImageForBlog(currentPost)})`,
-        }}
-      >
-        {/* Background image with overlay */}
-        <div className="store-blog-hero-background">
-          <div className="store-blog-hero-background-image">
-            {renderBlogMedia(currentPost)}
-          </div>
+      {/* Full Width Cover Photo Hero Section */}
+      <section className="store-cover-hero">
+        <div className="cover-hero-image">
+          <img 
+            src={dashboard.coverPhoto ? `http://localhost:1337/uploads/${dashboard.coverPhoto}` : getStoreImageUrl(store)} 
+            alt={store.businessName}
+            className="cover-hero-img"
+            onError={(e) => {
+              e.target.src = store.category === 'food' ? foodStoreImg : defaultStoreImg;
+            }}
+          />
+          <div className="cover-hero-overlay"></div>
         </div>
-        
-        <div className="store-blog-hero-container">
-          <div className="store-blog-hero-content">
-            <div className="store-blog-hero-text-section">
-              <h1 className="store-blog-hero-title">
-                {currentPost?.title || `Welcome to ${store?.businessName || 'Our Store'}`}
-              </h1>
-
-              {/* Category badge positioned below the title */}
-              <div className="store-blog-hero-badges">
-                <div className="store-blog-hero-category-badge">
-                  {currentPost?.category || 'STORE UPDATES'}
-                </div>
-              </div>
-
-              <h2 className="store-blog-hero-subtitle">
-                {currentPost?.subtitle || currentPost?.description || 'Stay tuned for our latest updates and stories'}
-              </h2>
-
-              <div className="store-blog-hero-actions">
-                <button 
-                  className="store-blog-hero-cta-primary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (currentPost) {
-                      handleBlogPostClick(currentPost);
-                    }
-                  }}
-                >
-                  READ MORE
-                  <span className="cta-arrow">→</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation arrows */}
-        {blogPosts.length > 1 && (
-          <>
-            <button 
-              className="store-blog-hero-nav prev"
-              onClick={() => handleSlideChange((currentBlogSlide - 1 + blogPosts.length) % blogPosts.length)}
-              aria-label="Previous slide"
-            >
-              ‹
-            </button>
-            <button 
-              className="store-blog-hero-nav next"
-              onClick={() => handleSlideChange((currentBlogSlide + 1) % blogPosts.length)}
-              aria-label="Next slide"
-            >
-              ›
-            </button>
-          </>
-        )}
       </section>
 
-      <div className="customer-store-view-content has-blog-hero">
+      <div className="customer-store-view-content">
         {/* Back Button */}
         <button 
           className="back-to-stores-btn"
@@ -758,24 +722,13 @@ const CustomerStoreView = () => {
           <ArrowBackIcon /> Back to Stores
         </button>
 
-        {/* Cover Photo Header */}
+        {/* Store Info Section */}
         <div className="store-cover-section">
-          <div className="cover-photo">
-            <img 
-              src={dashboard.coverPhoto ? `http://localhost:1337/uploads/${dashboard.coverPhoto}` : getStoreImageUrl(store)} 
-              alt={store.businessName}
-              className="cover-image"
-              onError={(e) => {
-                e.target.src = store.category === 'food' ? foodStoreImg : defaultStoreImg;
-              }}
-            />
-          </div>
-          
-          {/* Store Logo and Info Section - New Two Column Layout */}
+          {/* Store Logo and Info Section - Rearranged Layout */}
           <div className="store-info-section">
-            {/* Left Column - Logo, Header & Google Maps */}
+            {/* Left Column - Logo, Header, Buttons & Store Details */}
             <div className="store-left-column">
-              {/* Store Header with Logo, Name and Username - Top of Left Column */}
+              {/* Store Header with Logo, Name and Username */}
               <div className="store-header-left">
                 <div className="store-name-with-logo-left">
                   <div className="store-logo-container-left">
@@ -798,66 +751,8 @@ const CustomerStoreView = () => {
                 </div>
               </div>
 
-              {/* Google Maps - Below Header */}
-              {dashboard.googleMapsUrl && handleEmbedUrl(dashboard.googleMapsUrl) ? (
-                <div className="store-location-embed-left">
-                  {console.log('Original Google Maps URL:', dashboard.googleMapsUrl)}
-                  {console.log('Processed Embed URL:', handleEmbedUrl(dashboard.googleMapsUrl))}
-                  <iframe
-                    src={handleEmbedUrl(dashboard.googleMapsUrl)}
-                    width="100%"
-                    height="350"
-                    style={{border: 0}}
-                    allowFullScreen=""
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title="Store Location"
-                    className="google-maps-embed"
-                    onError={(e) => {
-                      console.error('Maps iframe failed to load:', e);
-                    }}
-                    onLoad={(e) => {
-                      console.log('Maps iframe loaded successfully');
-                    }}
-                  />
-                </div>
-              ) : dashboard.googleMapsUrl && !handleEmbedUrl(dashboard.googleMapsUrl) ? (
-                <div className="store-location-embed-left" style={{
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  background: '#f8f9fa', 
-                  borderRadius: '8px',
-                  border: '2px dashed #ddd',
-                  height: '350px'
-                }}>
-                  <div style={{textAlign: 'center', padding: '20px', color: '#666'}}>
-                    <p style={{margin: 0, fontSize: '14px'}}>📍 Location URL needs to be in embed format</p>
-                    <small>Store owner should use embedded Google Maps link</small>
-                  </div>
-                </div>
-              ) : (
-                <div className="store-location-embed-left" style={{
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  background: '#f8f9fa', 
-                  borderRadius: '8px',
-                  border: '2px dashed #ddd',
-                  height: '350px'
-                }}>
-                  <div style={{textAlign: 'center', padding: '20px', color: '#666'}}>
-                    <p style={{margin: 0, fontSize: '14px'}}>📍 No location provided</p>
-                    <small>Store location will appear here</small>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Right Column - Store Information */}
-            <div className="store-right-column">
-              {/* Action Buttons - Top Right */}
-              <div className="store-actions-top">
+              {/* Action Buttons - Below Header in Left Column */}
+              <div className="store-actions-left">
                 <FollowButton 
                   storeId={storeId} 
                   storeName={store?.businessName}
@@ -885,16 +780,21 @@ const CustomerStoreView = () => {
                   CHAT
                 </button>
               </div>
-
-              {/* Store Details */}
-              <div className="store-details-right">
+                    <div className="store-rating-bottom">
+                  {renderStarRating(store.averageRating || 0)}
+                  {store.totalRatings > 0 && (
+                    <span className="total-ratings">({store.totalRatings} rating{store.totalRatings !== 1 ? 's' : ''})</span>
+                  )}
+                </div>
+              {/* Store Details - Below Buttons in Left Column */}
+              <div className="store-details-left">
                 {/* Description */}
                 {dashboard.description && (
                   <p className="store-description">{dashboard.description}</p>
                 )}
                 
                 <div className="store-meta">
-                  {/* Location - only show as text, removed View Location link */}
+                  {/* Location - only show as text */}
                   {(dashboard.googleMapsUrl || dashboard.location) && (
                     <div className="store-detail-row">
                       <LocationOnIcon className="detail-icon location-icon" />
@@ -902,7 +802,7 @@ const CustomerStoreView = () => {
                     </div>
                   )}
                   
-                  {/* Contact Number - prioritize dashboard contact number, fallback to store contact number */}
+                  {/* Contact Number */}
                   {(dashboard.contactNumber || store.contactNumber) && (
                     <div className="store-detail-row">
                       <PhoneIcon className="detail-icon contact-icon" />
@@ -976,74 +876,121 @@ const CustomerStoreView = () => {
                   )}
                 </div>
                 
-                {/* Store Rating - Bottom of right column */}
-                <div className="store-rating-bottom">
-                  {renderStarRating(store.averageRating || 0)}
-                  {store.totalRatings > 0 && (
-                    <span className="total-ratings">({store.totalRatings} rating{store.totalRatings !== 1 ? 's' : ''})</span>
-                  )}
-                </div>
+                {/* Store Rating - Bottom of left column */}
+              
               </div>
+            </div>
+
+            {/* Right Column - Google Maps */}
+            <div className="store-right-column">
+              {/* Google Maps */}
+              {dashboard.googleMapsUrl && handleEmbedUrl(dashboard.googleMapsUrl) ? (
+                <div className="store-location-embed-right">
+                  <iframe
+                    src={handleEmbedUrl(dashboard.googleMapsUrl)}
+                    width="100%"
+                    height="100%"
+                    style={{border: 0}}
+                    allowFullScreen=""
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Store Location"
+                    className="google-maps-embed"
+                  />
+                </div>
+              ) : dashboard.googleMapsUrl && !handleEmbedUrl(dashboard.googleMapsUrl) ? (
+                <div className="store-location-embed-right" style={{
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  background: '#f8f9fa', 
+                  borderRadius: '8px',
+                  border: '2px dashed #ddd',
+                  height: '100%'
+                }}>
+                  <div style={{textAlign: 'center', padding: '20px', color: '#666'}}>
+                    <p style={{margin: 0, fontSize: '14px'}}>📍 Location URL needs to be in embed format</p>
+                    <small>Store owner should use embedded Google Maps link</small>
+                  </div>
+                </div>
+              ) : (
+                <div className="store-location-embed-right" style={{
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  background: '#f8f9fa', 
+                  borderRadius: '8px',
+                  border: '2px dashed #ddd',
+                  height: '100%'
+                }}>
+                  <div style={{textAlign: 'center', padding: '20px', color: '#666'}}>
+                    <p style={{margin: 0, fontSize: '14px'}}>📍 No location provided</p>
+                    <small>Store location will appear here</small>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Government Approvals Section */}
-        {(true || dashboard.governmentApprovals?.dole || dashboard.governmentApprovals?.dost || dashboard.governmentApprovals?.fda || dashboard.governmentApprovals?.others) && (
-          <div className="government-approvals-section">
-            <h2>Government Approvals & Assistance</h2>
-            <div className="approvals-grid">
-              {/* DTI is always shown - all MSMEs are DTI assisted */}
-              <div className="approval-badge dti-default">
-                <img 
-                  src={dtiLogo} 
-                  alt="DTI - Department of Trade and Industry" 
-                  className="approval-logo"
-                />
-              </div>
-              
-              {dashboard.governmentApprovals?.dole && (
-                <div className="approval-badge">
-                  <img 
-                    src={doleLogo} 
-                    alt="DOLE - Department of Labor and Employment" 
-                    className="approval-logo"
-                  />
-                </div>
-              )}
-              {dashboard.governmentApprovals?.dost && (
-                <div className="approval-badge">
-                  <img 
-                    src={dostLogo} 
-                    alt="DOST - Department of Science and Technology" 
-                    className="approval-logo"
-                  />
-                </div>
-              )}
-              {dashboard.governmentApprovals?.fda && (
-                <div className="approval-badge">
-                  <img 
-                    src={fdaLogo} 
-                    alt="FDA - Food and Drug Administration" 
-                    className="approval-logo"
-                  />
-                </div>
-              )}
-              {dashboard.governmentApprovals?.others && dashboard.governmentApprovals?.otherAgencies?.length > 0 && 
-                dashboard.governmentApprovals.otherAgencies.map((agency, index) => (
-                  agency.trim() && (
-                    <div key={index} className="approval-badge others-badge">
-                      <div className="others-content">
-                        <span className="approval-icon">🏢</span>
-                        <span className="others-name">{agency}</span>
-                      </div>
-                    </div>
-                  )
-                ))
-              }
+
+        {/* Store Reels Section - Replace Government Approvals */}
+        <div className="store-reels-section">
+          {blogPostsLoading ? (
+            <div className="reels-loading">
+              <p>Loading blogs and videos...</p>
             </div>
-          </div>
-        )}
+          ) : blogPosts.length === 0 ? (
+            <div className="no-reels">
+              <p>No store reels available at the moment.</p>
+            </div>
+          ) : (
+            <div className="reels-grid">
+              {blogPosts.map((post, index) => (
+                <div 
+                  key={post._id} 
+                  className="reel-card"
+                  onClick={() => handleBlogPostClick(post)}
+                >
+                  <div className="reel-media">
+                    <div className="reel-category-tag">{post.category}</div>
+                    {post.mediaType === 'youtube' ? (
+                      <div className="reel-youtube-thumb">
+                        <img 
+                          src={getYouTubeThumbnail(post.mediaUrl)} 
+                          alt={post.title}
+                          className="reel-thumbnail"
+                        />
+                        <div className="play-button-overlay">
+                          <div className="play-icon">▶</div>
+                        </div>
+                      </div>
+                    ) : post.mediaType === 'video' ? (
+                      <div className="reel-video-thumb">
+                        <video 
+                          src={getBlogMediaUrl(post)}
+                          className="reel-thumbnail"
+                          preload="metadata"
+                        />
+                        <div className="play-button-overlay">
+                          <div className="play-icon">▶</div>
+                        </div>
+                      </div>
+                    ) : (
+                      <img 
+                        src={getBlogMediaUrl(post)} 
+                        alt={post.title}
+                        className="reel-thumbnail"
+                      />
+                    )}
+                  </div>
+                  
+
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Products Section */}
         <div className="store-products">
@@ -1058,19 +1005,41 @@ const CustomerStoreView = () => {
                 <div 
                   key={product._id} 
                   className="product-card"
-                  onClick={() => navigate(`/product/${product._id}`)}
-                  style={{ cursor: 'pointer' }}
                 >
+                  <div className="product-price-tag">
+                    ₱{product.price}
+                  </div>
                   <img 
                     src={getProductImageUrl(product)} 
                     alt={product.productName}
                     className="product-image"
                   />
-                  <div className="product-name-overlay">
-                    {product.productName}
-                  </div>
-                  <div className="product-price-tag">
-                    ₱{product.price}
+                  <div className="product-content">
+                    <h3 className="product-name">{product.productName}</h3>
+                    <div className="product-rating">
+                      <div className="product-stars">
+                        {[1, 2, 3, 4, 5].map((star) => {
+                          const rating = getProductRating(product);
+                          return (
+                            <span 
+                              key={star} 
+                              className={`product-star ${star <= Math.round(rating) ? 'filled' : 'empty'}`}
+                            >
+                              ★
+                            </span>
+                          );
+                        })}
+                      </div>
+                      <span className="product-rating-score">
+                        ({getProductRating(product).toFixed(1)})
+                      </span>
+                    </div>
+                    <button 
+                      className="product-view-btn"
+                      onClick={() => navigate(`/product/${product._id}`)}
+                    >
+                      View Product
+                    </button>
                   </div>
                 </div>
               ))}
@@ -1080,45 +1049,12 @@ const CustomerStoreView = () => {
 
         {/* Reviews Section */}
         <div className="store-reviews">
-          {/* Top Rated Products Section */}
-          {topRatedProducts.length > 0 && (
-            <div className="top-reviews-section">
-              <h3>Top Rated Products</h3>
-              <div className="top-products-grid">
-                {topRatedProducts.slice(0, 3).map((product, index) => (
-                  <div 
-                    key={product._id} 
-                    className="top-product-card"
-                    onClick={() => navigate(`/product/${product._id}`)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <img 
-                      src={getProductImageUrl(product)} 
-                      alt={product.productName}
-                      className="top-product-image"
-                    />
-                    <div className="top-product-info">
-                      <h4 className="top-product-name">{product.productName}</h4>
-                      <div className="top-product-rating">
-                        <div className="stars">
-                          {'★'.repeat(Math.floor(product.rating || 0))}{'☆'.repeat(5 - Math.floor(product.rating || 0))}
-                        </div>
-                        <span className="rating-text">({product.rating ? product.rating.toFixed(1) : '0.0'})</span>
-                      </div>
-                      <div className="top-product-price">₱{product.price}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Product Feedbacks Section */}
           <div className="product-feedbacks-section">
-            <h3>Customer Reviews</h3>
+            <h2>Customer Reviews</h2>
             {productFeedbacks.length > 0 ? (
               <div className="feedbacks-list">
-                {productFeedbacks.map((feedback, index) => (
+                {productFeedbacks.slice(0, 5).map((feedback, index) => (
                   <div key={index} className="feedback-item">
                     <div className="feedback-header">
                       <div className="reviewer-info">
@@ -1146,10 +1082,22 @@ const CustomerStoreView = () => {
                     {/* Review text */}
                     <p className="review-text">"{feedback.feedback}"</p>
                     
-                    {/* Product name */}
-                    <div className="reviewed-product-name">
-                      <span className="product-label">Product: </span>
-                      <span className="product-name-text">{feedback.productName}</span>
+                    {/* Product name and variant */}
+                    <div className="reviewed-product-info">
+                      <div className="reviewed-product-name">
+                        <span className="product-label">Product: </span>
+                        <span className="product-name-text">{feedback.productName}</span>
+                      </div>
+                      {(feedback.variant || feedback.productVariant || feedback.size || feedback.color) && (
+                        <div className="reviewed-product-variant">
+                          <span className="variant-label">Variant: </span>
+                          <span className="variant-text">
+                            {feedback.variant || feedback.productVariant || 
+                             (feedback.size && feedback.color ? `${feedback.size}, ${feedback.color}` : 
+                              feedback.size || feedback.color || 'Not specified')}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

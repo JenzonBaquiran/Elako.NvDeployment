@@ -732,6 +732,7 @@ const CustomerStoreView = () => {
               <div className="store-header-left">
                 <div className="store-name-with-logo-left">
                   <div className="store-logo-container-left">
+                    
                     <img 
                       src={getStoreImageUrl(store)} 
                       alt={store.businessName}
@@ -874,6 +875,7 @@ const CustomerStoreView = () => {
                       </a>
                     </div>
                   )}
+
                 </div>
                 
                 {/* Store Rating - Bottom of left column */}
@@ -935,72 +937,17 @@ const CustomerStoreView = () => {
 
 
         {/* Store Reels Section - Replace Government Approvals */}
-        <div className="store-reels-section">
-          {blogPostsLoading ? (
-            <div className="reels-loading">
-              <p>Loading blogs and videos...</p>
-            </div>
-          ) : blogPosts.length === 0 ? (
-            <div className="no-reels">
-              <p>No store reels available at the moment.</p>
-            </div>
-          ) : (
-            <div className="reels-grid">
-              {blogPosts.map((post, index) => (
-                <div 
-                  key={post._id} 
-                  className="reel-card"
-                  onClick={() => handleBlogPostClick(post)}
-                >
-                  <div className="reel-media">
-                    <div className="reel-category-tag">{post.category}</div>
-                    {post.mediaType === 'youtube' ? (
-                      <div className="reel-youtube-thumb">
-                        <img 
-                          src={getYouTubeThumbnail(post.mediaUrl)} 
-                          alt={post.title}
-                          className="reel-thumbnail"
-                        />
-                        <div className="play-button-overlay">
-                          <div className="play-icon">▶</div>
-                        </div>
-                      </div>
-                    ) : post.mediaType === 'video' ? (
-                      <div className="reel-video-thumb">
-                        <video 
-                          src={getBlogMediaUrl(post)}
-                          className="reel-thumbnail"
-                          preload="metadata"
-                        />
-                        <div className="play-button-overlay">
-                          <div className="play-icon">▶</div>
-                        </div>
-                      </div>
-                    ) : (
-                      <img 
-                        src={getBlogMediaUrl(post)} 
-                        alt={post.title}
-                        className="reel-thumbnail"
-                      />
-                    )}
-                  </div>
-                  
-
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+       
 
         {/* Products Section */}
         <div className="store-products">
-          <h2>PRODUCTS</h2>
+          <h2>Products</h2>
           {products.length === 0 ? (
             <div className="no-products">
               <p>No products available at the moment.</p>
             </div>
           ) : (
-            <div className="products-grid">
+            <div className="customer-store-products-grid">
               {products.map((product) => (
                 <div 
                   key={product._id} 
@@ -1046,6 +993,7 @@ const CustomerStoreView = () => {
             </div>
           )}
         </div>
+ 
 
         {/* Reviews Section */}
         <div className="store-reviews">
@@ -1110,6 +1058,62 @@ const CustomerStoreView = () => {
           </div>
         </div>
 
+<div className="store-reels-section">
+          {blogPostsLoading ? (
+            <div className="reels-loading">
+              <p>Loading blogs and videos...</p>
+            </div>
+          ) : blogPosts.length === 0 ? (
+            <div className="no-reels">
+              <p>No store reels available at the moment.</p>
+            </div>
+          ) : (
+            <div className="reels-grid">
+              {blogPosts.map((post, index) => (
+                <div 
+                  key={post._id} 
+                  className="reel-card"
+                  onClick={() => handleBlogPostClick(post)}
+                >
+                  <div className="reel-media">
+                    <div className="reel-category-tag">{post.category}</div>
+                    {post.mediaType === 'youtube' ? (
+                      <div className="reel-youtube-thumb">
+                        <img 
+                          src={getYouTubeThumbnail(post.mediaUrl)} 
+                          alt={post.title}
+                          className="reel-thumbnail"
+                        />
+                        <div className="play-button-overlay">
+                          <div className="play-icon">▶</div>
+                        </div>
+                      </div>
+                    ) : post.mediaType === 'video' ? (
+                      <div className="reel-video-thumb">
+                        <video 
+                          src={getBlogMediaUrl(post)}
+                          className="reel-thumbnail"
+                          preload="metadata"
+                        />
+                        <div className="play-button-overlay">
+                          <div className="play-icon">▶</div>
+                        </div>
+                      </div>
+                    ) : (
+                      <img 
+                        src={getBlogMediaUrl(post)} 
+                        alt={post.title}
+                        className="reel-thumbnail"
+                      />
+                    )}
+                  </div>
+                  
+
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         {/* Rating Modal - Simplified to stars only */}
         {showRatingModal && (
           <div className="rating-modal-overlay" onClick={() => {

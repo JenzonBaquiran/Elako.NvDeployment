@@ -1457,11 +1457,11 @@ input:checked + .toggle-slider:before {
 
 .blog-section-header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
-  flex-direction: column;
-  text-align: center;
+  flex-direction: row;
+  text-align: left;
 }
 
 .blog-section-header h3 {
@@ -1680,9 +1680,9 @@ input:checked + .toggle-slider:before {
 }
 
 .edit-blog-btn {
-  background: #f8f9fa;
-  color: #333;
-  border: 1px solid #dee2e6;
+  background: #313131;
+  color: white;
+  border: 1px solid #313131;
 }
 
 .edit-blog-btn:hover {
@@ -1692,15 +1692,15 @@ input:checked + .toggle-slider:before {
 }
 
 .delete-blog-btn {
-  background: #f8f9fa;
-  color: #dc3545;
-  border: 1px solid #dee2e6;
+  background: #313131;
+  color: white;
+  border: 1px solid #313131;
 }
 
 .delete-blog-btn:hover {
-  background: #dc3545;
+  background: #7ed957;
   color: white;
-  border-color: #dc3545;
+  border-color: #7ed957;
 }
 
 .no-blogs {
@@ -1897,7 +1897,7 @@ input:checked + .toggle-slider:before {
   }
   
   .add-blog-btn {
-    align-self: flex-start;
+    align-self: center;
   }
   
   .blog-grid {
@@ -1921,6 +1921,10 @@ input:checked + .toggle-slider:before {
   .blog-form-cancel,
   .blog-form-save {
     width: 100%;
+  }
+  
+  .blog-actions {
+    justify-content: center;
   }
 }
 

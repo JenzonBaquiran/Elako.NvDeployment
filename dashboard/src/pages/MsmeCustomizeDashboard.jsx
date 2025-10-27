@@ -6,7 +6,7 @@ import '../css/MsmeCustomizeDashboard.css';
 
 const MsmeCustomizeDashboard = () => {
   const { user } = useAuth();
-  const { showSuccess, showError } = useNotification();
+  const { showSuccess, showError, showConfirm } = useNotification();
   const [sidebarState, setSidebarState] = useState({ isOpen: true, isMobile: false });
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
@@ -270,7 +270,12 @@ const MsmeCustomizeDashboard = () => {
   };
 
   const handleDeleteBlog = async (blogId) => {
-    if (!window.confirm("Are you sure you want to delete this blog post?")) return;
+    const confirmed = await showConfirm(
+      "This action cannot be undone. Are you sure you want to delete this blog post?",
+      "Delete Blog Post"
+    );
+    
+    if (!confirmed) return;
 
     try {
       const response = await fetch(`http://localhost:1337/api/msme/blog-posts/${blogId}`, {
@@ -280,14 +285,14 @@ const MsmeCustomizeDashboard = () => {
       const data = await response.json();
 
       if (data.success) {
-        showSuccess("Blog post deleted successfully!");
+        showSuccess("Blog post deleted successfully!", "Deleted");
         fetchBlogPosts();
       } else {
-        showError(data.error || "Failed to delete blog post");
+        showError(data.error || "Failed to delete blog post", "Delete Failed");
       }
     } catch (error) {
       console.error("Error deleting blog post:", error);
-      showError("Failed to delete blog post");
+      showError("An error occurred while deleting the blog post. Please try again.", "Delete Failed");
     }
   };
 

@@ -57,7 +57,7 @@ const handleEmbedUrl = (url) => {
 const CustomerStoreView = () => {
   const { storeId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, userType } = useAuth();
   const { showSuccess, showError } = useNotification();
 
   const [store, setStore] = useState(null);
@@ -507,7 +507,8 @@ const CustomerStoreView = () => {
         body: JSON.stringify({
           rating,
           user: userName,
-          userId: userId
+          userId: userId,
+          userType: userType
         })
       });
 
@@ -762,25 +763,31 @@ const CustomerStoreView = () => {
                     setIsFollowing(isFollowing);
                   }}
                 />
-                <button
-                  className="rate-btn-header"
-                  onClick={() => {
-                    setShowRatingModal(true);
-                    fetchExistingRating();
-                  }}
-                  title="Rate this store"
-                >
-                  <RateReviewIcon />
-                  RATE
-                </button>
-                <button
-                  className="chat-btn-header"
-                  onClick={handleChatClick}
-                  title="Chat with store"
-                >
-                  <ChatIcon />
-                  CHAT
-                </button>
+                {/* Only show rate button for customers */}
+                {userType === 'customer' && (
+                  <button
+                    className="rate-btn-header"
+                    onClick={() => {
+                      setShowRatingModal(true);
+                      fetchExistingRating();
+                    }}
+                    title="Rate this store"
+                  >
+                    <RateReviewIcon />
+                    RATE
+                  </button>
+                )}
+                {/* Only show chat button for customers */}
+                {userType === 'customer' && (
+                  <button
+                    className="chat-btn-header"
+                    onClick={handleChatClick}
+                    title="Chat with store"
+                  >
+                    <ChatIcon />
+                    CHAT
+                  </button>
+                )}
               </div>
               <div className="store-rating-bottom">
                 {renderStarRating(store.averageRating || 0)}

@@ -3968,15 +3968,29 @@ app.post(
 app.post("/api/stores/:storeId/rating", async (req, res) => {
   try {
     const { storeId } = req.params;
-    const { rating, user, userId } = req.body;
+    const { rating, user, userId, userType } = req.body;
 
-    console.log("Store rating request:", { storeId, rating, user, userId });
+    console.log("Store rating request:", {
+      storeId,
+      rating,
+      user,
+      userId,
+      userType,
+    });
 
     // Validation
     if (!rating || !user || !userId) {
       return res.status(400).json({
         success: false,
         error: "Rating, user, and userId are required",
+      });
+    }
+
+    // Check if user type is customer (only customers can rate stores)
+    if (userType !== "customer") {
+      return res.status(403).json({
+        success: false,
+        error: "Only customers can rate stores",
       });
     }
 

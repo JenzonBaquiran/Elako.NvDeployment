@@ -834,8 +834,8 @@ const MsmeCustomizeDashboard = () => {
                       <iframe
                         src={dashboardData.googleMapsUrl}
                         width="100%"
-                        height="200"
-                        style={{border: 0, borderRadius: '8px', marginTop: '8px'}}
+                        height="280"
+                        style={{border: 0, borderRadius: '8px', marginTop: '8px',paddingLeft: '20px'}}
                         allowFullScreen=""
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
@@ -851,7 +851,7 @@ const MsmeCustomizeDashboard = () => {
                       <iframe
                         src={dashboardData.googleMapsUrl}
                         width="100%"
-                        height="250"
+                        height="450"
                         style={{border: 0, borderRadius: '8px'}}
                         allowFullScreen=""
                         loading="lazy"

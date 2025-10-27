@@ -45,14 +45,6 @@ const MsmeCustomizeDashboard = () => {
       lazada: { enabled: false, url: '' },
       tiktok: { enabled: false, url: '' }
     },
-    governmentApprovals: {
-      dole: false,
-      dost: false,
-      fda: false,
-      dti: false,
-      others: false,
-      otherAgencies: []
-    },
     rating: 0,
     totalRatings: 0,
     isPublic: true
@@ -67,12 +59,23 @@ const MsmeCustomizeDashboard = () => {
   const [showBlogViewModal, setShowBlogViewModal] = useState(false);
   const [selectedViewBlog, setSelectedViewBlog] = useState(null);
 
+  // Debug preview URLs whenever they change
+  useEffect(() => {
+    console.log('=== PREVIEW URLs CHANGED ===');
+    console.log('Cover photo URL:', previewUrls.coverPhoto);
+    console.log('Store logo URL:', previewUrls.storeLogo);
+    console.log('============================');
+  }, [previewUrls]);
+
   // Fetch dashboard data and products on component mount
   useEffect(() => {
     if (user && user._id) {
+      console.log('User ID found, fetching dashboard data for:', user._id);
       fetchDashboardData();
       fetchProducts();
       fetchBlogPosts();
+    } else {
+      console.log('No user ID found, cannot fetch dashboard data');
     }
   }, [user]);
 
@@ -84,6 +87,12 @@ const MsmeCustomizeDashboard = () => {
       const data = await response.json();
       
       if (data.success) {
+        console.log('=== DASHBOARD DATA FETCH SUCCESS ===');
+        console.log('Full dashboard data:', data.dashboard);
+        console.log('Cover photo:', data.dashboard.coverPhoto);
+        console.log('Store logo:', data.dashboard.storeLogo);
+        console.log('=====================================');
+        
         // Ensure new fields have default values if not present in the data
         const dashboardWithDefaults = {
           ...data.dashboard,
@@ -91,12 +100,6 @@ const MsmeCustomizeDashboard = () => {
             shopee: { enabled: false, url: '' },
             lazada: { enabled: false, url: '' },
             tiktok: { enabled: false, url: '' }
-          },
-          governmentApprovals: data.dashboard.governmentApprovals || {
-            dole: false,
-            dost: false,
-            fda: false,
-            others: false
           },
           googleMapsUrl: data.dashboard.googleMapsUrl || '',
           coordinates: data.dashboard.coordinates || { lat: null, lng: null },
@@ -112,9 +115,26 @@ const MsmeCustomizeDashboard = () => {
           }));
         }
         if (data.dashboard.storeLogo) {
+          const logoUrl = `http://localhost:1337/uploads/${data.dashboard.storeLogo}`;
+          console.log('✅ STORE LOGO DETECTED:');
+          console.log('   - Setting store logo URL:', logoUrl);
+          console.log('   - Store logo filename:', data.dashboard.storeLogo);
+          console.log('   - Business name:', data.dashboard.businessName);
           setPreviewUrls(prev => ({
             ...prev,
-            storeLogo: `http://localhost:1337/uploads/${data.dashboard.storeLogo}`
+            storeLogo: logoUrl
+          }));
+          
+          // Test if image can be loaded
+          const testImg = new Image();
+          testImg.onload = () => console.log('✅ Store logo image loads successfully');
+          testImg.onerror = () => console.error('❌ Store logo image failed to load');
+          testImg.src = logoUrl;
+        } else {
+          console.log('❌ No store logo found in dashboard data');
+          setPreviewUrls(prev => ({
+            ...prev,
+            storeLogo: null
           }));
         }
       }
@@ -368,11 +388,6 @@ const MsmeCustomizeDashboard = () => {
             }
           };
           
-          // Initialize otherAgencies array when "others" is checked for the first time
-          if (name === 'governmentApprovals.others' && checked && (!prev.governmentApprovals.otherAgencies || prev.governmentApprovals.otherAgencies.length === 0)) {
-            newData.governmentApprovals.otherAgencies = [''];
-          }
-          
           return newData;
         });
       } else if (parts.length === 3) {
@@ -396,48 +411,27 @@ const MsmeCustomizeDashboard = () => {
     }
   };
 
-  // Handler functions for managing other agencies
-  const handleOtherAgencyChange = (index, value) => {
-    setDashboardData(prev => {
-      const newOtherAgencies = [...(prev.governmentApprovals.otherAgencies || [])];
-      newOtherAgencies[index] = value;
-      return {
-        ...prev,
-        governmentApprovals: {
-          ...prev.governmentApprovals,
-          otherAgencies: newOtherAgencies
-        }
-      };
-    });
-  };
-
-  const addOtherAgency = () => {
-    setDashboardData(prev => ({
-      ...prev,
-      governmentApprovals: {
-        ...prev.governmentApprovals,
-        otherAgencies: [...(prev.governmentApprovals.otherAgencies || []), '']
-      }
-    }));
-  };
-
-  const removeOtherAgency = (index) => {
-    setDashboardData(prev => {
-      const newOtherAgencies = [...(prev.governmentApprovals.otherAgencies || [])];
-      newOtherAgencies.splice(index, 1);
-      return {
-        ...prev,
-        governmentApprovals: {
-          ...prev.governmentApprovals,
-          otherAgencies: newOtherAgencies
-        }
-      };
-    });
-  };
-
   const handleFileChange = (e, type) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        showError("Please select a valid image file", "Invalid File");
+        return;
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        showError("Image file size must be less than 5MB", "File Too Large");
+        return;
+      }
+
+      console.log(`📁 New ${type} file selected:`, {
+        name: file.name,
+        size: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
+        type: file.type
+      });
+
       setDashboardData(prev => ({
         ...prev,
         [type]: file
@@ -446,12 +440,17 @@ const MsmeCustomizeDashboard = () => {
       // Create preview URL
       const reader = new FileReader();
       reader.onload = () => {
+        console.log(`✅ Preview created for ${type}`);
         setPreviewUrls(prev => ({
           ...prev,
           [type]: reader.result
         }));
       };
       reader.readAsDataURL(file);
+
+      if (type === 'storeLogo') {
+        showSuccess("Store logo selected! Click 'Save Changes' to upload.", "Logo Ready");
+      }
     }
   };
 
@@ -469,7 +468,6 @@ const MsmeCustomizeDashboard = () => {
       formData.append('coordinates', JSON.stringify(dashboardData.coordinates));
       formData.append('socialLinks', JSON.stringify(dashboardData.socialLinks));
       formData.append('ecommercePlatforms', JSON.stringify(dashboardData.ecommercePlatforms));
-      formData.append('governmentApprovals', JSON.stringify(dashboardData.governmentApprovals));
       formData.append('isPublic', dashboardData.isPublic);
       formData.append('msmeId', user._id);
       
@@ -489,7 +487,11 @@ const MsmeCustomizeDashboard = () => {
       const data = await response.json();
       
       if (data.success) {
-        showSuccess("Dashboard updated successfully!", "Success");
+        const hasNewLogo = dashboardData.storeLogo instanceof File;
+        const successMessage = hasNewLogo 
+          ? "Dashboard and store logo updated successfully!" 
+          : "Dashboard updated successfully!";
+        showSuccess(successMessage, "Success");
         setEditMode(false);
         fetchDashboardData(); // Refresh data
       } else {
@@ -606,8 +608,8 @@ const MsmeCustomizeDashboard = () => {
           </div>
 
           {/* Store Info Section */}
-          <div className="store-info-section">
-            <div className="store-logo-container">
+          <div className="customize-store-info-section">
+            <div className="customize-store-logo-container">
               {editMode ? (
                 <div className="store-logo-upload">
                   <input
@@ -617,96 +619,197 @@ const MsmeCustomizeDashboard = () => {
                     onChange={(e) => handleFileChange(e, 'storeLogo')}
                     style={{ display: 'none' }}
                   />
-                  <label htmlFor="storeLogo" className="store-logo-upload-label">
+                  <label htmlFor="storeLogo" className="customize-store-logo-upload-label">
                     {previewUrls.storeLogo ? (
-                      <img src={previewUrls.storeLogo} alt="Logo" className="store-logo-preview" />
+                      <div className="customize-logo-edit-container">
+                        <img 
+                          src={previewUrls.storeLogo} 
+                          alt="Logo" 
+                          className="customize-store-logo-preview"
+                          onError={(e) => {
+                            console.error('❌ Failed to load store logo:', previewUrls.storeLogo);
+                            console.error('Error details:', e);
+                            // Hide the broken image and show placeholder
+                            setPreviewUrls(prev => ({ ...prev, storeLogo: null }));
+                          }}
+                          onLoad={() => console.log('✅ Store logo loaded successfully:', previewUrls.storeLogo)}
+                          style={{ 
+                            maxWidth: '100%', 
+                            maxHeight: '100%',
+                            display: 'block'
+                          }}
+                        />
+                        <div className="customize-logo-edit-overlay">
+                          <span className="customize-edit-icon">✏️</span>
+                          <span className="customize-edit-text">Click to change</span>
+                        </div>
+                      </div>
                     ) : (
-                      <div className="store-logo-placeholder">
-                        <span>Logo</span>
+                      <div className="customize-store-logo-placeholder">
+                        <span>📷</span>
+                        <span className="customize-upload-text">Upload Logo</span>
                       </div>
                     )}
                   </label>
                 </div>
               ) : (
-                <div className="store-logo-display">
+                <div className="customize-store-logo-display">
                   {previewUrls.storeLogo ? (
-                    <img src={previewUrls.storeLogo} alt="Store Logo" className="store-logo" />
+                    <img 
+                      src={previewUrls.storeLogo} 
+                      alt="Store Logo" 
+                      className="customize-store-logo"
+                      onError={(e) => {
+                        console.error('❌ Failed to load store logo in display mode:', previewUrls.storeLogo);
+                        console.error('Error details:', e);
+                        // Hide the broken image and show placeholder
+                        setPreviewUrls(prev => ({ ...prev, storeLogo: null }));
+                      }}
+                      onLoad={() => console.log('✅ Store logo display loaded successfully:', previewUrls.storeLogo)}
+                      style={{ 
+                        maxWidth: '100%', 
+                        maxHeight: '100%',
+                        display: 'block'
+                      }}
+                    />
                   ) : (
-                    <div className="store-logo-default">
-                      <span>No Logo</span>
+                    <div className="customize-store-logo-default">
+                      <span>📷</span>
                     </div>
                   )}
                 </div>
               )}
             </div>
 
-            <div className="store-details">
+            <div className="customize-store-details">
               {editMode ? (
-                <div className="store-details-edit">
-                  <input
-                    type="text"
-                    name="businessName"
-                    value={dashboardData.businessName}
-                    onChange={handleInputChange}
-                    placeholder="Business Name"
-                    className="business-name-input"
-                  />
+                <div className="customize-store-details-edit">
+                  <div className="customize-business-name-with-logo">
+                    <input
+                      type="text"
+                      name="businessName"
+                      value={dashboardData.businessName}
+                      onChange={handleInputChange}
+                      placeholder="Business Name"
+                      className="customize-business-name-input"
+                    />
+                    <div className="customize-business-name-logo edit-mode">
+                      {previewUrls.storeLogo ? (
+                        <>
+                          <img 
+                            src={previewUrls.storeLogo} 
+                            alt="Store Logo" 
+                            className="customize-inline-store-logo"
+                            onError={(e) => {
+                              console.error('❌ Failed to load inline store logo in edit mode:', previewUrls.storeLogo);
+                              e.target.style.display = 'none';
+                            }}
+                            onLoad={() => console.log('✅ Inline store logo loaded successfully in edit mode:', previewUrls.storeLogo)}
+                          />
+                          <div className="customize-edit-logo-overlay">
+                            <input
+                              type="file"
+                              id="inlineStoreLogo"
+                              accept="image/*"
+                              onChange={(e) => handleFileChange(e, 'storeLogo')}
+                              style={{ display: 'none' }}
+                            />
+                            <label htmlFor="inlineStoreLogo" className="customize-edit-logo-button">
+                              📷
+                            </label>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="customize-inline-logo-placeholder">
+                          <input
+                            type="file"
+                            id="inlineStoreLogoNew"
+                            accept="image/*"
+                            onChange={(e) => handleFileChange(e, 'storeLogo')}
+                            style={{ display: 'none' }}
+                          />
+                          <label htmlFor="inlineStoreLogoNew" className="customize-inline-upload-button">
+                            <span className="customize-upload-icon">📷</span>
+                            <span className="customize-upload-label">Add Logo</span>
+                          </label>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <textarea
                     name="description"
                     value={dashboardData.description}
                     onChange={handleInputChange}
                     placeholder="Store Description"
-                    className="description-input"
+                    className="customize-description-input"
                     rows="3"
                   />
                 </div>
               ) : (
-                <div className="store-details-display">
-                  <h2 className="business-name">{dashboardData.businessName || 'Business Name'}</h2>
-                  <p className="store-description">{dashboardData.description || 'Store description will appear here.'}</p>
+                <div className="customize-store-details-display">
+                  <div className="customize-business-name-with-logo">
+                    <h2 className="customize-business-name">{dashboardData.businessName || 'Business Name'}</h2>
+                    {previewUrls.storeLogo && (
+                      <div className="customize-business-name-logo">
+                        <img 
+                          src={previewUrls.storeLogo} 
+                          alt="Store Logo" 
+                          className="customize-inline-store-logo"
+                          onError={(e) => {
+                            console.error('❌ Failed to load inline store logo:', previewUrls.storeLogo);
+                            e.target.style.display = 'none';
+                          }}
+                          onLoad={() => console.log('✅ Inline store logo loaded successfully:', previewUrls.storeLogo)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <p className="customize-store-description">{dashboardData.description || 'Store description will appear here.'}</p>
                 </div>
               )}
 
               {/* Rating Display */}
-              <div className="store-rating">
-                <div className="rating-stars">
+              <div className="customize-store-rating">
+                <div className="customize-rating-stars">
                   {renderStars(dashboardData.rating || 0)}
                 </div>
-                <span className="rating-text">
+                <span className="customize-rating-text">
                   ({dashboardData.rating ? dashboardData.rating.toFixed(1) : '0.0'}/5.0)
                   {dashboardData.totalRatings > 0 && (
-                    <span className="rating-count"> • {dashboardData.totalRatings} rating{dashboardData.totalRatings !== 1 ? 's' : ''}</span>
+                    <span className="customize-rating-count"> • {dashboardData.totalRatings} rating{dashboardData.totalRatings !== 1 ? 's' : ''}</span>
                   )}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Contact & Location Section */}
-          <div className="contact-section">
-            <div className="contact-grid">
-              <div className="contact-item">
-                <h4>Contact Number</h4>
-                {editMode ? (
-                  <input
-                    type="tel"
-                    name="contactNumber"
-                    value={dashboardData.contactNumber}
-                    onChange={handleInputChange}
-                    placeholder="Contact Number"
-                    className="contact-input"
-                  />
-                ) : (
-                  <p>{dashboardData.contactNumber || 'No contact number provided'}</p>
-                )}
+          {/* Contact & Social Links - Desktop optimized wrapper */}
+          <div className="contact-social-wrapper">
+            {/* Contact & Location Section */}
+            <div className="contact-section">
+              <div className="contact-grid">
+                <div className="contact-item">
+                  <h4>Contact Number</h4>
+                  {editMode ? (
+                    <input
+                      type="tel"
+                      name="contactNumber"
+                      value={dashboardData.contactNumber}
+                      onChange={handleInputChange}
+                      placeholder="Contact Number"
+                      className="contact-input"
+                    />
+                  ) : (
+                    <p>{dashboardData.contactNumber || 'No contact number provided'}</p>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Location Section */}
-            <div className="location-enhanced-section">
-              <h4>Store Location (Embedded Google Maps)</h4>
-              {editMode ? (
-                <div className="location-input-group">
+              {/* Location Section */}
+              <div className="location-enhanced-section">
+                <h4>Store Location (Embedded Google Maps)</h4>
+                {editMode ? (
+                  <div className="location-input-group">
                   <input
                     type="url"
                     name="googleMapsUrl"
@@ -764,113 +867,6 @@ const MsmeCustomizeDashboard = () => {
             </div>
           </div>
 
-
-
-          {/* Government Approvals Section */}
-          <div className={`government-approvals-section ${!editMode ? 'readonly' : 'editable'}`}>
-            <h3>Government Approvals & Assistance</h3>
-            <p className="section-description">Select the government agencies that have approved or assisted your business:</p>
-            <div className="dti-notice">
-              <strong>Note:</strong> All MSMEs are automatically DTI approved/assisted and will be displayed in your store view.
-            </div>
-            
-            <div className="approval-checklist">
-              <label className="approval-checkbox-item">
-                <input
-                  type="checkbox"
-                  name="governmentApprovals.dole"
-                  checked={dashboardData.governmentApprovals?.dole || false}
-                  onChange={handleInputChange}
-                  disabled={!editMode}
-                />
-                <span className="checkbox-custom"></span>
-                <span className="approval-text">
-                  <strong>DOLE</strong> - Department of Labor and Employment
-                </span>
-              </label>
-
-              <label className="approval-checkbox-item">
-                <input
-                  type="checkbox"
-                  name="governmentApprovals.dost"
-                  checked={dashboardData.governmentApprovals?.dost || false}
-                  onChange={handleInputChange}
-                  disabled={!editMode}
-                />
-                <span className="checkbox-custom"></span>
-                <span className="approval-text">
-                  <strong>DOST</strong> - Department of Science and Technology
-                </span>
-              </label>
-
-              <label className="approval-checkbox-item">
-                <input
-                  type="checkbox"
-                  name="governmentApprovals.fda"
-                  checked={dashboardData.governmentApprovals?.fda || false}
-                  onChange={handleInputChange}
-                  disabled={!editMode}
-                />
-                <span className="checkbox-custom"></span>
-                <span className="approval-text">
-                  <strong>FDA</strong> - Food and Drug Administration
-                </span>
-              </label>
-
-
-
-              <div className="approval-checkbox-item-with-input">
-                <label className="approval-checkbox-item">
-                  <input
-                      type="checkbox"
-                      name="governmentApprovals.others"
-                      checked={dashboardData.governmentApprovals?.others || false}
-                      onChange={handleInputChange}
-                      disabled={!editMode}
-                    />
-                  <span className="checkbox-custom"></span>
-                  <span className="approval-text">
-                    <strong>Others</strong> - Specify Government Agencies
-                  </span>
-                </label>
-                  {dashboardData.governmentApprovals?.others && (
-                    <div className="other-agencies-container">
-                      {(dashboardData.governmentApprovals?.otherAgencies || []).map((agency, index) => (
-                        <div key={index} className="agency-input-group">
-                          <input
-                            type="text"
-                            value={agency}
-                            onChange={(e) => handleOtherAgencyChange(index, e.target.value)}
-                            placeholder="Enter government agency name (e.g., BSP, DILG, etc.)"
-                            className="others-input"
-                            disabled={!editMode}
-                          />
-                          {editMode && (
-                            <button
-                              type="button"
-                              onClick={() => removeOtherAgency(index)}
-                              className="remove-agency-btn"
-                            >
-                              ×
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                      {editMode && (
-                        <button
-                          type="button"
-                          onClick={addOtherAgency}
-                          className="add-agency-btn"
-                        >
-                          + Add Another Agency
-                        </button>
-                      )}
-                    </div>
-                  )}
-              </div>
-            </div>
-          </div>
-
           {/* Social Links Section */}
           <div className="social-section">
             <h3>Social Media & Links</h3>
@@ -907,9 +903,9 @@ const MsmeCustomizeDashboard = () => {
               {Object.entries(dashboardData.ecommercePlatforms || {}).map(([platform, data]) => (
                 <div key={platform} className="social-item">
                   <label className="social-label">
-                    {platform === 'shopee' && '🛍️ Shopee'}
-                    {platform === 'lazada' && '🛒 Lazada'}
-                    {platform === 'tiktok' && '🎵 TikTok Shop'}
+                    {platform === 'shopee' && 'Shopee'}
+                    {platform === 'lazada' && 'Lazada'}
+                    {platform === 'tiktok' && 'TikTok Shop'}
                   </label>
                   {editMode ? (
                     <input
@@ -935,6 +931,7 @@ const MsmeCustomizeDashboard = () => {
               ))}
             </div>
           </div>
+          </div>
 
           {/* Blog/Video Section */}
           <div className="blog-section">
@@ -958,9 +955,9 @@ const MsmeCustomizeDashboard = () => {
                     <div className="blog-media" onClick={() => handleViewBlog(blog)}>
                       {renderBlogMediaPreview(blog)}
                       <div className="blog-media-type">
-                        {blog.mediaType === 'youtube' && '▶️ Video'}
-                        {blog.mediaType === 'video' && '🎥 Video'}
-                        {blog.mediaType === 'image' && '📷 Image'}
+                        {blog.mediaType === 'youtube' && 'Video'}
+                        {blog.mediaType === 'video' && 'Video'}
+                        {blog.mediaType === 'image' && 'Image'}
                       </div>
                       {blog.featured && <div className="blog-featured-badge">Featured</div>}
                     </div>
@@ -1004,7 +1001,7 @@ const MsmeCustomizeDashboard = () => {
 
           {/* Products Section */}
           <div className="products-section">
-            <h3>Our Products</h3>
+            <h3>Products</h3>
             {products.length > 0 ? (
               <div className="products-grid">
                 {products.map((product) => (

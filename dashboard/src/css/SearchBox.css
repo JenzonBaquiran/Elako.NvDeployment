@@ -389,3 +389,19 @@
 .search-suggestion-disabled:hover {
   background-color: #f3f4f6 !important;
 }
+
+/* Variant information styles */
+.search-suggestion-variant {
+  margin-top: 4px;
+  padding: 2px 8px;
+  background: rgba(126, 217, 87, 0.1);
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.variant-highlight {
+  color: #7ed957;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}

@@ -257,6 +257,11 @@ const SearchBox = ({ placeholder = "Search for services, products, or stores... 
                           <span>{suggestion.subtitle}</span>
                         </>
                       )}
+                      {suggestion.matchingVariant && (
+                        <div className="search-suggestion-variant">
+                          <span className="variant-highlight">Matching: {suggestion.matchingVariant.name}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

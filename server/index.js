@@ -2786,6 +2786,48 @@ app.get("/api/search", async (req, res) => {
                 { description: productSearchRegex },
                 { category: productSearchRegex },
                 { hashtags: { $elemMatch: { $regex: productSearchRegex } } },
+                // Add variant-based search for flavors and types
+                { "variants.name": productSearchRegex },
+                // Add size options search
+                { "sizeOptions.unit": productSearchRegex },
+                // Add artist name search for creative products
+                { artistName: productSearchRegex },
+                // Add broad category searches
+                ...(query.toLowerCase().includes("food")
+                  ? [
+                      {
+                        category: {
+                          $in: [
+                            "processed-foods",
+                            "baked-goods",
+                            "confectionery",
+                            "beverages",
+                          ],
+                        },
+                      },
+                    ]
+                  : []),
+                ...(query.toLowerCase().includes("clothes") ||
+                query.toLowerCase().includes("clothing")
+                  ? [
+                      {
+                        category: {
+                          $in: ["apparel", "accessories", "fashion"],
+                        },
+                      },
+                    ]
+                  : []),
+                ...(query.toLowerCase().includes("creative") ||
+                query.toLowerCase().includes("art") ||
+                query.toLowerCase().includes("painting")
+                  ? [
+                      {
+                        category: {
+                          $in: ["paintings", "artworks", "crafts", "creative"],
+                        },
+                      },
+                    ]
+                  : []),
                 // Add municipality-based search using both MSME and Dashboard location data
                 ...(allMunicipalityMSMEIds.length > 0
                   ? [{ msmeId: { $in: allMunicipalityMSMEIds } }]
@@ -2846,6 +2888,9 @@ app.get("/api/search", async (req, res) => {
             ? product.pictures[0]
             : null,
         category: product.category,
+        variants: product.variants || [],
+        sizeOptions: product.sizeOptions || [],
+        artistName: product.artistName,
         storeName: product.msmeId?.businessName,
         storeId: product.msmeId?._id,
         storeCategory: product.msmeId?.category,
@@ -3032,12 +3077,38 @@ app.get("/api/search", async (req, res) => {
         ? `${product.storeName} • ${primaryLocation}`
         : product.storeName;
 
+      // Check if the search query matches any variant
+      const matchingVariant = product.variants?.find((variant) =>
+        variant.name.toLowerCase().includes(query.toLowerCase())
+      );
+
+      // Build subtitle with variant information if applicable
+      let subtitle = `₱${product.price} • ${locationInfo}`;
+      if (matchingVariant) {
+        subtitle = `${matchingVariant.name} variant • ₱${product.price} • ${locationInfo}`;
+      } else if (product.variants && product.variants.length > 0) {
+        // Show available variants if query doesn't match specific variant
+        const variantNames = product.variants
+          .map((v) => v.name)
+          .slice(0, 2)
+          .join(", ");
+        const moreVariants =
+          product.variants.length > 2
+            ? `, +${product.variants.length - 2} more`
+            : "";
+        subtitle = `Variants: ${variantNames}${moreVariants} • ₱${product.price} • ${locationInfo}`;
+      }
+
       suggestions.push({
         type: "product",
         title: product.name,
-        subtitle: `₱${product.price} • ${locationInfo}`,
+        subtitle: subtitle,
         id: product._id,
         imageUrl: product.imageUrl,
+        matchingVariant: matchingVariant || null,
+        allVariants: product.variants || [],
+        category: product.category,
+        artistName: product.artistName,
       });
     });
 

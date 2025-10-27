@@ -636,8 +636,9 @@
   gap: 0.5rem;
   width: 100%;
   max-width: 400px;
-  text-align: center;
+  text-align: center !important;
   align-items: center;
+  justify-content: center;
 }
 
 .social-label {
@@ -660,24 +661,31 @@
 }
 
 .social-link {
-  color: #007bff;
+  color: #313131;
   text-decoration: none;
   word-break: break-all;
   font-family: 'Poppins', sans-serif;
-  text-align: center;
+  text-align: center !important;
   display: block;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .social-empty {
   color: #666;
   font-style: italic;
   font-family: 'Poppins', sans-serif;
-  text-align: center;
+  text-align: center !important;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .social-display {
   width: 100%;
-  text-align: center;
+  text-align: center !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1449,9 +1457,11 @@ input:checked + .toggle-slider:before {
 
 .blog-section-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 24px;
+  flex-direction: column;
+  text-align: center;
 }
 
 .blog-section-header h3 {
@@ -1882,7 +1892,8 @@ input:checked + .toggle-slider:before {
   .blog-section-header {
     flex-direction: column;
     gap: 16px;
-    align-items: stretch;
+    align-items: center;
+    text-align: center;
   }
   
   .add-blog-btn {

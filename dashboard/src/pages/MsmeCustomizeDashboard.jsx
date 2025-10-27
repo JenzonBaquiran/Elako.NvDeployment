@@ -807,7 +807,7 @@ const MsmeCustomizeDashboard = () => {
 
               {/* Location Section */}
               <div className="location-enhanced-section">
-                <h4>Store Location (Embedded Google Maps)</h4>
+                <h3>Store Location (Embedded Google Maps)</h3>
                 {editMode ? (
                   <div className="location-input-group">
                   <input
@@ -869,7 +869,7 @@ const MsmeCustomizeDashboard = () => {
 
           {/* Social Links Section */}
           <div className="social-section">
-            <h3>Social Media & Links</h3>
+            <h2>Social Media & Links</h2>
             <div className="social-grid">
               {Object.entries(dashboardData.socialLinks).map(([platform, url]) => (
                 <div key={platform} className="social-item">
@@ -936,8 +936,7 @@ const MsmeCustomizeDashboard = () => {
           {/* Blog/Video Section */}
           <div className="blog-section">
             <div className="blog-section-header">
-              <h3>Store Blog & Videos</h3>
-              <p>Share your story, showcase your products, and connect with customers through engaging content</p>
+              <h2>Store Blog & Videos</h2>
               {editMode && (
                 <button 
                   className="add-blog-btn"
@@ -1001,7 +1000,7 @@ const MsmeCustomizeDashboard = () => {
 
           {/* Products Section */}
           <div className="products-section">
-            <h3>Products</h3>
+            <h2>Store Products</h2>
             {products.length > 0 ? (
               <div className="products-grid">
                 {products.map((product) => (

@@ -446,7 +446,7 @@
   align-items: center;
   gap: 8px;
   font-size: 0.9rem;
-  color: #666;
+  color: #313131;
 }
 
 .detail-icon {
@@ -475,7 +475,7 @@
 }
 
 .social-link {
-  color: #666;
+  color: #313131;
   text-decoration: none;
   transition: none;
   flex: 1;
@@ -483,7 +483,7 @@
 }
 
 .social-link:hover {
-  color: #666;
+  color: #313131;
   text-decoration: none;
 }
 
@@ -491,6 +491,7 @@
   flex: 1;
   text-align: left;
   line-height: 1.4;
+  color: #313131;
 }
 
 .store-location {
@@ -733,6 +734,18 @@
 }
 
 .twitter-icon {
+  color: #313131 !important;
+}
+
+.shopee-icon {
+  color: #313131 !important;
+}
+
+.lazada-icon {
+  color: #313131 !important;
+}
+
+.tiktok-icon {
   color: #313131 !important;
 }
 

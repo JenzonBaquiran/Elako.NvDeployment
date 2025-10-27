@@ -613,21 +613,22 @@
   border-color: #313131;
 }
 
+.social-section h2,
 .social-section h3 {
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: #313131;
   margin: 0 0 20px 0;
   font-family: 'Poppins', sans-serif;
-  text-align: center;
+  text-align: left;
 }
 
 .social-grid {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .social-item {
@@ -636,17 +637,17 @@
   gap: 0.5rem;
   width: 100%;
   max-width: 400px;
-  text-align: center !important;
-  align-items: center;
-  justify-content: center;
+  text-align: left !important;
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 
 .social-label {
   font-weight: 600;
-  color: #333;
+  color: #313131;
   font-family: 'Poppins', sans-serif;
   font-size: 14px;
-  text-align: center;
+  text-align: left;
 }
 
 .social-input {
@@ -665,29 +666,26 @@
   text-decoration: none;
   word-break: break-all;
   font-family: 'Poppins', sans-serif;
-  text-align: center !important;
+  text-align: left !important;
   display: block;
   width: 100%;
   margin: 0 auto;
 }
 
 .social-empty {
-  color: #666;
+  color: #313131;
   font-style: italic;
   font-family: 'Poppins', sans-serif;
-  text-align: center !important;
+  text-align: left !important;
   width: 100%;
-  margin: 0 auto;
+  margin: 0;
 }
 
 .social-display {
   width: 100%;
-  text-align: center !important;
+  text-align: left !important;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
 }
 

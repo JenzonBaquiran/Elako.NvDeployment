@@ -79,6 +79,13 @@ const productSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    // Artist name for artworks/paintings
+    artistName: {
+      type: String,
+      trim: true,
+      maxlength: 100,
+      required: false,
+    },
     // Customer feedback and rating
     feedback: [
       {
@@ -142,6 +149,7 @@ productSchema.index({
   productName: "text",
   description: "text",
   hashtags: "text",
+  artistName: "text",
 });
 productSchema.index({ msmeId: 1 });
 productSchema.index({ availability: 1 });

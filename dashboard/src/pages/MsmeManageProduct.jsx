@@ -30,6 +30,7 @@ const MsmeManageProduct = () => {
     pictures: [], // Changed from single picture to multiple pictures
     hashtags: '',
     category: '',
+    artistName: '', // New field for artist name
     // New fields for enhanced product management
     variants: [], // For flavors/types (spicy, cheese, etc.)
     sizeOptions: [], // For beverage sizes (grams, ml, etc.)
@@ -314,6 +315,7 @@ const MsmeManageProduct = () => {
       pictures: [],
       hashtags: '',
       category: '',
+      artistName: '', // Reset artist name
       variants: [],
       sizeOptions: [],
       selectedVariant: 0
@@ -457,6 +459,11 @@ const MsmeManageProduct = () => {
     submitData.append('hashtags', JSON.stringify(hashtagList));
     submitData.append('msmeId', user._id);
     
+    // Add artist name if category is paintings & visual arts
+    if (formData.category === 'paintings-visual-arts' && formData.artistName) {
+      submitData.append('artistName', formData.artistName);
+    }
+    
     // For updates, preserve visibility status; for new products, set to visible
     if (editingProduct) {
       submitData.append('visible', editingProduct.visible);
@@ -515,6 +522,7 @@ const MsmeManageProduct = () => {
       pictures: [], // Will be handled separately for existing images
       hashtags: '',
       category: product.category || '',
+      artistName: product.artistName || '', // Set artist name if exists
       variants: Array.isArray(product.variants) ? product.variants : [], 
       sizeOptions: Array.isArray(product.sizeOptions) ? product.sizeOptions : [], 
       selectedVariant: 0
@@ -774,6 +782,13 @@ const MsmeManageProduct = () => {
                   <div className="msme-manage-product-info">
                     <div className="msme-manage-product-top-content">
                       <h3>{product.productName}</h3>
+                      {/* Artist Name - Only show for artworks */}
+                      {product.artistName && (
+                        <p className="msme-manage-product-artist">
+                          <span className="artist-label">Artist: </span>
+                          <span className="artist-name">{product.artistName}</span>
+                        </p>
+                      )}
                       <p className="msme-manage-product-description">{product.description}</p>
                       <div className="msme-manage-product-price-and-availability">
                         <p className="msme-manage-product-price">₱{product.price}</p>
@@ -909,6 +924,23 @@ const MsmeManageProduct = () => {
                       ))}
                     </select>
                   </div>
+                  
+                  {/* Artist Name Field - Only show for Paintings & Visual Arts category */}
+                  {formData.category === 'paintings-visual-arts' && (
+                    <div className="form-group">
+                      <label htmlFor="artistName">Artist Name</label>
+                      <input
+                        type="text"
+                        id="artistName"
+                        name="artistName"
+                        value={formData.artistName}
+                        onChange={handleInputChange}
+                        maxLength="100"
+                        placeholder="Enter artist name"
+                      />
+                      <small>Name of the artist who created this artwork</small>
+                    </div>
+                  )}
                 </div>
 
                 {/* Multiple Images Upload */}

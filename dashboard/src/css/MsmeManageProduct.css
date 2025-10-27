@@ -1395,3 +1395,33 @@
     padding: 1px 4px;
   }
 }
+
+/* Artist Name Styling for Product Cards */
+.msme-manage-product-artist {
+  margin: 8px 0 !important;
+  padding: 6px 12px;
+  background-color: #f0fdf4;
+  border-radius: 6px;
+  border-left: 3px solid #7ed957;
+  font-size: 14px;
+  color: #374151;
+}
+
+.artist-label {
+  font-weight: 600;
+  color: #7ed957;
+}
+
+.artist-name {
+  font-weight: 500;
+  color: #1f2937;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .msme-manage-product-artist {
+    font-size: 13px;
+    padding: 4px 8px;
+    margin: 6px 0 !important;
+  }
+}

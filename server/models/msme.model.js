@@ -10,6 +10,7 @@ const MSMESchema = new mongoose.Schema(
     password: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     address: { type: String, default: "" },
+    municipality: { type: String, default: "" }, // Municipality for location-based search
     contactNumber: { type: String, default: "" },
     businessDescription: { type: String, default: "" },
     operatingHours: { type: String, default: "" },

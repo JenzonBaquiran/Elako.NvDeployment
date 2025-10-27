@@ -27,18 +27,19 @@ import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AudiotrackIcon from '@mui/icons-material/Audiotrack';
 
+
 // Helper function to handle embedded Google Maps URLs
 const handleEmbedUrl = (url) => {
   if (!url) return null;
-  
+
   console.log('Processing embed URL:', url);
-  
+
   // If it's already an embed URL, use it directly
   if (url.includes('/embed') || url.includes('pb=!1m')) {
     console.log('URL is already embed format');
     return url;
   }
-  
+
   // If it's an iframe HTML code, extract the src
   if (url.includes('<iframe') && url.includes('src=')) {
     const srcMatch = url.match(/src="([^"]+)"/);
@@ -47,7 +48,7 @@ const handleEmbedUrl = (url) => {
       return srcMatch[1];
     }
   }
-  
+
   // For non-embed URLs, let them know they need to use embed format
   console.warn('URL is not in embed format. MSME owner should use embedded Google Maps URL.');
   return null;
@@ -58,7 +59,7 @@ const CustomerStoreView = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { showSuccess, showError } = useNotification();
-  
+
   const [store, setStore] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,7 +69,7 @@ const CustomerStoreView = () => {
   const [showBlogModal, setShowBlogModal] = useState(false);
   const [currentBlogSlide, setCurrentBlogSlide] = useState(0);
   const [blogPostsLoading, setBlogPostsLoading] = useState(true);
-  
+
   // Rating modal state
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [rating, setRating] = useState(0);
@@ -78,10 +79,10 @@ const CustomerStoreView = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [hasExistingRating, setHasExistingRating] = useState(false);
   const [loadingExistingRating, setLoadingExistingRating] = useState(false);
-  
+
   // Top rated products state
   const [topRatedProducts, setTopRatedProducts] = useState([]);
-  
+
   // Product feedbacks state
   const [productFeedbacks, setProductFeedbacks] = useState([]);
 
@@ -116,7 +117,7 @@ const CustomerStoreView = () => {
     try {
       const response = await fetch(`http://localhost:1337/api/stores/${storeId}`);
       const data = await response.json();
-      
+
       if (data.success) {
         setStore(data.store);
       } else {
@@ -135,7 +136,7 @@ const CustomerStoreView = () => {
     try {
       const response = await fetch(`http://localhost:1337/api/msme/${storeId}/products`);
       const data = await response.json();
-      
+
       if (data.success) {
         // Only show visible products to customers
         const visibleProducts = data.products.filter(product => product.visible === true);
@@ -150,7 +151,7 @@ const CustomerStoreView = () => {
     try {
       const response = await fetch(`http://localhost:1337/api/msme/${storeId}/products/top-rated`);
       const data = await response.json();
-      
+
       if (data.success) {
         setTopRatedProducts(data.products || []);
       }
@@ -163,7 +164,7 @@ const CustomerStoreView = () => {
     try {
       const response = await fetch(`http://localhost:1337/api/msme/${storeId}/products/feedbacks`);
       const data = await response.json();
-      
+
       if (data.success) {
         console.log('Received feedbacks:', data.feedbacks);
         setProductFeedbacks(data.feedbacks || []);
@@ -204,14 +205,14 @@ const CustomerStoreView = () => {
       console.log('🔄 Fetching blog posts for store:', storeId);
       const response = await fetch(`http://localhost:1337/api/msme/${storeId}/blog-posts`);
       console.log('📡 Response status:', response.status, response.statusText);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       console.log('📊 Blog posts response:', data);
-      
+
       if (data.success) {
         console.log('✅ Blog posts found:', data.blogPosts?.length || 0);
         console.log('📝 First blog post sample:', data.blogPosts?.[0]);
@@ -288,7 +289,7 @@ const CustomerStoreView = () => {
   };
 
   const handlePrevBlogSlide = () => {
-    setCurrentBlogSlide((prevSlide) => 
+    setCurrentBlogSlide((prevSlide) =>
       prevSlide === 0 ? blogPosts.length - 1 : prevSlide - 1
     );
   };
@@ -335,7 +336,7 @@ const CustomerStoreView = () => {
 
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
@@ -362,7 +363,7 @@ const CustomerStoreView = () => {
       views: clickedPost.views,
       _id: clickedPost._id
     });
-    
+
     // Create a fresh copy of the clicked post to avoid reference issues
     const postCopy = {
       _id: clickedPost._id,
@@ -376,13 +377,13 @@ const CustomerStoreView = () => {
       views: clickedPost.views,
       msmeId: clickedPost.msmeId
     };
-    
+
     console.log('📝 Post copy created:', postCopy);
-    
+
     // Immediately set the selected post and show modal
     setSelectedBlogPost(postCopy);
     setShowBlogModal(true);
-    
+
     // Increment views in background (don't wait for it)
     incrementMsmeBlogViews(clickedPost._id);
   };
@@ -392,12 +393,12 @@ const CustomerStoreView = () => {
     try {
       console.log('📈 Incrementing views for MSME blog post:', postId);
       const response = await fetch(`http://localhost:1337/api/msme/blog-posts/${postId}`);
-      
+
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.post) {
           console.log('✅ Views incremented successfully, new count:', data.post.views);
-          
+
           // Update the selected post with new view count if it's still the same post
           setSelectedBlogPost(prevSelected => {
             if (prevSelected && prevSelected._id === postId) {
@@ -405,10 +406,10 @@ const CustomerStoreView = () => {
             }
             return prevSelected;
           });
-          
+
           // Update the blog posts list
-          setBlogPosts(prevPosts => 
-            prevPosts.map(p => 
+          setBlogPosts(prevPosts =>
+            prevPosts.map(p =>
               p._id === postId ? { ...p, views: data.post.views } : p
             )
           );
@@ -430,18 +431,18 @@ const CustomerStoreView = () => {
   // Get background image URL for blog (like BlogHero)
   const getBackgroundImageForBlog = (post) => {
     if (!post) return defaultStoreImg;
-    
+
     if (post.mediaType === 'youtube') {
       return getYouTubeThumbnail(post.mediaUrl);
     }
-    
+
     return getBlogMediaUrl(post);
   };
 
   // Render blog media like BlogHero
   const renderBlogMedia = (post) => {
     if (!post) return <img src={defaultStoreImg} alt="Default" className="store-blog-hero-image" />;
-    
+
     switch (post.mediaType) {
       case 'youtube':
         // For YouTube videos, show the thumbnail image to maintain consistent sizing
@@ -503,8 +504,8 @@ const CustomerStoreView = () => {
       const response = await fetch(`http://localhost:1337/api/stores/${storeId}/rating`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          rating, 
+        body: JSON.stringify({
+          rating,
           user: userName,
           userId: userId
         })
@@ -517,14 +518,14 @@ const CustomerStoreView = () => {
         setHasExistingRating(true);
         setSubmitSuccess(true);
         setShowRatingModal(false);
-        
+
         // Refresh store details
         fetchStoreDetails();
-        
+
         // Show appropriate notification message
         const actionMessage = hasExistingRating ? 'updated' : 'rated';
         showSuccess(`You ${actionMessage} ${store.businessName} with ${rating} star${rating > 1 ? 's' : ''}!`, 'Rating Submitted');
-        
+
         // Hide success message after 3 seconds
         setTimeout(() => setSubmitSuccess(false), 3000);
       } else {
@@ -564,7 +565,7 @@ const CustomerStoreView = () => {
       showError('Store information not loaded', 'Error');
       return;
     }
-    
+
     console.log('✅ Starting conversation with store:', {
       storeId: storeId,
       storeName: store.businessName,
@@ -573,7 +574,7 @@ const CustomerStoreView = () => {
 
     // Show loading indicator while navigating
     showSuccess(`Starting conversation with ${store?.businessName || 'store'}...`, 'Chat');
-    
+
     // Navigate to customer messages with store ID (matches App.jsx route)
     navigate(`/customer-message/${storeId}`);
   };
@@ -618,17 +619,17 @@ const CustomerStoreView = () => {
     if (store?.dashboard?.storeLogo) {
       return `http://localhost:1337/uploads/${store.dashboard.storeLogo}`;
     }
-    
+
     if (store?.dashboard?.coverPhoto) {
       return `http://localhost:1337/uploads/${store.dashboard.coverPhoto}`;
     }
-    
+
     if (store?.category === 'food') {
       return foodStoreImg;
     } else if (store?.category === 'artisan') {
       return defaultStoreImg;
     }
-    
+
     return defaultStoreImg;
   };
 
@@ -696,12 +697,12 @@ const CustomerStoreView = () => {
   return (
     <div className="customer-store-view-container">
       <Header />
-      
+
       {/* Full Width Cover Photo Hero Section */}
       <section className="store-cover-hero">
         <div className="cover-hero-image">
-          <img 
-            src={dashboard.coverPhoto ? `http://localhost:1337/uploads/${dashboard.coverPhoto}` : getStoreImageUrl(store)} 
+          <img
+            src={dashboard.coverPhoto ? `http://localhost:1337/uploads/${dashboard.coverPhoto}` : getStoreImageUrl(store)}
             alt={store.businessName}
             className="cover-hero-img"
             onError={(e) => {
@@ -714,7 +715,7 @@ const CustomerStoreView = () => {
 
       <div className="customer-store-view-content">
         {/* Back Button */}
-        <button 
+        <button
           className="back-to-stores-btn"
           onClick={() => navigate('/customer/stores')}
           style={{ marginTop: '0' }}
@@ -732,9 +733,9 @@ const CustomerStoreView = () => {
               <div className="store-header-left">
                 <div className="store-name-with-logo-left">
                   <div className="store-logo-container-left">
-                    
-                    <img 
-                      src={getStoreImageUrl(store)} 
+
+                    <img
+                      src={getStoreImageUrl(store)}
                       alt={store.businessName}
                       className="store-logo-main"
                       onError={(e) => {
@@ -754,14 +755,14 @@ const CustomerStoreView = () => {
 
               {/* Action Buttons - Below Header in Left Column */}
               <div className="store-actions-left">
-                <FollowButton 
-                  storeId={storeId} 
+                <FollowButton
+                  storeId={storeId}
                   storeName={store?.businessName}
                   onFollowChange={(isFollowing) => {
                     setIsFollowing(isFollowing);
                   }}
                 />
-                <button 
+                <button
                   className="rate-btn-header"
                   onClick={() => {
                     setShowRatingModal(true);
@@ -772,7 +773,7 @@ const CustomerStoreView = () => {
                   <RateReviewIcon />
                   RATE
                 </button>
-                <button 
+                <button
                   className="chat-btn-header"
                   onClick={handleChatClick}
                   title="Chat with store"
@@ -781,28 +782,20 @@ const CustomerStoreView = () => {
                   CHAT
                 </button>
               </div>
-                    <div className="store-rating-bottom">
-                  {renderStarRating(store.averageRating || 0)}
-                  {store.totalRatings > 0 && (
-                    <span className="total-ratings">({store.totalRatings} rating{store.totalRatings !== 1 ? 's' : ''})</span>
-                  )}
-                </div>
+              <div className="store-rating-bottom">
+                {renderStarRating(store.averageRating || 0)}
+                {store.totalRatings > 0 && (
+                  <span className="total-ratings">({store.totalRatings} rating{store.totalRatings !== 1 ? 's' : ''})</span>
+                )}
+              </div>
               {/* Store Details - Below Buttons in Left Column */}
               <div className="store-details-left">
                 {/* Description */}
                 {dashboard.description && (
                   <p className="store-description">{dashboard.description}</p>
                 )}
-                
+
                 <div className="store-meta">
-                  {/* Location - only show as text */}
-                  {(dashboard.googleMapsUrl || dashboard.location) && (
-                    <div className="store-detail-row">
-                      <LocationOnIcon className="detail-icon location-icon" />
-                      <span>{dashboard.location || 'Location available'}</span>
-                    </div>
-                  )}
-                  
                   {/* Contact Number */}
                   {(dashboard.contactNumber || store.contactNumber) && (
                     <div className="store-detail-row">
@@ -820,7 +813,7 @@ const CustomerStoreView = () => {
                       </a>
                     </div>
                   )}
-                  
+
                   {dashboard.socialLinks?.instagram && (
                     <div className="store-detail-row">
                       <InstagramIcon className="detail-icon instagram-icon" />
@@ -829,7 +822,7 @@ const CustomerStoreView = () => {
                       </a>
                     </div>
                   )}
-                  
+
                   {dashboard.socialLinks?.twitter && (
                     <div className="store-detail-row">
                       <TwitterIcon className="detail-icon twitter-icon" />
@@ -838,7 +831,7 @@ const CustomerStoreView = () => {
                       </a>
                     </div>
                   )}
-                  
+
                   {dashboard.socialLinks?.website && (
                     <div className="store-detail-row">
                       <LanguageIcon className="detail-icon website-icon" />
@@ -857,7 +850,7 @@ const CustomerStoreView = () => {
                       </a>
                     </div>
                   )}
-                  
+
                   {dashboard.ecommercePlatforms?.lazada?.url && (
                     <div className="store-detail-row">
                       <ShoppingCartIcon className="detail-icon lazada-icon" />
@@ -866,7 +859,7 @@ const CustomerStoreView = () => {
                       </a>
                     </div>
                   )}
-                  
+
                   {dashboard.ecommercePlatforms?.tiktok?.url && (
                     <div className="store-detail-row">
                       <AudiotrackIcon className="detail-icon tiktok-icon" />
@@ -877,9 +870,9 @@ const CustomerStoreView = () => {
                   )}
 
                 </div>
-                
+
                 {/* Store Rating - Bottom of left column */}
-              
+
               </div>
             </div>
 
@@ -892,7 +885,7 @@ const CustomerStoreView = () => {
                     src={handleEmbedUrl(dashboard.googleMapsUrl)}
                     width="100%"
                     height="100%"
-                    style={{border: 0}}
+                    style={{ border: 0 }}
                     allowFullScreen=""
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
@@ -902,31 +895,31 @@ const CustomerStoreView = () => {
                 </div>
               ) : dashboard.googleMapsUrl && !handleEmbedUrl(dashboard.googleMapsUrl) ? (
                 <div className="store-location-embed-right" style={{
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  background: '#f8f9fa', 
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#f8f9fa',
                   borderRadius: '8px',
                   border: '2px dashed #ddd',
                   height: '100%'
                 }}>
-                  <div style={{textAlign: 'center', padding: '20px', color: '#666'}}>
-                    <p style={{margin: 0, fontSize: '14px'}}>📍 Location URL needs to be in embed format</p>
+                  <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                    <p style={{ margin: 0, fontSize: '14px' }}>📍 Location URL needs to be in embed format</p>
                     <small>Store owner should use embedded Google Maps link</small>
                   </div>
                 </div>
               ) : (
                 <div className="store-location-embed-right" style={{
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  background: '#f8f9fa', 
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: '#f8f9fa',
                   borderRadius: '8px',
                   border: '2px dashed #ddd',
                   height: '100%'
                 }}>
-                  <div style={{textAlign: 'center', padding: '20px', color: '#666'}}>
-                    <p style={{margin: 0, fontSize: '14px'}}>📍 No location provided</p>
+                  <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                    <p style={{ margin: 0, fontSize: '14px' }}>📍 No location provided</p>
                     <small>Store location will appear here</small>
                   </div>
                 </div>
@@ -937,7 +930,7 @@ const CustomerStoreView = () => {
 
 
         {/* Store Reels Section - Replace Government Approvals */}
-       
+
 
         {/* Products Section */}
         <div className="store-products">
@@ -949,15 +942,15 @@ const CustomerStoreView = () => {
           ) : (
             <div className="customer-store-products-grid">
               {products.map((product) => (
-                <div 
-                  key={product._id} 
+                <div
+                  key={product._id}
                   className="product-card"
                 >
                   <div className="product-price-tag">
                     ₱{product.price}
                   </div>
-                  <img 
-                    src={getProductImageUrl(product)} 
+                  <img
+                    src={getProductImageUrl(product)}
                     alt={product.productName}
                     className="product-image"
                   />
@@ -968,8 +961,8 @@ const CustomerStoreView = () => {
                         {[1, 2, 3, 4, 5].map((star) => {
                           const rating = getProductRating(product);
                           return (
-                            <span 
-                              key={star} 
+                            <span
+                              key={star}
                               className={`product-star ${star <= Math.round(rating) ? 'filled' : 'empty'}`}
                             >
                               ★
@@ -981,7 +974,7 @@ const CustomerStoreView = () => {
                         ({getProductRating(product).toFixed(1)})
                       </span>
                     </div>
-                    <button 
+                    <button
                       className="product-view-btn"
                       onClick={() => navigate(`/product/${product._id}`)}
                     >
@@ -993,7 +986,7 @@ const CustomerStoreView = () => {
             </div>
           )}
         </div>
- 
+
 
         {/* Reviews Section */}
         <div className="store-reviews">
@@ -1026,10 +1019,10 @@ const CustomerStoreView = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Review text */}
                     <p className="review-text">"{feedback.feedback}"</p>
-                    
+
                     {/* Product name and variant */}
                     <div className="reviewed-product-info">
                       <div className="reviewed-product-name">
@@ -1040,9 +1033,9 @@ const CustomerStoreView = () => {
                         <div className="reviewed-product-variant">
                           <span className="variant-label">Variant: </span>
                           <span className="variant-text">
-                            {feedback.variant || feedback.productVariant || 
-                             (feedback.size && feedback.color ? `${feedback.size}, ${feedback.color}` : 
-                              feedback.size || feedback.color || 'Not specified')}
+                            {feedback.variant || feedback.productVariant ||
+                              (feedback.size && feedback.color ? `${feedback.size}, ${feedback.color}` :
+                                feedback.size || feedback.color || 'Not specified')}
                           </span>
                         </div>
                       )}
@@ -1058,7 +1051,7 @@ const CustomerStoreView = () => {
           </div>
         </div>
 
-<div className="store-reels-section">
+        <div className="store-reels-section">
           {blogPostsLoading ? (
             <div className="reels-loading">
               <p>Loading blogs and videos...</p>
@@ -1070,8 +1063,8 @@ const CustomerStoreView = () => {
           ) : (
             <div className="reels-grid">
               {blogPosts.map((post, index) => (
-                <div 
-                  key={post._id} 
+                <div
+                  key={post._id}
                   className="reel-card"
                   onClick={() => handleBlogPostClick(post)}
                 >
@@ -1079,8 +1072,8 @@ const CustomerStoreView = () => {
                     <div className="reel-category-tag">{post.category}</div>
                     {post.mediaType === 'youtube' ? (
                       <div className="reel-youtube-thumb">
-                        <img 
-                          src={getYouTubeThumbnail(post.mediaUrl)} 
+                        <img
+                          src={getYouTubeThumbnail(post.mediaUrl)}
                           alt={post.title}
                           className="reel-thumbnail"
                         />
@@ -1090,7 +1083,7 @@ const CustomerStoreView = () => {
                       </div>
                     ) : post.mediaType === 'video' ? (
                       <div className="reel-video-thumb">
-                        <video 
+                        <video
                           src={getBlogMediaUrl(post)}
                           className="reel-thumbnail"
                           preload="metadata"
@@ -1100,14 +1093,14 @@ const CustomerStoreView = () => {
                         </div>
                       </div>
                     ) : (
-                      <img 
-                        src={getBlogMediaUrl(post)} 
+                      <img
+                        src={getBlogMediaUrl(post)}
                         alt={post.title}
                         className="reel-thumbnail"
                       />
                     )}
                   </div>
-                  
+
 
                 </div>
               ))}
@@ -1126,7 +1119,7 @@ const CustomerStoreView = () => {
             setSubmitSuccess(false);
           }}>
             <div className="rating-modal-content" onClick={(e) => e.stopPropagation()}>
-              <button 
+              <button
                 className="rating-modal-close"
                 onClick={() => {
                   setShowRatingModal(false);
@@ -1140,16 +1133,16 @@ const CustomerStoreView = () => {
               >
                 ×
               </button>
-              
+
               <h3>
-                {loadingExistingRating 
-                  ? `Loading rating for ${store?.businessName}...` 
-                  : hasExistingRating 
-                    ? `Update your rating for ${store?.businessName}` 
+                {loadingExistingRating
+                  ? `Loading rating for ${store?.businessName}...`
+                  : hasExistingRating
+                    ? `Update your rating for ${store?.businessName}`
                     : `Rate ${store?.businessName}`
                 }
               </h3>
-              
+
               {!user ? (
                 <div className="auth-message">
                   <p>Please log in to rate this store.</p>
@@ -1165,9 +1158,9 @@ const CustomerStoreView = () => {
                       <p>You previously rated this store {rating} star{rating > 1 ? 's' : ''}. You can update your rating below.</p>
                     </div>
                   )}
-                  
+
                   <div className="rating-input">
-                    {[1,2,3,4,5].map(star => (
+                    {[1, 2, 3, 4, 5].map(star => (
                       <span
                         key={star}
                         className={`star-input ${(hoverRating || rating) >= star ? 'filled' : 'empty'}`}
@@ -1184,20 +1177,20 @@ const CustomerStoreView = () => {
                     ))}
                     {rating > 0 && <span className="rating-label">{rating} Star{rating > 1 ? 's' : ''}</span>}
                   </div>
-                  
+
                   <button
                     onClick={submitStoreRating}
                     disabled={submitting || rating === 0}
                     className="submit-rating-button"
                   >
-                    {submitting 
-                      ? 'Submitting...' 
-                      : hasExistingRating 
-                        ? 'Update Rating' 
+                    {submitting
+                      ? 'Submitting...'
+                      : hasExistingRating
+                        ? 'Update Rating'
                         : 'Submit Rating'
                     }
                   </button>
-                  
+
                   {submitError && <div className="error-message">{submitError}</div>}
                   {submitSuccess && <div className="success-message">Rating submitted successfully!</div>}
                 </div>
@@ -1212,13 +1205,13 @@ const CustomerStoreView = () => {
         {showBlogModal && selectedBlogPost && (
           <div className="store-blog-hero-modal-overlay" onClick={() => setShowBlogModal(false)}>
             <div className="store-blog-hero-modal-content" onClick={(e) => e.stopPropagation()}>
-              <button 
+              <button
                 className="store-blog-hero-modal-close"
                 onClick={() => setShowBlogModal(false)}
               >
                 ×
               </button>
-              
+
               <div className="store-blog-hero-modal-header">
                 <h2 className="store-blog-hero-modal-title">{selectedBlogPost.title}</h2>
                 <div className="store-blog-hero-modal-meta">
@@ -1235,8 +1228,8 @@ const CustomerStoreView = () => {
               <div className="store-blog-hero-modal-body">
                 {selectedBlogPost.mediaType === 'image' && selectedBlogPost.mediaUrl && (
                   <div className="store-blog-hero-modal-media">
-                    <img 
-                      src={getBlogMediaUrl(selectedBlogPost)} 
+                    <img
+                      src={getBlogMediaUrl(selectedBlogPost)}
                       alt={selectedBlogPost.title}
                       className="store-blog-hero-modal-image"
                       onError={(e) => {
@@ -1246,10 +1239,10 @@ const CustomerStoreView = () => {
                     />
                   </div>
                 )}
-                
+
                 {selectedBlogPost.mediaType === 'video' && selectedBlogPost.mediaUrl && (
                   <div className="store-blog-hero-modal-media">
-                    <video 
+                    <video
                       src={getBlogMediaUrl(selectedBlogPost)}
                       className="store-blog-hero-modal-video"
                       controls
@@ -1262,7 +1255,7 @@ const CustomerStoreView = () => {
                     </video>
                   </div>
                 )}
-                
+
                 {selectedBlogPost.mediaType === 'youtube' && selectedBlogPost.mediaUrl && (
                   <div className="store-blog-hero-modal-media">
                     <iframe
@@ -1276,7 +1269,7 @@ const CustomerStoreView = () => {
                     />
                   </div>
                 )}
-                
+
                 <div className="store-blog-hero-modal-text">
                   <h3>{selectedBlogPost.subtitle}</h3>
                   <p>{selectedBlogPost.description}</p>

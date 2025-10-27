@@ -2183,122 +2183,6 @@ app.delete("/api/admin/admins/:id", async (req, res) => {
   }
 });
 
-// --- Product Routes ---
-// Create new product
-app.post("/api/products", upload.array("pictures", 10), async (req, res) => {
-  try {
-    const {
-      productName,
-      price,
-      description,
-      availability,
-      category,
-      hashtags,
-      msmeId,
-      variants,
-      sizeOptions,
-    } = req.body;
-
-    // Validate required fields
-    if (!productName || !price || !description || !msmeId) {
-      return res.status(400).json({
-        success: false,
-        error: "Product name, price, description, and MSME ID are required",
-      });
-    }
-
-    // Parse hashtags if it's a string
-    let parsedHashtags = [];
-    if (hashtags) {
-      try {
-        parsedHashtags =
-          typeof hashtags === "string" ? JSON.parse(hashtags) : hashtags;
-      } catch (e) {
-        parsedHashtags = [];
-      }
-    }
-
-    // Parse variants if it's a string
-    let parsedVariants = [];
-    if (variants) {
-      try {
-        parsedVariants =
-          typeof variants === "string" ? JSON.parse(variants) : variants;
-      } catch (e) {
-        parsedVariants = [];
-      }
-    }
-
-    // Parse size options if it's a string
-    let parsedSizeOptions = [];
-    if (sizeOptions) {
-      try {
-        parsedSizeOptions =
-          typeof sizeOptions === "string"
-            ? JSON.parse(sizeOptions)
-            : sizeOptions;
-      } catch (e) {
-        parsedSizeOptions = [];
-      }
-    }
-
-    // Handle multiple file uploads
-    let pictures = [];
-    let singlePicture = null; // For backward compatibility
-
-    if (req.files && req.files.length > 0) {
-      pictures = req.files.map((file) => file.filename);
-      singlePicture = pictures[0]; // Use first image as main picture
-    }
-
-    // Create new product
-    const newProduct = new Product({
-      productName,
-      price: parseFloat(price),
-      description,
-      availability: availability === "true" || availability === true,
-      visible: true, // New products are visible by default
-      picture: singlePicture, // Backward compatibility
-      pictures: pictures, // New multiple images support
-      variants: parsedVariants,
-      sizeOptions: parsedSizeOptions,
-      hashtags: parsedHashtags,
-      category: category || "",
-      msmeId,
-    });
-
-    await newProduct.save();
-
-    // Notify followers of the store about the new product
-    try {
-      await CustomerNotificationService.notifyFollowersOfNewProduct(
-        msmeId,
-        newProduct._id
-      );
-      // Also send email notifications
-      await StoreActivityNotificationService.notifyFollowersOfNewProduct(
-        msmeId,
-        newProduct._id
-      );
-    } catch (notificationError) {
-      console.error("Error sending customer notifications:", notificationError);
-      // Continue with product creation even if notifications fail
-    }
-
-    res.status(201).json({
-      success: true,
-      message: "Product created successfully",
-      product: newProduct,
-    });
-  } catch (err) {
-    console.error("Error creating product:", err);
-    res.status(500).json({
-      success: false,
-      error: "Error creating product",
-    });
-  }
-});
-
 // Get all products
 app.get("/api/products", async (req, res) => {
   try {
@@ -2361,12 +2245,14 @@ app.get("/api/products/:id", async (req, res) => {
   }
 });
 
+/*
+// OLD DUPLICATE UPDATE ENDPOINT - DISABLED
 // Update product
 app.put("/api/products/:id", upload.array("pictures", 10), async (req, res) => {
   try {
     const productId = req.params.id;
     console.log(
-      "PUT /api/products/" + productId + " - Update request received"
+      "PUT /api/products/" + productId + " - OLD ENDPOINT WITHOUT ARTISTNAME - Update request received"
     );
     console.log("Request body keys:", Object.keys(req.body));
     console.log("Files received:", req.files ? req.files.length : 0);
@@ -2573,6 +2459,7 @@ app.put("/api/products/:id", upload.array("pictures", 10), async (req, res) => {
     });
   }
 });
+*/
 
 // Delete product
 app.delete("/api/products/:id", async (req, res) => {
@@ -2732,6 +2619,52 @@ app.get("/api/products/search/hashtag/:hashtag", async (req, res) => {
   }
 });
 
+// Helper function to extract location info from Google Maps embed URL
+function extractLocationFromMapsUrl(googleMapsUrl) {
+  if (!googleMapsUrl) return [];
+
+  try {
+    // Decode URL and extract location names
+    const decodedUrl = decodeURIComponent(googleMapsUrl);
+    const locations = [];
+
+    // Look for place names in the URL (after !2s or similar patterns)
+    const placeMatches = decodedUrl.match(/!2s([^!]+)/g);
+    if (placeMatches) {
+      placeMatches.forEach((match) => {
+        const placeName = match.replace("!2s", "").trim();
+        if (placeName && placeName.length > 2) {
+          locations.push(placeName);
+        }
+      });
+    }
+
+    // Also look for %20 encoded space-separated words which might be location names
+    const urlParts = googleMapsUrl.split(/[!&]/);
+    urlParts.forEach((part) => {
+      if (part.includes("%20") && part.length > 10) {
+        try {
+          const decoded = decodeURIComponent(part);
+          // Look for patterns that might be location names
+          const words = decoded
+            .split(/\s+/)
+            .filter((word) => word.length > 3 && /^[A-Za-z]/.test(word));
+          if (words.length > 0) {
+            locations.push(...words);
+          }
+        } catch (e) {
+          // Skip malformed parts
+        }
+      }
+    });
+
+    return [...new Set(locations)]; // Remove duplicates
+  } catch (error) {
+    console.error("Error extracting location from maps URL:", error);
+    return [];
+  }
+}
+
 // Universal search endpoint for products, stores, and MSMEs
 app.get("/api/search", async (req, res) => {
   try {
@@ -2793,7 +2726,57 @@ app.get("/api/search", async (req, res) => {
       } else {
         // Regular search
         const productSearchRegex = new RegExp(query, "i");
-        products = await Product.find({
+
+        // First, check if the query might be a municipality name by searching MSMEs and their dashboard locations
+        const municipalityMSMEs = await MSME.find({
+          $and: [
+            { status: "approved" },
+            {
+              $or: [
+                { municipality: productSearchRegex },
+                { address: productSearchRegex },
+              ],
+            },
+          ],
+        }).select("_id");
+
+        // Also search in Dashboard locations (embedded map data)
+        const dashboardsWithLocation = await Dashboard.find({
+          location: productSearchRegex,
+        }).select("msmeId");
+
+        // Search in embedded Google Maps URLs for additional location matches
+        const allDashboards = await Dashboard.find({
+          googleMapsUrl: { $exists: true, $ne: "" },
+        }).select("msmeId googleMapsUrl");
+
+        const dashboardsWithMapsLocation = allDashboards.filter((dashboard) => {
+          const extractedLocations = extractLocationFromMapsUrl(
+            dashboard.googleMapsUrl
+          );
+          return extractedLocations.some((location) =>
+            location.toLowerCase().includes(query.toLowerCase())
+          );
+        });
+
+        // Combine MSME IDs from all searches
+        const msmeIdsFromMSME = municipalityMSMEs.map((msme) => msme._id);
+        const msmeIdsFromDashboard = dashboardsWithLocation.map(
+          (dashboard) => dashboard.msmeId
+        );
+        const msmeIdsFromMapsUrl = dashboardsWithMapsLocation.map(
+          (dashboard) => dashboard.msmeId
+        );
+        const allMunicipalityMSMEIds = [
+          ...new Set([
+            ...msmeIdsFromMSME,
+            ...msmeIdsFromDashboard,
+            ...msmeIdsFromMapsUrl,
+          ]),
+        ];
+
+        // Search for products - include municipality-based results from both MSME and Dashboard data
+        const searchCriteria = {
           $and: [
             { visible: true },
             { availability: true },
@@ -2803,13 +2786,53 @@ app.get("/api/search", async (req, res) => {
                 { description: productSearchRegex },
                 { category: productSearchRegex },
                 { hashtags: { $elemMatch: { $regex: productSearchRegex } } },
+                // Add municipality-based search using both MSME and Dashboard location data
+                ...(allMunicipalityMSMEIds.length > 0
+                  ? [{ msmeId: { $in: allMunicipalityMSMEIds } }]
+                  : []),
               ],
             },
           ],
-        })
-          .populate("msmeId", "businessName username category")
+        };
+
+        products = await Product.find(searchCriteria)
+          .populate(
+            "msmeId",
+            "businessName username category municipality address"
+          )
           .limit(searchLimit)
           .sort({ createdAt: -1 });
+
+        // Fetch dashboard data for each product to get embedded map location
+        const productsWithDashboard = await Promise.all(
+          products.map(async (product) => {
+            const dashboard = await Dashboard.findOne({
+              msmeId: product.msmeId?._id,
+            });
+
+            let enhancedLocation = dashboard?.location || "";
+
+            // If we have a Google Maps URL, extract additional location info
+            if (dashboard?.googleMapsUrl && !enhancedLocation) {
+              const extractedLocations = extractLocationFromMapsUrl(
+                dashboard.googleMapsUrl
+              );
+              if (extractedLocations.length > 0) {
+                enhancedLocation = extractedLocations[0];
+              }
+            }
+
+            return {
+              ...product.toObject(),
+              dashboardLocation: enhancedLocation,
+              extractedMapLocations: dashboard?.googleMapsUrl
+                ? extractLocationFromMapsUrl(dashboard.googleMapsUrl)
+                : [],
+            };
+          })
+        );
+
+        products = productsWithDashboard;
       }
 
       results.products = products.map((product) => ({
@@ -2826,6 +2849,9 @@ app.get("/api/search", async (req, res) => {
         storeName: product.msmeId?.businessName,
         storeId: product.msmeId?._id,
         storeCategory: product.msmeId?.category,
+        storeMunicipality: product.msmeId?.municipality,
+        storeLocation: product.msmeId?.address,
+        dashboardLocation: product.dashboardLocation || "", // Include embedded map location
         storeRating: product.msmeId?.averageRating || 0,
         storeUsername: product.msmeId?.username,
         rating: product.rating || 0,
@@ -2836,6 +2862,41 @@ app.get("/api/search", async (req, res) => {
     // Search stores/MSMEs if type is 'all' or 'stores' or 'artists'
     if (!type || type === "all" || type === "stores" || type === "artists") {
       const storeSearchRegex = new RegExp(query, "i");
+
+      // Also search in Dashboard locations for stores
+      const dashboardsWithLocationForStores = await Dashboard.find({
+        location: storeSearchRegex,
+      }).select("msmeId");
+
+      // Search in embedded Google Maps URLs for stores
+      const allDashboardsForStores = await Dashboard.find({
+        googleMapsUrl: { $exists: true, $ne: "" },
+      }).select("msmeId googleMapsUrl");
+
+      const dashboardsWithMapsLocationForStores = allDashboardsForStores.filter(
+        (dashboard) => {
+          const extractedLocations = extractLocationFromMapsUrl(
+            dashboard.googleMapsUrl
+          );
+          return extractedLocations.some((location) =>
+            location.toLowerCase().includes(query.toLowerCase())
+          );
+        }
+      );
+
+      const msmeIdsFromDashboardSearch = dashboardsWithLocationForStores.map(
+        (dashboard) => dashboard.msmeId
+      );
+      const msmeIdsFromMapsUrlSearch = dashboardsWithMapsLocationForStores.map(
+        (dashboard) => dashboard.msmeId
+      );
+      const allMsmeIdsFromLocationSearch = [
+        ...new Set([
+          ...msmeIdsFromDashboardSearch,
+          ...msmeIdsFromMapsUrlSearch,
+        ]),
+      ];
+
       const stores = await MSME.find({
         $and: [
           { status: "approved" },
@@ -2845,7 +2906,13 @@ app.get("/api/search", async (req, res) => {
               { username: storeSearchRegex },
               { category: storeSearchRegex },
               { businessDescription: storeSearchRegex },
+              { municipality: storeSearchRegex },
+              { address: storeSearchRegex },
               { specialties: { $elemMatch: { $regex: storeSearchRegex } } },
+              // Add dashboard location search (including embedded maps)
+              ...(allMsmeIdsFromLocationSearch.length > 0
+                ? [{ _id: { $in: allMsmeIdsFromLocationSearch } }]
+                : []),
             ],
           },
         ],
@@ -2853,7 +2920,34 @@ app.get("/api/search", async (req, res) => {
         .limit(searchLimit)
         .sort({ createdAt: -1 });
 
-      results.stores = stores.map((store) => ({
+      // Fetch dashboard data for each store to get embedded map location
+      const storesWithDashboard = await Promise.all(
+        stores.map(async (store) => {
+          const dashboard = await Dashboard.findOne({ msmeId: store._id });
+
+          let enhancedLocation = dashboard?.location || "";
+
+          // If we have a Google Maps URL, extract additional location info
+          if (dashboard?.googleMapsUrl && !enhancedLocation) {
+            const extractedLocations = extractLocationFromMapsUrl(
+              dashboard.googleMapsUrl
+            );
+            if (extractedLocations.length > 0) {
+              enhancedLocation = extractedLocations[0];
+            }
+          }
+
+          return {
+            ...store.toObject(),
+            dashboardLocation: enhancedLocation,
+            extractedMapLocations: dashboard?.googleMapsUrl
+              ? extractLocationFromMapsUrl(dashboard.googleMapsUrl)
+              : [],
+          };
+        })
+      );
+
+      results.stores = storesWithDashboard.map((store) => ({
         _id: store._id,
         type: store.category === "artisan" ? "artist" : "store",
         name: store.businessName,
@@ -2862,6 +2956,8 @@ app.get("/api/search", async (req, res) => {
         category: store.category,
         businessType: store.category,
         location: store.address,
+        municipality: store.municipality,
+        dashboardLocation: store.dashboardLocation || "", // Include embedded map location
         imageUrl: store.businessPicture,
         rating: store.averageRating || 0,
         followers: store.followers?.length || 0,
@@ -2873,12 +2969,73 @@ app.get("/api/search", async (req, res) => {
     // Generate suggestions for autocomplete (first 5 items of each type)
     const suggestions = [];
 
-    // Add product suggestions
-    results.products.slice(0, 5).forEach((product) => {
+    // Check if query seems to be a municipality search (check MSME data, dashboard locations, and embedded maps)
+    let isMunicipalityQuery =
+      (await MSME.exists({
+        $and: [
+          { status: "approved" },
+          {
+            $or: [
+              { municipality: new RegExp(query, "i") },
+              { address: new RegExp(query, "i") },
+            ],
+          },
+        ],
+      })) ||
+      (await Dashboard.exists({
+        location: new RegExp(query, "i"),
+      }));
+
+    // Also check embedded Google Maps URLs for location matches
+    if (!isMunicipalityQuery) {
+      const dashboardsWithMaps = await Dashboard.find({
+        googleMapsUrl: { $exists: true, $ne: "" },
+      }).select("googleMapsUrl");
+
+      isMunicipalityQuery = dashboardsWithMaps.some((dashboard) => {
+        const extractedLocations = extractLocationFromMapsUrl(
+          dashboard.googleMapsUrl
+        );
+        return extractedLocations.some((location) =>
+          location.toLowerCase().includes(query.toLowerCase())
+        );
+      });
+    }
+
+    // Add product suggestions (prioritize municipality-based if applicable)
+    const productSuggestions = results.products.slice(0, 5);
+
+    // If it's a municipality query, sort products by relevance (municipality match first)
+    if (isMunicipalityQuery) {
+      productSuggestions.sort((a, b) => {
+        const queryRegex = new RegExp(query, "i");
+
+        // Check both municipality field and dashboard location
+        const aMunicipalityMatch =
+          queryRegex.test(a.storeMunicipality || "") ||
+          queryRegex.test(a.dashboardLocation || "");
+        const bMunicipalityMatch =
+          queryRegex.test(b.storeMunicipality || "") ||
+          queryRegex.test(b.dashboardLocation || "");
+
+        if (aMunicipalityMatch && !bMunicipalityMatch) return -1;
+        if (!aMunicipalityMatch && bMunicipalityMatch) return 1;
+        return 0;
+      });
+    }
+
+    productSuggestions.forEach((product) => {
+      // Prioritize dashboard location (embedded map) over municipality field
+      const primaryLocation =
+        product.dashboardLocation || product.storeMunicipality || "";
+      const locationInfo = primaryLocation
+        ? `${product.storeName} • ${primaryLocation}`
+        : product.storeName;
+
       suggestions.push({
         type: "product",
         title: product.name,
-        subtitle: `₱${product.price} • ${product.storeName}`,
+        subtitle: `₱${product.price} • ${locationInfo}`,
         id: product._id,
         imageUrl: product.imageUrl,
       });
@@ -2886,10 +3043,17 @@ app.get("/api/search", async (req, res) => {
 
     // Add store/artist suggestions
     results.stores.slice(0, 5).forEach((store) => {
+      // Prioritize dashboard location (embedded map) over municipality field
+      const primaryLocation =
+        store.dashboardLocation || store.municipality || "";
+      const locationInfo = primaryLocation
+        ? `${store.businessType || store.category} • ${primaryLocation}`
+        : store.businessType || store.category;
+
       suggestions.push({
         type: store.type,
         title: store.name,
-        subtitle: store.businessType || store.category,
+        subtitle: locationInfo,
         id: store._id,
         imageUrl: store.imageUrl,
       });
@@ -8628,6 +8792,309 @@ app.delete("/api/msme/:id/delete-account", async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Error deleting account",
+    });
+  }
+});
+
+// --- Product Routes ---
+// Create new product
+app.post("/api/products", upload.array("pictures", 10), async (req, res) => {
+  try {
+    const {
+      productName,
+      price,
+      description,
+      availability,
+      category,
+      hashtags,
+      msmeId,
+      variants,
+      sizeOptions,
+      artistName, // Add artistName field
+    } = req.body;
+
+    // Debug logging
+    console.log("POST /api/products - Product creation request received");
+    console.log("Request body keys:", Object.keys(req.body));
+    console.log("Artist name received:", artistName);
+    console.log("Category received:", category);
+
+    // Validate required fields
+    if (!productName || !price || !description || !msmeId) {
+      return res.status(400).json({
+        success: false,
+        error: "Product name, price, description, and MSME ID are required",
+      });
+    }
+
+    // Parse hashtags if it's a string
+    let parsedHashtags = [];
+    if (hashtags) {
+      try {
+        parsedHashtags =
+          typeof hashtags === "string" ? JSON.parse(hashtags) : hashtags;
+      } catch (e) {
+        parsedHashtags = [];
+      }
+    }
+
+    // Parse variants if it's a string
+    let parsedVariants = [];
+    if (variants) {
+      try {
+        parsedVariants =
+          typeof variants === "string" ? JSON.parse(variants) : variants;
+      } catch (e) {
+        parsedVariants = [];
+      }
+    }
+
+    // Parse size options if it's a string
+    let parsedSizeOptions = [];
+    if (sizeOptions) {
+      try {
+        parsedSizeOptions =
+          typeof sizeOptions === "string"
+            ? JSON.parse(sizeOptions)
+            : sizeOptions;
+      } catch (e) {
+        parsedSizeOptions = [];
+      }
+    }
+
+    // Handle multiple file uploads
+    let pictures = [];
+    let singlePicture = null; // For backward compatibility
+
+    if (req.files && req.files.length > 0) {
+      pictures = req.files.map((file) => file.filename);
+      singlePicture = pictures[0]; // Use first image as main picture
+    }
+
+    // Create new product with artistName field
+    const newProduct = new Product({
+      productName,
+      price: parseFloat(price),
+      description,
+      availability: availability === "true" || availability === true,
+      visible: true, // New products are visible by default
+      picture: singlePicture, // Backward compatibility
+      pictures: pictures, // New multiple images support
+      variants: parsedVariants,
+      sizeOptions: parsedSizeOptions,
+      hashtags: parsedHashtags,
+      category: category || "",
+      artistName: artistName || "", // Add artistName field
+      msmeId,
+    });
+
+    await newProduct.save();
+
+    // Notify followers of the store about the new product
+    try {
+      await CustomerNotificationService.notifyFollowersOfNewProduct(
+        msmeId,
+        newProduct._id
+      );
+      // Also send email notifications
+      await StoreActivityNotificationService.notifyFollowersOfNewProduct(
+        msmeId,
+        newProduct._id
+      );
+    } catch (notificationError) {
+      console.error("Error sending customer notifications:", notificationError);
+      // Continue with product creation even if notifications fail
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Product created successfully",
+      product: newProduct,
+    });
+  } catch (err) {
+    console.error("Error creating product:", err);
+    res.status(500).json({
+      success: false,
+      error: "Error creating product",
+    });
+  }
+});
+
+// Update product
+app.put("/api/products/:id", upload.array("pictures", 10), async (req, res) => {
+  try {
+    const productId = req.params.id;
+    console.log(
+      "PUT /api/products/" +
+        productId +
+        " - NEW ENDPOINT WITH ARTISTNAME - Update request received"
+    );
+    console.log("Request body keys:", Object.keys(req.body));
+    console.log("Files received:", req.files ? req.files.length : 0);
+    console.log("Artist name received:", req.body.artistName);
+
+    const {
+      productName,
+      price,
+      description,
+      availability,
+      visible,
+      category,
+      hashtags,
+      variants,
+      sizeOptions,
+      keepExistingImages,
+      existingImages,
+      artistName, // Add artistName field
+    } = req.body;
+
+    // Find existing product
+    const existingProduct = await Product.findById(productId);
+    if (!existingProduct) {
+      return res.status(404).json({
+        success: false,
+        error: "Product not found",
+      });
+    }
+
+    // Parse hashtags if it's a string
+    let parsedHashtags = existingProduct.hashtags;
+    if (hashtags) {
+      try {
+        parsedHashtags =
+          typeof hashtags === "string" ? JSON.parse(hashtags) : hashtags;
+      } catch (e) {
+        // Keep existing hashtags if parsing fails
+      }
+    }
+
+    // Parse variants if it's a string
+    let parsedVariants = existingProduct.variants || [];
+    if (variants) {
+      try {
+        parsedVariants =
+          typeof variants === "string" ? JSON.parse(variants) : variants;
+      } catch (e) {
+        parsedVariants = existingProduct.variants || [];
+      }
+    }
+
+    // Parse size options if it's a string
+    let parsedSizeOptions = existingProduct.sizeOptions || [];
+    if (sizeOptions) {
+      try {
+        parsedSizeOptions =
+          typeof sizeOptions === "string"
+            ? JSON.parse(sizeOptions)
+            : sizeOptions;
+      } catch (e) {
+        parsedSizeOptions = existingProduct.sizeOptions || [];
+      }
+    }
+
+    // Handle multiple file uploads with existing image removal support
+    let pictures = [];
+    let singlePicture = null;
+
+    // Parse existing images to keep (sent from frontend)
+    let imagesToKeep = [];
+    if (existingImages) {
+      try {
+        imagesToKeep =
+          typeof existingImages === "string"
+            ? JSON.parse(existingImages)
+            : existingImages;
+      } catch (e) {
+        imagesToKeep = existingProduct.pictures || [];
+      }
+    } else {
+      // If no existingImages provided, keep all existing images
+      imagesToKeep = existingProduct.pictures || [];
+    }
+
+    // Start with existing images that should be kept
+    pictures = [...imagesToKeep];
+
+    // Add new uploaded images
+    if (req.files && req.files.length > 0) {
+      const newImages = req.files.map((file) => file.filename);
+      pictures = [...pictures, ...newImages];
+    }
+
+    // Set single picture for backward compatibility
+    singlePicture = pictures.length > 0 ? pictures[0] : existingProduct.picture;
+
+    // Store original values for comparison
+    const oldPrice = existingProduct.price;
+    const oldAvailability = existingProduct.availability;
+
+    // Update product with artistName field
+    const updatedProduct = await Product.findByIdAndUpdate(
+      productId,
+      {
+        productName: productName || existingProduct.productName,
+        price: price ? parseFloat(price) : existingProduct.price,
+        description: description || existingProduct.description,
+        availability:
+          availability !== undefined
+            ? availability === "true" || availability === true
+            : existingProduct.availability,
+        visible:
+          visible !== undefined
+            ? visible === "true" || visible === true
+            : existingProduct.visible,
+        picture: singlePicture,
+        pictures: pictures,
+        variants: parsedVariants,
+        sizeOptions: parsedSizeOptions,
+        hashtags: parsedHashtags,
+        category: category || existingProduct.category,
+        artistName:
+          artistName !== undefined ? artistName : existingProduct.artistName, // Update artistName field
+        updatedAt: new Date(),
+      },
+      { new: true }
+    );
+
+    // Check if significant changes occurred for notifications
+    const newPrice = updatedProduct.price;
+    const newAvailability = updatedProduct.availability;
+
+    if (oldPrice !== newPrice) {
+      console.log(
+        `Price changed for product ${updatedProduct.productName}: ${oldPrice} -> ${newPrice}`
+      );
+      // Send price change notifications to followers
+      await StoreActivityNotificationService.notifyFollowersOfPriceChange(
+        updatedProduct.msmeId,
+        updatedProduct._id,
+        oldPrice,
+        newPrice
+      );
+    }
+
+    if (oldAvailability !== newAvailability) {
+      console.log(
+        `Availability changed for product ${updatedProduct.productName}: ${oldAvailability} -> ${newAvailability}`
+      );
+      // Send availability change notifications
+      await StoreActivityNotificationService.notifyFollowersOfAvailabilityChange(
+        updatedProduct.msmeId,
+        updatedProduct._id,
+        newAvailability
+      );
+    }
+
+    res.json({
+      success: true,
+      message: "Product updated successfully",
+      product: updatedProduct,
+    });
+  } catch (err) {
+    console.error("Error updating product:", err);
+    res.status(500).json({
+      success: false,
+      error: "Error updating product",
     });
   }
 });

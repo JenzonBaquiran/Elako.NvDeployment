@@ -171,6 +171,15 @@ const ProductDetails = () => {
                 />
               )}
             </div>
+            
+            {/* Artist Name - Only show for artworks */}
+            {product.artistName && (
+              <div className="product-details-artist">
+                <span className="product-details-artist-label">Artist: </span>
+                <span className="product-details-artist-name">{product.artistName}</span>
+              </div>
+            )}
+            
             <p className="product-details-description">{product.description}</p>
             
             <div className="product-details-price">₱{product.price}</div>

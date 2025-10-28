@@ -5031,7 +5031,6 @@ app.get("/api/admin/analytics/monthly-growth", async (req, res) => {
         // Calculate average rating for products in this month
         let monthRating = 0;
         let totalRatings = 0;
-        let totalViews = 0;
 
         products.forEach((product) => {
           if (product.feedback && product.feedback.length > 0) {
@@ -5056,20 +5055,28 @@ app.get("/api/admin/analytics/monthly-growth", async (req, res) => {
         const finalRating =
           totalRatings > 0
             ? monthRating / totalRatings
-            : msme.averageRating || 4.0 + Math.random() * 0.8;
+            : msme.averageRating || 4.0;
 
         storeData.ratings.push(Math.round(finalRating * 10) / 10);
 
-        // Calculate profile views (simulate realistic growth pattern)
-        const baseViews = Math.floor((msme.averageRating || 4.0) * 150);
-        const monthlyGrowth = i * 20; // Growth factor based on month
-        const randomVariation = Math.floor(Math.random() * 100);
-        const monthViews = Math.max(
-          baseViews + monthlyGrowth + randomVariation,
-          50
-        );
-
-        storeData.views.push(monthViews);
+        // Get real PageView data for this month
+        try {
+          const monthViews = await PageView.countDocuments({
+            storeId: msme._id,
+            viewDate: {
+              $gte: currentMonth.date,
+              $lt: nextMonth,
+            },
+          });
+          storeData.views.push(monthViews);
+        } catch (error) {
+          console.error(
+            `Error getting PageView data for ${msme.businessName}:`,
+            error
+          );
+          // Fallback to a small realistic number if PageView query fails
+          storeData.views.push(0);
+        }
       }
 
       monthlyData.stores.push(storeData);

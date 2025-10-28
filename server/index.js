@@ -7,6 +7,13 @@ const bcrypt = require("bcryptjs");
 const http = require("http");
 const socketIo = require("socket.io");
 
+// Import Utils
+const {
+  maskCustomerName,
+  maskCustomerFromObject,
+  getAvatarLetter,
+} = require("./utils/nameUtils");
+
 // Import Models
 const Customer = require("./models/customer.model");
 const MSME = require("./models/msme.model");
@@ -1601,7 +1608,19 @@ app.get("/api/products/:productId", async (req, res) => {
         .status(404)
         .json({ success: false, error: "Product not found" });
     }
-    res.json({ success: true, product });
+
+    // Create a copy of the product to modify feedback
+    const productData = product.toObject();
+
+    // Mask customer names in feedback for privacy
+    if (productData.feedback && Array.isArray(productData.feedback)) {
+      productData.feedback = productData.feedback.map((fb) => ({
+        ...fb,
+        user: maskCustomerName(fb.user), // Mask the customer name
+      }));
+    }
+
+    res.json({ success: true, product: productData });
   } catch (err) {
     console.error("Error fetching product:", err);
     res.status(500).json({ success: false, error: "Error fetching product" });
@@ -2204,9 +2223,21 @@ app.get("/api/products", async (req, res) => {
       customerId
     );
 
+    // Mask customer names in feedback for privacy
+    const maskedProducts = productsWithFavoriteStatus.map((product) => {
+      const productData = product.toObject ? product.toObject() : product;
+      if (productData.feedback && Array.isArray(productData.feedback)) {
+        productData.feedback = productData.feedback.map((fb) => ({
+          ...fb,
+          user: maskCustomerName(fb.user),
+        }));
+      }
+      return productData;
+    });
+
     res.json({
       success: true,
-      products: productsWithFavoriteStatus,
+      products: maskedProducts,
     });
   } catch (err) {
     console.error("Error fetching products:", err);
@@ -2232,9 +2263,20 @@ app.get("/api/products/:id", async (req, res) => {
       });
     }
 
+    // Create a copy of the product to modify feedback
+    const productData = product.toObject();
+
+    // Mask customer names in feedback for privacy
+    if (productData.feedback && Array.isArray(productData.feedback)) {
+      productData.feedback = productData.feedback.map((fb) => ({
+        ...fb,
+        user: maskCustomerName(fb.user), // Mask the customer name
+      }));
+    }
+
     res.json({
       success: true,
-      product,
+      product: productData,
     });
   } catch (err) {
     console.error("Error fetching product:", err);
@@ -2583,9 +2625,21 @@ app.get("/api/msme/:msmeId/products", async (req, res) => {
 
     const products = await Product.find(filter).sort({ createdAt: -1 });
 
+    // Mask customer names in feedback for privacy
+    const maskedProducts = products.map((product) => {
+      const productData = product.toObject();
+      if (productData.feedback && Array.isArray(productData.feedback)) {
+        productData.feedback = productData.feedback.map((fb) => ({
+          ...fb,
+          user: maskCustomerName(fb.user),
+        }));
+      }
+      return productData;
+    });
+
     res.json({
       success: true,
-      products,
+      products: maskedProducts,
     });
   } catch (err) {
     console.error("Error fetching MSME products:", err);
@@ -4295,16 +4349,19 @@ app.get("/api/msme/:storeId/products/feedbacks", async (req, res) => {
         );
 
         visibleFeedbacks.forEach((feedback) => {
+          // Mask the customer name for privacy
+          const maskedUserName = maskCustomerName(feedback.user);
+
           console.log("Processing feedback:", {
-            userName: feedback.user, // Changed from userName to user
+            userName: maskedUserName, // Use masked name
             feedback: feedback.comment, // Changed from feedback to comment
             rating: feedback.rating,
             productName: product.productName,
           });
           allFeedbacks.push({
             ...feedback.toObject(),
-            // Map the correct field names
-            userName: feedback.user, // Map user to userName for frontend
+            // Map the correct field names with masked user name
+            userName: maskedUserName, // Map masked user to userName for frontend
             feedback: feedback.comment, // Map comment to feedback for frontend
             productId: product._id,
             productName: product.productName,
@@ -5540,6 +5597,23 @@ app.get("/api/stores/:storeId/reviews", async (req, res) => {
             }
           }
 
+          // Create masked customer info for privacy
+          let maskedCustomer = null;
+          if (customer) {
+            maskedCustomer = {
+              firstname: maskCustomerFromObject(customer),
+              lastname: "", // Don't show lastname separately
+              maskedName: maskCustomerFromObject(customer),
+            };
+          } else if (feedback.user) {
+            // Handle legacy reviews that have user name directly
+            maskedCustomer = {
+              firstname: maskCustomerName(feedback.user),
+              lastname: "",
+              maskedName: maskCustomerName(feedback.user),
+            };
+          }
+
           reviews.push({
             _id: feedback._id || `${product._id}_${reviews.length}`,
             productId: product._id,
@@ -5547,7 +5621,8 @@ app.get("/api/stores/:storeId/reviews", async (req, res) => {
               productName: product.productName,
               picture: product.picture,
             },
-            customer: customer,
+            customer: maskedCustomer,
+            userName: maskedCustomer ? maskedCustomer.maskedName : "Anonymous",
             rating: feedback.rating,
             comment: feedback.comment,
             createdAt: feedback.createdAt || new Date(),

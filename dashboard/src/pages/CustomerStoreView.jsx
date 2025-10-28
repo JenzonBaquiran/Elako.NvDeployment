@@ -1007,9 +1007,11 @@ const CustomerStoreView = () => {
                     <div className="feedback-header">
                       <div className="reviewer-info">
                         <div className="reviewer-avatar">
+                          {/* Customer names are masked on server-side for privacy */}
                           {(feedback.userName || 'A').charAt(0).toUpperCase()}
                         </div>
                         <div className="reviewer-details">
+                          {/* Customer names are masked on server-side for privacy (e.g., "N**o*a") */}
                           <strong>{feedback.userName || 'Anonymous'}</strong>
                           <span className="review-date">
                             {new Date(feedback.createdAt).toLocaleDateString('en-US', {

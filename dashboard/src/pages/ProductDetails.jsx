@@ -288,10 +288,12 @@ const ProductDetails = () => {
                 <div key={idx} className="product-details-feedback-item">
                   <div className="product-details-feedback-header">
                     <div className="product-details-feedback-avatar">
+                      {/* Customer names are masked on server-side for privacy */}
                       {fb.user.charAt(0).toUpperCase()}
                     </div>
                     <div className="product-details-feedback-content">
                       <div className="product-details-feedback-user-info">
+                        {/* Customer names are masked on server-side for privacy (e.g., "N**o*a") */}
                         <strong className="product-details-feedback-user">{fb.user}</strong>
                         <span className="product-details-feedback-date">
                           {fb.createdAt ? new Date(fb.createdAt).toLocaleDateString('en-US', {

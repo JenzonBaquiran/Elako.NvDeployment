@@ -9,6 +9,7 @@ import StarBorderIcon from '@mui/icons-material/StarBorder';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import { maskCustomerFromObject } from '../utils/nameUtils';
 import PersonIcon from '@mui/icons-material/Person';
 import CloseIcon from '@mui/icons-material/Close';
 import GridViewIcon from '@mui/icons-material/GridView';
@@ -517,8 +518,9 @@ const MsmeReviews = () => {
                             </div>
                             <div className="msme-reviews__modal-customer-details">
                               <h4 className="msme-reviews__modal-customer-name">
+                                {/* Customer names are masked for privacy protection */}
                                 {review.customer?.firstname && review.customer?.lastname 
-                                  ? `${review.customer.firstname} ${review.customer.lastname}`
+                                  ? (review.customer.maskedName || maskCustomerFromObject(review.customer))
                                   : 'Anonymous Customer'
                                 }
                                 {review.hidden && (

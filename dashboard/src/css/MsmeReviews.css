@@ -1253,3 +1253,113 @@
     padding: 3px 8px;
   }
 }
+
+/* Review Visibility Controls */
+.msme-reviews__modal-review-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.msme-reviews__visibility-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  min-width: 80px;
+  justify-content: center;
+}
+
+.msme-reviews__visibility-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.msme-reviews__visibility-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.msme-reviews__visibility-button--visible {
+  background: #dc3545;
+  color: white;
+  border: 1px solid #dc3545;
+}
+
+.msme-reviews__visibility-button--visible:hover:not(:disabled) {
+  background: #c82333;
+  border-color: #c82333;
+}
+
+.msme-reviews__visibility-button--hidden {
+  background: #28a745;
+  color: white;
+  border: 1px solid #28a745;
+}
+
+.msme-reviews__visibility-button--hidden:hover:not(:disabled) {
+  background: #218838;
+  border-color: #218838;
+}
+
+.msme-reviews__visibility-text {
+  font-size: 0.85rem;
+}
+
+.msme-reviews__loading-spinner {
+  font-size: 1rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Hidden Review Indicators */
+.msme-reviews__modal-review-card--hidden {
+  background: #f8f9fa;
+  border: 1px dashed #dc3545;
+  opacity: 0.8;
+}
+
+.msme-reviews__hidden-indicator {
+  color: #dc3545;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background: #ffe6e6;
+  border-radius: 12px;
+  border: 1px solid #ffcccc;
+}
+
+/* Mobile Responsiveness for Visibility Controls */
+@media (max-width: 768px) {
+  .msme-reviews__modal-review-actions {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .msme-reviews__visibility-button {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    min-width: 70px;
+  }
+
+  .msme-reviews__hidden-indicator {
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    margin-left: 4px;
+  }
+}

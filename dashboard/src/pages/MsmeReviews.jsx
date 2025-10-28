@@ -8,13 +8,14 @@ import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import PersonIcon from '@mui/icons-material/Person';
 import CloseIcon from '@mui/icons-material/Close';
 import GridViewIcon from '@mui/icons-material/GridView';
 
 const MsmeReviews = () => {
   const { user, userType, isAuthenticated } = useAuth();
-  const { showError } = useNotification();
+  const { showError, showSuccess } = useNotification();
   const navigate = useNavigate();
   
   const [sidebarState, setSidebarState] = useState({
@@ -33,6 +34,7 @@ const MsmeReviews = () => {
     averageRating: 0,
     ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
   });
+  const [togglingVisibility, setTogglingVisibility] = useState({});
   
 
 
@@ -255,6 +257,52 @@ const MsmeReviews = () => {
     return Math.round((productStats.ratingDistribution[rating] / productStats.totalReviews) * 100);
   };
 
+  const handleToggleReviewVisibility = async (reviewId, currentHiddenStatus) => {
+    setTogglingVisibility(prev => ({ ...prev, [reviewId]: true }));
+    
+    try {
+      const response = await fetch(`http://localhost:1337/api/reviews/${reviewId}/visibility`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          msmeId: user._id || user.id,
+          hidden: !currentHiddenStatus, // Toggle the current status
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update the review in the selectedProduct state
+        setSelectedProduct(prev => ({
+          ...prev,
+          reviews: prev.reviews.map(review => 
+            review._id === reviewId 
+              ? { ...review, hidden: data.hidden }
+              : review
+          )
+        }));
+
+        // Refresh the products data to get updated stats
+        await fetchStoreProducts();
+        
+        showSuccess(
+          `Review ${data.hidden ? 'hidden' : 'shown'} successfully`,
+          'Review Updated'
+        );
+      } else {
+        showError(data.error || 'Failed to update review visibility', 'Error');
+      }
+    } catch (error) {
+      console.error('Error toggling review visibility:', error);
+      showError('Failed to update review visibility', 'Error');
+    } finally {
+      setTogglingVisibility(prev => ({ ...prev, [reviewId]: false }));
+    }
+  };
+
 
 
   // Show login message if not authenticated
@@ -461,7 +509,7 @@ const MsmeReviews = () => {
                 ) : (
                   <div className="msme-reviews__modal-reviews-list">
                     {selectedProduct.reviews.map((review) => (
-                      <div key={review._id} className="msme-reviews__modal-review-card">
+                      <div key={review._id} className={`msme-reviews__modal-review-card ${review.hidden ? 'msme-reviews__modal-review-card--hidden' : ''}`}>
                         <div className="msme-reviews__modal-review-header">
                           <div className="msme-reviews__modal-customer-info">
                             <div className="msme-reviews__modal-customer-avatar">
@@ -473,14 +521,36 @@ const MsmeReviews = () => {
                                   ? `${review.customer.firstname} ${review.customer.lastname}`
                                   : 'Anonymous Customer'
                                 }
+                                {review.hidden && (
+                                  <span className="msme-reviews__hidden-indicator">(Hidden from customers)</span>
+                                )}
                               </h4>
                               <div className="msme-reviews__modal-review-rating">
                                 {renderStars(review.rating)}
                               </div>
                             </div>
                           </div>
-                          <div className="msme-reviews__modal-review-date">
-                            {formatDate(review.createdAt)}
+                          <div className="msme-reviews__modal-review-actions">
+                            <div className="msme-reviews__modal-review-date">
+                              {formatDate(review.createdAt)}
+                            </div>
+                            <button
+                              className={`msme-reviews__visibility-button ${review.hidden ? 'msme-reviews__visibility-button--hidden' : 'msme-reviews__visibility-button--visible'}`}
+                              onClick={() => handleToggleReviewVisibility(review._id, review.hidden)}
+                              disabled={togglingVisibility[review._id]}
+                              title={review.hidden ? 'Show this review to customers' : 'Hide this review from customers'}
+                            >
+                              {togglingVisibility[review._id] ? (
+                                <span className="msme-reviews__loading-spinner">⏳</span>
+                              ) : review.hidden ? (
+                                <VisibilityIcon />
+                              ) : (
+                                <VisibilityOffIcon />
+                              )}
+                              <span className="msme-reviews__visibility-text">
+                                {review.hidden ? 'Show' : 'Hide'}
+                              </span>
+                            </button>
                           </div>
                         </div>
                         

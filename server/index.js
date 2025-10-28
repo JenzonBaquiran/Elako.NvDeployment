@@ -4289,7 +4289,12 @@ app.get("/api/msme/:storeId/products/feedbacks", async (req, res) => {
 
     products.forEach((product) => {
       if (product.feedback && product.feedback.length > 0) {
-        product.feedback.forEach((feedback) => {
+        // Filter out hidden reviews from customer view
+        const visibleFeedbacks = product.feedback.filter(
+          (feedback) => !feedback.hidden
+        );
+
+        visibleFeedbacks.forEach((feedback) => {
           console.log("Processing feedback:", {
             userName: feedback.user, // Changed from userName to user
             feedback: feedback.comment, // Changed from feedback to comment
@@ -5412,6 +5417,76 @@ app.delete("/api/reviews/:reviewId", async (req, res) => {
   }
 });
 
+// Toggle review visibility (hide/show) for MSME
+app.put("/api/reviews/:reviewId/visibility", async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+    const { msmeId, hidden } = req.body;
+
+    // Validate MSME ID
+    if (!msmeId) {
+      return res.status(400).json({
+        success: false,
+        error: "MSME ID is required",
+      });
+    }
+
+    // Find the product that contains this review
+    const product = await Product.findOne({
+      "feedback._id": reviewId,
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        error: "Review not found",
+      });
+    }
+
+    // Verify that the MSME owns this product
+    if (product.msmeId.toString() !== msmeId) {
+      return res.status(403).json({
+        success: false,
+        error: "You can only manage reviews for your own products",
+      });
+    }
+
+    // Find the specific review
+    const review = product.feedback.id(reviewId);
+    if (!review) {
+      return res.status(404).json({
+        success: false,
+        error: "Review not found",
+      });
+    }
+
+    // Toggle or set hidden status
+    review.hidden = hidden !== undefined ? hidden : !review.hidden;
+
+    // Save the product
+    await product.save();
+
+    console.log(
+      `Review ${reviewId} ${
+        review.hidden ? "hidden" : "shown"
+      } by MSME ${msmeId}`
+    );
+
+    res.json({
+      success: true,
+      message: `Review ${review.hidden ? "hidden" : "shown"} successfully`,
+      reviewId: reviewId,
+      hidden: review.hidden,
+    });
+  } catch (error) {
+    console.error("Error toggling review visibility:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error toggling review visibility",
+    });
+  }
+});
+
 // Get store reviews for MSME (all reviews for products belonging to the store)
 app.get("/api/stores/:storeId/reviews", async (req, res) => {
   try {
@@ -5443,7 +5518,12 @@ app.get("/api/stores/:storeId/reviews", async (req, res) => {
 
     for (const product of storeProducts) {
       if (product.feedback && product.feedback.length > 0) {
-        for (const feedback of product.feedback) {
+        // Filter out hidden reviews from customer view
+        const visibleFeedbacks = product.feedback.filter(
+          (feedback) => !feedback.hidden
+        );
+
+        for (const feedback of visibleFeedbacks) {
           // Get customer details if userId exists
           let customer = null;
           if (feedback.userId) {

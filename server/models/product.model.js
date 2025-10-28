@@ -108,6 +108,7 @@ const productSchema = new mongoose.Schema(
           },
           required: false,
         }, // Store selected size for this review
+        hidden: { type: Boolean, default: false }, // Allow MSME to hide specific reviews
         createdAt: { type: Date, default: Date.now },
       },
     ],

@@ -282,9 +282,9 @@ const ProductDetails = () => {
         {/* Customer Reviews Section */}
         <div className="product-details-reviews-section">
           <h3>Customer Reviews</h3>
-          {(product.feedback && Array.isArray(product.feedback) && product.feedback.length > 0) ? (
+          {(product.feedback && Array.isArray(product.feedback) && product.feedback.filter(fb => !fb.hidden).length > 0) ? (
             <div className="product-details-reviews-list">
-              {product.feedback.map((fb, idx) => (
+              {product.feedback.filter(fb => !fb.hidden).map((fb, idx) => (
                 <div key={idx} className="product-details-feedback-item">
                   <div className="product-details-feedback-header">
                     <div className="product-details-feedback-avatar">

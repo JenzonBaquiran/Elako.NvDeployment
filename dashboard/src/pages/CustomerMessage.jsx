@@ -705,11 +705,6 @@ const CustomerMessage = () => {
                   • Connecting...
                 </span>
               )}
-              {isConnected && (
-                <span className="customer-messages__connection-status customer-messages__connection-status--connected">
-                  • Online
-                </span>
-              )}
             </h2>
             <div className="customer-messages__search-box">
               <SearchIcon className="customer-messages__search-icon" />

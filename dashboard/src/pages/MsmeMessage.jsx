@@ -654,11 +654,6 @@ const MsmeMessage = () => {
                     • Connecting...
                   </span>
                 )}
-                {isConnected && (
-                  <span className="msme-messages__connection-status msme-messages__connection-status--connected">
-                    • Online
-                  </span>
-                )}
               </h2>
               <div className="msme-messages__search-box">
                 <SearchIcon className="msme-messages__search-icon" />

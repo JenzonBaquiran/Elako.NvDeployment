@@ -586,6 +586,8 @@ body {
   text-align: center;
   flex: 1;
   width: 100%;
+  justify-content: space-between;
+  min-height: 200px; /* Set minimum height for consistent layout */
 }
 
 .hot-pick-info h3 {
@@ -594,6 +596,7 @@ body {
   color: var(--foreground);
   line-height: 1.4;
   font-weight: 600;
+  flex-shrink: 0; /* Prevent title from shrinking */
 }
 
 .hot-pick-info p {
@@ -602,6 +605,11 @@ body {
   font-size: 0.9rem;
   line-height: 1.4;
   text-align: center;
+  flex: 1; /* Allow description to take available space */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Limit to 3 lines */
+  -webkit-box-orient: vertical;
 }
 
 .hot-pick-rating {
@@ -612,6 +620,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
+  flex-shrink: 0; /* Keep rating at fixed position */
 }
 
 .hot-pick-price {

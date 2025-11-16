@@ -187,9 +187,6 @@ function Home() {
                           {starIcon}
                           <span>{product.rating.toFixed(1)} ({product.totalReviews})</span>
                         </div>
-                        <div className="hot-pick-price">
-                          {formatPrice(product.price)}
-                        </div>
                       </div>
                       <button 
                         className="hero-button hero-button-primary hot-pick-button" 

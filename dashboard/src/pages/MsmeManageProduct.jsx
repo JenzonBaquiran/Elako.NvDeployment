@@ -43,7 +43,7 @@ const MsmeManageProduct = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [imagePreview, setImagePreview] = useState([]);
   const [existingImages, setExistingImages] = useState([]); // Track existing images from server
-  const [currentVariant, setCurrentVariant] = useState('');
+  const [currentVariant, setCurrentVariant] = useState({ name: '', price: '' });
   const [currentSize, setCurrentSize] = useState({ size: '', unit: 'ml' });
   const [showVariantForm, setShowVariantForm] = useState(false);
   const [showSizeForm, setShowSizeForm] = useState(false);
@@ -325,7 +325,7 @@ const MsmeManageProduct = () => {
     setSelectedImages([]);
     setImagePreview([]);
     setExistingImages([]);
-    setCurrentVariant('');
+    setCurrentVariant({ name: '', price: '' });
     setCurrentSize({ size: '', unit: 'ml' });
     setShowVariantForm(false);
     setShowSizeForm(false);
@@ -392,11 +392,12 @@ const MsmeManageProduct = () => {
   };
 
   const addVariant = () => {
-    if (!currentVariant.trim()) return;
+    if (!currentVariant.name.trim() || !currentVariant.price.trim()) return;
     
     const newVariant = {
       id: Date.now(),
-      name: currentVariant.trim(),
+      name: currentVariant.name.trim(),
+      price: parseFloat(currentVariant.price),
       imageIndex: selectedImages.length > 0 ? 0 : -1
     };
     
@@ -405,7 +406,7 @@ const MsmeManageProduct = () => {
       variants: [...(prev.variants || []), newVariant]
     }));
     
-    setCurrentVariant('');
+    setCurrentVariant({ name: '', price: '' });
     setShowVariantForm(false);
   };
 
@@ -1051,7 +1052,10 @@ const MsmeManageProduct = () => {
                     <div className="variants-container">
                       {(formData.variants || []).map((variant) => (
                         <div key={variant.id} className="variant-item">
-                          <span>{variant.name}</span>
+                          <div className="variant-info">
+                            <span className="variant-name">{variant.name}</span>
+                            <span className="variant-price">₱{variant.price}</span>
+                          </div>
                           <button
                             type="button"
                             onClick={() => removeVariant(variant.id)}
@@ -1066,10 +1070,19 @@ const MsmeManageProduct = () => {
                         <div className="add-variant-form">
                           <input
                             type="text"
-                            value={currentVariant}
-                            onChange={(e) => setCurrentVariant(e.target.value)}
+                            value={currentVariant.name}
+                            onChange={(e) => setCurrentVariant(prev => ({ ...prev, name: e.target.value }))}
                             placeholder="e.g., Spicy, Cheese, Ube, Pastillas"
-                            className="variant-input"
+                            className="variant-input variant-name-input"
+                          />
+                          <input
+                            type="number"
+                            value={currentVariant.price}
+                            onChange={(e) => setCurrentVariant(prev => ({ ...prev, price: e.target.value }))}
+                            placeholder="Price (₱)"
+                            min="0"
+                            step="0.01"
+                            className="variant-input variant-price-input"
                           />
                           <button type="button" onClick={addVariant} className="add-btn">Add</button>
                           <button type="button" onClick={() => setShowVariantForm(false)} className="cancel-btn">Cancel</button>

@@ -1120,6 +1120,19 @@
   transition: all 0.2s ease;
   text-transform: capitalize;
   align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.product-details-variant-btn .variant-name {
+  font-weight: 500;
+}
+
+.product-details-variant-btn .variant-price {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.8;
 }
 
 .product-details-variant-btn:hover,
@@ -1146,6 +1159,14 @@
   background: white;
   border-radius: 8px;
   border: 1px solid #e9ecef;
+}
+
+.product-details-price-note {
+  font-size: 12px;
+  color: #6b7280;
+  display: block;
+  margin-top: 4px;
+  font-weight: normal;
 }
 
 @media (max-width: 480px) {

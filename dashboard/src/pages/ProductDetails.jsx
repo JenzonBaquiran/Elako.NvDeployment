@@ -182,7 +182,14 @@ const ProductDetails = () => {
             
             <p className="product-details-description">{product.description}</p>
             
-            <div className="product-details-price">₱{product.price}</div>
+            <div className="product-details-price">
+              ₱{selectedVariant?.price || product.price}
+              {selectedVariant && (
+                <span className="product-details-price-note">
+                  {selectedVariant.name} variant
+                </span>
+              )}
+            </div>
             
             <div className="product-details-meta">
               <span className="product-details-availability-status">
@@ -202,7 +209,8 @@ const ProductDetails = () => {
                       className={`product-details-variant-btn ${selectedVariant?.id === variant.id ? 'selected' : ''}`}
                       onClick={() => handleVariantSelection(variant)}
                     >
-                      {variant.name}
+                      <span className="variant-name">{variant.name}</span>
+                      <span className="variant-price">₱{variant.price}</span>
                     </button>
                   ))}
                 </div>

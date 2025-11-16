@@ -47,6 +47,7 @@ const productSchema = new mongoose.Schema(
       {
         id: { type: String, required: true },
         name: { type: String, required: true },
+        price: { type: Number, required: true, min: 0 }, // Individual price for this variant
         imageIndex: { type: Number, default: 0 }, // Which image to show for this variant
       },
     ],

@@ -1330,6 +1330,90 @@
   font-weight: 600;
 }
 
+.variant-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.edit-btn {
+  background: #f59e0b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-btn:hover {
+  background: #d97706;
+}
+
+.remove-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-btn:hover {
+  background: #dc2626;
+}
+
+.save-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.save-btn:hover {
+  background: #059669;
+}
+
+.edit-variant-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.edit-variant-form .variant-input {
+  padding: 6px 8px !important;
+  font-size: 12px !important;
+}
+
+.edit-variant-form .variant-name-input {
+  flex: 2;
+  min-width: 100px;
+}
+
+.edit-variant-form .variant-price-input {
+  flex: 1;
+  min-width: 80px;
+}
+
 .add-variant-form {
   display: flex;
   gap: 8px;
@@ -1371,7 +1455,8 @@
     height: 80px;
   }
   
-  .add-variant-form {
+  .add-variant-form,
+  .edit-variant-form {
     flex-direction: column;
     gap: 8px;
     align-items: stretch;
@@ -1379,6 +1464,16 @@
   
   .variant-name-input,
   .variant-price-input {
+    min-width: unset;
+  }
+  
+  .variant-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .edit-variant-form .variant-name-input,
+  .edit-variant-form .variant-price-input {
     min-width: unset;
   }
 }

@@ -210,7 +210,6 @@ const ProductDetails = () => {
                       onClick={() => handleVariantSelection(variant)}
                     >
                       <span className="variant-name">{variant.name}</span>
-                      <span className="variant-price">₱{variant.price}</span>
                     </button>
                   ))}
                 </div>

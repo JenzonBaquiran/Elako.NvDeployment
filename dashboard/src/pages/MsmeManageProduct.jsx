@@ -47,6 +47,8 @@ const MsmeManageProduct = () => {
   const [currentSize, setCurrentSize] = useState({ size: '', unit: 'ml' });
   const [showVariantForm, setShowVariantForm] = useState(false);
   const [showSizeForm, setShowSizeForm] = useState(false);
+  const [editingVariantId, setEditingVariantId] = useState(null);
+  const [editingVariantData, setEditingVariantData] = useState({ name: '', price: '' });
 
   // Fetch products on component mount
   useEffect(() => {
@@ -329,6 +331,8 @@ const MsmeManageProduct = () => {
     setCurrentSize({ size: '', unit: 'ml' });
     setShowVariantForm(false);
     setShowSizeForm(false);
+    setEditingVariantId(null);
+    setEditingVariantData({ name: '', price: '' });
     
     // Reset file input
     const fileInput = document.querySelector('input[type="file"]');
@@ -415,6 +419,36 @@ const MsmeManageProduct = () => {
       ...prev,
       variants: (prev.variants || []).filter(v => v.id !== variantId)
     }));
+  };
+
+  const startEditVariant = (variant) => {
+    setEditingVariantId(variant.id);
+    setEditingVariantData({ name: variant.name, price: variant.price.toString() });
+  };
+
+  const cancelEditVariant = () => {
+    setEditingVariantId(null);
+    setEditingVariantData({ name: '', price: '' });
+  };
+
+  const saveEditVariant = () => {
+    if (!editingVariantData.name.trim() || !editingVariantData.price.trim()) return;
+    
+    setFormData(prev => ({
+      ...prev,
+      variants: (prev.variants || []).map(variant => 
+        variant.id === editingVariantId 
+          ? {
+              ...variant,
+              name: editingVariantData.name.trim(),
+              price: parseFloat(editingVariantData.price)
+            }
+          : variant
+      )
+    }));
+    
+    setEditingVariantId(null);
+    setEditingVariantData({ name: '', price: '' });
   };
 
   const addSizeOption = () => {
@@ -565,10 +599,12 @@ const MsmeManageProduct = () => {
     }
     
     // Clear any form-related states
-    setCurrentVariant('');
+    setCurrentVariant({ name: '', price: '' });
     setCurrentSize({ size: '', unit: 'ml' });
     setShowVariantForm(false);
     setShowSizeForm(false);
+    setEditingVariantId(null);
+    setEditingVariantData({ name: '', price: '' });
     
     // Show the edit modal
     console.log('Setting showEditModal to true');
@@ -1052,17 +1088,53 @@ const MsmeManageProduct = () => {
                     <div className="variants-container">
                       {(formData.variants || []).map((variant) => (
                         <div key={variant.id} className="variant-item">
-                          <div className="variant-info">
-                            <span className="variant-name">{variant.name}</span>
-                            <span className="variant-price">₱{variant.price}</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => removeVariant(variant.id)}
-                            className="remove-btn"
-                          >
-                            ×
-                          </button>
+                          {editingVariantId === variant.id ? (
+                            <div className="edit-variant-form">
+                              <input
+                                type="text"
+                                value={editingVariantData.name}
+                                onChange={(e) => setEditingVariantData(prev => ({ ...prev, name: e.target.value }))}
+                                placeholder="Variant name"
+                                className="variant-input variant-name-input"
+                              />
+                              <input
+                                type="number"
+                                value={editingVariantData.price}
+                                onChange={(e) => setEditingVariantData(prev => ({ ...prev, price: e.target.value }))}
+                                placeholder="Price (₱)"
+                                min="0"
+                                step="0.01"
+                                className="variant-input variant-price-input"
+                              />
+                              <button type="button" onClick={saveEditVariant} className="save-btn">Save</button>
+                              <button type="button" onClick={cancelEditVariant} className="cancel-btn">Cancel</button>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="variant-info">
+                                <span className="variant-name">{variant.name}</span>
+                                <span className="variant-price">₱{variant.price}</span>
+                              </div>
+                              <div className="variant-actions">
+                                <button
+                                  type="button"
+                                  onClick={() => startEditVariant(variant)}
+                                  className="edit-btn"
+                                  title="Edit variant"
+                                >
+                                  ✎
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => removeVariant(variant.id)}
+                                  className="remove-btn"
+                                  title="Remove variant"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            </>
+                          )}
                         </div>
                       ))}
                       

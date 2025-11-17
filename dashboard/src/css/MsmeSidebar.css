@@ -171,7 +171,7 @@
 
 .msme-sidebar.msme-sidebar--desktop.msme-sidebar--collapsed .msme-sidebar__nav-link .msme-sidebar__icon {
   margin-right: 0;
-  font-size: 24px;
+   font-size: 22px;
 }
 
 .msme-sidebar__nav-link .msme-sidebar__text {
@@ -188,8 +188,12 @@
 
 .msme-sidebar.msme-sidebar--desktop.msme-sidebar--collapsed .msme-sidebar__nav-link {
   justify-content: center;
-  padding: 12px;
+  padding: 15px 0;
+  margin: 0 10px;
   position: relative;
+  height: 50px;
+  display: flex;
+  align-items: center;
 }
 
 /* Tooltip for collapsed sidebar */

@@ -173,7 +173,7 @@
 
 .customer-sidebar.customer-sidebar--desktop.customer-sidebar--collapsed .customer-sidebar__nav-link .customer-sidebar__icon {
   margin-right: 0;
-  font-size: 24px;
+  font-size: 22px;
 }
 
 .customer-sidebar__nav-link .customer-sidebar__text {
@@ -190,8 +190,12 @@
 
 .customer-sidebar.customer-sidebar--desktop.customer-sidebar--collapsed .customer-sidebar__nav-link {
   justify-content: center;
-  padding: 12px;
+  padding: 15px 0;
+  margin: 0 10px;
   position: relative;
+  height: 50px;
+  display: flex;
+  align-items: center;
 }
 
 /* Tooltip for collapsed sidebar */

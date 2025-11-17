@@ -3,6 +3,7 @@ import { TextField, Button, IconButton, InputAdornment, MenuItem, Alert, Circula
 import { Visibility, VisibilityOff, PersonOutline, Apartment } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import TermsAgreementModal from "../components/TermsAgreementModal";
+import PasswordStrengthIndicator from "../components/PasswordStrengthIndicator";
 import "../css/Signup.css";
 import logo from "../logos/Icon on dark with text.png";
 
@@ -479,6 +480,7 @@ function Signup() {
                     ),
                   }}
                 />
+                <PasswordStrengthIndicator password={customerData.password} />
                 <TextField
                   variant="outlined"
                   placeholder="Confirm Password"
@@ -706,6 +708,7 @@ function Signup() {
                     ),
                   }}
                 />
+                <PasswordStrengthIndicator password={msmeData.password} />
                 <TextField
                   variant="outlined"
                   placeholder="Confirm Password"

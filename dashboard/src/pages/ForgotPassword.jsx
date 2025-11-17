@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
+import PasswordStrengthIndicator from "../components/PasswordStrengthIndicator";
 import "../css/Login.css";
 import logo from "../logos/Icon on bright with text.png";
 
@@ -316,6 +317,7 @@ function ForgotPassword() {
         disabled={loading}
         style={{ marginBottom: "20px" }}
       />
+      <PasswordStrengthIndicator password={formData.newPassword} />
 
       <TextField
         variant="outlined"

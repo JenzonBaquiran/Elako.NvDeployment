@@ -39,6 +39,74 @@ export const validation = {
     return null;
   },
 
+  // Password strength checker
+  passwordStrength: (password) => {
+    if (!password) return { strength: "none", score: 0, feedback: [] };
+
+    let score = 0;
+    const feedback = [];
+    const checks = {
+      length: password.length >= 8,
+      lowercase: /[a-z]/.test(password),
+      uppercase: /[A-Z]/.test(password),
+      numbers: /\d/.test(password),
+      symbols: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+      noCommonPatterns:
+        !/^(password|123456|qwerty|abc123|admin|user|guest)$/i.test(password),
+    };
+
+    // Length check (most important)
+    if (checks.length) {
+      score += 2;
+    } else {
+      feedback.push("Use at least 8 characters");
+    }
+
+    // Character variety checks
+    if (checks.lowercase) score += 1;
+    else feedback.push("Add lowercase letters");
+
+    if (checks.uppercase) score += 1;
+    else feedback.push("Add uppercase letters");
+
+    if (checks.numbers) score += 1;
+    else feedback.push("Add numbers");
+
+    if (checks.symbols) score += 2;
+    else feedback.push("Add symbols (!@#$%^&*)");
+
+    if (checks.noCommonPatterns) score += 1;
+    else feedback.push("Avoid common passwords");
+
+    // Bonus for longer passwords
+    if (password.length >= 12) score += 1;
+    if (password.length >= 16) score += 1;
+
+    // Determine strength level
+    let strength;
+    let color;
+    if (score < 3) {
+      strength = "weak";
+      color = "#f44336"; // Red
+    } else if (score < 6) {
+      strength = "medium";
+      color = "#ff9800"; // Orange
+    } else {
+      strength = "strong";
+      color = "#4caf50"; // Green
+    }
+
+    return {
+      strength,
+      score,
+      maxScore: 9,
+      percentage: Math.round((score / 9) * 100),
+      color,
+      feedback,
+      checks,
+    };
+  },
+
   // Password confirmation validation
   passwordConfirm: (value, password) => {
     if (!value) return "Please confirm your password";
@@ -231,6 +299,7 @@ export const validateForm = (data, rules, options = {}) => {
     requiredFields = [],
     customMessages = {},
     context = "form",
+    checkPasswordStrength = false,
   } = options;
 
   const errors = {};
@@ -259,6 +328,12 @@ export const validateForm = (data, rules, options = {}) => {
     }
   });
 
+  // Check password strength if requested
+  let passwordStrengthResult = null;
+  if (checkPasswordStrength && data.password) {
+    passwordStrengthResult = validation.passwordStrength(data.password);
+  }
+
   // Check overall completion if requested
   let completionResult = null;
   if (checkCompletion && requiredFields.length > 0) {
@@ -279,6 +354,7 @@ export const validateForm = (data, rules, options = {}) => {
     isValid: !hasErrors,
     hasErrors,
     completionResult,
+    passwordStrengthResult,
     summary: hasErrors
       ? `Please fix the following issues before ${context} submission: ${Object.values(
           errors

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import MsmeSidebar from './MsmeSidebar';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
+import { validateForm } from '../utils/validation';
+import ValidationMessage from '../components/ValidationMessage';
 import '../css/MsmeManageProduct.css';
 import shakshoukaImg from '../assets/shakshouka.jpg';
 
@@ -22,6 +24,10 @@ const MsmeManageProduct = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [openDropdown, setOpenDropdown] = useState(null);
+  
+  // Validation state
+  const [validationErrors, setValidationErrors] = useState({});
+  
   const [formData, setFormData] = useState({
     productName: '',
     price: '',
@@ -280,6 +286,14 @@ const MsmeManageProduct = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    
+    // Clear validation error for this field when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
+    }
   };
 
   const handleFileChange = (e) => {
@@ -360,6 +374,14 @@ const MsmeManageProduct = () => {
 
     // Update formData
     setFormData(prev => ({ ...prev, pictures: newImages }));
+    
+    // Clear validation error for images when user selects files
+    if (validationErrors.images) {
+      setValidationErrors(prev => ({
+        ...prev,
+        images: undefined
+      }));
+    }
   };
 
   const removeImage = (index) => {
@@ -483,6 +505,51 @@ const MsmeManageProduct = () => {
       showError("User information not found", "Error");
       return;
     }
+    
+    // Validate form with enhanced messaging
+    const productData = {
+      productName: formData.productName,
+      price: formData.price,
+      description: formData.description,
+      category: formData.category,
+      images: selectedImages
+    };
+    
+    const errors = validateForm(productData, 'product', { showDetailedMessages: true });
+    setValidationErrors(errors);
+    
+    if (Object.keys(errors).length > 0) {
+      const fieldErrors = Object.keys(errors).filter(key => key !== 'images');
+      const imageErrors = errors.images ? 1 : 0;
+      
+      let errorMessage = "Please complete all required product information to proceed. ";
+      
+      if (fieldErrors.length > 0) {
+        errorMessage += `You have ${fieldErrors.length} product field${fieldErrors.length > 1 ? 's' : ''} that need${fieldErrors.length > 1 ? '' : 's'} attention: `;
+        const fieldNames = fieldErrors.map(field => {
+          switch(field) {
+            case 'productName': return 'Product Name';
+            case 'price': return 'Price';
+            case 'description': return 'Description';
+            case 'category': return 'Category';
+            default: return field;
+          }
+        }).join(', ');
+        errorMessage += `${fieldNames}. `;
+      }
+      
+      if (imageErrors) {
+        errorMessage += "Additionally, you must upload at least one product image to showcase your product. ";
+      }
+      
+      errorMessage += "All product information and images are required to create a complete and attractive product listing that customers can discover and purchase.";
+      
+      showError(errorMessage, "Complete Required Information");
+      return;
+    }
+    
+    // Clear validation errors if form is valid
+    setValidationErrors({});
     
     // Create FormData for file upload
     const submitData = new FormData();
@@ -908,7 +975,9 @@ const MsmeManageProduct = () => {
                       required
                       maxLength="100"
                       placeholder="Enter product name"
+                      className={validationErrors.productName ? 'error' : ''}
                     />
+                    <ValidationMessage error={validationErrors.productName} />
                   </div>
                   
                   <div className="form-group">
@@ -923,7 +992,9 @@ const MsmeManageProduct = () => {
                       min="0"
                       step="0.01"
                       placeholder="0.00"
+                      className={validationErrors.price ? 'error' : ''}
                     />
+                    <ValidationMessage error={validationErrors.price} />
                   </div>
                 </div>
 
@@ -938,7 +1009,9 @@ const MsmeManageProduct = () => {
                     maxLength="1000"
                     rows="4"
                     placeholder="Describe your product..."
+                    className={validationErrors.description ? 'error' : ''}
                   />
+                  <ValidationMessage error={validationErrors.description} />
                   <small className="char-counter">
                     {formData.description.length}/1000 characters
                   </small>
@@ -952,6 +1025,7 @@ const MsmeManageProduct = () => {
                       name="category"
                       value={formData.category}
                       onChange={handleInputChange}
+                      className={validationErrors.category ? 'error' : ''}
                     >
                       <option value="">Select category</option>
                       {getCategories().map((category) => (
@@ -960,6 +1034,7 @@ const MsmeManageProduct = () => {
                         </option>
                       ))}
                     </select>
+                    <ValidationMessage error={validationErrors.category} />
                   </div>
                   
                   {/* Artist Name Field - Only show for Paintings & Visual Arts category */}
@@ -982,7 +1057,7 @@ const MsmeManageProduct = () => {
 
                 {/* Multiple Images Upload */}
                 <div className="form-group">
-                  <label htmlFor="pictures">Product Images (1-10 images)</label>
+                  <label htmlFor="pictures">Product Images (1-10 images) *</label>
                   <input
                     type="file"
                     id="pictures"
@@ -990,8 +1065,9 @@ const MsmeManageProduct = () => {
                     onChange={handleMultipleImageSelect}
                     accept="image/*"
                     multiple
-                    className="file-input"
+                    className={`file-input ${validationErrors.images ? 'error' : ''}`}
                   />
+                  <ValidationMessage error={validationErrors.images} />
                   <small>Recommended: JPG, PNG, max 5MB each. Upload 1-10 images.</small>
                   
                   {/* Image Preview */}

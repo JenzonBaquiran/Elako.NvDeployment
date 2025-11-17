@@ -17,6 +17,11 @@ function Signup() {
   const [pendingSubmit, setPendingSubmit] = useState(null);
   const navigate = useNavigate();
 
+  // Validation states
+  const [customerValidation, setCustomerValidation] = useState({});
+  const [msmeValidation, setMsmeValidation] = useState({});
+  const [touched, setTouched] = useState({});
+
   // Customer form state
   const [customerData, setCustomerData] = useState({
     firstname: "",
@@ -51,14 +56,97 @@ function Signup() {
 
   const handleCustomerChange = (field, value) => {
     setCustomerData(prev => ({ ...prev, [field]: value }));
+    // Clear validation error when user starts typing
+    if (customerValidation[field]) {
+      setCustomerValidation(prev => ({ ...prev, [field]: null }));
+    }
   };
 
   const handleMsmeChange = (field, value) => {
     setMsmeData(prev => ({ ...prev, [field]: value }));
+    // Clear validation error when user starts typing
+    if (msmeValidation[field]) {
+      setMsmeValidation(prev => ({ ...prev, [field]: null }));
+    }
   };
 
   const handleFileChange = (certificateType, file) => {
     setCertificateFiles(prev => ({ ...prev, [certificateType]: file }));
+  };
+
+  // Enhanced validation functions with detailed messaging
+  const validateCustomerForm = () => {
+    const errors = {};
+    
+    // Check all required fields with detailed messages
+    if (!customerData.firstname?.trim()) 
+      errors.firstname = "First name is required. Please enter your first name to proceed with registration.";
+    if (!customerData.lastname?.trim()) 
+      errors.lastname = "Last name is required. Please enter your last name to complete your profile.";
+    if (!customerData.email?.trim()) {
+      errors.email = "Email address is required for account verification and communication.";
+    } else if (!/\S+@\S+\.\S+/.test(customerData.email)) {
+      errors.email = "Please enter a valid email address format (e.g., user@example.com).";
+    }
+    if (!customerData.contactNumber?.trim()) 
+      errors.contactNumber = "Contact number is required for order updates and customer service communication.";
+    if (!customerData.address?.trim()) 
+      errors.address = "Address is required for delivery and verification purposes.";
+    if (!customerData.username?.trim()) 
+      errors.username = "Username is required. Please create a unique username for your account.";
+    if (!customerData.password?.trim()) {
+      errors.password = "Password is required for account security. Please create a strong password.";
+    } else if (customerData.password.length < 6) {
+      errors.password = "Password must be at least 6 characters long for security purposes.";
+    }
+    if (!customerData.confirmPassword?.trim()) {
+      errors.confirmPassword = "Please confirm your password by typing it again.";
+    } else if (customerData.password !== customerData.confirmPassword) {
+      errors.confirmPassword = "Password confirmation does not match. Please ensure both passwords are identical.";
+    }
+    
+    return errors;
+  };
+
+  const validateMsmeForm = () => {
+    const errors = {};
+    
+    // Business information validation
+    if (!msmeData.clientProfilingNumber?.trim()) 
+      errors.clientProfilingNumber = "Client profiling number is required for business verification. Please enter your DTI/SEC registration number.";
+    if (!msmeData.category) 
+      errors.category = "Business category must be selected. Please choose whether you're in Food or Artisan category.";
+    if (!msmeData.businessName?.trim()) 
+      errors.businessName = "Business name is required. Please enter your official registered business name.";
+    if (!msmeData.email?.trim()) {
+      errors.email = "Business email address is required for official communication and order notifications.";
+    } else if (!/\S+@\S+\.\S+/.test(msmeData.email)) {
+      errors.email = "Please enter a valid business email address format (e.g., business@company.com).";
+    }
+    if (!msmeData.username?.trim()) 
+      errors.username = "Username is required. Please create a unique username for your business account.";
+    if (!msmeData.tinNumber?.trim()) 
+      errors.tinNumber = "TIN number is required for tax compliance and business verification.";
+    if (!msmeData.password?.trim()) {
+      errors.password = "Password is required for account security. Please create a strong password.";
+    } else if (msmeData.password.length < 6) {
+      errors.password = "Password must be at least 6 characters long for security purposes.";
+    }
+    if (!msmeData.confirmPassword?.trim()) {
+      errors.confirmPassword = "Please confirm your password by typing it again.";
+    } else if (msmeData.password !== msmeData.confirmPassword) {
+      errors.confirmPassword = "Password confirmation does not match. Please ensure both passwords are identical.";
+    }
+    
+    // Certificate validation with detailed messages
+    if (!certificateFiles.mayorsPermit) 
+      errors.mayorsPermit = "Mayor's Permit is required for business operation. Please upload your valid Mayor's Permit certificate.";
+    if (!certificateFiles.bir) 
+      errors.bir = "BIR Certificate is required for tax compliance. Please upload your Bureau of Internal Revenue certificate.";
+    if (!certificateFiles.fda) 
+      errors.fda = "FDA Certificate is required for food/health products. Please upload your Food and Drug Administration certificate.";
+    
+    return errors;
   };
 
   const clearCustomerForm = () => {
@@ -112,8 +200,17 @@ function Signup() {
     setError("");
     setSuccess("");
 
-    if (customerData.password !== customerData.confirmPassword) {
-      setError("Passwords do not match");
+    // Validate form with enhanced messaging
+    const validationErrors = validateCustomerForm();
+    setCustomerValidation(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) {
+      const missingFields = Object.keys(validationErrors).length;
+      setError(
+        `Please complete all required fields to proceed with registration. ` +
+        `You have ${missingFields} field${missingFields > 1 ? 's' : ''} that need${missingFields > 1 ? '' : 's'} attention. ` +
+        `All information is required to create your account and ensure proper service delivery.`
+      );
       return;
     }
 
@@ -157,14 +254,28 @@ function Signup() {
     setError("");
     setSuccess("");
 
-    if (msmeData.password !== msmeData.confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
+    // Validate form with enhanced messaging
+    const validationErrors = validateMsmeForm();
+    setMsmeValidation(validationErrors);
 
-    // Validate required certificate files
-    if (!certificateFiles.mayorsPermit || !certificateFiles.bir || !certificateFiles.fda) {
-      setError("Please upload all required certificates (Mayor's Permit, BIR, and FDA)");
+    if (Object.keys(validationErrors).length > 0) {
+      const fieldErrors = Object.keys(validationErrors).filter(key => !['mayorsPermit', 'bir', 'fda'].includes(key));
+      const certErrors = Object.keys(validationErrors).filter(key => ['mayorsPermit', 'bir', 'fda'].includes(key));
+      
+      let errorMessage = "Please complete all required information to proceed with business registration. ";
+      
+      if (fieldErrors.length > 0) {
+        errorMessage += `You have ${fieldErrors.length} business information field${fieldErrors.length > 1 ? 's' : ''} that need${fieldErrors.length > 1 ? '' : 's'} attention. `;
+      }
+      
+      if (certErrors.length > 0) {
+        errorMessage += `Additionally, ${certErrors.length} required certificate${certErrors.length > 1 ? 's are' : ' is'} missing. `;
+        errorMessage += "All business certificates are mandatory for verification and compliance with local regulations. ";
+      }
+      
+      errorMessage += "Please complete all fields and upload all required certificates to enable your business registration.";
+      
+      setError(errorMessage);
       return;
     }
 
@@ -269,6 +380,8 @@ function Signup() {
                   className="signup-input"
                   required
                   disabled={loading}
+                  error={!!customerValidation.firstname}
+                  helperText={customerValidation.firstname}
                 />
                 <TextField
                   variant="outlined"
@@ -288,6 +401,8 @@ function Signup() {
                   className="signup-input"
                   required
                   disabled={loading}
+                  error={!!customerValidation.lastname}
+                  helperText={customerValidation.lastname}
                 />
                 <TextField
                   variant="outlined"
@@ -299,6 +414,8 @@ function Signup() {
                   className="signup-input"
                   required
                   disabled={loading}
+                  error={!!customerValidation.email}
+                  helperText={customerValidation.email}
                 />
                 <TextField
                   variant="outlined"
@@ -309,6 +426,8 @@ function Signup() {
                   className="signup-input"
                   required
                   disabled={loading}
+                  error={!!customerValidation.contactNumber}
+                  helperText={customerValidation.contactNumber}
                 />
                 <TextField
                   variant="outlined"
@@ -319,6 +438,8 @@ function Signup() {
                   className="signup-input"
                   required
                   disabled={loading}
+                  error={!!customerValidation.address}
+                  helperText={customerValidation.address}
                 />
                 <TextField
                   variant="outlined"
@@ -329,6 +450,8 @@ function Signup() {
                   className="signup-input"
                   required
                   disabled={loading}
+                  error={!!customerValidation.username}
+                  helperText={customerValidation.username}
                 />
                 <TextField
                   variant="outlined"
@@ -340,6 +463,8 @@ function Signup() {
                   className="signup-input"
                   required
                   disabled={loading}
+                  error={!!customerValidation.password}
+                  helperText={customerValidation.password}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -364,6 +489,8 @@ function Signup() {
                   className="signup-input"
                   required
                   disabled={loading}
+                  error={!!customerValidation.confirmPassword}
+                  helperText={customerValidation.confirmPassword}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -419,6 +546,8 @@ function Signup() {
                   className="signup-input"
                   required
                   disabled={loading}
+                  error={!!msmeValidation.clientProfilingNumber}
+                  helperText={msmeValidation.clientProfilingNumber}
                 />
                 <TextField
                   select
@@ -430,6 +559,8 @@ function Signup() {
                   className="signup-input"
                   required
                   disabled={loading}
+                  error={!!msmeValidation.category}
+                  helperText={msmeValidation.category}
                 >
                   <MenuItem value="">Select Category</MenuItem>
                   <MenuItem value="food">Food</MenuItem>
@@ -444,6 +575,8 @@ function Signup() {
                   className="signup-input"
                   required
                   disabled={loading}
+                  error={!!msmeValidation.businessName}
+                  helperText={msmeValidation.businessName}
                 />
                 <TextField
                   variant="outlined"
@@ -455,6 +588,8 @@ function Signup() {
                   className="signup-input"
                   required
                   disabled={loading}
+                  error={!!msmeValidation.email}
+                  helperText={msmeValidation.email}
                 />
                 <TextField
                   variant="outlined"
@@ -465,6 +600,8 @@ function Signup() {
                   className="signup-input"
                   required
                   disabled={loading}
+                  error={!!msmeValidation.username}
+                  helperText={msmeValidation.username}
                 />
                 <TextField
                   variant="outlined"
@@ -475,6 +612,8 @@ function Signup() {
                   className="signup-input"
                   required
                   disabled={loading}
+                  error={!!msmeValidation.tinNumber}
+                  helperText={msmeValidation.tinNumber}
                 />
                 
                 {/* Certificate Upload Section */}
@@ -492,9 +631,12 @@ function Signup() {
                         disabled={loading}
                         required
                       />
-                      <span className="file-upload-custom">
+                      <span className={`file-upload-custom ${msmeValidation.mayorsPermit ? 'error' : ''}`}>
                         {certificateFiles.mayorsPermit ? certificateFiles.mayorsPermit.name : "Choose file"}
                       </span>
+                      {msmeValidation.mayorsPermit && (
+                        <div className="field-error">{msmeValidation.mayorsPermit}</div>
+                      )}
                     </label>
                   </div>
 
@@ -509,9 +651,12 @@ function Signup() {
                         disabled={loading}
                         required
                       />
-                      <span className="file-upload-custom">
+                      <span className={`file-upload-custom ${msmeValidation.bir ? 'error' : ''}`}>
                         {certificateFiles.bir ? certificateFiles.bir.name : "Choose file"}
                       </span>
+                      {msmeValidation.bir && (
+                        <div className="field-error">{msmeValidation.bir}</div>
+                      )}
                     </label>
                   </div>
 
@@ -526,9 +671,12 @@ function Signup() {
                         disabled={loading}
                         required
                       />
-                      <span className="file-upload-custom">
+                      <span className={`file-upload-custom ${msmeValidation.fda ? 'error' : ''}`}>
                         {certificateFiles.fda ? certificateFiles.fda.name : "Choose file"}
                       </span>
+                      {msmeValidation.fda && (
+                        <div className="field-error">{msmeValidation.fda}</div>
+                      )}
                     </label>
                   </div>
                 </div>
@@ -542,6 +690,8 @@ function Signup() {
                   className="signup-input"
                   required
                   disabled={loading}
+                  error={!!msmeValidation.password}
+                  helperText={msmeValidation.password}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -566,6 +716,8 @@ function Signup() {
                   className="signup-input"
                   required
                   disabled={loading}
+                  error={!!msmeValidation.confirmPassword}
+                  helperText={msmeValidation.confirmPassword}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">

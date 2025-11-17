@@ -32,13 +32,20 @@ class BadgeService {
       // Calculate product ratings average
       const products = await Product.find({ msmeId: storeId });
       if (products.length > 0) {
-        const totalRating = products.reduce(
-          (sum, product) => sum + (product.rating || 0),
-          0
-        );
-        const avgRating = totalRating / products.length;
+        let totalRating = 0;
+        let ratedProductsCount = 0;
+
+        products.forEach((product) => {
+          if (product.rating && product.rating > 0) {
+            totalRating += product.rating;
+            ratedProductsCount++;
+          }
+        });
+
+        const avgRating =
+          ratedProductsCount > 0 ? totalRating / ratedProductsCount : 0;
         badge.criteria.productRatings.current = avgRating;
-        badge.criteria.productRatings.met = avgRating >= 4.5;
+        badge.criteria.productRatings.met = avgRating >= 4.0; // Slightly lower threshold
       }
 
       // Calculate profile views for current week
@@ -50,18 +57,9 @@ class BadgeService {
         },
       });
       badge.criteria.profileViews.current = profileViews;
-      badge.criteria.profileViews.met =
-        profileViews >= badge.criteria.profileViews.required;
+      badge.criteria.profileViews.met = profileViews >= 25; // Updated threshold
 
-      // Calculate blog views for store's blog posts
-      const storeBlogPosts = await MSMEBlogPost.find({ msmeId: storeId });
-
-      // For now, use blog post count * 10 as a proxy for blog views
-      // In the future, implement proper blog view tracking
-      const blogViews = storeBlogPosts.length * 10;
-      badge.criteria.blogViews.current = blogViews;
-      badge.criteria.blogViews.met =
-        blogViews >= badge.criteria.blogViews.required;
+      // Blog engagement removed - not required for badges
 
       // Check if all criteria are met
       badge.checkCriteria();
@@ -89,20 +87,38 @@ class BadgeService {
       }
 
       // Calculate ratings given this week
-      // Assuming you have a Rating/Review model - adjust based on your actual model
       const ratingsGiven = await this.countCustomerRatings(
         customerId,
         badge.weekStart,
         badge.weekEnd
       );
       badge.criteria.ratingsGiven.current = ratingsGiven;
-      badge.criteria.ratingsGiven.met = ratingsGiven >= 5;
+      badge.criteria.ratingsGiven.met = ratingsGiven >= 3; // Updated threshold
 
-      // Note: Current PageView model doesn't track blog views by customer,
-      // so we'll set this to 0 for now or implement blog engagement tracking separately
-      const blogViews = 0;
-      badge.criteria.blogEngagement.current = blogViews;
-      badge.criteria.blogEngagement.met = blogViews >= 5;
+      // Calculate blog engagement (page views on blog posts)
+      const blogViews = await PageView.countDocuments({
+        customerId: customerId,
+        pageType: "blog", // Assuming you track blog page views
+        viewDate: {
+          $gte: badge.weekStart,
+          $lte: badge.weekEnd,
+        },
+      });
+
+      // If no blog-specific tracking, count any store page views as engagement
+      const totalPageViews = await PageView.countDocuments({
+        customerId: customerId,
+        viewDate: {
+          $gte: badge.weekStart,
+          $lte: badge.weekEnd,
+        },
+      });
+
+      // Use blog views if available, otherwise use a percentage of total page views
+      const engagementScore =
+        blogViews > 0 ? blogViews : Math.floor(totalPageViews * 0.3);
+      badge.criteria.blogEngagement.current = engagementScore;
+      badge.criteria.blogEngagement.met = engagementScore >= 3; // Updated threshold
 
       // Determine loyalty store (most interacted store)
       const loyaltyStore = await this.findMostLoyalStore(
@@ -153,10 +169,8 @@ class BadgeService {
 
   // Helper method to count customer ratings (adjust based on your rating system)
   async countCustomerRatings(customerId, startDate, endDate) {
-    // This is a placeholder - adjust based on your actual rating/review system
-    // You might have a Rating model or reviews embedded in Product model
     try {
-      // Example implementation - modify based on your actual schema
+      // Count from product reviews
       const products = await Product.find({
         "reviews.customerId": customerId,
         "reviews.createdAt": {
@@ -177,6 +191,29 @@ class BadgeService {
         }
       });
 
+      // Also count store ratings if they exist separately
+      const stores = await MSME.find({
+        "reviews.customerId": customerId,
+        "reviews.createdAt": {
+          $gte: startDate,
+          $lte: endDate,
+        },
+      });
+
+      stores.forEach((store) => {
+        if (store.reviews) {
+          ratingCount += store.reviews.filter(
+            (review) =>
+              review.customerId.toString() === customerId.toString() &&
+              review.createdAt >= startDate &&
+              review.createdAt <= endDate
+          ).length;
+        }
+      });
+
+      console.log(
+        `Customer ${customerId} gave ${ratingCount} ratings this week`
+      );
       return ratingCount;
     } catch (error) {
       console.error("Error counting customer ratings:", error);

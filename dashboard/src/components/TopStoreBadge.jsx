@@ -93,24 +93,6 @@ const TopStoreBadge = ({
                   ></div>
                 </div>
               </div>
-
-              <div className="criteria-item">
-                <div className="criteria-header">
-                  <span>Blog Views</span>
-                  <span className={badge.criteria.blogViews.met ? 'met' : 'not-met'}>
-                    {formatProgress(badge.criteria.blogViews.current, badge.criteria.blogViews.required)}
-                  </span>
-                </div>
-                <div className="progress-bar">
-                  <div 
-                    className="progress-fill"
-                    style={{ 
-                      width: `${getProgressPercentage(badge.criteria.blogViews.current, badge.criteria.blogViews.required)}%`,
-                      backgroundColor: badge.criteria.blogViews.met ? '#7ed957' : '#ffb300'
-                    }}
-                  ></div>
-                </div>
-              </div>
             </div>
             
             {badge.awardedAt && (

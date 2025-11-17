@@ -23,12 +23,12 @@ const customerBadgeSchema = new mongoose.Schema(
     criteria: {
       ratingsGiven: {
         current: { type: Number, default: 0 },
-        required: { type: Number, default: 5 },
+        required: { type: Number, default: 3 }, // Lowered from 5
         met: { type: Boolean, default: false },
       },
       blogEngagement: {
         current: { type: Number, default: 0 },
-        required: { type: Number, default: 5 },
+        required: { type: Number, default: 3 }, // Lowered from 5
         met: { type: Boolean, default: false },
       },
     },

@@ -23,22 +23,17 @@ const storeBadgeSchema = new mongoose.Schema(
     criteria: {
       storeRating: {
         current: { type: Number, default: 0 },
-        required: { type: Number, default: 4.5 },
+        required: { type: Number, default: 4.0 }, // Lowered from 4.5
         met: { type: Boolean, default: false },
       },
       productRatings: {
         current: { type: Number, default: 0 },
-        required: { type: Number, default: 4.5 },
+        required: { type: Number, default: 4.0 }, // Lowered from 4.5
         met: { type: Boolean, default: false },
       },
       profileViews: {
         current: { type: Number, default: 0 },
-        required: { type: Number, default: 50 },
-        met: { type: Boolean, default: false },
-      },
-      blogViews: {
-        current: { type: Number, default: 0 },
-        required: { type: Number, default: 20 },
+        required: { type: Number, default: 25 }, // Lowered from 50
         met: { type: Boolean, default: false },
       },
     },
@@ -73,8 +68,7 @@ storeBadgeSchema.methods.checkCriteria = function () {
   const allMet =
     this.criteria.storeRating.met &&
     this.criteria.productRatings.met &&
-    this.criteria.profileViews.met &&
-    this.criteria.blogViews.met;
+    this.criteria.profileViews.met;
 
   if (allMet && !this.isActive) {
     this.isActive = true;

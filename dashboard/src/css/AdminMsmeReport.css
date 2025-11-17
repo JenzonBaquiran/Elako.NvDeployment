@@ -267,7 +267,7 @@
 .admin-msme-reports__table {
   table-layout: fixed;
   width: 100%;
-  min-width: auto;
+  min-width: 1400px; /* Increased minimum width to accommodate all columns */
   font-size: 14px;
   border-collapse: collapse;
 }
@@ -295,36 +295,43 @@
 /* Fixed column widths for consistency */
 .admin-msme-reports__table th:nth-child(1),
 .admin-msme-reports__table td:nth-child(1) {
-  width: 200px; /* MSME Name */
+  width: 220px; /* MSME Name - slightly increased */
 }
 
 .admin-msme-reports__table th:nth-child(2),
 .admin-msme-reports__table td:nth-child(2) {
-  width: 160px; /* Customer Engagement */
+  width: 140px; /* Customer Engagement */
 }
 
 .admin-msme-reports__table th:nth-child(3),
 .admin-msme-reports__table td:nth-child(3) {
-  width: 160px; /* Media Marketing */
+  width: 140px; /* Media Marketing */
 }
 
 .admin-msme-reports__table th:nth-child(4),
 .admin-msme-reports__table td:nth-child(4) {
-  width: 160px; /* Product Performance */
+  width: 140px; /* Product Performance */
 }
 
 .admin-msme-reports__table th:nth-child(5),
 .admin-msme-reports__table td:nth-child(5) {
-  width: 160px; /* Store Performance */
+  width: 140px; /* Store Performance */
 }
 
 .admin-msme-reports__table th:nth-child(6),
 .admin-msme-reports__table td:nth-child(6) {
-  width: 120px; /* Status */
+  width: 150px; /* Top Store Badge - increased width */
+  text-align: center;
 }
 
 .admin-msme-reports__table th:nth-child(7),
 .admin-msme-reports__table td:nth-child(7) {
+  width: 120px; /* Status */
+  text-align: center;
+}
+
+.admin-msme-reports__table th:nth-child(8),
+.admin-msme-reports__table td:nth-child(8) {
   width: 100px; /* Actions */
   text-align: center;
 }
@@ -491,6 +498,43 @@
   align-items: center;
   gap: 8px;
   min-width: 80px;
+}
+
+/* Badge Info Styling */
+.admin-msme-reports__badge-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+}
+
+.admin-msme-reports__badge-week {
+  font-size: 9px;
+  color: #666;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.admin-msme-reports__status-badge--verified {
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  color: #333;
+  font-weight: 800;
+  font-size: 9px !important;
+  padding: 4px 8px !important;
+  border-radius: 12px;
+  white-space: nowrap;
+  min-width: auto;
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
+}
+
+.admin-msme-reports__no-badge {
+  color: #999;
+  font-style: italic;
+  font-size: 11px;
 }
 
 .admin-msme-reports__view-btn {

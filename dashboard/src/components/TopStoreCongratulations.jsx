@@ -117,14 +117,6 @@ const TopStoreCongratulations = ({
                 {badgeData?.criteria?.profileViews?.current || '200+'} this week
               </span>
             </div>
-            
-            <div className="achievement-item">
-              <span className="achievement-icon">📖</span>
-              <span>Blog Engagement</span>
-              <span className="achievement-value">
-                {badgeData?.criteria?.blogViews?.current || '100+'} views
-              </span>
-            </div>
           </div>
 
           {/* Badge Display */}

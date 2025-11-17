@@ -117,7 +117,7 @@ function Home() {
   // Helper function to get product label based on rating
   const getProductLabel = (rating, index) => {
     if (rating === 5) return { label: "Hot", labelClass: "hot" };
-    if (rating >= 4.8) return { label: "Trending", labelClass: "trending" };
+    if (rating >= 4.8) return { label: "HOT", labelClass: "trending" };
     if (rating >= 4.5) return { label: "Popular", labelClass: "popular" };
     return { label: "Featured", labelClass: "hot" };
   };

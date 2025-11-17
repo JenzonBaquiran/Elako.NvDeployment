@@ -8706,6 +8706,45 @@ app.post("/api/badges/admin/process-all", async (req, res) => {
   }
 });
 
+// Debug endpoint: Force calculate badges with detailed info
+app.post("/api/badges/debug/calculate/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { userType } = req.body; // 'customer' or 'store'
+
+    console.log(`Debug: Calculating badge for ${userType} ${userId}`);
+
+    let badge;
+    if (userType === "customer") {
+      badge = await BadgeService.calculateCustomerBadge(userId);
+    } else if (userType === "store") {
+      badge = await BadgeService.calculateStoreBadge(userId);
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "userType must be 'customer' or 'store'",
+      });
+    }
+
+    res.json({
+      success: true,
+      badge: badge,
+      debug: {
+        isActive: badge.isActive,
+        criteria: badge.criteria,
+        calculatedAt: new Date(),
+      },
+    });
+  } catch (error) {
+    console.error("Error in debug badge calculation:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to calculate badge",
+      error: error.message,
+    });
+  }
+});
+
 // Test endpoint: Create a customer badge with met criteria for testing
 app.post("/api/badges/test/create-top-fan/:customerId", async (req, res) => {
   try {

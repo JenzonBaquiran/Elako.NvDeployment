@@ -163,15 +163,6 @@ const TopFanCongratulations = ({
                   {badgeData.criteria?.ratingsGiven?.met ? '✅' : '❌'}
                 </span>
               </div>
-              <div className="top-fan-congratulations__achievement">
-                <span className="top-fan-congratulations__achievement-icon">📖</span>
-                <span className="top-fan-congratulations__achievement-text">
-                  {badgeData.criteria?.blogEngagement?.current || 0} blog views
-                </span>
-                <span className="top-fan-congratulations__achievement-status">
-                  {badgeData.criteria?.blogEngagement?.met ? '✅' : '❌'}
-                </span>
-              </div>
               {badgeData.loyaltyStore && badgeData.loyaltyStore.interactionCount > 0 && (
                 <div className="top-fan-congratulations__achievement">
                   <span className="top-fan-congratulations__achievement-icon">💖</span>

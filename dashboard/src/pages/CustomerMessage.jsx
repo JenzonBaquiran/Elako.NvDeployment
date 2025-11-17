@@ -9,7 +9,6 @@ import ClearIcon from '@mui/icons-material/Clear';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import StoreIcon from '@mui/icons-material/Store';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
 import DeleteIcon from '@mui/icons-material/Delete';
 import socketService from '../utils/socketService';
 import messageService from '../utils/messageService';
@@ -857,9 +856,6 @@ const CustomerMessage = () => {
                 <div ref={messagesEndRef} />
               </div>
               <div className="customer-messages__chat-input">
-                <button className="customer-messages__attach-btn">
-                  <AttachFileIcon />
-                </button>
                 <input
                   type="text"
                   className="customer-messages__input-field"

@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import CustomerSidebar from './CustomerSidebar';
 import TopFanCongratulations from '../components/TopFanCongratulations';
 import Notification from '../components/Notification';
+import PasswordStrengthIndicator from '../components/PasswordStrengthIndicator';
 import '../css/CustomerProfile.css';
 import EditIcon from '@mui/icons-material/Edit';
 import PersonIcon from '@mui/icons-material/Person';
@@ -514,47 +515,6 @@ const CustomerProfile = () => {
               <h1>Customer Profile</h1>
               <p>Manage your profile information and view your activity.</p>
             </div>
-            
-            {/* Test Button for Badge Calculation */}
-            <button 
-              style={{
-                background: '#2196F3',
-                color: 'white',
-                border: 'none',
-                padding: '10px 20px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                fontSize: '14px',
-                transition: 'all 0.3s ease'
-              }}
-              onClick={async () => {
-                try {
-                  const response = await fetch(`http://localhost:1337/api/debug/badges/customer/${user.id}`, {
-                    method: 'POST',
-                  });
-                  const data = await response.json();
-                  console.log('Customer badge calculation result:', data);
-                  alert(`Customer Badge Test Result:\nShould Have Badge: ${data.shouldHaveBadge}\nCurrent Badge: ${data.currentBadge ? 'Active' : 'None'}\n\nRatings Given: ${data.customerAnalysis.ratingsGiven}\nBlog Engagements: ${data.customerAnalysis.blogEngagements}\nSee console for full details.`);
-                  
-                  // Refresh badge status
-                  await checkTopFanStatus();
-                } catch (error) {
-                  console.error('Error testing customer badge:', error);
-                  alert('Error testing customer badge calculation');
-                }
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-2px) scale(1.05)';
-                e.target.style.boxShadow = '0 6px 20px rgba(33, 150, 243, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0) scale(1)';
-                e.target.style.boxShadow = 'none';
-              }}
-            >
-              🧪 Test Customer Badge
-            </button>
           </div>
         </div>
 
@@ -827,6 +787,7 @@ const CustomerProfile = () => {
                     className="customer-profile__edit-input"
                     placeholder="Enter new password (min. 6 characters)"
                   />
+                  <PasswordStrengthIndicator password={passwordData.newPassword} />
                 </div>
                 <div className="customer-profile__field">
                   <label>Confirm New Password</label>

@@ -375,7 +375,7 @@ const MsmeDashboard = () => {
               <h1>Welcome back, {businessName}!</h1>
               <p>Here's what's happening with your business today</p>
             </div>
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <button 
                 className="msme-dashboard__customize-btn"
                 onClick={() => navigate('/msme-customize-dashboard')}

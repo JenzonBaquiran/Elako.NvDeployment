@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from '../contexts/AuthContext';
 import AdminSidebar from "./AdminSidebar";
 import Notification from "../components/Notification";
+import PasswordStrengthIndicator from "../components/PasswordStrengthIndicator";
 import "../css/AdminSettings.css";
 
 const AdminSettings = () => {
@@ -126,13 +127,34 @@ const AdminSettings = () => {
   const handleChangePassword = async (e) => {
     e.preventDefault();
     
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      showNotification('error', 'Validation Error', 'Please fill in all password fields');
+      return;
+    }
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       showNotification('error', 'Validation Error', 'New passwords do not match');
       return;
     }
 
-    if (passwordData.newPassword.length < 6) {
-      showNotification('error', 'Validation Error', 'Password must be at least 6 characters long');
+    if (passwordData.newPassword.length < 8) {
+      showNotification('error', 'Validation Error', 'Password must be at least 8 characters long');
+      return;
+    }
+
+    // Check for password strength requirements
+    const hasLowercase = /[a-z]/.test(passwordData.newPassword);
+    const hasUppercase = /[A-Z]/.test(passwordData.newPassword);
+    const hasNumbers = /\d/.test(passwordData.newPassword);
+    const hasSymbols = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(passwordData.newPassword);
+
+    if (!hasLowercase || !hasUppercase || !hasNumbers || !hasSymbols) {
+      showNotification('error', 'Weak Password', 'Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character');
+      return;
+    }
+
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      showNotification('error', 'Validation Error', 'New password must be different from current password');
       return;
     }
 
@@ -375,9 +397,10 @@ const AdminSettings = () => {
                   type="password"
                   value={passwordData.newPassword}
                   onChange={(e) => handlePasswordInputChange('newPassword', e.target.value)}
-                  minLength="6"
+                  minLength="8"
                   required
                 />
+                <PasswordStrengthIndicator password={passwordData.newPassword} />
               </div>
               <div className="admin-settings__form-field">
                 <label>Confirm New Password</label>

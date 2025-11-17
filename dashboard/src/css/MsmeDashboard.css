@@ -43,9 +43,11 @@
 
 .msme-dashboard__header-content {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
   margin-bottom: 24px;
+  text-align: center;
 }
 
 .msme-dashboard__header-text h1 {
@@ -540,8 +542,9 @@
 
   .msme-dashboard__header-content {
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     gap: 16px;
+    text-align: center;
   }
 
   .msme-dashboard__customize-btn {

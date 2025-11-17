@@ -55,6 +55,8 @@
 .blog-management-title-section {
   display: flex;
   flex-direction: column;
+  text-align: center;
+  align-items: center;
 }
 
 .blog-management-header h1 {
@@ -505,8 +507,9 @@
   
   .blog-management-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 16px;
+    text-align: center;
   }
   
   .blog-form-container {

@@ -48,8 +48,12 @@
 
 .customer-profile__header-content {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+}
+
+.customer-profile__header-text {
+  text-align: center;
 }
 
 .customer-profile__header-text h1 {
@@ -441,7 +445,12 @@
   .customer-profile__header-content {
     flex-direction: column;
     gap: 16px;
-    align-items: flex-start;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .customer-profile__header-text {
+    text-align: center;
   }
   
   .customer-profile__section {

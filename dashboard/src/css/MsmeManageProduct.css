@@ -560,19 +560,19 @@
 
   .msme-manage-product-filters-row {
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
+    align-items: stretch;
   }
 
   .msme-manage-product-search-input,
   .msme-manage-product-filter-select {
     width: 100%;
     min-width: unset;
-    padding: 10px 12px;
+    padding: 12px 16px;
     font-size: 0.9rem;
-  }
-
-  .msme-manage-product-filter-select {
-    height: 44px;
+    box-sizing: border-box;
+    height: 48px;
+    border-radius: 8px;
   }
 
   .msme-manage-product-card {
@@ -611,15 +611,17 @@
   }
 
   .msme-manage-product-filters-row {
-    gap: 6px;
+    gap: 8px;
+    align-items: stretch;
   }
 
   .msme-manage-product-search-input,
   .msme-manage-product-filter-select {
-    padding: 8px 10px;
+    padding: 10px 14px;
     font-size: 0.85rem;
-    height: 40px;
+    height: 44px;
     box-sizing: border-box;
+    width: 100%;
   }
 
   .msme-manage-product-filters h2 {
@@ -1299,7 +1301,7 @@
 .variants-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .variant-item {
@@ -1307,73 +1309,90 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  background-color: #f3f4f6;
+  background-color: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.variant-item:hover {
+  background-color: #f1f3f4;
+  border-color: #d1d5db;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .variant-info {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex-grow: 1;
 }
 
 .variant-name {
-  font-weight: 500;
-  color: #374151;
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 13px;
   text-transform: capitalize;
 }
 
 .variant-price {
   font-size: 12px;
-  color: #6b7280;
+  color: #059669;
   font-weight: 600;
 }
 
 .variant-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
 }
 
 .edit-btn {
-  background: #f59e0b;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   padding: 4px 8px;
   font-size: 12px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  min-width: 24px;
-  height: 24px;
+  transition: all 0.2s ease;
+  min-width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.2);
+  font-weight: 500;
 }
 
 .edit-btn:hover {
-  background: #d97706;
+  background: linear-gradient(135deg, #d97706, #b45309);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
 }
 
 .remove-btn {
-  background: #ef4444;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   padding: 4px 8px;
   font-size: 12px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  min-width: 24px;
-  height: 24px;
+  transition: all 0.2s ease;
+  min-width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 1px 3px rgba(239, 68, 68, 0.2);
+  font-weight: 500;
 }
 
 .remove-btn:hover {
-  background: #dc2626;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
 }
 
 .save-btn {
@@ -1462,14 +1481,37 @@
     align-items: stretch;
   }
   
-  .variant-name-input,
-  .variant-price-input {
-    min-width: unset;
+  .variant-item {
+    padding: 8px 12px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  
+  .variant-info {
+    text-align: left;
+    align-items: flex-start;
   }
   
   .variant-actions {
-    flex-direction: column;
+    align-self: center;
+    margin-top: 0;
+    flex-direction: row;
     gap: 4px;
+  }
+  
+  .edit-btn,
+  .remove-btn {
+    min-width: 32px;
+    height: 32px;
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+  
+  .variant-name-input,
+  .variant-price-input {
+    min-width: unset;
   }
   
   .edit-variant-form .variant-name-input,

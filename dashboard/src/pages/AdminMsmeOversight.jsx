@@ -584,11 +584,11 @@ const AdminMsmeOversight = () => {
                   </div>
                   
                   <div className="admin-msme-oversight__certificate-item">
-                    <h4>FDA Certificate</h4>
-                    {certificates.fda ? (
+                    <h4>DTI Certificate</h4>
+                    {certificates.dti ? (
                       <button 
                         className="admin-msme-oversight__view-certificate-btn"
-                        onClick={() => handleViewCertificate('FDA Certificate', `http://localhost:1337/uploads/${certificates.fda}`)}
+                        onClick={() => handleViewCertificate('DTI Certificate', `http://localhost:1337/uploads/${certificates.dti}`)}
                       >
                         View Document
                       </button>

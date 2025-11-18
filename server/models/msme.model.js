@@ -30,7 +30,7 @@ const MSMESchema = new mongoose.Schema(
       mayorsPermit: { type: String, default: "" }, // File path for Mayor's Permit
       bir: { type: String, default: "" }, // File path for BIR certificate
       tinNumber: { type: String, default: "" }, // TIN number as text
-      fda: { type: String, default: "" }, // File path for FDA certificate
+      dti: { type: String, default: "" }, // File path for DTI certificate
     },
 
     // Rating system for stores

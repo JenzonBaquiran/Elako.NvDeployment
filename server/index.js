@@ -112,7 +112,7 @@ const certificateStorage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const prefix = file.fieldname; // mayorsPermit, bir, or fda
+    const prefix = file.fieldname; // mayorsPermit, bir, or dti
     cb(null, prefix + "-" + uniqueSuffix + path.extname(file.originalname));
   },
 });
@@ -710,7 +710,7 @@ app.post(
   certificateUpload.fields([
     { name: "mayorsPermit", maxCount: 1 },
     { name: "bir", maxCount: 1 },
-    { name: "fda", maxCount: 1 },
+    { name: "dti", maxCount: 1 },
   ]),
   async (req, res) => {
     const errors = validateMSMEInput(req.body);
@@ -753,7 +753,7 @@ app.post(
           ? `certificates/${req.files.mayorsPermit[0].filename}`
           : "",
         bir: req.files?.bir ? `certificates/${req.files.bir[0].filename}` : "",
-        fda: req.files?.fda ? `certificates/${req.files.fda[0].filename}` : "",
+        dti: req.files?.dti ? `certificates/${req.files.dti[0].filename}` : "",
         tinNumber: req.body.tinNumber || "",
       };
 
@@ -3272,7 +3272,7 @@ app.get("/api/stores/:storeId", async (req, res) => {
         governmentApprovals: {
           dole: false,
           dost: false,
-          fda: false,
+          dti: false,
           others: false,
           otherAgencies: [],
         },
@@ -3312,7 +3312,7 @@ app.get("/api/stores/:storeId", async (req, res) => {
         governmentApprovals: dashboard.governmentApprovals || {
           dole: false,
           dost: false,
-          fda: false,
+          dti: false,
           others: false,
         },
         // Use MSME rating for display, not dashboard rating
@@ -3684,7 +3684,7 @@ app.get("/api/stores", async (req, res) => {
               governmentApprovals: {
                 dole: false,
                 dost: false,
-                fda: false,
+                dti: false,
                 others: false,
               },
               rating: 0,
@@ -4432,7 +4432,7 @@ app.get("/api/msme/:msmeId/dashboard", async (req, res) => {
         governmentApprovals: {
           dole: false,
           dost: false,
-          fda: false,
+          dti: false,
           others: false,
         },
         rating: msme.averageRating || 0,
@@ -4545,7 +4545,7 @@ app.post(
       let parsedGovernmentApprovals = {
         dole: false,
         dost: false,
-        fda: false,
+        dti: false,
         others: false,
       };
       if (governmentApprovals) {
@@ -4559,7 +4559,7 @@ app.post(
           parsedGovernmentApprovals = {
             dole: false,
             dost: false,
-            fda: false,
+            dti: false,
             others: false,
           };
         }
@@ -7923,7 +7923,7 @@ app.get("/api/top-stores", async (req, res) => {
               governmentApprovals: {
                 dole: false,
                 dost: false,
-                fda: false,
+                dti: false,
                 others: false,
               },
               rating: 0,
@@ -8118,7 +8118,7 @@ app.get("/api/top-stores/all", async (req, res) => {
               governmentApprovals: {
                 dole: false,
                 dost: false,
-                fda: false,
+                dti: false,
                 others: false,
               },
               rating: 0,

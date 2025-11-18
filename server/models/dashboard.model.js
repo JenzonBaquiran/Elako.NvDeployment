@@ -62,7 +62,7 @@ const dashboardSchema = new mongoose.Schema({
   governmentApprovals: {
     dole: { type: Boolean, default: false },
     dost: { type: Boolean, default: false },
-    fda: { type: Boolean, default: false },
+    dti: { type: Boolean, default: false },
     others: { type: Boolean, default: false },
     otherAgencies: [
       {

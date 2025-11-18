@@ -205,7 +205,7 @@ export const checkCertificatesCompletion = (certificates) => {
   const requiredCertificates = {
     mayorsPermit: "Mayor's Permit",
     bir: "BIR Certificate",
-    fda: "FDA Certificate",
+    dti: "DTI Certificate",
   };
 
   const missingCertificates = [];

@@ -52,7 +52,7 @@ function Signup() {
   const [certificateFiles, setCertificateFiles] = useState({
     mayorsPermit: null,
     bir: null,
-    fda: null
+    dti: null
   });
 
   const handleCustomerChange = (field, value) => {
@@ -144,8 +144,8 @@ function Signup() {
       errors.mayorsPermit = "Mayor's Permit is required for business operation. Please upload your valid Mayor's Permit certificate.";
     if (!certificateFiles.bir) 
       errors.bir = "BIR Certificate is required for tax compliance. Please upload your Bureau of Internal Revenue certificate.";
-    if (!certificateFiles.fda) 
-      errors.fda = "FDA Certificate is required for food/health products. Please upload your Food and Drug Administration certificate.";
+    if (!certificateFiles.dti) 
+      errors.dti = "DTI Certificate is required for food/health products. Please upload your Department of Trade and Industry certificate.";
     
     return errors;
   };
@@ -178,7 +178,7 @@ function Signup() {
     setCertificateFiles({
       mayorsPermit: null,
       bir: null,
-      fda: null
+      dti: null
     });
   };
 
@@ -260,8 +260,8 @@ function Signup() {
     setMsmeValidation(validationErrors);
 
     if (Object.keys(validationErrors).length > 0) {
-      const fieldErrors = Object.keys(validationErrors).filter(key => !['mayorsPermit', 'bir', 'fda'].includes(key));
-      const certErrors = Object.keys(validationErrors).filter(key => ['mayorsPermit', 'bir', 'fda'].includes(key));
+      const fieldErrors = Object.keys(validationErrors).filter(key => !['mayorsPermit', 'bir', 'dti'].includes(key));
+      const certErrors = Object.keys(validationErrors).filter(key => ['mayorsPermit', 'bir', 'dti'].includes(key));
       
       let errorMessage = "Please complete all required information to proceed with business registration. ";
       
@@ -664,20 +664,20 @@ function Signup() {
 
                   <div className="file-upload-group">
                     <label className="file-upload-label">
-                      FDA Certificate *
+                      DTI Certificate *
                       <input
                         type="file"
                         accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) => handleFileChange("fda", e.target.files[0])}
+                        onChange={(e) => handleFileChange("dti", e.target.files[0])}
                         className="file-upload-input"
                         disabled={loading}
                         required
                       />
-                      <span className={`file-upload-custom ${msmeValidation.fda ? 'error' : ''}`}>
-                        {certificateFiles.fda ? certificateFiles.fda.name : "Choose file"}
+                      <span className={`file-upload-custom ${msmeValidation.dti ? 'error' : ''}`}>
+                        {certificateFiles.dti ? certificateFiles.dti.name : "Choose file"}
                       </span>
-                      {msmeValidation.fda && (
-                        <div className="field-error">{msmeValidation.fda}</div>
+                      {msmeValidation.dti && (
+                        <div className="field-error">{msmeValidation.dti}</div>
                       )}
                     </label>
                   </div>

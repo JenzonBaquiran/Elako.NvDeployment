@@ -1538,11 +1538,11 @@ const AdminUserManagement = () => {
                       </div>
                       
                       <div className="user-management__certificate-item">
-                        <h4>FDA Certificate</h4>
-                        {certificates.fda ? (
+                        <h4>DTI Certificate</h4>
+                        {certificates.dti ? (
                           <button 
                             className="user-management__view-certificate-btn"
-                            onClick={() => handleViewCertificate('FDA Certificate', `http://localhost:1337/uploads/${certificates.fda}`)}
+                            onClick={() => handleViewCertificate('DTI Certificate', `http://localhost:1337/uploads/${certificates.dti}`)}
                           >
                             View Document
                           </button>

@@ -11,7 +11,7 @@ This feature allows MSME (Micro, Small, and Medium Enterprises) owners to upload
 - **TIN Number Field**: Text input for Tax Identification Number
 - **Mayor's Permit Upload**: File upload for Mayor's Permit (PDF, JPG, PNG)
 - **BIR Certificate Upload**: File upload for BIR certificate (PDF, JPG, PNG)
-- **FDA Certificate Upload**: File upload for FDA certificate (PDF, JPG, PNG)
+- **DTI Certificate Upload**: File upload for DTI certificate (PDF, JPG, PNG)
 
 ### 2. Backend Changes
 
@@ -19,7 +19,7 @@ This feature allows MSME (Micro, Small, and Medium Enterprises) owners to upload
   - `mayorsPermit`: File path for Mayor's Permit
   - `bir`: File path for BIR certificate
   - `tinNumber`: TIN number as text
-  - `fda`: File path for FDA certificate
+  - `dti`: File path for DTI certificate
 - **File Upload Handling**: Implemented multer middleware for certificate uploads
 - **API Endpoint**: Added `/api/msme/:id/certificates` endpoint for retrieving certificate information
 
@@ -65,7 +65,7 @@ dashboard/src/
 4. Upload all three required certificates:
    - Mayor's Permit
    - BIR Certificate
-   - FDA Certificate
+   - DTI Certificate
 5. Submit the registration form
 
 ### For Admin Certificate Review:

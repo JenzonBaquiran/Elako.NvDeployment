@@ -1,0 +1,12 @@
+# Sample DTI Certificate
+
+Department of Trade and Industry
+Certificate of Business Name Registration
+
+License Number: DTI-2024-001
+Business Name: Test MSME Business
+Product Category: General Merchandise
+Date Issued: February 1, 2024
+Valid Until: February 1, 2026
+
+This is a sample DTI certificate document for testing purposes.

@@ -41,23 +41,34 @@
   }
 }
 
-
+/* Header */
+.msme-reviews__header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
 
 .msme-reviews__header-content {
   max-width: 1200px;
 }
 
+.msme-reviews__header-text {
+  flex: 1;
+}
+
 .msme-reviews__header-text h1 {
-  font-size: 2.5rem;
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 8px;
+  font-family: 'Poppins', sans-serif;
   font-weight: 700;
-  margin: 0 0 10px 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .msme-reviews__header-text p {
-  font-size: 1.1rem;
+  color: #666;
+  font-size: 15px;
+  font-family: 'Poppins', sans-serif;
   margin: 0;
-  opacity: 0.9;
 }
 
 /* Stats Section */
@@ -345,15 +356,44 @@
   color: #e9ecef;
 }
 
+/* Header */
+.msme-reviews__header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.msme-reviews__header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.msme-reviews__header-text {
+  flex: 1;
+}
+
+.msme-reviews__header-text h1 {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+}
+
+.msme-reviews__header-text p {
+  color: #666;
+  font-size: 15px;
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+}
+
 /* Products Gallery Section */
 .msme-reviews__products-section {
   background: transparent;
   padding: 30px 0;
   margin-bottom: 30px;
-}
-
-.msme-reviews__products-header {
-  margin-bottom: 25px;
 }
 
 .msme-reviews__products-header h2 {

@@ -730,6 +730,13 @@ const AdminUserManagement = () => {
     setSidebarState(state);
   };
 
+  const clearFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('all');
+    setActiveTab('all');
+    setActiveStatFilter(null);
+  };
+
   const getContentClass = () => {
     if (sidebarState.isMobile) {
       return 'user-management__content user-management__content--mobile';
@@ -869,6 +876,13 @@ const AdminUserManagement = () => {
               disabled={loading}
             >
               {loading ? "Loading..." : "Refresh"}
+            </button>
+            <button 
+              className="user-management__clear-filters-btn"
+              onClick={clearFilters}
+              disabled={loading}
+            >
+              Clear Filters
             </button>
           </div>
         </div>

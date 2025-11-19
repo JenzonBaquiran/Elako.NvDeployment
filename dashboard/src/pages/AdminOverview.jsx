@@ -163,7 +163,7 @@ const AdminOverview = () => {
 
         {/* Statistics Section */}
         <div className="admin-overview__stats">
-          <div className="admin-overview__stat-box">
+          <div className="admin-overview__stat-box admin-overview__stat-box--clickable" onClick={() => navigate('/admin-user-management')}>
             <div className="admin-overview__stat-icon">
               <People />
             </div>
@@ -175,7 +175,7 @@ const AdminOverview = () => {
               <div className="admin-overview__stat-growth">+8% from last month</div>
             </div>
           </div>
-          <div className="admin-overview__stat-box">
+          <div className="admin-overview__stat-box admin-overview__stat-box--clickable" onClick={() => navigate('/admin-user-management')}>
             <div className="admin-overview__stat-icon">
               <Business />
             </div>
@@ -187,7 +187,7 @@ const AdminOverview = () => {
               <div className="admin-overview__stat-growth">+15% from last month</div>
             </div>
           </div>
-          <div className="admin-overview__stat-box">
+          <div className="admin-overview__stat-box admin-overview__stat-box--clickable" onClick={() => navigate('/admin-user-management')}>
             <div className="admin-overview__stat-icon">
               <Person />
             </div>
@@ -199,7 +199,7 @@ const AdminOverview = () => {
               <div className="admin-overview__stat-growth">+12% from last month</div>
             </div>
           </div>
-          <div className="admin-overview__stat-box">
+          <div className="admin-overview__stat-box admin-overview__stat-box--clickable" onClick={() => navigate('/admin-user-management')}>
             <div className="admin-overview__stat-icon">
               <PendingActions />
             </div>

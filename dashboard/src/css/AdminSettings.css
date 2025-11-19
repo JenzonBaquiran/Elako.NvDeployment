@@ -42,16 +42,29 @@
 .admin-settings__header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.admin-settings__header-text {
+  flex: 1;
 }
 
 .admin-settings__header h1 {
-  font-size: 24px;
-  color: #313131;
-  margin: 0;
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 8px;
   font-family: 'Poppins', sans-serif;
-  font-weight: 600;
+  font-weight: 700;
+}
+
+.admin-settings__header p {
+  color: #666;
+  font-size: 15px;
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
 }
 
 .admin-settings__edit-btn {
@@ -99,10 +112,17 @@
   border-color: #313131;
 }
 
+.admin-settings__section-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
 .admin-settings__section h2 {
   color: #313131;
   font-size: 18px;
-  margin-bottom: 24px;
+  margin: 0;
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
 }
@@ -424,8 +444,12 @@
 /* Edit functionality styles */
 .admin-settings__edit-actions {
   display: flex;
+  justify-content: center;
   gap: 12px;
   align-items: center;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
 }
 
 .admin-settings__save-btn {

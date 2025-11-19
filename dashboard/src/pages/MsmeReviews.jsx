@@ -329,17 +329,14 @@ const MsmeReviews = () => {
         <div className="msme-reviews__header">
           <div className="msme-reviews__header-content">
             <div className="msme-reviews__header-text">
-            
+              <h1>Review's and Ratings</h1>
+              <p>Click on any product to view its reviews and ratings</p>
             </div>
           </div>
         </div>
 
         {/* Products Gallery Section */}
         <div className="msme-reviews__products-section">
-          <div className="msme-reviews__products-header">
-            <h2> Review's and Ratings</h2>
-            <p>Click on any product to view its reviews and ratings</p>
-          </div>
           
           {loadingProducts ? (
             <div className="msme-reviews__loading">

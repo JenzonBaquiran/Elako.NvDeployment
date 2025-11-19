@@ -84,6 +84,22 @@
   border-color: #313131;
 }
 
+.admin-overview__stat-box--clickable {
+  cursor: pointer;
+}
+
+.admin-overview__stat-box--clickable:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: #7ed957;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fff8 100%);
+}
+
+.admin-overview__stat-box--clickable:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(126, 217, 87, 0.3);
+}
+
 .admin-overview__stat-icon {
   width: 48px;
   height: 48px;

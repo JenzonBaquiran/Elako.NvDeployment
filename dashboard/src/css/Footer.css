@@ -353,6 +353,13 @@ body {
   color: #313131;
   overflow-y: auto;
   flex-grow: 1;
+  /* Hide scrollbar */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.terms-popup-body::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 
 .terms-section {
@@ -469,6 +476,13 @@ body {
   overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   animation: slideInFromBottom 0.3s ease-out;
+  /* Hide scrollbar */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.about-popup-content::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 
 .about-popup-header {

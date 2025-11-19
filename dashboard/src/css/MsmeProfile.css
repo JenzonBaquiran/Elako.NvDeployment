@@ -38,28 +38,33 @@
 }
 
 .msme-profile__header {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .msme-profile__header-content {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 24px;
-  text-align: center;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.msme-profile__header-text {
+  flex: 1;
 }
 
 .msme-profile__header-text h1 {
-  font-size: 24px;
+  font-size: 28px;
   color: #333;
   margin-bottom: 8px;
   font-family: 'Poppins', sans-serif;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .msme-profile__header-text p {
   color: #666;
-  font-size: 14px;
+  font-size: 15px;
   font-family: 'Poppins', sans-serif;
   margin: 0;
 }

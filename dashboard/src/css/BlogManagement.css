@@ -49,29 +49,26 @@
   align-items: flex-start;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.blog-management-title-section {
-  display: flex;
-  flex-direction: column;
-  text-align: center;
-  align-items: center;
+.blog-management__header-text {
+  flex: 1;
 }
 
 .blog-management-header h1 {
   font-size: 28px;
-  font-weight: 600;
-  color: #313131;
-  margin: 0 0 8px 0;
+  color: #333;
+  margin-bottom: 8px;
   font-family: 'Poppins', sans-serif;
+  font-weight: 700;
 }
 
 .blog-management-header p {
-  font-size: 14px;
   color: #666;
-  margin: 0;
+  font-size: 15px;
   font-family: 'Poppins', sans-serif;
+  margin: 0;
 }
 
 .add-blog-btn {

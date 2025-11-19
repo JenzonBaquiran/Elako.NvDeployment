@@ -39,30 +39,39 @@
 
 .msme-dashboard__header {
   margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .msme-dashboard__header-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  margin-bottom: 24px;
-  text-align: center;
+  margin-bottom: 16px;
+}
+
+.msme-dashboard__header-text {
+  flex: 1;
 }
 
 .msme-dashboard__header-text h1 {
-  font-size: 24px;
+  font-size: 28px;
   color: #333;
   margin-bottom: 8px;
   font-family: 'Poppins', sans-serif;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .msme-dashboard__header-text p {
   color: #666;
-  font-size: 14px;
+  font-size: 15px;
   font-family: 'Poppins', sans-serif;
-  margin: 0;
+  margin: 0 0 16px 0;
+}
+
+.msme-dashboard__header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .msme-dashboard__header-actions {

@@ -293,7 +293,7 @@ const BlogManagement = () => {
       <AdminSidebar onSidebarToggle={handleSidebarToggle} />
       <div className={getContentClass()}>
         <div className="blog-management-header">
-          <div className="blog-management-title-section">
+          <div className="blog-management__header-text">
             <h1>Blog Management</h1>
             <p>Create and manage blog posts for the hero section</p>
           </div>

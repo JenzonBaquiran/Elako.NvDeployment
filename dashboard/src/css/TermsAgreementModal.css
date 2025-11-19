@@ -77,26 +77,13 @@
   padding: 24px 24px 24px 24px;
   max-height: 60vh;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #7ed957 #f1f1f1;
+  /* Hide scrollbar */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
 }
 
 .terms-agreement-modal__scroll-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.terms-agreement-modal__scroll-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.terms-agreement-modal__scroll-container::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #7ed957 0%, #6bc544 100%);
-  border-radius: 4px;
-}
-
-.terms-agreement-modal__scroll-container::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #6bc544 0%, #5bb332 100%);
+  display: none; /* Safari and Chrome */
 }
 
 .terms-agreement-modal__effective-date {

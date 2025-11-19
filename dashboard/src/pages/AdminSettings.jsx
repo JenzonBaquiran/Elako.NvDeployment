@@ -260,34 +260,19 @@ const AdminSettings = () => {
       <AdminSidebar onSidebarToggle={handleSidebarToggle} />
       <div className={getContentClass()}>
         <div className="admin-settings__header">
-          <h1>Profile Settings</h1>
-          {!isEditing ? (
-            <button className="admin-settings__edit-btn" onClick={handleEditToggle}>
-              Edit Profile
-            </button>
-          ) : (
-            <div className="admin-settings__edit-actions">
-              <button 
-                className="admin-settings__save-btn" 
-                onClick={handleSaveProfile}
-                disabled={saving}
-              >
-                {saving ? 'Saving...' : 'Save Changes'}
-              </button>
-              <button 
-                className="admin-settings__cancel-btn" 
-                onClick={handleCancel}
-                disabled={saving}
-              >
-                Cancel
-              </button>
-            </div>
-          )}
+          <div className="admin-settings__header-text">
+            <h1>Profile Settings</h1>
+            <p>Manage your profile information and account settings.</p>
+          </div>
         </div>
 
         <div className="admin-settings__layout">
           <section className="admin-settings__section">
-            <h2>Personal Information</h2>
+            <div className="admin-settings__section-header">
+              <button className="admin-settings__edit-btn" onClick={handleEditToggle}>
+                {isEditing ? 'Cancel' : 'Edit'}
+              </button>
+            </div>
             {loading ? (
               <div className="admin-settings__loading">Loading profile...</div>
             ) : (
@@ -343,12 +328,22 @@ const AdminSettings = () => {
                     <p>{profileData.email || 'Not provided'}</p>
                   )}
                 </div>
-              </div>
+                </div>
+                
+                {isEditing && (
+                  <div className="admin-settings__edit-actions">
+                    <button 
+                      className="admin-settings__save-btn" 
+                      onClick={handleSaveProfile}
+                      disabled={saving}
+                    >
+                      {saving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
-          </section>
-
-          <section className="admin-settings__section">
+          </section>          <section className="admin-settings__section">
             <h2>Account Settings</h2>
             <div className="admin-settings__account-options">
               <button 

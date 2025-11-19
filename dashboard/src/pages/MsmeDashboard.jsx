@@ -375,16 +375,17 @@ const MsmeDashboard = () => {
               <h1>Welcome back, {businessName}!</h1>
               <p>Here's what's happening with your business today</p>
             </div>
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button 
-                className="msme-dashboard__customize-btn"
-                onClick={() => navigate('/msme-customize-dashboard')}
-              >
-                Customize Dashboard
-              </button>
-              
-              {/* Top Store Badge Button - Only show if store has active badge */}
-              {topStoreBadgeData?.isActive && (
+          </div>
+          <div className="msme-dashboard__header-actions">
+            <button 
+              className="msme-dashboard__customize-btn"
+              onClick={() => navigate('/msme-customize-dashboard')}
+            >
+              Customize Dashboard
+            </button>
+            
+            {/* Top Store Badge Button - Only show if store has active badge */}
+            {topStoreBadgeData?.isActive && (
                 <button 
                   style={{
                     background: 'linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%)',
@@ -411,8 +412,7 @@ const MsmeDashboard = () => {
                 >
                   🏆 Badge Top Store 
                 </button>
-              )}
-            </div>
+            )}
           </div>
         </div>
         

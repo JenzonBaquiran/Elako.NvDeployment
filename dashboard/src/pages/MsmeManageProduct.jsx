@@ -507,15 +507,20 @@ const MsmeManageProduct = () => {
     }
     
     // Validate form with enhanced messaging
+    // For editing products, consider both existing images and newly selected images
+    const totalImages = editingProduct 
+      ? [...existingImages, ...selectedImages]
+      : selectedImages;
+    
     const productData = {
       productName: formData.productName,
       price: formData.price,
       description: formData.description,
       category: formData.category,
-      images: selectedImages
+      images: totalImages
     };
     
-    const validationResult = checkProductCompletion(productData, selectedImages);
+    const validationResult = checkProductCompletion(productData, totalImages);
     setValidationErrors(validationResult.errors);
     
     if (!validationResult.isComplete) {

@@ -20,7 +20,7 @@ const TermsPage = () => {
               Back
             </Button>
             <Typography variant="h4" component="h1" className="terms-page__title">
-              📋 ELako.Nv Terms and Agreement
+               ELako.Nv Terms and Agreement
             </Typography>
           </Box>
 

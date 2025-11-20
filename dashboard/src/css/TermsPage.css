@@ -65,6 +65,7 @@
   padding: 40px;
   max-height: 70vh;
   overflow-y: auto;
+  text-align: left;
   scrollbar-width: thin;
   scrollbar-color: #7ed957 #f1f1f1;
 }

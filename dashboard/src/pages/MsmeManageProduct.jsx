@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import MsmeSidebar from './MsmeSidebar';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
-import { validateForm } from '../utils/validation';
+import { validateForm, checkProductCompletion } from '../utils/validation';
 import ValidationMessage from '../components/ValidationMessage';
 import '../css/MsmeManageProduct.css';
 import shakshoukaImg from '../assets/shakshouka.jpg';
@@ -515,12 +515,12 @@ const MsmeManageProduct = () => {
       images: selectedImages
     };
     
-    const errors = validateForm(productData, 'product', { showDetailedMessages: true });
-    setValidationErrors(errors);
+    const validationResult = checkProductCompletion(productData, selectedImages);
+    setValidationErrors(validationResult.errors);
     
-    if (Object.keys(errors).length > 0) {
-      const fieldErrors = Object.keys(errors).filter(key => key !== 'images');
-      const imageErrors = errors.images ? 1 : 0;
+    if (!validationResult.isComplete) {
+      const fieldErrors = Object.keys(validationResult.errors).filter(key => key !== 'images');
+      const imageErrors = validationResult.errors.images ? 1 : 0;
       
       let errorMessage = "Please complete all required product information to proceed. ";
       

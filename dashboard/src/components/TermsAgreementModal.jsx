@@ -48,7 +48,7 @@ const TermsAgreementModal = ({ open, onClose, onAgree, userType }) => {
     >
       <DialogTitle className="terms-agreement-modal__header">
         <Typography variant="h5" component="div" className="terms-agreement-modal__title">
-          📋 ELako.Nv Terms and Agreement
+           ELako.Nv Terms and Agreement
         </Typography>
         <IconButton
           onClick={handleClose}
@@ -256,7 +256,7 @@ const TermsAgreementModal = ({ open, onClose, onAgree, userType }) => {
           <Typography variant="h6" className="terms-agreement-modal__section-title">
             12. Contact Information
           </Typography>
-          <Typography variant="body2" paragraph>
+          <Typography variant="body2" paragraph style={{ marginBottom: '32px' }}>
             If you have questions or concerns about these Terms or our Privacy Policy, please contact us:
             <br />
             📩 <strong>elakonv@gmail.com</strong>

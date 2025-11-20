@@ -353,6 +353,7 @@ body {
   color: #313131;
   overflow-y: auto;
   flex-grow: 1;
+  text-align: left;
   /* Hide scrollbar */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* Internet Explorer 10+ */
@@ -364,6 +365,7 @@ body {
 
 .terms-section {
   margin-bottom: 20px;
+  text-align: left;
 }
 
 .terms-section h4 {

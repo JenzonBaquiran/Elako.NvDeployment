@@ -63,7 +63,7 @@
 
 .terms-agreement-modal__content {
   padding: 0 !important;
-  max-height: 60vh;
+  max-height: 70vh;
   overflow: hidden !important;
 }
 
@@ -75,8 +75,10 @@
 
 .terms-agreement-modal__scroll-container {
   padding: 24px 24px 24px 24px;
-  max-height: 60vh;
+  max-height: 70vh;
   overflow-y: auto;
+  overflow-x: hidden;
+  text-align: left;
   /* Hide scrollbar */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* Internet Explorer 10+ */
@@ -124,14 +126,27 @@
   color: #313131;
   margin-bottom: 16px;
   font-family: 'Poppins', sans-serif;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+/* Specific styling for contact information */
+.terms-agreement-modal__content p strong {
+  display: inline;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  max-width: 100%;
+  white-space: normal;
 }
 
 .terms-agreement-modal__actions {
   background-color: #f8f9fa;
-  padding: 20px 24px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
   border-top: 1px solid #e0e0e0;
 }
 
@@ -167,7 +182,7 @@
 .terms-agreement-modal__cancel-btn {
   color: #313131 !important;
   border-color: #ddd !important;
-  padding: 10px 24px;
+  padding: 8px 16px;
   border-radius: 8px;
   text-transform: none;
   font-weight: 500;
@@ -182,7 +197,7 @@
 .terms-agreement-modal__agree-btn {
   background: linear-gradient(135deg, #313131 0%, #404040 100%) !important;
   color: white !important;
-  padding: 10px 24px;
+  padding: 8px 16px;
   border-radius: 8px;
   text-transform: none;
   font-weight: 600;

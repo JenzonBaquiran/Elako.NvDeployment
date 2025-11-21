@@ -627,6 +627,9 @@
     min-height: 100vh;
     height: auto;
     min-height: 100svh; /* Use small viewport height for better mobile support */
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .blog-hero-container {
@@ -634,6 +637,7 @@
     align-items: center;
     padding: 1rem;
     min-height: 100vh;
+    width: 100%;
   }
   
   .blog-hero-content {
@@ -645,16 +649,23 @@
     justify-content: center;
     display: flex;
     flex-direction: column;
+    margin: 0 auto;
   }
   
   .blog-hero-text-section {
     text-align: center;
     width: 100%;
     max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
   
   .blog-hero-meta {
     justify-content: center;
+    text-align: center;
+    width: 100%;
   }
   
   .blog-hero-actions {
@@ -662,6 +673,8 @@
     flex-direction: column;
     gap: 1rem;
     width: 100%;
+    align-items: center;
+    text-align: center;
   }
   
   .blog-hero-nav {
@@ -674,6 +687,8 @@
     max-width: 280px;
     padding: 0.875rem 1.5rem;
     font-size: 0.95rem;
+    text-align: center;
+    margin: 0 auto;
   }
   
   .blog-hero-badges {
@@ -681,6 +696,8 @@
     flex-direction: row;
     align-items: center;
     margin-bottom: 1.5rem;
+    text-align: center;
+    width: 100%;
   }
   
   .blog-hero-title {
@@ -691,6 +708,8 @@
     word-wrap: break-word;
     overflow-wrap: break-word;
     hyphens: auto;
+    text-align: center !important;
+    width: 100%;
   }
   
   .blog-hero-subtitle {
@@ -700,6 +719,8 @@
     margin-bottom: 2rem;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    text-align: center !important;
+    width: 100%;
   }
 }
 
@@ -931,23 +952,35 @@
 @media (max-width: 768px) {
   .blog-hero-modal-overlay {
     padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .blog-hero-modal-content {
+    margin: 0 auto;
+    text-align: center;
   }
   
   .blog-hero-modal-header {
     padding: 1.5rem 1.5rem 1rem 1.5rem;
+    text-align: center;
   }
   
   .blog-hero-modal-title {
     font-size: 1.5rem;
+    text-align: center;
   }
   
   .blog-hero-modal-body {
     padding: 1rem 1.5rem 1.5rem 1.5rem;
+    text-align: center;
   }
   
   .blog-hero-modal-video,
   .blog-hero-modal-youtube {
     height: 250px;
+    margin: 0 auto;
   }
   
   .blog-hero-modal-youtube {
@@ -956,8 +989,22 @@
   
   .blog-hero-modal-meta {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 0.5rem;
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .blog-hero-modal-text {
+    text-align: center;
+  }
+  
+  .blog-hero-modal-text h3 {
+    text-align: center;
+  }
+  
+  .blog-hero-modal-text p {
+    text-align: center;
   }
 }
 

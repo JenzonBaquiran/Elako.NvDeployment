@@ -47,7 +47,7 @@ const productSchema = new mongoose.Schema(
       {
         id: { type: String, required: true },
         name: { type: String, required: true },
-        price: { type: Number, required: true, min: 0 }, // Individual price for this variant
+        price: { type: Number, required: false, min: 0, default: 0 }, // Individual price for this variant - made optional with default
         imageIndex: { type: Number, default: 0 }, // Which image to show for this variant
       },
     ],
@@ -95,19 +95,13 @@ const productSchema = new mongoose.Schema(
         comment: { type: String, required: true },
         rating: { type: Number, required: true, min: 1, max: 5 },
         selectedVariant: {
-          type: {
-            id: String,
-            name: String,
-          },
-          required: false,
+          id: { type: String, required: false },
+          name: { type: String, required: false },
         }, // Store selected variant for this review
         selectedSize: {
-          type: {
-            id: String,
-            size: Number,
-            unit: String,
-          },
-          required: false,
+          id: { type: String, required: false },
+          size: { type: mongoose.Schema.Types.Mixed, required: false }, // Allow both String and Number
+          unit: { type: String, required: false },
         }, // Store selected size for this review
         hidden: { type: Boolean, default: false }, // Allow MSME to hide specific reviews
         createdAt: { type: Date, default: Date.now },
@@ -143,6 +137,16 @@ productSchema.pre("validate", function (next) {
   if (typeof this.rating === "undefined") {
     this.rating = null;
   }
+
+  // Ensure all variants have a price (fix for existing data)
+  if (Array.isArray(this.variants)) {
+    this.variants.forEach((variant) => {
+      if (typeof variant.price === "undefined" || variant.price === null) {
+        variant.price = 0;
+      }
+    });
+  }
+
   next();
 });
 

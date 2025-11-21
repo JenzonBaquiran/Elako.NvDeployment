@@ -2562,23 +2562,45 @@
 
 /* Mobile modal adjustments */
 @media (max-width: 768px) {
+  .store-blog-hero-modal-overlay {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
   .store-blog-hero-modal-content {
     width: 95vw;
     max-height: 95vh;
-    margin: 10px;
+    margin: 10px auto;
   }
   
   .store-blog-hero-modal-header {
     padding: 20px 20px 15px 20px;
+    text-align: center;
   }
   
   .store-blog-hero-modal-title {
     font-size: 1.4rem;
     padding-right: 50px;
+    text-align: center;
   }
   
   .store-blog-hero-modal-body {
     padding: 20px;
+    text-align: center;
+  }
+  
+  .store-blog-hero-modal-text {
+    text-align: center;
+  }
+  
+  .store-blog-hero-modal-text h3 {
+    text-align: center;
+  }
+  
+  .store-blog-hero-modal-text p {
+    text-align: center;
   }
   
   .store-blog-hero-modal-close {
@@ -2592,6 +2614,7 @@
   .store-blog-hero-modal-video,
   .store-blog-hero-modal-youtube {
     height: 250px;
+    margin: 0 auto;
   }
 }
 

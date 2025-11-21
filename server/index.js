@@ -1631,7 +1631,12 @@ app.get("/api/products/:productId", async (req, res) => {
 app.post("/api/products/:productId/feedback", async (req, res) => {
   try {
     const { rating, comment, user, userId } = req.body;
-    if (!rating || !comment || !user) {
+
+    // Convert rating to number if it's a string
+    const numericRating =
+      typeof rating === "string" ? parseInt(rating) : rating;
+
+    if (!numericRating || !comment || !user) {
       return res.status(400).json({
         success: false,
         error: "Rating, comment, and user are required",
@@ -1639,7 +1644,7 @@ app.post("/api/products/:productId/feedback", async (req, res) => {
     }
 
     // Validate rating range
-    if (rating < 1 || rating > 5) {
+    if (numericRating < 1 || numericRating > 5) {
       return res
         .status(400)
         .json({ success: false, error: "Rating must be between 1 and 5" });
@@ -1657,15 +1662,37 @@ app.post("/api/products/:productId/feedback", async (req, res) => {
 
     // Add feedback to product
     if (!Array.isArray(product.feedback)) product.feedback = [];
-    product.feedback.push({
+
+    // Process selectedVariant and selectedSize to match schema
+    let processedVariant = null;
+    let processedSize = null;
+
+    if (selectedVariant) {
+      processedVariant = {
+        id: selectedVariant.id || selectedVariant._id,
+        name: selectedVariant.name,
+      };
+    }
+
+    if (selectedSize) {
+      processedSize = {
+        id: selectedSize.id || selectedSize._id,
+        size: selectedSize.size,
+        unit: selectedSize.unit,
+      };
+    }
+
+    const feedbackEntry = {
       user,
       userId: userId || null,
       comment,
-      rating,
-      selectedVariant: selectedVariant || null,
-      selectedSize: selectedSize || null,
+      rating: numericRating,
+      selectedVariant: processedVariant,
+      selectedSize: processedSize,
       createdAt: new Date(),
-    });
+    };
+
+    product.feedback.push(feedbackEntry);
 
     // Update average rating
     const ratings = product.feedback.map((fb) => fb.rating);

@@ -354,20 +354,31 @@ const ProductDetails = () => {
               {/* Variant Selection for Review (if product has variants) */}
               {product.variants && product.variants.length > 0 && (
                 <div className="product-details-review-variant-selection">
-                  <h4>Select Variant to Review:</h4>
+                  <h4>Select Variant to Review (Optional):</h4>
+                  <p style={{ fontSize: '14px', color: '#666', marginBottom: '12px' }}>
+                    You can select a specific variant or leave unselected for general product feedback.
+                  </p>
                   <div className="product-details-review-variants-list">
                     {product.variants.map((variant) => (
                       <button
                         key={variant.id}
                         className={`product-details-review-variant-btn ${selectedVariant?.id === variant.id ? 'selected' : ''}`}
-                        onClick={() => setSelectedVariant(variant)}
+                        onClick={() => setSelectedVariant(selectedVariant?.id === variant.id ? null : variant)}
                       >
                         {variant.name}
                       </button>
                     ))}
                   </div>
-                  {!selectedVariant && (
-                    <p className="product-details-variant-required">Please select a variant to review.</p>
+                  {selectedVariant && (
+                    <div className="product-details-selected-variant-review">
+                      Selected: <strong>{selectedVariant.name}</strong>
+                      <button 
+                        onClick={() => setSelectedVariant(null)}
+                        style={{ marginLeft: '10px', fontSize: '12px', padding: '2px 8px', background: '#f8f9fa', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer' }}
+                      >
+                        Clear
+                      </button>
+                    </div>
                   )}
                 </div>
               )}
@@ -375,18 +386,32 @@ const ProductDetails = () => {
               {/* Size Selection for Review (if product has sizes) */}
               {product.sizeOptions && product.sizeOptions.length > 0 && (
                 <div className="product-details-review-size-selection">
-                  <h4>Select Size to Review:</h4>
+                  <h4>Select Size to Review (Optional):</h4>
+                  <p style={{ fontSize: '14px', color: '#666', marginBottom: '12px' }}>
+                    You can select a specific size or leave unselected for general product feedback.
+                  </p>
                   <div className="product-details-review-sizes-list">
                     {product.sizeOptions.map((size) => (
                       <button
                         key={size.id}
                         className={`product-details-review-size-btn ${selectedSize?.id === size.id ? 'selected' : ''}`}
-                        onClick={() => setSelectedSize(size)}
+                        onClick={() => setSelectedSize(selectedSize?.id === size.id ? null : size)}
                       >
                         {size.size} {size.unit}
                       </button>
                     ))}
                   </div>
+                  {selectedSize && (
+                    <div className="product-details-selected-size-review">
+                      Selected: <strong>{selectedSize.size} {selectedSize.unit}</strong>
+                      <button 
+                        onClick={() => setSelectedSize(null)}
+                        style={{ marginLeft: '10px', fontSize: '12px', padding: '2px 8px', background: '#f8f9fa', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer' }}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -415,9 +440,15 @@ const ProductDetails = () => {
               <button
                 onClick={async () => {
                   // Validation: Check if variant is required but not selected
+                  // Only enforce variant selection if it's explicitly required by the product configuration
                   if (product.variants && product.variants.length > 0 && !selectedVariant) {
-                    setSubmitError('Please select a variant to review.');
-                    return;
+                    // Allow feedback without variant selection, but show a warning
+                    const confirmSubmit = window.confirm(
+                      'This product has variants available. Are you sure you want to submit feedback without selecting a specific variant? Your feedback will apply to the product in general.'
+                    );
+                    if (!confirmSubmit) {
+                      return;
+                    }
                   }
 
                   setSubmitting(true);
@@ -428,20 +459,29 @@ const ProductDetails = () => {
                     const userName = `${user.firstname} ${user.lastname}`.trim();
                     const userId = user.id || user._id;
                     
+                    const requestBody = { 
+                      rating, 
+                      comment, 
+                      user: userName,
+                      userId: userId,
+                      selectedVariant: selectedVariant || null,
+                      selectedSize: selectedSize || null
+                    };
+                    
+                    console.log('Submitting feedback with data:', requestBody);
+                    console.log('Product ID:', productId);
+                    
                     const res = await fetch(`http://localhost:1337/api/products/${productId}/feedback`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ 
-                        rating, 
-                        comment, 
-                        user: userName,
-                        userId: userId,
-                        selectedVariant: selectedVariant,
-                        selectedSize: selectedSize
-                      })
+                      body: JSON.stringify(requestBody)
                     });
                     
+                    console.log('Response status:', res.status);
+                    console.log('Response status text:', res.statusText);
+                    
                     const data = await res.json();
+                    console.log('Response data:', data);
                     
                     if (data.success) {
                       // Re-fetch product data to get updated rating and feedback
@@ -450,6 +490,8 @@ const ProductDetails = () => {
                       // Reset form
                       setRating(0);
                       setComment("");
+                      setSelectedVariant(null);
+                      setSelectedSize(null);
                       setSubmitSuccess(true);
                       
                       // Hide success message after 3 seconds

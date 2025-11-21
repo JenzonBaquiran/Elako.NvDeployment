@@ -1885,6 +1885,9 @@ input:checked + .toggle-slider:before {
 @media (max-width: 768px) {
   .blog-section {
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   
   .blog-section-header {
@@ -1892,6 +1895,7 @@ input:checked + .toggle-slider:before {
     gap: 16px;
     align-items: center;
     text-align: center;
+    width: 100%;
   }
   
   .add-blog-btn {
@@ -1901,6 +1905,31 @@ input:checked + .toggle-slider:before {
   .blog-grid {
     grid-template-columns: 1fr;
     gap: 16px;
+    width: 100%;
+    justify-items: center;
+  }
+  
+  .blog-card {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  .blog-content {
+    text-align: center;
+  }
+  
+  .blog-category,
+  .blog-title,
+  .blog-subtitle,
+  .blog-description {
+    text-align: center;
+  }
+  
+  .blog-actions {
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
   }
   
   .blog-form-modal {
@@ -1914,15 +1943,13 @@ input:checked + .toggle-slider:before {
   
   .blog-form-actions {
     flex-direction: column-reverse;
+    align-items: center;
   }
   
   .blog-form-cancel,
   .blog-form-save {
     width: 100%;
-  }
-  
-  .blog-actions {
-    justify-content: center;
+    max-width: 200px;
   }
 }
 

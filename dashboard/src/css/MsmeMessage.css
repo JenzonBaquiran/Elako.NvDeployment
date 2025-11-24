@@ -290,6 +290,11 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
+  user-select: none;
+  -webkit-user-drag: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 /* Chat Header */
@@ -427,10 +432,32 @@
 .msme-messages__chat-messages {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  scroll-behavior: smooth;
+  position: relative;
+}
+
+/* Custom scrollbar for messages */
+.msme-messages__chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.msme-messages__chat-messages::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.msme-messages__chat-messages::-webkit-scrollbar-thumb {
+  background: #7ed957;
+  border-radius: 3px;
+}
+
+.msme-messages__chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #6bc043;
 }
 
 .msme-messages__message {
@@ -479,12 +506,12 @@
 
 /* Chat Input */
 .msme-messages__chat-input {
-  padding: 20px;
+  padding: 12px 16px;
   border-top: 1px solid #e5e7eb;
   background: #f9fafb;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .msme-messages__attach-btn {
@@ -504,9 +531,9 @@
 
 .msme-messages__input-field {
   flex: 1;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border: 1px solid #d1d5db;
-  border-radius: 24px;
+  border-radius: 20px;
   font-size: 14px;
   font-family: 'Poppins', sans-serif;
   outline: none;
@@ -519,7 +546,7 @@
 }
 
 .msme-messages__send-button {
-  padding: 10px;
+  padding: 8px;
   background: #313131;
   border: none;
   color: white;
@@ -529,8 +556,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
 }
 
 .msme-messages__send-button:hover:not(:disabled) {
@@ -802,5 +829,12 @@
     min-width: 16px;
     height: 16px;
     font-size: 10px;
+  }
+
+  /* Mobile message container adjustments */
+  .msme-messages__chat-messages {
+    max-height: 300px;
+    min-height: 250px;
+    padding: 16px;
   }
 }

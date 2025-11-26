@@ -75,6 +75,20 @@ function Signup() {
     setCertificateFiles(prev => ({ ...prev, [certificateType]: file }));
   };
 
+  // Password strength validation function
+  const isPasswordStrong = (password) => {
+    if (!password || password.length < 8) return false;
+    
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    // Require at least 3 out of 4 criteria for strong password
+    const criteriaCount = [hasUpperCase, hasLowerCase, hasNumbers, hasSpecialChar].filter(Boolean).length;
+    return criteriaCount >= 3;
+  };
+
   // Enhanced validation functions with detailed messaging
   const validateCustomerForm = () => {
     const errors = {};
@@ -97,8 +111,8 @@ function Signup() {
       errors.username = "Username is required. Please create a unique username for your account.";
     if (!customerData.password?.trim()) {
       errors.password = "Password is required for account security. Please create a strong password.";
-    } else if (customerData.password.length < 6) {
-      errors.password = "Password must be at least 6 characters long for security purposes.";
+    } else if (!isPasswordStrong(customerData.password)) {
+      errors.password = "Password is too weak. Please create a stronger password with at least 8 characters including uppercase, lowercase, numbers, and special characters.";
     }
     if (!customerData.confirmPassword?.trim()) {
       errors.confirmPassword = "Please confirm your password by typing it again.";
@@ -130,8 +144,8 @@ function Signup() {
       errors.tinNumber = "TIN number is required for tax compliance and business verification.";
     if (!msmeData.password?.trim()) {
       errors.password = "Password is required for account security. Please create a strong password.";
-    } else if (msmeData.password.length < 6) {
-      errors.password = "Password must be at least 6 characters long for security purposes.";
+    } else if (!isPasswordStrong(msmeData.password)) {
+      errors.password = "Password is too weak. Please create a stronger password with at least 8 characters including uppercase, lowercase, numbers, and special characters.";
     }
     if (!msmeData.confirmPassword?.trim()) {
       errors.confirmPassword = "Please confirm your password by typing it again.";

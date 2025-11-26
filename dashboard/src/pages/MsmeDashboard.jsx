@@ -441,7 +441,7 @@ const MsmeDashboard = () => {
             </div>
             <div className="msme-dashboard__stat-label">Followers</div>
             <div className="msme-dashboard__stat-change positive">
-              New today: {loading ? '...' : (analytics.followersToday || 0)}
+              Total Followers
             </div>
           </div>
           <div className="msme-dashboard__stat-box">

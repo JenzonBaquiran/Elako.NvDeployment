@@ -6,6 +6,7 @@ import { validateForm, checkProductCompletion } from '../utils/validation';
 import ValidationMessage from '../components/ValidationMessage';
 import '../css/MsmeManageProduct.css';
 import shakshoukaImg from '../assets/shakshouka.jpg';
+import logoImage from '../logos/Icon on bright.png';
 
 const MsmeManageProduct = () => {
   const { user } = useAuth();
@@ -124,6 +125,7 @@ const MsmeManageProduct = () => {
   };
 
   const createProduct = async (productData) => {
+    setLoading(true);
     try {
       const response = await fetch('http://localhost:1337/api/products', {
         method: 'POST',
@@ -144,10 +146,13 @@ const MsmeManageProduct = () => {
       console.error("Error creating product:", error);
       showError("Failed to create product", "Error");
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
   const updateProduct = async (productId, productData) => {
+    setLoading(true);
     try {
       console.log('Updating product:', productId);
       console.log('Update data being sent:', {
@@ -185,6 +190,8 @@ const MsmeManageProduct = () => {
       console.error("Error updating product:", error);
       showError("Failed to update product", "Error");
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -967,6 +974,18 @@ const MsmeManageProduct = () => {
                 </button>
               </div>
               
+              {/* Progress Bar at Top */}
+              {loading && (
+                <div className="modal-progress-container top-progress">
+                  <div className="modal-progress-bar">
+                    <div className="modal-progress-fill"></div>
+                  </div>
+                  <p className="modal-progress-text">
+                    {editingProduct ? 'Updating your product...' : 'Adding your product...'}
+                  </p>
+                </div>
+              )}
+              
               <form onSubmit={handleSubmit} className="add-product-form">
                 <div className="form-row">
                   <div className="form-group">
@@ -1317,7 +1336,7 @@ const MsmeManageProduct = () => {
                     className="submit-btn"
                     disabled={loading}
                   >
-                    {loading ? 'Processing...' : (editingProduct ? 'Update Product' : 'Add Product')}
+                    {editingProduct ? 'Update Product' : 'Add Product'}
                   </button>
                 </div>
               </form>

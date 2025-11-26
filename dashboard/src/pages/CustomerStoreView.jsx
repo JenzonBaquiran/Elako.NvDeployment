@@ -16,8 +16,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PhoneIcon from '@mui/icons-material/Phone';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import LanguageIcon from '@mui/icons-material/Language';
+
 import PersonIcon from '@mui/icons-material/Person';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
@@ -830,23 +829,9 @@ const CustomerStoreView = () => {
                     </div>
                   )}
 
-                  {dashboard.socialLinks?.twitter && (
-                    <div className="store-detail-row">
-                      <TwitterIcon className="detail-icon twitter-icon" />
-                      <a href={dashboard.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="social-link">
-                        Twitter
-                      </a>
-                    </div>
-                  )}
 
-                  {dashboard.socialLinks?.website && (
-                    <div className="store-detail-row">
-                      <LanguageIcon className="detail-icon website-icon" />
-                      <a href={dashboard.socialLinks.website} target="_blank" rel="noopener noreferrer" className="social-link">
-                        Website
-                      </a>
-                    </div>
-                  )}
+
+
 
                   {/* E-commerce Platforms */}
                   {dashboard.ecommercePlatforms?.shopee?.url && (

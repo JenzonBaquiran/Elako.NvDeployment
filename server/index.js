@@ -936,7 +936,6 @@ app.get("/api/msme/:id/profile", async (req, res) => {
       dashboard?.description || msme.businessDescription || "";
     const contactNumber = dashboard?.contactNumber || msme.contactNumber || "";
     const address = dashboard?.location || msme.address || "";
-    const website = dashboard?.socialLinks?.website || msme.website || "";
 
     // Calculate profile completeness based on combined data
     const requiredFields = [
@@ -948,7 +947,6 @@ app.get("/api/msme/:id/profile", async (req, res) => {
     const optionalFields = [
       businessDescription,
       msme.operatingHours,
-      website,
       msme.specialties,
       msme.established,
     ];
@@ -996,7 +994,7 @@ app.get("/api/msme/:id/profile", async (req, res) => {
         businessDescription: businessDescription,
         category: msme.category,
         operatingHours: msme.operatingHours || "",
-        website: website,
+
         specialties: msme.specialties || [],
         established: msme.established || "",
         storeLogo: dashboard?.storeLogo || null,
@@ -1101,8 +1099,7 @@ app.put("/api/msme/:id/profile/personal", async (req, res) => {
 // Update MSME business information
 app.put("/api/msme/:id/profile/business", async (req, res) => {
   try {
-    const { category, established, operatingHours, website, specialties } =
-      req.body;
+    const { category, established, operatingHours, specialties } = req.body;
 
     // Validate category if provided
     if (category && !["food", "artisan"].includes(category)) {
@@ -1110,18 +1107,6 @@ app.put("/api/msme/:id/profile/business", async (req, res) => {
         success: false,
         error: "Category must be 'food' or 'artisan'",
       });
-    }
-
-    // Validate website URL if provided
-    if (website && website.trim() !== "") {
-      try {
-        new URL(website);
-      } catch (e) {
-        return res.status(400).json({
-          success: false,
-          error: "Invalid website URL format",
-        });
-      }
     }
 
     // Find the MSME first
@@ -1146,11 +1131,10 @@ app.put("/api/msme/:id/profile/business", async (req, res) => {
       { new: true, select: "-password" }
     );
 
-    // Update Dashboard model (for website)
+    // Update Dashboard model
     const dashboard = await Dashboard.findOneAndUpdate(
       { msmeId: msme._id },
       {
-        "socialLinks.website": website || "",
         updatedAt: new Date(),
       },
       {
@@ -1167,7 +1151,7 @@ app.put("/api/msme/:id/profile/business", async (req, res) => {
         category: updatedMsme.category,
         established: updatedMsme.established,
         operatingHours: updatedMsme.operatingHours,
-        website: dashboard.socialLinks.website,
+
         specialties: updatedMsme.specialties,
       },
     });
@@ -3288,8 +3272,6 @@ app.get("/api/stores/:storeId", async (req, res) => {
         socialLinks: {
           facebook: "",
           instagram: "",
-          twitter: "",
-          website: "",
         },
         ecommercePlatforms: {
           shopee: { enabled: false, url: "" },
@@ -3328,8 +3310,6 @@ app.get("/api/stores/:storeId", async (req, res) => {
         socialLinks: dashboard.socialLinks || {
           facebook: "",
           instagram: "",
-          twitter: "",
-          website: "",
         },
         ecommercePlatforms: dashboard.ecommercePlatforms || {
           shopee: { enabled: false, url: "" },
@@ -3700,8 +3680,6 @@ app.get("/api/stores", async (req, res) => {
               socialLinks: {
                 facebook: "",
                 instagram: "",
-                twitter: "",
-                website: "",
               },
               ecommercePlatforms: {
                 shopee: { enabled: false, url: "" },
@@ -3774,8 +3752,6 @@ app.get("/api/stores", async (req, res) => {
               socialLinks: dashboard.socialLinks || {
                 facebook: "",
                 instagram: "",
-                twitter: "",
-                website: "",
               },
               // Override dashboard rating with MSME rating
               rating: msme.averageRating || 0,
@@ -3824,8 +3800,6 @@ app.get("/api/stores", async (req, res) => {
               socialLinks: {
                 facebook: "",
                 instagram: "",
-                twitter: "",
-                website: "",
               },
               rating: msme.averageRating || 0,
               totalRatings: msme.totalRatings || 0,
@@ -4448,8 +4422,6 @@ app.get("/api/msme/:msmeId/dashboard", async (req, res) => {
         socialLinks: {
           facebook: "",
           instagram: "",
-          twitter: "",
-          website: "",
         },
         ecommercePlatforms: {
           shopee: { enabled: false, url: "" },
@@ -7939,8 +7911,6 @@ app.get("/api/top-stores", async (req, res) => {
               socialLinks: {
                 facebook: "",
                 instagram: "",
-                twitter: "",
-                website: "",
               },
               ecommercePlatforms: {
                 shopee: { enabled: false, url: "" },
@@ -8004,8 +7974,6 @@ app.get("/api/top-stores", async (req, res) => {
               socialLinks: dashboard.socialLinks || {
                 facebook: "",
                 instagram: "",
-                twitter: "",
-                website: "",
               },
               rating: msme.averageRating || 0,
               totalRatings: msme.totalRatings || 0,
@@ -8052,8 +8020,6 @@ app.get("/api/top-stores", async (req, res) => {
               socialLinks: {
                 facebook: "",
                 instagram: "",
-                twitter: "",
-                website: "",
               },
               rating: msme.averageRating || 0,
               totalRatings: msme.totalRatings || 0,
@@ -8134,8 +8100,6 @@ app.get("/api/top-stores/all", async (req, res) => {
               socialLinks: {
                 facebook: "",
                 instagram: "",
-                twitter: "",
-                website: "",
               },
               ecommercePlatforms: {
                 shopee: { enabled: false, url: "" },
@@ -8199,8 +8163,6 @@ app.get("/api/top-stores/all", async (req, res) => {
               socialLinks: dashboard.socialLinks || {
                 facebook: "",
                 instagram: "",
-                twitter: "",
-                website: "",
               },
               rating: msme.averageRating || 0,
               totalRatings: msme.totalRatings || 0,
@@ -8247,8 +8209,6 @@ app.get("/api/top-stores/all", async (req, res) => {
               socialLinks: {
                 facebook: "",
                 instagram: "",
-                twitter: "",
-                website: "",
               },
               rating: msme.averageRating || 0,
               totalRatings: msme.totalRatings || 0,

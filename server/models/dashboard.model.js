@@ -42,8 +42,6 @@ const dashboardSchema = new mongoose.Schema({
   socialLinks: {
     facebook: { type: String, default: "" },
     instagram: { type: String, default: "" },
-    twitter: { type: String, default: "" },
-    website: { type: String, default: "" },
   },
   ecommercePlatforms: {
     shopee: {

@@ -36,9 +36,7 @@ const MsmeCustomizeDashboard = () => {
     coordinates: { lat: null, lng: null },
     socialLinks: {
       facebook: '',
-      instagram: '',
-      twitter: '',
-      website: ''
+      instagram: ''
     },
     ecommercePlatforms: {
       shopee: { enabled: false, url: '' },
@@ -876,7 +874,9 @@ const MsmeCustomizeDashboard = () => {
           <div className="social-section">
             <h2>Social Media & Links</h2>
             <div className="social-grid">
-              {Object.entries(dashboardData.socialLinks).map(([platform, url]) => (
+              {Object.entries(dashboardData.socialLinks)
+                .filter(([platform]) => ['facebook', 'instagram'].includes(platform))
+                .map(([platform, url]) => (
                 <div key={platform} className="social-item">
                   <label className="social-label">
                     {platform.charAt(0).toUpperCase() + platform.slice(1)}

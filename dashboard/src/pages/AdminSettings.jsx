@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import AdminSidebar from "./AdminSidebar";
 import Notification from "../components/Notification";
 import PasswordStrengthIndicator from "../components/PasswordStrengthIndicator";
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import "../css/AdminSettings.css";
 
 const AdminSettings = () => {
@@ -24,6 +25,9 @@ const AdminSettings = () => {
     confirmPassword: ''
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [notification, setNotification] = useState({
     isVisible: false,
     type: 'info',
@@ -429,33 +433,60 @@ const AdminSettings = () => {
             <form onSubmit={handleChangePassword} className="admin-settings__modal-form">
               <div className="admin-settings__form-field">
                 <label>Current Password</label>
-                <input
-                  type="password"
-                  value={passwordData.currentPassword}
-                  onChange={(e) => handlePasswordInputChange('currentPassword', e.target.value)}
-                  required
-                />
+                <div className="admin-settings__password-field">
+                  <input
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={passwordData.currentPassword}
+                    onChange={(e) => handlePasswordInputChange('currentPassword', e.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="admin-settings__password-toggle"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  >
+                    {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                  </button>
+                </div>
               </div>
               <div className="admin-settings__form-field">
                 <label>New Password</label>
-                <input
-                  type="password"
-                  value={passwordData.newPassword}
-                  onChange={(e) => handlePasswordInputChange('newPassword', e.target.value)}
-                  minLength="8"
-                  required
-                />
+                <div className="admin-settings__password-field">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    value={passwordData.newPassword}
+                    onChange={(e) => handlePasswordInputChange('newPassword', e.target.value)}
+                    minLength="8"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="admin-settings__password-toggle"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                  >
+                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </button>
+                </div>
                 <PasswordStrengthIndicator password={passwordData.newPassword} />
               </div>
               <div className="admin-settings__form-field">
                 <label>Confirm New Password</label>
-                <input
-                  type="password"
-                  value={passwordData.confirmPassword}
-                  onChange={(e) => handlePasswordInputChange('confirmPassword', e.target.value)}
-                  minLength="6"
-                  required
-                />
+                <div className="admin-settings__password-field">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => handlePasswordInputChange('confirmPassword', e.target.value)}
+                    minLength="6"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="admin-settings__password-toggle"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </button>
+                </div>
               </div>
               <div className="admin-settings__modal-actions">
                 <button

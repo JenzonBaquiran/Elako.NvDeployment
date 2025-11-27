@@ -660,6 +660,72 @@
   box-shadow: 0 0 0 3px rgba(126, 217, 87, 0.1);
 }
 
+/* Password field with toggle */
+.admin-settings__password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.admin-settings__password-field input {
+  width: 100%;
+  padding: 12px 50px 12px 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.admin-settings__password-field input:focus {
+  outline: none;
+  border-color: #7ed957;
+  box-shadow: 0 0 0 3px rgba(126, 217, 87, 0.1);
+}
+
+.admin-settings__password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  z-index: 10;
+  border-radius: 4px;
+}
+
+.admin-settings__password-toggle:hover {
+  color: #7ed957;
+}
+
+.admin-settings__password-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Hide browser-generated password visibility icons */
+.admin-settings__password-field input[type="password"]::-ms-reveal,
+.admin-settings__password-field input[type="password"]::-ms-clear,
+.admin-settings__password-field input[type="text"]::-ms-reveal,
+.admin-settings__password-field input[type="text"]::-ms-clear {
+  display: none;
+}
+
+.admin-settings__password-field input[type="password"]::-webkit-credentials-auto-fill-button,
+.admin-settings__password-field input[type="password"]::-webkit-strong-password-auto-fill-button,
+.admin-settings__password-field input[type="text"]::-webkit-credentials-auto-fill-button,
+.admin-settings__password-field input[type="text"]::-webkit-strong-password-auto-fill-button {
+  display: none !important;
+}
+
 .admin-settings__modal-actions {
   display: flex;
   gap: 12px;

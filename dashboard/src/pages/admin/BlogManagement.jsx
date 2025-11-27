@@ -26,6 +26,7 @@ const BlogManagement = () => {
     featured: false,
     status: 'draft' // 'draft', 'published'
   });
+  const [readTimeError, setReadTimeError] = useState('');
   const [notification, setNotification] = useState({
     isVisible: false,
     type: 'info',
@@ -79,6 +80,28 @@ const BlogManagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
+    // Special handling for readTime to ensure only positive numbers (> 0)
+    if (name === 'readTime') {
+      const numValue = parseFloat(value);
+      if (value === '') {
+        setFormData(prev => ({
+          ...prev,
+          [name]: value
+        }));
+        setReadTimeError('');
+      } else if (numValue > 0 && !isNaN(numValue)) {
+        setFormData(prev => ({
+          ...prev,
+          [name]: value
+        }));
+        setReadTimeError('');
+      } else {
+        setReadTimeError('0 and negative numbers not allowed');
+      }
+      return;
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
@@ -118,12 +141,18 @@ const BlogManagement = () => {
       
       const method = editingPost ? 'PUT' : 'POST';
       
+      // Format the readTime for submission
+      const submissionData = {
+        ...formData,
+        readTime: formData.readTime ? `${formData.readTime} MIN READ` : ''
+      };
+      
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(submissionData)
       });
 
       const data = await response.json();
@@ -163,13 +192,21 @@ const BlogManagement = () => {
 
   const handleEdit = (post) => {
     setEditingPost(post);
+    
+    // Extract numeric value from readTime (e.g., "5 MIN READ" -> "5")
+    const extractReadTimeNumber = (readTimeString) => {
+      if (!readTimeString) return '';
+      const match = readTimeString.match(/(\d+)/);
+      return match ? match[1] : '';
+    };
+    
     setFormData({
       category: post.category,
       title: post.title,
       subtitle: post.subtitle,
       description: post.description,
       author: post.author,
-      readTime: post.readTime,
+      readTime: extractReadTimeNumber(post.readTime),
       mediaType: post.mediaType,
       mediaUrl: post.mediaUrl,
       featured: post.featured,
@@ -248,6 +285,7 @@ const BlogManagement = () => {
       status: 'draft'
     });
     setEditingPost(null);
+    setReadTimeError('');
   };
 
   // Helper function to extract YouTube video ID
@@ -361,15 +399,27 @@ const BlogManagement = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>READ TIME</label>
+                  <label>READ TIME (MINUTES)</label>
                   <input
-                    type="text"
+                    type="number"
                     name="readTime"
                     value={formData.readTime}
                     onChange={handleInputChange}
-                    placeholder="e.g., 5 MIN READ"
+                    placeholder="Enter read time in minutes (e.g., 5)"
+                    min="1"
+                    step="1"
                     required
                   />
+                  {readTimeError && (
+                    <div style={{
+                      color: '#dc3545',
+                      fontSize: '12px',
+                      marginTop: '5px',
+                      fontFamily: 'Poppins, sans-serif'
+                    }}>
+                      {readTimeError}
+                    </div>
+                  )}
                 </div>
 
                 <div className="form-group">

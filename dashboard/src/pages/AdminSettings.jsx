@@ -4,6 +4,7 @@ import AdminSidebar from "./AdminSidebar";
 import Notification from "../components/Notification";
 import PasswordStrengthIndicator from "../components/PasswordStrengthIndicator";
 import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { validation } from '../utils/validation';
 import "../css/AdminSettings.css";
 
 const AdminSettings = () => {
@@ -196,14 +197,10 @@ const AdminSettings = () => {
       return;
     }
 
-    // Check for password strength requirements
-    const hasLowercase = /[a-z]/.test(passwordData.newPassword);
-    const hasUppercase = /[A-Z]/.test(passwordData.newPassword);
-    const hasNumbers = /\d/.test(passwordData.newPassword);
-    const hasSymbols = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(passwordData.newPassword);
-
-    if (!hasLowercase || !hasUppercase || !hasNumbers || !hasSymbols) {
-      showNotification('error', 'Weak Password', 'Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character');
+    // Check password strength using validation utility
+    const strengthResult = validation.passwordStrength(passwordData.newPassword);
+    if (strengthResult.strength !== 'strong') {
+      showNotification('error', 'Weak Password', 'Password is too weak. Please use a stronger password with uppercase letters, lowercase letters, numbers, and special characters.');
       return;
     }
 

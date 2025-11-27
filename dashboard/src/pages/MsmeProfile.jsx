@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import MsmeSidebar from './MsmeSidebar';
 import Notification from '../components/Notification';
+import PasswordStrengthIndicator from '../components/PasswordStrengthIndicator';
+import { validation } from '../utils/validation';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import '../css/MsmeProfile.css';
 import profileImg from '../assets/pic.jpg';
 
@@ -17,6 +20,9 @@ const MsmeProfile = () => {
     newPassword: '',
     confirmPassword: ''
   });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [notification, setNotification] = useState({
     isVisible: false,
     type: 'info',
@@ -247,6 +253,13 @@ const MsmeProfile = () => {
 
     if (passwordData.newPassword.length < 6) {
       showNotification('error', 'Validation Error', 'New password must be at least 6 characters long');
+      return;
+    }
+
+    // Check password strength
+    const strengthResult = validation.passwordStrength(passwordData.newPassword);
+    if (strengthResult.strength !== 'strong') {
+      showNotification('error', 'Weak Password', 'Password is too weak. Please use a stronger password with uppercase letters, lowercase letters, numbers, and special characters.');
       return;
     }
 
@@ -527,33 +540,61 @@ const MsmeProfile = () => {
               <div className="msme-profile__modal-content">
                 <div className="msme-profile__field">
                   <label>Current Password</label>
-                  <input
-                    type="password"
-                    value={passwordData.currentPassword}
-                    onChange={(e) => handlePasswordInputChange('currentPassword', e.target.value)}
-                    className="msme-profile__edit-input"
-                    placeholder="Enter current password"
-                  />
+                  <div className="msme-profile__password-field">
+                    <input
+                      type={showCurrentPassword ? "text" : "password"}
+                      value={passwordData.currentPassword}
+                      onChange={(e) => handlePasswordInputChange('currentPassword', e.target.value)}
+                      className="msme-profile__edit-input"
+                      placeholder="Enter current password"
+                    />
+                    <button
+                      type="button"
+                      className="msme-profile__password-toggle"
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    >
+                      {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                    </button>
+                  </div>
                 </div>
                 <div className="msme-profile__field">
                   <label>New Password</label>
-                  <input
-                    type="password"
-                    value={passwordData.newPassword}
-                    onChange={(e) => handlePasswordInputChange('newPassword', e.target.value)}
-                    className="msme-profile__edit-input"
-                    placeholder="Enter new password (min. 6 characters)"
-                  />
+                  <div className="msme-profile__password-field">
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      value={passwordData.newPassword}
+                      onChange={(e) => handlePasswordInputChange('newPassword', e.target.value)}
+                      className="msme-profile__edit-input"
+                      placeholder="Enter new password (min. 6 characters)"
+                    />
+                    <button
+                      type="button"
+                      className="msme-profile__password-toggle"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                    >
+                      {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                    </button>
+                  </div>
+                  <PasswordStrengthIndicator password={passwordData.newPassword} />
                 </div>
                 <div className="msme-profile__field">
                   <label>Confirm New Password</label>
-                  <input
-                    type="password"
-                    value={passwordData.confirmPassword}
-                    onChange={(e) => handlePasswordInputChange('confirmPassword', e.target.value)}
-                    className="msme-profile__edit-input"
-                    placeholder="Confirm new password"
-                  />
+                  <div className="msme-profile__password-field">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => handlePasswordInputChange('confirmPassword', e.target.value)}
+                      className="msme-profile__edit-input"
+                      placeholder="Confirm new password"
+                    />
+                    <button
+                      type="button"
+                      className="msme-profile__password-toggle"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="msme-profile__modal-actions">

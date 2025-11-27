@@ -1798,10 +1798,10 @@ app.put("/api/admin/msme/:id/update", async (req, res) => {
           ...(contactNumber && { contactNumber }),
           updatedAt: new Date(),
         },
-        { 
+        {
           new: true,
           upsert: true, // Create if doesn't exist
-          setDefaultsOnInsert: true
+          setDefaultsOnInsert: true,
         }
       );
     }

@@ -374,20 +374,29 @@
 
 .msme-profile__edit-textarea {
   width: 100%;
-  padding: 8px 12px;
+  padding: 12px;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 14px;
   font-family: 'Poppins', sans-serif;
   background: white;
   resize: vertical;
-  min-height: 80px;
+  min-height: 100px;
+  max-height: 200px;
   transition: border-color 0.2s ease;
+  box-sizing: border-box;
+  line-height: 1.5;
+}
+
+.msme-profile__edit-textarea--description {
+  min-height: 120px;
+  max-width: 100%;
 }
 
 .msme-profile__edit-textarea:focus {
   outline: none;
   border-color: #7ed957;
+  box-shadow: 0 0 0 3px rgba(126, 217, 87, 0.1);
 }
 
 .msme-profile__edit-actions {

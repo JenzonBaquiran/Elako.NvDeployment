@@ -379,10 +379,6 @@ const MsmeProfile = () => {
             <div className="msme-profile__stat-label">Rating</div>
           </div>
           <div className="msme-profile__stat-box">
-            <div className="msme-profile__stat-value">{stats.profileComplete}%</div>
-            <div className="msme-profile__stat-label">Profile Complete</div>
-          </div>
-          <div className="msme-profile__stat-box">
             <div className="msme-profile__stat-value">
               {profileData.termsAcceptedAt 
                 ? new Date(profileData.termsAcceptedAt).toLocaleDateString()
@@ -433,16 +429,7 @@ const MsmeProfile = () => {
               <div className="msme-profile__info-fields">
                 <div className="msme-profile__field">
                   <label>Business Name</label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={profileData.businessName}
-                      onChange={(e) => handleInputChange('businessName', e.target.value)}
-                      className="msme-profile__edit-input"
-                    />
-                  ) : (
-                    <span>{profileData.businessName || 'Not provided'}</span>
-                  )}
+                  <span>{profileData.businessName || 'Not provided'}</span>
                 </div>
                 <div className="msme-profile__field">
                   <label>Email Address</label>
@@ -470,57 +457,21 @@ const MsmeProfile = () => {
                     <span>{profileData.contactNumber || 'Not provided'}</span>
                   )}
                 </div>
-                <div className="msme-profile__field">
-                  <label>Business Address</label>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      value={profileData.address}
-                      onChange={(e) => handleInputChange('address', e.target.value)}
-                      className="msme-profile__edit-input"
-                    />
-                  ) : (
-                    <span>{profileData.address || 'Not provided'}</span>
-                  )}
-                </div>
+
                 <div className="msme-profile__field">
                   <label>Business Category</label>
-                  {isEditing ? (
-                    <select
-                      value={profileData.category}
-                      onChange={(e) => handleInputChange('category', e.target.value)}
-                      className="msme-profile__edit-input"
-                    >
-                      <option value="">Select Category</option>
-                      <option value="food">Food & Beverage</option>
-                      <option value="artisan">Artisan</option>
-                    </select>
-                  ) : (
-                    <span>{profileData.category === 'food' ? 'Food & Beverage' : profileData.category === 'artisan' ? 'Artisan' : 'Not provided'}</span>
-                  )}
+                  <span>{profileData.category === 'food' ? 'Food & Beverage' : profileData.category === 'artisan' ? 'Artisan' : 'Not provided'}</span>
                 </div>
-                <div className="msme-profile__field">
-                  <label>Website</label>
-                  {isEditing ? (
-                    <input
-                      type="url"
-                      value={profileData.website}
-                      onChange={(e) => handleInputChange('website', e.target.value)}
-                      className="msme-profile__edit-input"
-                      placeholder="https://your-website.com"
-                    />
-                  ) : (
-                    <span>{profileData.website || 'Not provided'}</span>
-                  )}
-                </div>
+
                 <div className="msme-profile__field msme-profile__field--full">
                   <label>Business Description</label>
                   {isEditing ? (
                     <textarea
                       value={profileData.businessDescription}
                       onChange={(e) => handleInputChange('businessDescription', e.target.value)}
-                      className="msme-profile__edit-textarea"
-                      rows="3"
+                      className="msme-profile__edit-textarea msme-profile__edit-textarea--description"
+                      rows="4"
+                      placeholder="Enter your business description..."
                     />
                   ) : (
                     <span>{profileData.businessDescription || 'Not provided'}</span>

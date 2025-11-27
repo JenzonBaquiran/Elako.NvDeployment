@@ -988,7 +988,7 @@ app.get("/api/msme/:id/profile", async (req, res) => {
         id: msme.id,
         businessName: businessName,
         username: msme.username,
-        email: msme.email || "", // Email from MSME signup
+        email: msme.email || `${msme.username}@msme.local`, // Email from MSME signup or fallback
         contactNumber: contactNumber,
         address: address,
         businessDescription: businessDescription,

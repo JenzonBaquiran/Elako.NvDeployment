@@ -498,14 +498,6 @@ const AdminAnalytics = () => {
                       <p>{monthlyGrowthData.stores.length}</p>
                     </div>
                     <div className="admin-analytics__detail-stat">
-                      <h4>Average Growth</h4>
-                      <p>{Math.round(monthlyGrowthData.stores.reduce((acc, store) => {
-                        const latest = store.views[store.views.length - 1] || 0;
-                        const previous = store.views[store.views.length - 2] || 0;
-                        return acc + (previous > 0 ? ((latest - previous) / previous) * 100 : 0);
-                      }, 0) / monthlyGrowthData.stores.length)}%</p>
-                    </div>
-                    <div className="admin-analytics__detail-stat">
                       <h4>Top Performer</h4>
                       <p>{monthlyGrowthData.stores.reduce((max, store) => 
                         store.views[store.views.length - 1] > max.views[max.views.length - 1] ? store : max, 

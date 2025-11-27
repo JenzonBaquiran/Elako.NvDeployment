@@ -523,11 +523,6 @@ const AdminAnalytics = () => {
                         const maxGrowth = maxPrevious > 0 ? ((maxLatest - maxPrevious) / maxPrevious) * 100 : 0;
                         return storeGrowth > maxGrowth ? store : max;
                       }, monthlyGrowthData.stores[0]).name}</li>
-                      <li>Average monthly growth rate: {Math.round(monthlyGrowthData.stores.reduce((acc, store) => {
-                        const latest = store.views[store.views.length - 1] || 0;
-                        const previous = store.views[store.views.length - 2] || 0;
-                        return acc + (previous > 0 ? ((latest - previous) / previous) * 100 : 0);
-                      }, 0) / monthlyGrowthData.stores.length)}%</li>
                       <li>Peak performance months: {monthlyGrowthData.months.slice(-2).join(' and ')}</li>
                       <li>Overall trend: {monthlyGrowthData.stores.reduce((acc, store) => {
                         const latest = store.views[store.views.length - 1] || 0;
@@ -612,24 +607,6 @@ const AdminAnalytics = () => {
                       </g>
                     </svg>
                   </div>
-                  <div className="admin-analytics__detailed-stats">
-                    <div className="admin-analytics__detail-stat">
-                      <h4>Total Products</h4>
-                      <p>{topProducts.length}</p>
-                    </div>
-                    <div className="admin-analytics__detail-stat">
-                      <h4>Top Rated</h4>
-                      <p>{topProducts[0]?.rating ? `${topProducts[0].rating}★` : 'N/A'}</p>
-                    </div>
-                    <div className="admin-analytics__detail-stat">
-                      <h4>Categories</h4>
-                      <p>{new Set(topProducts.map(p => p.category).filter(Boolean)).size || 'Various'}</p>
-                    </div>
-                    <div className="admin-analytics__detail-stat">
-                      <h4>Active Stores</h4>
-                      <p>{new Set(topProducts.map(p => p.storeName).filter(Boolean)).size}</p>
-                    </div>
-                  </div>
                   <div className="admin-analytics__product-breakdown">
                     <h3>Product Performance Breakdown</h3>
                     <div className="admin-analytics__product-grid">
@@ -667,8 +644,6 @@ const AdminAnalytics = () => {
                       <li>Average rating across top products: {topProducts.filter(p => p.rating).length > 0 ? 
                         (topProducts.filter(p => p.rating).reduce((sum, p) => sum + parseFloat(p.rating), 0) / 
                         topProducts.filter(p => p.rating).length).toFixed(1) + '★' : 'No ratings available'}</li>
-                      <li>Market distribution: {topProducts.length > 3 ? 'Competitive market with diverse products' : 'Market dominated by few key products'}</li>
-                      <li>Store participation: {new Set(topProducts.map(p => p.storeName).filter(Boolean)).size} unique stores contributing to top picks</li>
                     </ul>
                   </div>
                 </>

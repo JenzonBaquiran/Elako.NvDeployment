@@ -219,7 +219,7 @@ const MsmeReviews = () => {
       createdAt: feedback.createdAt || new Date(),
       selectedVariant: feedback.selectedVariant || null,
       selectedSize: feedback.selectedSize || null,
-    })) : [];
+    })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) : [];
     
 
     

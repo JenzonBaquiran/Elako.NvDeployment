@@ -1375,17 +1375,20 @@ app.get("/api/admin/users", async (req, res) => {
         try {
           // Get dashboard data for this MSME
           const dashboard = await Dashboard.findOne({ msmeId: msme._id });
-          
+
           return {
             ...msme.toObject(),
             // Use Dashboard contact number if available, otherwise use MSME contact number
-            contactNumber: dashboard?.contactNumber || msme.contactNumber || '',
+            contactNumber: dashboard?.contactNumber || msme.contactNumber || "",
             // Also include other dashboard data that might be useful
             businessName: dashboard?.businessName || msme.businessName,
-            address: dashboard?.location || msme.address || ''
+            address: dashboard?.location || msme.address || "",
           };
         } catch (error) {
-          console.error(`Error fetching dashboard for MSME ${msme._id}:`, error);
+          console.error(
+            `Error fetching dashboard for MSME ${msme._id}:`,
+            error
+          );
           // Return original MSME data if dashboard fetch fails
           return msme.toObject();
         }

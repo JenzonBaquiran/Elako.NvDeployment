@@ -24,12 +24,43 @@ const MsmeSidebar = ({ onSidebarToggle }) => {
   const location = useLocation(); // Get the current route
   const navigate = useNavigate(); // Initialize navigate
 
-  // Get MSME data from AuthContext
+  // Get MSME data from AuthContext and refresh from server
   useEffect(() => {
     if (user) {
-      setMsmeUser(user);
+      refreshMsmeUser();
     }
   }, [user]);
+
+  // Function to refresh MSME user data from server
+  const refreshMsmeUser = async () => {
+    try {
+      if (user && user.id) {
+        // Fetch the latest MSME data from server
+        const response = await fetch(`http://localhost:1337/api/msme/${user.id}/profile`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.profile) {
+            // Update local state with fresh data
+            const updatedUser = {
+              ...user,
+              businessName: data.profile.businessName
+            };
+            setMsmeUser(updatedUser);
+            
+            // Update localStorage
+            localStorage.setItem('msmeUser', JSON.stringify(updatedUser));
+            return;
+          }
+        }
+      }
+      
+      // Fallback to existing user data
+      setMsmeUser(user);
+    } catch (error) {
+      console.error('Error refreshing MSME user data:', error);
+      setMsmeUser(user);
+    }
+  };
 
   // Detect screen size and update state
   useEffect(() => {
@@ -48,6 +79,30 @@ const MsmeSidebar = ({ onSidebarToggle }) => {
 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Listen for localStorage changes and refresh data periodically
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'msmeUser' && user) {
+        refreshMsmeUser();
+      }
+    };
+
+    // Listen for storage changes
+    window.addEventListener('storage', handleStorageChange);
+
+    // Set up periodic refresh every 30 seconds to catch admin updates
+    const refreshInterval = setInterval(() => {
+      if (user) {
+        refreshMsmeUser();
+      }
+    }, 30000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(refreshInterval);
+    };
+  }, [user]);
 
   // Notify parent component when sidebar state changes - use ref to prevent infinite loops
   const previousStateRef = useRef();

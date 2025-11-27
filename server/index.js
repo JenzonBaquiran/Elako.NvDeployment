@@ -1788,6 +1788,24 @@ app.put("/api/admin/msme/:id/update", async (req, res) => {
       return res.status(404).json({ success: false, error: "MSME not found" });
     }
 
+    // Also update the Dashboard model with the new business name and other relevant fields
+    if (businessName || address || contactNumber) {
+      await Dashboard.findOneAndUpdate(
+        { msmeId: updatedMSME._id },
+        {
+          ...(businessName && { businessName }),
+          ...(address && { location: address }),
+          ...(contactNumber && { contactNumber }),
+          updatedAt: new Date(),
+        },
+        { 
+          new: true,
+          upsert: true, // Create if doesn't exist
+          setDefaultsOnInsert: true
+        }
+      );
+    }
+
     res.json({
       success: true,
       message: "MSME updated successfully",

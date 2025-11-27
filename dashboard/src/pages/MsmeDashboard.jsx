@@ -58,10 +58,30 @@ const MsmeDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch business name from localStorage
-    const fetchBusinessName = () => {
+    // Fetch business name from server to ensure it's up to date
+    const fetchBusinessName = async () => {
       try {
-        // Get MSME user data from localStorage
+        if (user && user.id) {
+          // First try to fetch from server to get the most current business name
+          const response = await fetch(`http://localhost:1337/api/msme/${user.id}/profile`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.profile.businessName) {
+              setBusinessName(data.profile.businessName);
+              
+              // Update localStorage with the latest business name
+              const msmeUserData = localStorage.getItem('msmeUser');
+              if (msmeUserData) {
+                const parsedData = JSON.parse(msmeUserData);
+                parsedData.businessName = data.profile.businessName;
+                localStorage.setItem('msmeUser', JSON.stringify(parsedData));
+              }
+              return;
+            }
+          }
+        }
+        
+        // Fallback to localStorage if server request fails
         const msmeUserData = localStorage.getItem('msmeUser');
         if (msmeUserData) {
           const parsedData = JSON.parse(msmeUserData);
@@ -71,10 +91,25 @@ const MsmeDashboard = () => {
           }
         }
 
-        // Fallback if no business name found
+        // Final fallback
         setBusinessName("Your Business");
       } catch (error) {
         console.error('Error fetching business name:', error);
+        
+        // Try localStorage as fallback
+        try {
+          const msmeUserData = localStorage.getItem('msmeUser');
+          if (msmeUserData) {
+            const parsedData = JSON.parse(msmeUserData);
+            if (parsedData.businessName) {
+              setBusinessName(parsedData.businessName);
+              return;
+            }
+          }
+        } catch (localStorageError) {
+          console.error('Error reading from localStorage:', localStorageError);
+        }
+        
         setBusinessName("Your Business");
       }
     };

@@ -134,6 +134,17 @@ const MsmeProfile = () => {
           ...personalData.profile,
           ...businessData.profile
         }));
+        
+        // Update localStorage with the new business name to keep UI in sync
+        if (personalData.profile.businessName) {
+          const msmeUserData = localStorage.getItem('msmeUser');
+          if (msmeUserData) {
+            const parsedData = JSON.parse(msmeUserData);
+            parsedData.businessName = personalData.profile.businessName;
+            localStorage.setItem('msmeUser', JSON.stringify(parsedData));
+          }
+        }
+        
         setIsEditing(false);
         showNotification('success', 'Success', 'Business information updated successfully!');
       } else {

@@ -142,10 +142,20 @@ const AdminAuditLogs = () => {
       setActiveStatFilter(null);
       handleClearFilters();
     } else {
-      setActiveStatFilter(statType);
+      // First clear all filters to prevent conflicts
+      setSearchTerm('');
+      setActionFilter('all');
+      setStatusFilter('all');
+      setStartDate('');
+      setEndDate('');
       setCurrentPage(1);
+      setActiveStatFilter(statType);
       
+      // Then apply the specific filter
       switch (statType) {
+        case 'total':
+          // Show all logs, no specific filter needed
+          break;
         case 'login':
           setActionFilter('LOGIN');
           break;

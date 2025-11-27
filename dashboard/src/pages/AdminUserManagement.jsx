@@ -120,6 +120,8 @@ const AdminUserManagement = () => {
           joinDate: new Date(customer.createdAt).toLocaleDateString(),
           activity: new Date(customer.updatedAt).toLocaleDateString(),
           username: customer.username,
+          firstname: customer.firstname,
+          lastname: customer.lastname,
           contactNumber: customer.contactNumber,
           address: customer.address
         })),
@@ -1462,22 +1464,9 @@ const AdminUserManagement = () => {
               <div className="user-management__modal-avatar">
                 {selectedUser.name[0].toUpperCase()}
               </div>
-              {/** Align Last Activity, Client Profiling Number and TIN in a single row */}
-              <div className="user-management__three-columns">
-                <div className="user-management__modal-field">
-                  <div className="user-management__modal-label">Last Activity</div>
-                  <div className="user-management__modal-value">{selectedUser.activity || 'Not provided'}</div>
-                </div>
-
-                <div className="user-management__modal-field">
-                  <div className="user-management__modal-label">Client Profiling Number</div>
-                  <div className="user-management__modal-value">{selectedUser.clientProfilingNumber || 'Not provided'}</div>
-                </div>
-
-                <div className="user-management__modal-field">
-                  <div className="user-management__modal-label">TIN Number</div>
-                  <div className="user-management__modal-value">{(certificates && certificates.tinNumber) || 'Not provided'}</div>
-                </div>
+              <div className="user-management__modal-field">
+                <div className="user-management__modal-label">Last Activity</div>
+                <div className="user-management__modal-value">{selectedUser.activity || 'Not provided'}</div>
               </div>
 
               <div className="user-management__modal-field">
@@ -1498,7 +1487,57 @@ const AdminUserManagement = () => {
                 <div className="user-management__modal-value">{selectedUser.joinDate}</div>
               </div>
 
-      
+              {/* Customer-specific fields */}
+              {selectedUser.type === "Customer" && (
+                <>
+                  <div className="user-management__modal-field">
+                    <div className="user-management__modal-label">Username</div>
+                    <div className="user-management__modal-value">{selectedUser.username || 'Not provided'}</div>
+                  </div>
+
+                  <div className="user-management__modal-field">
+                    <div className="user-management__modal-label">Full Name</div>
+                    <div className="user-management__modal-value">
+                      {selectedUser.firstname && selectedUser.lastname 
+                        ? `${selectedUser.firstname} ${selectedUser.lastname}` 
+                        : selectedUser.name || 'Not provided'
+                      }
+                    </div>
+                  </div>
+
+                  <div className="user-management__modal-field">
+                    <div className="user-management__modal-label">Email</div>
+                    <div className="user-management__modal-value">{selectedUser.email || 'Not provided'}</div>
+                  </div>
+                </>
+              )}
+
+              {/* Admin-specific fields */}
+              {selectedUser.type === "Admin" && (
+                <>
+                  <div className="user-management__modal-field">
+                    <div className="user-management__modal-label">Username</div>
+                    <div className="user-management__modal-value">{selectedUser.username || 'Not provided'}</div>
+                  </div>
+
+                  <div className="user-management__modal-field">
+                    <div className="user-management__modal-label">Full Name</div>
+                    <div className="user-management__modal-value">{selectedUser.name || 'Not provided'}</div>
+                  </div>
+
+                  <div className="user-management__modal-field">
+                    <div className="user-management__modal-label">Email</div>
+                    <div className="user-management__modal-value">{selectedUser.email || 'Not provided'}</div>
+                  </div>
+
+                  {selectedUser.role && (
+                    <div className="user-management__modal-field">
+                      <div className="user-management__modal-label">Role</div>
+                      <div className="user-management__modal-value">{selectedUser.role}</div>
+                    </div>
+                  )}
+                </>
+              )}
 
               {selectedUser.contactNumber && (
                 <div className="user-management__modal-field">

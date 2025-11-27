@@ -90,30 +90,80 @@ const AdminSettings = () => {
   };
 
   const handleInputChange = (field, value) => {
-    setProfileData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    if (field === 'fullName') {
+      // Split fullName into firstname and lastname
+      const names = value.trim().split(' ');
+      const firstname = names[0] || '';
+      const lastname = names.slice(1).join(' ') || '';
+      
+      setProfileData(prev => ({
+        ...prev,
+        fullName: value,
+        firstname: firstname,
+        lastname: lastname
+      }));
+    } else {
+      setProfileData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    }
   };
 
   const handleEditToggle = () => {
+    if (isEditing) {
+      // Reset to original data when canceling
+      fetchAdminProfile();
+    }
     setIsEditing(!isEditing);
   };
 
   const handleSaveProfile = async () => {
     try {
       setSaving(true);
-      // Here you would typically make an API call to save the profile data
-      // await fetch('/api/admin/profile', { method: 'PUT', body: JSON.stringify(profileData) });
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Skip API call for hardcoded admin
+      if (user.id === 'admin') {
+        showNotification('info', 'Info', 'Hardcoded admin profile cannot be updated');
+        setSaving(false);
+        return;
+      }
       
-      setIsEditing(false);
-      console.log('Profile updated successfully');
+      // Make actual API call to save the profile data
+      const response = await fetch(`http://localhost:1337/api/admin/admins/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: profileData.username,
+          firstname: profileData.firstname,
+          lastname: profileData.lastname,
+          email: profileData.email
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update local profile data with response
+        setProfileData(prev => ({
+          ...prev,
+          fullName: `${data.admin.firstname} ${data.admin.lastname}`.trim(),
+          username: data.admin.username,
+          firstname: data.admin.firstname,
+          lastname: data.admin.lastname,
+          email: data.admin.email
+        }));
+        
+        setIsEditing(false);
+        showNotification('success', 'Success', 'Profile updated successfully!');
+      } else {
+        showNotification('error', 'Error', data.error || 'Failed to update profile');
+      }
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('Failed to update profile. Please try again.');
+      showNotification('error', 'Error', 'Network error. Please try again.');
     } finally {
       setSaving(false);
     }

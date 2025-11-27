@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { TextField, Button, IconButton, InputAdornment, Alert, CircularProgress } from "@mui/material";
+import { TextField, Button, Alert, CircularProgress, InputAdornment, IconButton } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
@@ -16,8 +16,57 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [validating, setValidating] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [cooldownTime, setCooldownTime] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Load login attempts from localStorage on component mount
+  useEffect(() => {
+    const storedAttempts = localStorage.getItem('loginAttempts');
+    const storedBlockTime = localStorage.getItem('loginBlockTime');
+    
+    if (storedAttempts) {
+      setAttempts(parseInt(storedAttempts));
+    }
+    
+    if (storedBlockTime) {
+      const blockTime = parseInt(storedBlockTime);
+      const now = Date.now();
+      
+      if (now < blockTime) {
+        setIsBlocked(true);
+        setCooldownTime(Math.ceil((blockTime - now) / 1000));
+        
+        // Start countdown
+        const interval = setInterval(() => {
+          setCooldownTime(prev => {
+            if (prev <= 1) {
+              clearInterval(interval);
+              setIsBlocked(false);
+              setAttempts(0);
+              setUsername("");
+              setPassword("");
+              localStorage.removeItem('loginAttempts');
+              localStorage.removeItem('loginBlockTime');
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+        
+        return () => clearInterval(interval);
+      } else {
+        // Block time has expired, reset
+        setAttempts(0);
+        setUsername("");
+        setPassword("");
+        localStorage.removeItem('loginAttempts');
+        localStorage.removeItem('loginBlockTime');
+      }
+    }
+  }, []);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -42,6 +91,13 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    
+    // Check if user is blocked
+    if (isBlocked) {
+      showError(`Too many failed attempts. Please wait ${cooldownTime} seconds before trying again.`, "Login Blocked");
+      return;
+    }
+    
     setLoading(true);
     setError("");
 
@@ -65,6 +121,11 @@ function Login() {
       if (data.success) {
         const loginSuccess = login(data.user, 'admin');
         if (loginSuccess) {
+          // Reset login attempts on successful login
+          setAttempts(0);
+          localStorage.removeItem('loginAttempts');
+          localStorage.removeItem('loginBlockTime');
+          
           // Track admin login time for audit logging
           sessionStorage.setItem('adminLoginTime', Date.now().toString());
           
@@ -89,6 +150,11 @@ function Login() {
       if (data.success) {
         const loginSuccess = login(data.user, 'customer');
         if (loginSuccess) {
+          // Reset login attempts on successful login
+          setAttempts(0);
+          localStorage.removeItem('loginAttempts');
+          localStorage.removeItem('loginBlockTime');
+          
           showSuccess("Welcome back! Let's get started.", "Login Successful");
           const from = location.state?.from?.pathname || '/customer-sidebar';
           navigate(from, { replace: true });
@@ -112,6 +178,11 @@ function Login() {
         if (data.user.status === "approved") {
           const loginSuccess = login(data.user, 'msme');
           if (loginSuccess) {
+            // Reset login attempts on successful login
+            setAttempts(0);
+            localStorage.removeItem('loginAttempts');
+            localStorage.removeItem('loginBlockTime');
+            
             // Clear congratulation status for today so it can show after login
             localStorage.removeItem(`topStoreCongratulation_${data.user._id}`);
             
@@ -129,7 +200,39 @@ function Login() {
       }
 
       // If all login attempts fail
-      showError("Invalid username or password", "Login Failed");
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
+      localStorage.setItem('loginAttempts', newAttempts.toString());
+      
+      if (newAttempts >= 3) {
+        // Block for 1 minute (60 seconds)
+        const blockTime = Date.now() + 60000;
+        localStorage.setItem('loginBlockTime', blockTime.toString());
+        setIsBlocked(true);
+        setCooldownTime(60);
+        
+        // Start countdown
+        const interval = setInterval(() => {
+          setCooldownTime(prev => {
+            if (prev <= 1) {
+              clearInterval(interval);
+              setIsBlocked(false);
+              setAttempts(0);
+              setUsername("");
+              setPassword("");
+              localStorage.removeItem('loginAttempts');
+              localStorage.removeItem('loginBlockTime');
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+        
+        showError("Too many failed attempts. You are blocked for 1 minute.", "Login Blocked");
+      } else {
+        const remainingAttempts = 3 - newAttempts;
+        showError(`Invalid username or password. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining.`, "Login Failed");
+      }
 
     } catch (error) {
       console.error("Login error:", error);
@@ -158,25 +261,27 @@ function Login() {
             <form onSubmit={handleLogin}>
               <TextField
                 variant="outlined"
-                placeholder="Username"
-                value={username}
+                placeholder={isBlocked ? `Login blocked - ${cooldownTime}s remaining` : "Username"}
+                value={isBlocked ? `Blocked for ${cooldownTime} seconds` : username}
                 onChange={(e) => setUsername(e.target.value)}
                 fullWidth
                 className="login-input"
                 InputProps={{
                   classes: { notchedOutline: "input-outline" },
+                  readOnly: isBlocked,
                 }}
                 inputProps={{
                   className: "login-input-inner",
+                  style: { textAlign: isBlocked ? 'center' : 'left', color: isBlocked ? '#ff6b6b' : 'inherit' }
                 }}
                 required
-                disabled={loading}
+                disabled={loading || isBlocked}
               />
               <TextField
                 variant="outlined"
-                placeholder="Password"
+                placeholder={isBlocked ? "Password field disabled" : "Password"}
                 type={showPassword ? "text" : "password"}
-                value={password}
+                value={isBlocked ? "" : password}
                 onChange={(e) => setPassword(e.target.value)}
                 fullWidth
                 className="login-input"
@@ -187,18 +292,20 @@ function Login() {
                       <IconButton
                         onClick={() => setShowPassword(!showPassword)}
                         edge="end"
-                        disabled={loading}
+                        disabled={loading || isBlocked}
                       >
                         {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </InputAdornment>
                   ),
+                  readOnly: isBlocked,
                 }}
                 inputProps={{
                   className: "login-input-inner",
+                  style: { color: isBlocked ? '#ccc' : 'inherit' }
                 }}
                 required
-                disabled={loading}
+                disabled={loading || isBlocked}
               />
               <div className="login-links">
                 <span

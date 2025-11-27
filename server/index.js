@@ -148,6 +148,25 @@ mongoose.connection.on("error", (err) => {
   console.error("❌ MongoDB connection error:", err);
 });
 
+// --- Password Strength Validation ---
+const isPasswordStrong = (password) => {
+  if (!password || password.length < 8) return false;
+
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasLowerCase = /[a-z]/.test(password);
+  const hasNumbers = /\d/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+  // Require at least 3 out of 4 criteria for strong password
+  const criteriaCount = [
+    hasUpperCase,
+    hasLowerCase,
+    hasNumbers,
+    hasSpecialChar,
+  ].filter(Boolean).length;
+  return criteriaCount >= 3;
+};
+
 // --- Validation Helpers ---
 function validateCustomerInput(data) {
   const errors = [];
@@ -163,12 +182,12 @@ function validateCustomerInput(data) {
     errors.push("Contact number is required.");
   if (!data.address || typeof data.address !== "string")
     errors.push("Address is required.");
-  if (
-    !data.password ||
-    typeof data.password !== "string" ||
-    data.password.length < 6
-  )
-    errors.push("Password must be at least 6 characters.");
+  if (!data.password || typeof data.password !== "string")
+    errors.push("Password is required.");
+  else if (!isPasswordStrong(data.password))
+    errors.push(
+      "Password is too weak. Please create a stronger password with at least 8 characters including at least 3 of the following: uppercase letters, lowercase letters, numbers, and special characters."
+    );
   return errors;
 }
 
@@ -187,12 +206,12 @@ function validateMSMEInput(data) {
     errors.push("Username is required.");
   if (!data.email || typeof data.email !== "string")
     errors.push("Email is required.");
-  if (
-    !data.password ||
-    typeof data.password !== "string" ||
-    data.password.length < 6
-  )
-    errors.push("Password must be at least 6 characters.");
+  if (!data.password || typeof data.password !== "string")
+    errors.push("Password is required.");
+  else if (!isPasswordStrong(data.password))
+    errors.push(
+      "Password is too weak. Please create a stronger password with at least 8 characters including at least 3 of the following: uppercase letters, lowercase letters, numbers, and special characters."
+    );
 
   // Validate email format
   if (data.email) {
@@ -489,10 +508,11 @@ app.put("/api/customers/:id/change-password", async (req, res) => {
       });
     }
 
-    if (newPassword.length < 6) {
+    if (!isPasswordStrong(newPassword)) {
       return res.status(400).json({
         success: false,
-        error: "New password must be at least 6 characters long",
+        error:
+          "Password is too weak. Please create a stronger password with at least 8 characters including at least 3 of the following: uppercase letters, lowercase letters, numbers, and special characters.",
       });
     }
 
@@ -7777,10 +7797,11 @@ app.post("/api/reset-password", async (req, res) => {
       });
     }
 
-    if (newPassword.length < 6) {
+    if (!isPasswordStrong(newPassword)) {
       return res.status(400).json({
         success: false,
-        error: "Password must be at least 6 characters long",
+        error:
+          "Password is too weak. Please create a stronger password with at least 8 characters including at least 3 of the following: uppercase letters, lowercase letters, numbers, and special characters.",
       });
     }
 
@@ -9038,11 +9059,12 @@ app.put("/api/msme/:id/change-password", async (req, res) => {
       });
     }
 
-    // Validate new password length
-    if (newPassword.length < 6) {
+    // Validate new password strength
+    if (!isPasswordStrong(newPassword)) {
       return res.status(400).json({
         success: false,
-        error: "New password must be at least 6 characters long",
+        error:
+          "Password is too weak. Please create a stronger password with at least 8 characters including at least 3 of the following: uppercase letters, lowercase letters, numbers, and special characters.",
       });
     }
 

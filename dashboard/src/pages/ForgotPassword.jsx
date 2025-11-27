@@ -11,8 +11,11 @@ import {
   Box,
   Typography,
   Paper,
-  Divider
+  Divider,
+  InputAdornment,
+  IconButton
 } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
 import PasswordStrengthIndicator from "../components/PasswordStrengthIndicator";
@@ -33,6 +36,8 @@ function ForgotPassword() {
   });
   const [otpTimer, setOtpTimer] = useState(0);
   const [canResend, setCanResend] = useState(true);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Start countdown timer for OTP resend
   const startTimer = () => {
@@ -52,6 +57,20 @@ function ForgotPassword() {
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Password strength validation function
+  const isPasswordStrong = (password) => {
+    if (!password || password.length < 8) return false;
+    
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    
+    // Require at least 3 out of 4 criteria for strong password
+    const criteriaCount = [hasUpperCase, hasLowerCase, hasNumbers, hasSpecialChar].filter(Boolean).length;
+    return criteriaCount >= 3;
   };
 
   const validateEmail = (email) => {
@@ -126,8 +145,11 @@ function ForgotPassword() {
       return;
     }
 
-    if (formData.newPassword.length < 6) {
-      showError("Password must be at least 6 characters long", "Password Too Short");
+    if (!isPasswordStrong(formData.newPassword)) {
+      showError(
+        "Password is too weak. Please create a stronger password with at least 8 characters including at least 3 of the following: uppercase letters, lowercase letters, numbers, and special characters.",
+        "Weak Password"
+      );
       return;
     }
 
@@ -308,7 +330,7 @@ function ForgotPassword() {
       <TextField
         variant="outlined"
         placeholder="New Password"
-        type="password"
+        type={showNewPassword ? "text" : "password"}
         value={formData.newPassword}
         onChange={(e) => handleInputChange("newPassword", e.target.value)}
         fullWidth
@@ -316,18 +338,44 @@ function ForgotPassword() {
         required
         disabled={loading}
         style={{ marginBottom: "20px" }}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                edge="end"
+                disabled={loading}
+              >
+                {showNewPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
       <PasswordStrengthIndicator password={formData.newPassword} />
 
       <TextField
         variant="outlined"
         placeholder="Confirm New Password"
-        type="password"
+        type={showConfirmPassword ? "text" : "password"}
         value={formData.confirmPassword}
         onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
         fullWidth
         className="login-input"
         required
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                edge="end"
+                disabled={loading}
+              >
+                {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
         disabled={loading}
         style={{ marginBottom: "20px" }}
       />

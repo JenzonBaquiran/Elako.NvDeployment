@@ -7177,6 +7177,10 @@ app.get("/api/users/:userId/conversations", async (req, res) => {
     const { userId } = req.params;
     const { userModel } = req.query;
 
+    console.log(
+      `[CONVERSATIONS] Fetching conversations for user: ${userId}, model: ${userModel}`
+    );
+
     if (!userModel) {
       return res.status(400).json({
         success: false,
@@ -7184,6 +7188,33 @@ app.get("/api/users/:userId/conversations", async (req, res) => {
       });
     }
 
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      console.log(`[CONVERSATIONS] Invalid userId format: ${userId}`);
+      return res.status(400).json({
+        success: false,
+        error: "Invalid user ID format",
+      });
+    }
+
+    // Find conversations without populate first to debug
+    const rawConversations = await Conversation.find({
+      "participants.userId": userId,
+      isActive: true,
+    }).sort({ lastActivity: -1 });
+
+    console.log(
+      `[CONVERSATIONS] Found ${rawConversations.length} raw conversations`
+    );
+
+    if (rawConversations.length === 0) {
+      return res.json({
+        success: true,
+        conversations: [],
+      });
+    }
+
+    // Now populate carefully with error handling
     const conversations = await Conversation.find({
       "participants.userId": userId,
       isActive: true,
@@ -7195,44 +7226,74 @@ app.get("/api/users/:userId/conversations", async (req, res) => {
         },
         { path: "lastMessage" },
       ])
-      .sort({ lastActivity: -1 });
+      .sort({ lastActivity: -1 })
+      .lean(); // Use lean for better performance
+
+    console.log(
+      `[CONVERSATIONS] Populated ${conversations.length} conversations`
+    );
 
     // Get unread message counts for each conversation
     const conversationsWithUnread = await Promise.all(
       conversations.map(async (conversation) => {
-        const unreadCount = await Message.countDocuments({
-          conversationId: conversation._id,
-          receiverId: userId,
-          isRead: false,
-          isDeleted: false,
-        });
+        try {
+          const unreadCount = await Message.countDocuments({
+            conversationId: conversation._id,
+            receiverId: userId,
+            isRead: false,
+            isDeleted: false,
+          });
 
-        // Find the other participant
-        const otherParticipant = conversation.participants.find(
-          (p) => p.userId._id.toString() !== userId.toString()
-        );
+          // Find the other participant with null checking
+          const otherParticipant = conversation.participants?.find(
+            (p) => p.userId?._id?.toString() !== userId.toString()
+          );
 
-        return {
-          ...conversation.toObject(),
-          unreadCount,
-          otherParticipant: otherParticipant
-            ? {
-                id: otherParticipant.userId._id,
-                name:
-                  otherParticipant.userModel === "Customer"
-                    ? `${otherParticipant.userId.firstname} ${otherParticipant.userId.lastname}`
-                    : otherParticipant.userId.businessName,
-                // Add these fields for proper client-side display
-                firstname: otherParticipant.userId.firstname,
-                lastname: otherParticipant.userId.lastname,
-                businessName: otherParticipant.userId.businessName,
-                username: otherParticipant.userId.username,
-                email: otherParticipant.userId.email,
-                userType: otherParticipant.userModel.toLowerCase(),
-              }
-            : null,
-        };
+          console.log(
+            `[CONVERSATIONS] Processing conversation ${conversation._id}, other participant:`,
+            otherParticipant?.userId
+          );
+
+          return {
+            ...conversation,
+            unreadCount,
+            otherParticipant:
+              otherParticipant && otherParticipant.userId
+                ? {
+                    id: otherParticipant.userId._id,
+                    name:
+                      otherParticipant.userModel === "Customer"
+                        ? `${otherParticipant.userId.firstname || "Unknown"} ${
+                            otherParticipant.userId.lastname || "User"
+                          }`
+                        : otherParticipant.userId.businessName ||
+                          "Unknown Business",
+                    // Add these fields for proper client-side display
+                    firstname: otherParticipant.userId.firstname,
+                    lastname: otherParticipant.userId.lastname,
+                    businessName: otherParticipant.userId.businessName,
+                    username: otherParticipant.userId.username,
+                    email: otherParticipant.userId.email,
+                    userType: otherParticipant.userModel?.toLowerCase(),
+                  }
+                : null,
+          };
+        } catch (convError) {
+          console.error(
+            `[CONVERSATIONS] Error processing conversation ${conversation._id}:`,
+            convError
+          );
+          return {
+            ...conversation,
+            unreadCount: 0,
+            otherParticipant: null,
+          };
+        }
       })
+    );
+
+    console.log(
+      `[CONVERSATIONS] Successfully processed ${conversationsWithUnread.length} conversations`
     );
 
     res.json({
@@ -7240,8 +7301,16 @@ app.get("/api/users/:userId/conversations", async (req, res) => {
       conversations: conversationsWithUnread,
     });
   } catch (error) {
-    console.error("Error fetching conversations:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error("[CONVERSATIONS] Error fetching conversations:", error);
+    console.error("[CONVERSATIONS] Error stack:", error.stack);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error:
+        process.env.NODE_ENV === "development"
+          ? error.message
+          : "Internal server error",
+    });
   }
 });
 

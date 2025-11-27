@@ -33,17 +33,38 @@ class MessageService {
   // Get user's conversations
   async getUserConversations(userId, userModel) {
     try {
+      console.log(
+        `[MessageService] Fetching conversations for userId: ${userId}, userModel: ${userModel}`
+      );
+
       const response = await fetch(
         `${API_BASE_URL}/users/${userId}/conversations?userModel=${userModel}`
       );
 
       const data = await response.json();
 
+      console.log(
+        `[MessageService] Response status: ${response.status}, data:`,
+        data
+      );
+
       if (!response.ok) {
-        throw new Error(data.message || "Failed to fetch conversations");
+        console.error(
+          `[MessageService] API error: ${response.status} - ${
+            data.message || data.error
+          }`
+        );
+        throw new Error(
+          data.message || data.error || "Failed to fetch conversations"
+        );
       }
 
-      return data.conversations;
+      console.log(
+        `[MessageService] Successfully fetched ${
+          data.conversations?.length || 0
+        } conversations`
+      );
+      return data.conversations || [];
     } catch (error) {
       console.error("Error fetching conversations:", error);
       throw error;

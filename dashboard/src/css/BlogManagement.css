@@ -222,9 +222,15 @@
 }
 
 .preview img,
-.preview video {
+.preview video,
+.preview iframe {
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.preview iframe {
+  border: none;
+  background-color: #000;
 }
 
 /* Form Actions */

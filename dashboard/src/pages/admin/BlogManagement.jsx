@@ -250,17 +250,25 @@ const BlogManagement = () => {
     setEditingPost(null);
   };
 
+  // Helper function to extract YouTube video ID
+  const extractYouTubeId = (url) => {
+    if (!url) return null;
+    
+    let videoId;
+    if (url.includes('youtube.com')) {
+      videoId = url.split('v=')[1]?.split('&')[0];
+    } else if (url.includes('youtu.be')) {
+      videoId = url.split('/').pop().split('?')[0];
+    } else {
+      videoId = url.split('/').pop();
+    }
+    return videoId;
+  };
+
   const renderMediaPreview = (post) => {
     switch (post.mediaType) {
       case 'youtube':
-        let videoId;
-        if (post.mediaUrl.includes('youtube.com')) {
-          videoId = post.mediaUrl.split('v=')[1]?.split('&')[0];
-        } else if (post.mediaUrl.includes('youtu.be')) {
-          videoId = post.mediaUrl.split('/').pop().split('?')[0];
-        } else {
-          videoId = post.mediaUrl.split('/').pop();
-        }
+        const videoId = extractYouTubeId(post.mediaUrl);
         return (
           <div className="media-preview youtube">
             <iframe
@@ -437,6 +445,18 @@ const BlogManagement = () => {
                     placeholder="https://www.youtube.com/watch?v=..."
                     required
                   />
+                  {formData.mediaUrl && (
+                    <div className="preview">
+                      <iframe
+                        src={`https://www.youtube.com/embed/${extractYouTubeId(formData.mediaUrl)}`}
+                        width="200"
+                        height="113"
+                        frameBorder="0"
+                        allowFullScreen
+                        title="YouTube Preview"
+                      />
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="form-group">

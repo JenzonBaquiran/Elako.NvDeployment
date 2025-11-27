@@ -1159,6 +1159,18 @@ const MsmeCustomizeDashboard = () => {
                       placeholder="https://www.youtube.com/watch?v=..."
                       required
                     />
+                    {blogFormData.mediaUrl && (
+                      <div className="blog-form-preview">
+                        <iframe
+                          src={`https://www.youtube.com/embed/${extractYouTubeId(blogFormData.mediaUrl)}`}
+                          width="200"
+                          height="113"
+                          frameBorder="0"
+                          allowFullScreen
+                          title="YouTube Preview"
+                        />
+                      </div>
+                    )}
                   </>
                 ) : (
                   <>
@@ -1169,6 +1181,23 @@ const MsmeCustomizeDashboard = () => {
                       onChange={handleBlogFileChange}
                       required={!editingBlog}
                     />
+                    {blogFormData.mediaUrl && typeof blogFormData.mediaUrl === 'string' && (
+                      <div className="blog-form-preview">
+                        {blogFormData.mediaType === 'video' ? (
+                          <video controls width="200">
+                            <source src={`http://localhost:1337/uploads/${blogFormData.mediaUrl}`} type="video/mp4" />
+                            Your browser does not support the video tag.
+                          </video>
+                        ) : (
+                          <img 
+                            src={`http://localhost:1337/uploads/${blogFormData.mediaUrl}`} 
+                            alt="Current media" 
+                            width="200"
+                            style={{maxHeight: '150px', objectFit: 'cover'}}
+                          />
+                        )}
+                      </div>
+                    )}
                   </>
                 )}
               </div>

@@ -1367,7 +1367,30 @@ app.get("/api/admin/audit-logs/statistics", async (req, res) => {
 app.get("/api/admin/users", async (req, res) => {
   try {
     const customers = await Customer.find({}, { password: 0 });
-    const msmes = await MSME.find({}, { password: 0 });
+    const msmeData = await MSME.find({}, { password: 0 });
+
+    // Enhance MSME data with Dashboard information (contact number, etc.)
+    const msmes = await Promise.all(
+      msmeData.map(async (msme) => {
+        try {
+          // Get dashboard data for this MSME
+          const dashboard = await Dashboard.findOne({ msmeId: msme._id });
+          
+          return {
+            ...msme.toObject(),
+            // Use Dashboard contact number if available, otherwise use MSME contact number
+            contactNumber: dashboard?.contactNumber || msme.contactNumber || '',
+            // Also include other dashboard data that might be useful
+            businessName: dashboard?.businessName || msme.businessName,
+            address: dashboard?.location || msme.address || ''
+          };
+        } catch (error) {
+          console.error(`Error fetching dashboard for MSME ${msme._id}:`, error);
+          // Return original MSME data if dashboard fetch fails
+          return msme.toObject();
+        }
+      })
+    );
 
     res.json({
       customers,
@@ -1753,7 +1776,6 @@ app.put("/api/admin/msme/:id/update", async (req, res) => {
       businessName,
       email,
       category,
-      address,
       contactNumber,
       clientProfilingNumber,
     } = req.body;
@@ -1776,7 +1798,6 @@ app.put("/api/admin/msme/:id/update", async (req, res) => {
         businessName,
         email: email || "",
         category,
-        address,
         contactNumber,
         clientProfilingNumber,
         updatedAt: new Date(),
@@ -1788,13 +1809,12 @@ app.put("/api/admin/msme/:id/update", async (req, res) => {
       return res.status(404).json({ success: false, error: "MSME not found" });
     }
 
-    // Also update the Dashboard model with the new business name and other relevant fields
-    if (businessName || address || contactNumber) {
+    // Also update the Dashboard model with the new business name and contact number
+    if (businessName || contactNumber) {
       await Dashboard.findOneAndUpdate(
         { msmeId: updatedMSME._id },
         {
           ...(businessName && { businessName }),
-          ...(address && { location: address }),
           ...(contactNumber && { contactNumber }),
           updatedAt: new Date(),
         },

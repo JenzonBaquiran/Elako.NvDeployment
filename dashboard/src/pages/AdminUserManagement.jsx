@@ -126,14 +126,16 @@ const AdminUserManagement = () => {
         ...data.msmes.map(msme => ({
           id: msme.id,
           name: msme.businessName,
-          email: `${msme.username}@msme.com`, // You may want to add email field to MSME model
+          email: msme.email || `${msme.username}@msme.com`, // Use actual email if available
           type: "MSME",
           status: msme.status,
           joinDate: new Date(msme.createdAt).toLocaleDateString(),
           activity: new Date(msme.updatedAt).toLocaleDateString(),
           username: msme.username,
           category: msme.category,
-          clientProfilingNumber: msme.clientProfilingNumber
+          clientProfilingNumber: msme.clientProfilingNumber,
+          contactNumber: msme.contactNumber || '', // Include contact number
+          address: msme.address || '' // Include address for consistency
         }))
       ];
       
@@ -549,7 +551,7 @@ const AdminUserManagement = () => {
         email: user.email,
         businessName: user.name,
         category: user.category || '',
-        address: user.address || '',
+        address: '', // No longer using address for MSME
         contactNumber: user.contactNumber || '',
         clientProfilingNumber: user.clientProfilingNumber || ''
       });
@@ -600,7 +602,6 @@ const AdminUserManagement = () => {
           username: editUserFormData.username,
           businessName: editUserFormData.businessName,
           category: editUserFormData.category,
-          address: editUserFormData.address,
           contactNumber: editUserFormData.contactNumber,
           clientProfilingNumber: editUserFormData.clientProfilingNumber
         };
@@ -1409,16 +1410,19 @@ const AdminUserManagement = () => {
                     />
                   </div>
 
-                  <div className="user-management__form-field">
-                    <label className="user-management__form-label">Address</label>
-                    <textarea
-                      name="address"
-                      value={editUserFormData.address}
-                      onChange={handleEditUserFormChange}
-                      className="user-management__form-input"
-                      rows="3"
-                    />
-                  </div>
+                  {/* Address field removed for MSME, kept only for Customer */}
+                  {editingUser.type === 'Customer' && (
+                    <div className="user-management__form-field">
+                      <label className="user-management__form-label">Address</label>
+                      <textarea
+                        name="address"
+                        value={editUserFormData.address}
+                        onChange={handleEditUserFormChange}
+                        className="user-management__form-input"
+                        rows="3"
+                      />
+                    </div>
+                  )}
                 </>
               )}
 

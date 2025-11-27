@@ -4605,9 +4605,15 @@ app.post(
         }
       }
 
-      // Prepare update data
+      // Get current dashboard to preserve business name if user is not admin
+      let existingDashboard = await Dashboard.findOne({ msmeId });
+
+      // Prepare update data - only allow admins to change business name
       const updateData = {
-        businessName,
+        businessName:
+          req.body.userType === "admin"
+            ? businessName
+            : existingDashboard?.businessName || businessName,
         description,
         contactNumber,
         location,
@@ -4630,14 +4636,19 @@ app.post(
       }
 
       // Update or create dashboard
-      let dashboard = await Dashboard.findOne({ msmeId });
+      let dashboard = existingDashboard;
 
       if (dashboard) {
         // Update existing dashboard
         Object.assign(dashboard, updateData);
         await dashboard.save();
       } else {
-        // Create new dashboard
+        // Create new dashboard - for new dashboards, we need to get business name from MSME record
+        if (req.body.userType !== "admin") {
+          // If not admin, get business name from MSME record instead of request
+          const msme = await MSME.findById(msmeId);
+          updateData.businessName = msme?.businessName || businessName;
+        }
         dashboard = new Dashboard({
           msmeId,
           ...updateData,

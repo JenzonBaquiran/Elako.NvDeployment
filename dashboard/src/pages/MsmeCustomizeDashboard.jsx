@@ -5,7 +5,7 @@ import { useNotification } from '../components/NotificationProvider';
 import '../css/MsmeCustomizeDashboard.css';
 
 const MsmeCustomizeDashboard = () => {
-  const { user } = useAuth();
+  const { user, userType } = useAuth();
   const { showSuccess, showError, showConfirm } = useNotification();
   const [sidebarState, setSidebarState] = useState({ isOpen: true, isMobile: false });
   const [loading, setLoading] = useState(false);
@@ -473,6 +473,7 @@ const MsmeCustomizeDashboard = () => {
       formData.append('ecommercePlatforms', JSON.stringify(dashboardData.ecommercePlatforms));
       formData.append('isPublic', dashboardData.isPublic);
       formData.append('msmeId', user._id);
+      formData.append('userType', userType); // Add user role for server validation
       
       // Add files if they're new uploads
       if (dashboardData.coverPhoto instanceof File) {
@@ -692,9 +693,11 @@ const MsmeCustomizeDashboard = () => {
                       type="text"
                       name="businessName"
                       value={dashboardData.businessName}
-                      onChange={handleInputChange}
-                      placeholder="Business Name"
-                      className="customize-business-name-input"
+                      onChange={userType === 'admin' ? handleInputChange : null}
+                      placeholder={userType === 'admin' ? "Business Name" : "Business Name (Admin only)"}
+                      className={`customize-business-name-input ${userType !== 'admin' ? 'read-only' : ''}`}
+                      readOnly={userType !== 'admin'}
+                      title={userType !== 'admin' ? "Only administrators can edit the business name" : ""}
                     />
                     <div className="customize-business-name-logo edit-mode">
                       {previewUrls.storeLogo ? (

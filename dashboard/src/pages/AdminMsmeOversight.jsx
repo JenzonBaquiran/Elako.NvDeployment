@@ -4,7 +4,6 @@ import '../css/AdminMsmeOversight.css';
 import PeopleIcon from '@mui/icons-material/People';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import InventoryIcon from '@mui/icons-material/Inventory';
-import StarIcon from '@mui/icons-material/Star';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 const AdminMsmeOversight = () => {
@@ -307,8 +306,6 @@ const AdminMsmeOversight = () => {
     total: msmeData.length,
     verified: msmeData.filter(m => m.status === 'approved' || m.status === 'verified').length,
     totalProducts: msmeData.reduce((sum, msme) => sum + (msme.products || 0), 0), // Sum all products from all MSMEs
-    avgRating: msmeData.length > 0 ? 
-      Math.round((msmeData.reduce((sum, m) => sum + (m.rating || 0), 0) / msmeData.length) * 10) / 10 : 0,
     pending: msmeData.filter(m => m.status === 'pending').length,
     topPerformers: badgeData.length // Count stores with active top badges
   };
@@ -355,16 +352,6 @@ const AdminMsmeOversight = () => {
               <div className="admin-msme-oversight__stat-growth">+18% from last month</div>
             </div>
           </div>
-          <div className="admin-msme-oversight__stat-box">
-            <div className="admin-msme-oversight__stat-icon">
-              <StarIcon />
-            </div>
-            <div className="admin-msme-oversight__stat-content">
-              <div className="admin-msme-oversight__stat-value">{stats.avgRating.toFixed(1)}</div>
-              <div className="admin-msme-oversight__stat-label">Avg Rating</div>
-              <div className="admin-msme-oversight__stat-growth">+0.2 from last month</div>
-            </div>
-          </div>
         </div>
 
         {/* Filters Section */}
@@ -393,9 +380,7 @@ const AdminMsmeOversight = () => {
             >
               <option value="all">All Status</option>
               <option value="approved">Approved</option>
-              <option value="verified">Verified</option>
               <option value="pending">Pending</option>
-              <option value="rejected">Rejected</option>
             </select>
             <select
               value={visibilityFilter}
@@ -486,12 +471,6 @@ const AdminMsmeOversight = () => {
                     <div className="admin-msme-oversight__metric">
                       <div className="admin-msme-oversight__metric-value">{msme.products}</div>
                       <div className="admin-msme-oversight__metric-label">Products</div>
-                    </div>
-                    <div className="admin-msme-oversight__metric">
-                      <div className="admin-msme-oversight__metric-value">
-                        {msme.rating} <StarIcon className="admin-msme-oversight__rating-star" />
-                      </div>
-                      <div className="admin-msme-oversight__metric-label">Rating</div>
                     </div>
                     <div className="admin-msme-oversight__metric">
                       <div className="admin-msme-oversight__metric-value">{msme.followers}</div>

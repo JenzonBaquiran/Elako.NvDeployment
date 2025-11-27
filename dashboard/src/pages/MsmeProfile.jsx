@@ -375,10 +375,6 @@ const MsmeProfile = () => {
             <div className="msme-profile__stat-label">Followers</div>
           </div>
           <div className="msme-profile__stat-box">
-            <div className="msme-profile__stat-value">{stats.rating}</div>
-            <div className="msme-profile__stat-label">Rating</div>
-          </div>
-          <div className="msme-profile__stat-box">
             <div className="msme-profile__stat-value">
               {profileData.termsAcceptedAt 
                 ? new Date(profileData.termsAcceptedAt).toLocaleDateString()

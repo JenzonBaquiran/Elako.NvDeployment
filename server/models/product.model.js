@@ -47,7 +47,18 @@ const productSchema = new mongoose.Schema(
       {
         id: { type: String, required: true },
         name: { type: String, required: true },
-        price: { type: Number, required: false, min: 0, default: 0 }, // Individual price for this variant - made optional with default
+        price: {
+          type: Number,
+          required: false,
+          min: [0.01, "Variant price must be greater than 0"],
+          default: 0,
+          validate: {
+            validator: function (v) {
+              return v === 0 || v > 0; // Allow 0 for default/fallback but validate on save
+            },
+            message: "Variant price must be a positive number greater than 0",
+          },
+        }, // Individual price for this variant
         imageIndex: { type: Number, default: 0 }, // Which image to show for this variant
       },
     ],
@@ -138,13 +149,20 @@ productSchema.pre("validate", function (next) {
     this.rating = null;
   }
 
-  // Ensure all variants have a price (fix for existing data)
+  // Validate variant prices and ensure they are positive when set
   if (Array.isArray(this.variants)) {
-    this.variants.forEach((variant) => {
+    for (const variant of this.variants) {
       if (typeof variant.price === "undefined" || variant.price === null) {
-        variant.price = 0;
+        variant.price = 0; // Default for backward compatibility
+      } else if (variant.price !== 0 && variant.price <= 0) {
+        // If price is set to something other than default 0, it must be positive
+        return next(
+          new Error(
+            `Variant "${variant.name}" price must be a positive number greater than 0`
+          )
+        );
       }
-    });
+    }
   }
 
   next();

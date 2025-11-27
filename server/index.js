@@ -9169,6 +9169,20 @@ app.post("/api/products", upload.array("pictures", 10), async (req, res) => {
       try {
         parsedVariants =
           typeof variants === "string" ? JSON.parse(variants) : variants;
+
+        // Validate variant prices
+        for (const variant of parsedVariants) {
+          if (variant.price !== undefined && variant.price !== null) {
+            const price = parseFloat(variant.price);
+            if (isNaN(price) || price <= 0) {
+              return res.status(400).json({
+                success: false,
+                error: `Variant "${variant.name}" price must be a positive number greater than 0`,
+              });
+            }
+            variant.price = price; // Ensure it's stored as a number
+          }
+        }
       } catch (e) {
         parsedVariants = [];
       }
@@ -9299,6 +9313,20 @@ app.put("/api/products/:id", upload.array("pictures", 10), async (req, res) => {
       try {
         parsedVariants =
           typeof variants === "string" ? JSON.parse(variants) : variants;
+
+        // Validate variant prices
+        for (const variant of parsedVariants) {
+          if (variant.price !== undefined && variant.price !== null) {
+            const price = parseFloat(variant.price);
+            if (isNaN(price) || price <= 0) {
+              return res.status(400).json({
+                success: false,
+                error: `Variant "${variant.name}" price must be a positive number greater than 0`,
+              });
+            }
+            variant.price = price; // Ensure it's stored as a number
+          }
+        }
       } catch (e) {
         parsedVariants = existingProduct.variants || [];
       }

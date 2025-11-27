@@ -427,10 +427,17 @@ const MsmeManageProduct = () => {
   const addVariant = () => {
     if (!currentVariant.name.trim() || !currentVariant.price.trim()) return;
     
+    // Validate that price is a positive number
+    const priceValue = parseFloat(currentVariant.price);
+    if (isNaN(priceValue) || priceValue <= 0) {
+      showError("Variant price must be a positive number greater than 0", "Invalid Price");
+      return;
+    }
+    
     const newVariant = {
       id: Date.now(),
       name: currentVariant.name.trim(),
-      price: parseFloat(currentVariant.price),
+      price: priceValue,
       imageIndex: selectedImages.length > 0 ? 0 : -1
     };
     
@@ -463,6 +470,13 @@ const MsmeManageProduct = () => {
   const saveEditVariant = () => {
     if (!editingVariantData.name.trim() || !editingVariantData.price.trim()) return;
     
+    // Validate that price is a positive number
+    const priceValue = parseFloat(editingVariantData.price);
+    if (isNaN(priceValue) || priceValue <= 0) {
+      showError("Variant price must be a positive number greater than 0", "Invalid Price");
+      return;
+    }
+    
     setFormData(prev => ({
       ...prev,
       variants: (prev.variants || []).map(variant => 
@@ -470,7 +484,7 @@ const MsmeManageProduct = () => {
           ? {
               ...variant,
               name: editingVariantData.name.trim(),
-              price: parseFloat(editingVariantData.price)
+              price: priceValue
             }
           : variant
       )
@@ -1202,7 +1216,7 @@ const MsmeManageProduct = () => {
                                 value={editingVariantData.price}
                                 onChange={(e) => setEditingVariantData(prev => ({ ...prev, price: e.target.value }))}
                                 placeholder="Price (₱)"
-                                min="0"
+                                min="0.01"
                                 step="0.01"
                                 className="variant-input variant-price-input"
                               />
@@ -1252,7 +1266,7 @@ const MsmeManageProduct = () => {
                             value={currentVariant.price}
                             onChange={(e) => setCurrentVariant(prev => ({ ...prev, price: e.target.value }))}
                             placeholder="Price (₱)"
-                            min="0"
+                            min="0.01"
                             step="0.01"
                             className="variant-input variant-price-input"
                           />

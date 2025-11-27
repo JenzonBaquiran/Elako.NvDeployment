@@ -8944,7 +8944,15 @@ app.get("/api/badges/admin/stores", async (req, res) => {
 
     const query = {};
     if (isActive !== undefined) {
-      query.isActive = isActive === "true";
+      const isActiveBool = isActive === "true";
+      if (isActiveBool) {
+        // For active badges, check both isActive=true AND not expired
+        query.isActive = true;
+        query.expiresAt = { $gt: new Date() };
+      } else {
+        // For inactive badges, show either isActive=false OR expired badges
+        query.$or = [{ isActive: false }, { expiresAt: { $lte: new Date() } }];
+      }
     }
 
     const badges = await StoreBadge.find(query)
@@ -9521,8 +9529,32 @@ app.put("/api/products/:id", upload.array("pictures", 10), async (req, res) => {
   }
 });
 
+// --- Badge Cleanup Scheduler ---
+// Clean up expired badges every hour
+setInterval(async () => {
+  try {
+    console.log("🧹 Running scheduled badge cleanup...");
+    await BadgeService.cleanupExpiredBadges();
+    console.log("✅ Badge cleanup completed");
+  } catch (error) {
+    console.error("❌ Error in scheduled badge cleanup:", error);
+  }
+}, 60 * 60 * 1000); // Run every hour
+
+// Run initial cleanup on server start
+(async () => {
+  try {
+    console.log("🧹 Running initial badge cleanup...");
+    await BadgeService.cleanupExpiredBadges();
+    console.log("✅ Initial badge cleanup completed");
+  } catch (error) {
+    console.error("❌ Error in initial badge cleanup:", error);
+  }
+})();
+
 // --- Start Server ---
 server.listen(port, () => {
   console.log(`🚀 Server running at http://localhost:${port}`);
   console.log(`🔌 Socket.IO enabled for real-time messaging`);
+  console.log(`⏰ Badge cleanup scheduled every hour`);
 });

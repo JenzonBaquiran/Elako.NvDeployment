@@ -345,7 +345,8 @@ const AdminMsmeReport = () => {
       return badgeStoreId === storeId;
     });
     
-    if (badge && badge.isActive) {
+    // Check if badge is active AND not expired (same logic as backend)
+    if (badge && badge.isActive && new Date(badge.expiresAt) > new Date()) {
       const weekStart = new Date(badge.weekStart).toLocaleDateString();
       const weekEnd = new Date(badge.weekEnd).toLocaleDateString();
       return {

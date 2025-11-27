@@ -7,7 +7,8 @@ const TopStoreBadge = ({
   showDetails = false, 
   className = '' 
 }) => {
-  if (!badge || !badge.isActive) {
+  // Check if badge is active and not expired
+  if (!badge || !badge.isActive || new Date(badge.expiresAt) <= new Date()) {
     return null;
   }
 

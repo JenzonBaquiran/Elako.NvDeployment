@@ -203,6 +203,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  text-align: left;
+  align-items: flex-start;
 }
 
 .store-name-left {
@@ -212,6 +214,7 @@
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 1px;
+  text-align: left;
 }
 
 /* Username styling in left column */
@@ -1840,10 +1843,12 @@
   .store-header-left {
     padding: 0;
     margin-bottom: 12px;
+    text-align: left;
   }
 
   .store-name-left {
     font-size: 1.5rem;
+    text-align: left;
   }
 
   .username-row-left {

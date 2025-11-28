@@ -25,6 +25,7 @@ import RateReviewIcon from '@mui/icons-material/RateReview';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AudiotrackIcon from '@mui/icons-material/Audiotrack';
+import { processGoogleMapsInput } from '../utils/googleMapsProcessor';
 
 
 // Helper function to handle embedded Google Maps URLs
@@ -33,23 +34,16 @@ const handleEmbedUrl = (url) => {
 
   console.log('Processing embed URL:', url);
 
-  // If it's already an embed URL, use it directly
-  if (url.includes('/embed') || url.includes('pb=!1m')) {
-    console.log('URL is already embed format');
-    return url;
+  // Use the new processing utility for consistency
+  const processResult = processGoogleMapsInput(url);
+  
+  if (processResult.isValid) {
+    console.log('URL processed successfully:', processResult.url);
+    return processResult.url;
   }
 
-  // If it's an iframe HTML code, extract the src
-  if (url.includes('<iframe') && url.includes('src=')) {
-    const srcMatch = url.match(/src="([^"]+)"/);
-    if (srcMatch) {
-      console.log('Extracted iframe src URL:', srcMatch[1]);
-      return srcMatch[1];
-    }
-  }
-
-  // For non-embed URLs, let them know they need to use embed format
-  console.warn('URL is not in embed format. MSME owner should use embedded Google Maps URL.');
+  // For invalid URLs, let them know they need to use embed format
+  console.warn('URL is not in valid embed format. MSME owner should use embedded Google Maps URL.');
   return null;
 };
 

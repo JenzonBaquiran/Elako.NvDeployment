@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import MsmeSidebar from './MsmeSidebar';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
+import { processGoogleMapsInput } from '../utils/googleMapsProcessor';
 import '../css/MsmeCustomizeDashboard.css';
 
 const MsmeCustomizeDashboard = () => {
@@ -377,6 +378,18 @@ const MsmeCustomizeDashboard = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
+    // Special handling for Google Maps URL to automatically process iframe HTML
+    if (name === 'googleMapsUrl') {
+      const processResult = processGoogleMapsInput(value);
+      
+      // Use the processed URL
+      setDashboardData(prev => ({
+        ...prev,
+        [name]: processResult.url
+      }));
+      return;
+    }
     
     if (name.includes('.')) {
       const parts = name.split('.');
@@ -821,17 +834,22 @@ const MsmeCustomizeDashboard = () => {
                     name="googleMapsUrl"
                     value={dashboardData.googleMapsUrl || ''}
                     onChange={handleInputChange}
-                    placeholder="Paste your Google Maps EMBED link here (e.g., https://www.google.com/maps/embed?pb=...)"
+                    placeholder="Paste your Google Maps EMBED link OR iframe HTML code here..."
                     className="specific-address-input"
                   />
+                  
                   <div className="location-help-text">
                     <small>
-                      � <strong>How to get embedded Google Maps link:</strong><br/>
+                      � <strong>How to add your location:</strong><br/>
+                      <strong>Option 1:</strong> Paste the embed URL (starts with https://www.google.com/maps/embed?pb=...)<br/>
+                      <strong>Option 2:</strong> Paste the entire iframe HTML code - we'll extract the URL automatically!<br/><br/>
+                      
+                      <strong>To get the embed code:</strong><br/>
                       1. Go to <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer">Google Maps</a><br/>
                       2. Search and find your store location<br/>
                       3. Click "Share" button<br/>
                       4. Click "Embed a map" tab<br/>
-                      5. Copy the link from the iframe src (starts with https://www.google.com/maps/embed?pb=...)
+                      5. Copy either the URL from src="" or the entire iframe code
                     </small>
                   </div>
                   {dashboardData.googleMapsUrl && (

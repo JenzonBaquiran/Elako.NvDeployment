@@ -13,7 +13,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import InfoIcon from '@mui/icons-material/Info';
+
 import SecurityIcon from '@mui/icons-material/Security';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
@@ -241,8 +241,7 @@ const CustomerProfile = () => {
           lastname: profileData.lastname,
           email: profileData.email,
           contactNumber: profileData.contactNumber,
-          address: profileData.address,
-          bio: profileData.bio
+          address: profileData.address
         })
       });
 
@@ -257,8 +256,7 @@ const CustomerProfile = () => {
           lastname: data.profile.lastname,
           email: data.profile.email,
           contactNumber: data.profile.contactNumber,
-          address: data.profile.address,
-          bio: data.profile.bio
+          address: data.profile.address
         }));
         
         setIsEditing(false);
@@ -679,22 +677,7 @@ const CustomerProfile = () => {
                   )}
                 </div>
 
-                <div className="customer-profile__detail-row">
-                  <label className="customer-profile__label">
-                    <InfoIcon className="customer-profile__field-icon" />
-                    Bio
-                  </label>
-                  {isEditing ? (
-                    <textarea
-                      value={profileData.bio}
-                      onChange={(e) => handleInputChange('bio', e.target.value)}
-                      className="customer-profile__edit-textarea"
-                      rows="3"
-                    />
-                  ) : (
-                    <span className="customer-profile__value">{profileData.bio}</span>
-                  )}
-                </div>
+
 
                 {isEditing && (
                   <div className="customer-profile__edit-actions">

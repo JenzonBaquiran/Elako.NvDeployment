@@ -415,8 +415,7 @@ app.get("/api/customers/:id/profile", async (req, res) => {
 // Update customer profile (by customer themselves)
 app.put("/api/customers/:id/profile", async (req, res) => {
   try {
-    const { firstname, lastname, email, contactNumber, address, bio } =
-      req.body;
+    const { firstname, lastname, email, contactNumber, address } = req.body;
 
     // Validate required fields
     if (!firstname || !lastname || !email) {
@@ -456,7 +455,6 @@ app.put("/api/customers/:id/profile", async (req, res) => {
         email,
         contactNumber: contactNumber || "",
         address: address || "",
-        bio: bio || "",
         updatedAt: new Date(),
       },
       { new: true, select: "-password" }
@@ -482,7 +480,6 @@ app.put("/api/customers/:id/profile", async (req, res) => {
         email: updatedCustomer.email,
         contactNumber: updatedCustomer.contactNumber,
         address: updatedCustomer.address,
-        bio: updatedCustomer.bio,
         createdAt: updatedCustomer.createdAt,
         updatedAt: updatedCustomer.updatedAt,
       },

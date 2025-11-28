@@ -341,8 +341,8 @@
   }
 
   .msme-analytics__stats {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 
   .msme-analytics__charts-grid {
@@ -369,12 +369,31 @@
     font-size: 20px;
   }
 
+  .msme-analytics__stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
   .msme-analytics__stat-box {
-    padding: 20px 16px;
+    padding: 14px 10px;
+    min-width: auto;
+    border-radius: 8px;
   }
 
   .msme-analytics__stat-value {
-    font-size: 28px;
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+
+  .msme-analytics__stat-label {
+    font-size: 10px;
+    margin-bottom: 4px;
+    line-height: 1.2;
+  }
+
+  .msme-analytics__stat-change {
+    font-size: 9px;
+    line-height: 1.2;
   }
 
   .msme-analytics__chart-card {
@@ -640,4 +659,45 @@
   color: #666;
   font-size: 16px;
   font-family: 'Poppins', sans-serif;
+}
+
+/* Extra small screens - phone portrait */
+@media (max-width: 375px) {
+  .msme-analytics__content {
+    padding: 8px;
+  }
+
+  .msme-analytics__stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 24px;
+  }
+
+  .msme-analytics__stat-box {
+    padding: 12px 8px;
+    border-radius: 6px;
+  }
+
+  .msme-analytics__stat-value {
+    font-size: 20px;
+    margin-bottom: 2px;
+  }
+
+  .msme-analytics__stat-label {
+    font-size: 9px;
+    margin-bottom: 2px;
+    letter-spacing: 0.3px;
+  }
+
+  .msme-analytics__stat-change {
+    font-size: 8px;
+  }
+
+  .msme-analytics__header-text h1 {
+    font-size: 18px;
+  }
+
+  .msme-analytics__header-text p {
+    font-size: 12px;
+  }
 }

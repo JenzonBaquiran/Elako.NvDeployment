@@ -98,9 +98,10 @@
 /* Stats section - matching AdminUserManagement */
 .msme-profile__stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   margin-bottom: 32px;
+  justify-items: center;
 }
 
 .msme-profile__stat-box {
@@ -113,7 +114,8 @@
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   border: 2px solid #f0f0f0;
-  min-width: 160px;
+  width: 100%;
+  max-width: 280px;
   text-align: center;
   transition: all 0.3s ease;
   position: relative;
@@ -566,6 +568,23 @@
   font-weight: 500;
 }
 
+/* Tablet responsiveness */
+@media (max-width: 1024px) {
+  .msme-profile__stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .msme-profile__stat-box {
+    max-width: 200px;
+    padding: 20px 12px;
+  }
+
+  .msme-profile__stat-value {
+    font-size: 30px;
+  }
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .msme-profile__content {
@@ -600,8 +619,13 @@
   }
 
   .msme-profile__stats {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: 1fr;
     gap: 16px;
+    justify-items: stretch;
+  }
+
+  .msme-profile__stat-box {
+    max-width: 100%;
   }
 
   .msme-profile__content-grid {

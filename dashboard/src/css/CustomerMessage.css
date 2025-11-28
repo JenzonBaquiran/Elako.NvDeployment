@@ -4,7 +4,7 @@
 /* Main container and layout */
 .customer-messages {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
   position: relative;
   overflow-x: hidden;
@@ -23,6 +23,7 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .customer-messages__content--sidebar-open {
@@ -85,7 +86,6 @@
   display: flex;
   flex: 1;
   gap: 16px;
-  min-height: 600px;
   max-height: calc(100vh - 200px);
 }
 
@@ -683,6 +683,7 @@
     flex-direction: column;
     gap: 16px;
     max-height: none;
+    min-height: 0;
   }
   
   .customer-messages__conversations-panel {
@@ -691,7 +692,8 @@
   }
   
   .customer-messages__chat-panel {
-    min-height: 400px;
+    min-height: 0;
+    flex: 1;
   }
   
   .customer-messages__message {

@@ -392,7 +392,7 @@
 /* Products Gallery Section */
 .msme-reviews__products-section {
   background: transparent;
-  padding: 30px 0;
+  padding: 30px 0 40px 0;
   margin-bottom: 30px;
 }
 
@@ -484,7 +484,10 @@
 .msme-reviews__products-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 24px;
+  /* Remove grid-auto-rows to allow natural height */
+  align-items: stretch;
+  justify-items: center;
 }
 
 .msme-reviews__product-card {
@@ -497,7 +500,9 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  height: 100%;
+  width: 100%;
+  max-width: 400px;
+  /* Remove min-height and let content determine height naturally */
 }
 
 .msme-reviews__product-card:hover {
@@ -542,6 +547,7 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  justify-content: space-between;
 }
 
 .msme-reviews__product-card-name {
@@ -600,6 +606,7 @@
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  flex-grow: 1;
 }
 
 /* Category Tag */
@@ -614,6 +621,7 @@
   margin-bottom: 16px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  flex-shrink: 0;
 }
 
 /* View Product Button */
@@ -631,6 +639,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-top: auto;
+  flex-shrink: 0;
 }
 
 .msme-reviews__product-card-button:hover {
@@ -942,7 +951,8 @@
 @media (max-width: 1024px) {
   .msme-reviews__products-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    gap: 20px;
+    justify-items: center;
   }
 
   .msme-reviews__content {
@@ -955,6 +965,10 @@
 
   .msme-reviews__search {
     min-width: 200px;
+  }
+
+  .msme-reviews__product-card {
+    max-width: 350px;
   }
 }
 
@@ -983,11 +997,15 @@
 
   .msme-reviews__products-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 16px;
+    justify-items: center;
   }
 
   .msme-reviews__product-card {
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    margin-bottom: 0;
+    max-width: 100%;
+    width: 100%;
   }
 
   .msme-reviews__product-card-content {
@@ -1172,11 +1190,14 @@
 
   .msme-reviews__products-grid {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 12px;
+    justify-items: center;
   }
 
   .msme-reviews__product-card {
-    margin-bottom: 8px;
+    margin-bottom: 0;
+    max-width: 100%;
+    width: 100%;
   }
 
   .msme-reviews__product-card-content {

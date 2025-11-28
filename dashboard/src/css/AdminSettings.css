@@ -40,16 +40,15 @@
 
 /* Header */
 .admin-settings__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
   margin-bottom: 32px;
   padding-bottom: 16px;
   border-bottom: 1px solid #f0f0f0;
+  text-align: center;
 }
 
 .admin-settings__header-text {
-  flex: 1;
+  width: 100%;
+  text-align: center;
 }
 
 .admin-settings__header h1 {
@@ -58,6 +57,7 @@
   margin-bottom: 8px;
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
+  text-align: center;
 }
 
 .admin-settings__header p {
@@ -65,6 +65,7 @@
   font-size: 15px;
   font-family: 'Poppins', sans-serif;
   margin: 0;
+  text-align: center;
 }
 
 .admin-settings__edit-btn {

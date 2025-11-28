@@ -22,10 +22,28 @@ function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Define restricted usernames that should have login restrictions
+  const restrictedUsernames = ['admin', 'superuser', 'administrator'];
+
+  // Check if current username is restricted
+  const isRestrictedUser = (username) => {
+    return restrictedUsernames.includes(username.toLowerCase());
+  };
+
   // Load login attempts from localStorage on component mount
   useEffect(() => {
-    const storedAttempts = localStorage.getItem('loginAttempts');
-    const storedBlockTime = localStorage.getItem('loginBlockTime');
+    if (!username || !isRestrictedUser(username)) {
+      // Clear any existing blocks if user is not restricted
+      setIsBlocked(false);
+      setCooldownTime(0);
+      setAttempts(0);
+      return;
+    }
+
+    const storageKey = `loginAttempts_${username}`;
+    const blockTimeKey = `loginBlockTime_${username}`;
+    const storedAttempts = localStorage.getItem(storageKey);
+    const storedBlockTime = localStorage.getItem(blockTimeKey);
     
     if (storedAttempts) {
       setAttempts(parseInt(storedAttempts));
@@ -46,10 +64,8 @@ function Login() {
               clearInterval(interval);
               setIsBlocked(false);
               setAttempts(0);
-              setUsername("");
-              setPassword("");
-              localStorage.removeItem('loginAttempts');
-              localStorage.removeItem('loginBlockTime');
+              localStorage.removeItem(storageKey);
+              localStorage.removeItem(blockTimeKey);
               return 0;
             }
             return prev - 1;
@@ -60,13 +76,11 @@ function Login() {
       } else {
         // Block time has expired, reset
         setAttempts(0);
-        setUsername("");
-        setPassword("");
-        localStorage.removeItem('loginAttempts');
-        localStorage.removeItem('loginBlockTime');
+        localStorage.removeItem(storageKey);
+        localStorage.removeItem(blockTimeKey);
       }
     }
-  }, []);
+  }, [username]);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -92,8 +106,8 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     
-    // Check if user is blocked
-    if (isBlocked) {
+    // Check if user is blocked (only for restricted usernames)
+    if (isBlocked && isRestrictedUser(username)) {
       showError(`Too many failed attempts. Please wait ${cooldownTime} seconds before trying again.`, "Login Blocked");
       return;
     }
@@ -123,8 +137,10 @@ function Login() {
         if (loginSuccess) {
           // Reset login attempts on successful login
           setAttempts(0);
-          localStorage.removeItem('loginAttempts');
-          localStorage.removeItem('loginBlockTime');
+          const storageKey = `loginAttempts_${username}`;
+          const blockTimeKey = `loginBlockTime_${username}`;
+          localStorage.removeItem(storageKey);
+          localStorage.removeItem(blockTimeKey);
           
           // Track admin login time for audit logging
           sessionStorage.setItem('adminLoginTime', Date.now().toString());
@@ -147,15 +163,15 @@ function Login() {
 
       data = await response.json();
 
-      if (data.success) {
-        const loginSuccess = login(data.user, 'customer');
-        if (loginSuccess) {
-          // Reset login attempts on successful login
-          setAttempts(0);
-          localStorage.removeItem('loginAttempts');
-          localStorage.removeItem('loginBlockTime');
-          
-          showSuccess("Welcome back! Let's get started.", "Login Successful");
+          if (data.success) {
+            const loginSuccess = login(data.user, 'customer');
+            if (loginSuccess) {
+              // Reset login attempts on successful login
+              setAttempts(0);
+              const storageKey = `loginAttempts_${username}`;
+              const blockTimeKey = `loginBlockTime_${username}`;
+              localStorage.removeItem(storageKey);
+              localStorage.removeItem(blockTimeKey);          showSuccess("Welcome back! Let's get started.", "Login Successful");
           const from = location.state?.from?.pathname || '/customer-sidebar';
           navigate(from, { replace: true });
           return;
@@ -180,8 +196,10 @@ function Login() {
           if (loginSuccess) {
             // Reset login attempts on successful login
             setAttempts(0);
-            localStorage.removeItem('loginAttempts');
-            localStorage.removeItem('loginBlockTime');
+            const storageKey = `loginAttempts_${username}`;
+            const blockTimeKey = `loginBlockTime_${username}`;
+            localStorage.removeItem(storageKey);
+            localStorage.removeItem(blockTimeKey);
             
             // Clear congratulation status for today so it can show after login
             localStorage.removeItem(`topStoreCongratulation_${data.user._id}`);
@@ -200,38 +218,44 @@ function Login() {
       }
 
       // If all login attempts fail
-      const newAttempts = attempts + 1;
-      setAttempts(newAttempts);
-      localStorage.setItem('loginAttempts', newAttempts.toString());
-      
-      if (newAttempts >= 3) {
-        // Block for 1 minute (60 seconds)
-        const blockTime = Date.now() + 60000;
-        localStorage.setItem('loginBlockTime', blockTime.toString());
-        setIsBlocked(true);
-        setCooldownTime(60);
+      // Only apply restrictions to specific usernames
+      if (isRestrictedUser(username)) {
+        const storageKey = `loginAttempts_${username}`;
+        const blockTimeKey = `loginBlockTime_${username}`;
+        const newAttempts = attempts + 1;
+        setAttempts(newAttempts);
+        localStorage.setItem(storageKey, newAttempts.toString());
         
-        // Start countdown
-        const interval = setInterval(() => {
-          setCooldownTime(prev => {
-            if (prev <= 1) {
-              clearInterval(interval);
-              setIsBlocked(false);
-              setAttempts(0);
-              setUsername("");
-              setPassword("");
-              localStorage.removeItem('loginAttempts');
-              localStorage.removeItem('loginBlockTime');
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
-        
-        showError("Too many failed attempts. You are blocked for 1 minute.", "Login Blocked");
+        if (newAttempts >= 3) {
+          // Block for 1 minute (60 seconds)
+          const blockTime = Date.now() + 60000;
+          localStorage.setItem(blockTimeKey, blockTime.toString());
+          setIsBlocked(true);
+          setCooldownTime(60);
+          
+          // Start countdown
+          const interval = setInterval(() => {
+            setCooldownTime(prev => {
+              if (prev <= 1) {
+                clearInterval(interval);
+                setIsBlocked(false);
+                setAttempts(0);
+                localStorage.removeItem(storageKey);
+                localStorage.removeItem(blockTimeKey);
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+          
+          showError(`Too many failed attempts for ${username}. You are blocked for 1 minute.`, "Login Blocked");
+        } else {
+          const remainingAttempts = 3 - newAttempts;
+          showError(`Invalid username or password. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining.`, "Login Failed");
+        }
       } else {
-        const remainingAttempts = 3 - newAttempts;
-        showError(`Invalid username or password. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining.`, "Login Failed");
+        // For non-restricted usernames, just show error without blocking
+        showError("Invalid username or password. Please try again.", "Login Failed");
       }
 
     } catch (error) {
@@ -267,27 +291,27 @@ function Login() {
             <form onSubmit={handleLogin}>
               <TextField
                 variant="outlined"
-                placeholder={isBlocked ? `Login blocked - ${cooldownTime}s remaining` : "Username"}
-                value={isBlocked ? `Blocked for ${cooldownTime} seconds` : username}
+                placeholder={(isBlocked && isRestrictedUser(username)) ? `Login blocked - ${cooldownTime}s remaining` : "Username"}
+                value={(isBlocked && isRestrictedUser(username)) ? `Blocked for ${cooldownTime} seconds` : username}
                 onChange={(e) => setUsername(e.target.value)}
                 fullWidth
                 className="login-input"
                 InputProps={{
                   classes: { notchedOutline: "input-outline" },
-                  readOnly: isBlocked,
+                  readOnly: isBlocked && isRestrictedUser(username),
                 }}
                 inputProps={{
                   className: "login-input-inner",
-                  style: { textAlign: isBlocked ? 'center' : 'left', color: isBlocked ? '#ff6b6b' : 'inherit' }
+                  style: { textAlign: (isBlocked && isRestrictedUser(username)) ? 'center' : 'left', color: (isBlocked && isRestrictedUser(username)) ? '#ff6b6b' : 'inherit' }
                 }}
                 required
-                disabled={loading || isBlocked}
+                disabled={loading || (isBlocked && isRestrictedUser(username))}
               />
               <TextField
                 variant="outlined"
-                placeholder={isBlocked ? "Password field disabled" : "Password"}
+                placeholder={(isBlocked && isRestrictedUser(username)) ? "Password field disabled" : "Password"}
                 type={showPassword ? "text" : "password"}
-                value={isBlocked ? "" : password}
+                value={(isBlocked && isRestrictedUser(username)) ? "" : password}
                 onChange={(e) => setPassword(e.target.value)}
                 fullWidth
                 className="login-input"
@@ -298,20 +322,20 @@ function Login() {
                       <IconButton
                         onClick={() => setShowPassword(!showPassword)}
                         edge="end"
-                        disabled={loading || isBlocked}
+                        disabled={loading || (isBlocked && isRestrictedUser(username))}
                       >
                         {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
                     </InputAdornment>
                   ),
-                  readOnly: isBlocked,
+                  readOnly: isBlocked && isRestrictedUser(username),
                 }}
                 inputProps={{
                   className: "login-input-inner",
-                  style: { color: isBlocked ? '#ccc' : 'inherit' }
+                  style: { color: (isBlocked && isRestrictedUser(username)) ? '#ccc' : 'inherit' }
                 }}
                 required
-                disabled={loading || isBlocked}
+                disabled={loading || (isBlocked && isRestrictedUser(username))}
               />
               <div className="login-links">
                 <span

@@ -480,9 +480,9 @@
 }
 
 .admin-overview__status-badge--verified {
-  background-color: #d1fae5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
+  background-color: #7ed957;
+  color: #ffffff;
+  border: 1px solid #7ed957;
 }
 
 .admin-overview__status-badge--pending {
@@ -713,7 +713,6 @@
   font-size: 14px;
   text-align: left;
 }
-}
 
 .admin-overview__header-item {
   display: flex;
@@ -725,6 +724,13 @@
 }
 
 .admin-overview__header-item--details {
+  justify-content: center;
+}
+
+/* Type, Status, and Time columns should be centered */
+.admin-overview__activities-header .admin-overview__header-item:nth-child(2),
+.admin-overview__activities-header .admin-overview__header-item:nth-child(3),
+.admin-overview__activities-header .admin-overview__header-item:nth-child(4) {
   justify-content: center;
 }
 
@@ -795,6 +801,21 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  text-align: center;
+}
+
+/* Ensure proper vertical alignment for all row content */
+.admin-overview__activity-row > * {
+  display: flex;
+  align-items: center;
+}
+
+.admin-overview__activity-main {
+  justify-content: flex-start;
+}
+
+.admin-overview__activity-details {
+  justify-content: center;
 }
 
 .admin-overview__type-badge {
@@ -807,18 +828,18 @@
 }
 
 .admin-overview__type-badge--customer-registration {
-  background-color: #e3f2fd;
-  color: #1976d2;
+  background-color: #7ed957;
+  color: #ffffff;
 }
 
 .admin-overview__type-badge--msme-registration {
-  background-color: #f3e5f5;
-  color: #7b1fa2;
+  background-color: #7ed957;
+  color: #ffffff;
 }
 
 .admin-overview__type-badge--msme-approval {
-  background-color: #e8f5e8;
-  color: #2e7d32;
+  background-color: #7ed957;
+  color: #ffffff;
 }
 
 .admin-overview__activity-time {

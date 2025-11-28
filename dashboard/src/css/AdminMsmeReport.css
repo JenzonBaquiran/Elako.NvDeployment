@@ -280,6 +280,15 @@
   vertical-align: middle;
 }
 
+/* Ensure proper alignment for all table cells */
+.admin-msme-reports__table th {
+  vertical-align: middle;
+}
+
+.admin-msme-reports__table td {
+  vertical-align: middle;
+}
+
 .admin-msme-reports__table th {
   color: #666;
   font-weight: 600;
@@ -301,21 +310,25 @@
 .admin-msme-reports__table th:nth-child(2),
 .admin-msme-reports__table td:nth-child(2) {
   width: 140px; /* Customer Engagement */
+  text-align: center;
 }
 
 .admin-msme-reports__table th:nth-child(3),
 .admin-msme-reports__table td:nth-child(3) {
   width: 140px; /* Media Marketing */
+  text-align: center;
 }
 
 .admin-msme-reports__table th:nth-child(4),
 .admin-msme-reports__table td:nth-child(4) {
   width: 140px; /* Product Performance */
+  text-align: center;
 }
 
 .admin-msme-reports__table th:nth-child(5),
 .admin-msme-reports__table td:nth-child(5) {
   width: 140px; /* Store Performance */
+  text-align: center;
 }
 
 .admin-msme-reports__table th:nth-child(6),
@@ -438,8 +451,8 @@
 }
 
 .admin-msme-reports__rating-badge--excellent {
-  background-color: #d4edda;
-  color: #155724;
+  background-color: #7ed957;
+  color: #ffffff;
 }
 
 .admin-msme-reports__rating-badge--good {
@@ -477,8 +490,8 @@
 }
 
 .admin-msme-reports__status-badge--active {
-  background-color: #d4edda;
-  color: #155724;
+  background-color: #7ed957;
+  color: #ffffff;
 }
 
 .admin-msme-reports__status-badge--inactive {
@@ -769,21 +782,25 @@
   .admin-msme-reports__table th:nth-child(2),
   .admin-msme-reports__table td:nth-child(2) {
     width: 120px;
+    text-align: center;
   }
   
   .admin-msme-reports__table th:nth-child(3),
   .admin-msme-reports__table td:nth-child(3) {
     width: 120px;
+    text-align: center;
   }
   
   .admin-msme-reports__table th:nth-child(4),
   .admin-msme-reports__table td:nth-child(4) {
     width: 130px;
+    text-align: center;
   }
   
   .admin-msme-reports__table th:nth-child(5),
   .admin-msme-reports__table td:nth-child(5) {
     width: 130px;
+    text-align: center;
   }
 }
 

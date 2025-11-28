@@ -187,6 +187,11 @@ const AdminUserManagement = () => {
     }
     
     return matchesTab && matchesSearch && matchesStatus && matchesStatFilter;
+  }).sort((a, b) => {
+    // Sort by newest first (assuming joinDate is in MM/DD/YYYY format or createdAt exists)
+    const dateA = a.createdAt ? new Date(a.createdAt) : new Date(a.joinDate);
+    const dateB = b.createdAt ? new Date(b.createdAt) : new Date(b.joinDate);
+    return dateB - dateA; // Newest first
   });
 
   // Filter admins based on search term, status, and stat filter
@@ -216,6 +221,11 @@ const AdminUserManagement = () => {
     }
     
     return matchesSearch && matchesStatus && matchesStatFilter;
+  }).sort((a, b) => {
+    // Sort by newest first (assuming joinDate is in MM/DD/YYYY format or createdAt exists)
+    const dateA = a.createdAt ? new Date(a.createdAt) : new Date(a.joinDate);
+    const dateB = b.createdAt ? new Date(b.createdAt) : new Date(b.joinDate);
+    return dateB - dateA; // Newest first
   });
 
   // Get current display data based on active tab and stat filter
@@ -230,7 +240,13 @@ const AdminUserManagement = () => {
         case 'admins':
           return filteredAdmins;
         case 'total':
-          return [...filteredUsers, ...filteredAdmins];
+          // Combine and sort all users by newest first
+          const combined = [...filteredUsers, ...filteredAdmins];
+          return combined.sort((a, b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt) : new Date(a.joinDate);
+            const dateB = b.createdAt ? new Date(b.createdAt) : new Date(b.joinDate);
+            return dateB - dateA; // Newest first
+          });
         case 'active':
         case 'pending':
         case 'suspended':

@@ -295,6 +295,15 @@
   vertical-align: middle;
 }
 
+/* Ensure proper alignment for all table cells */
+.audit-logs__table th {
+  vertical-align: middle;
+}
+
+.audit-logs__table td {
+  vertical-align: middle;
+}
+
 .audit-logs__table th {
   color: #666;
   font-weight: 600;
@@ -311,6 +320,7 @@
 .audit-logs__table th:nth-child(1),
 .audit-logs__table td:nth-child(1) {
   width: 120px; /* Login Time */
+  text-align: center;
 }
 
 .audit-logs__table th:nth-child(2),
@@ -321,16 +331,19 @@
 .audit-logs__table th:nth-child(3),
 .audit-logs__table td:nth-child(3) {
   width: 110px; /* Action */
+  text-align: center;
 }
 
 .audit-logs__table th:nth-child(4),
 .audit-logs__table td:nth-child(4) {
   width: 100px; /* Status */
+  text-align: center;
 }
 
 .audit-logs__table th:nth-child(5),
 .audit-logs__table td:nth-child(5) {
   width: 120px; /* Logout Time */
+  text-align: center;
 }
 
 .audit-logs__table th:nth-child(6),
@@ -378,7 +391,7 @@
   align-items: center;
   gap: 6px;
   min-height: 40px;
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 .audit-logs__action-icon {
@@ -412,8 +425,8 @@
 }
 
 .audit-logs__status-badge--success {
-  background-color: #d4edda;
-  color: #155724;
+  background-color: #7ed957;
+  color: #ffffff;
 }
 
 .audit-logs__status-badge--failed {

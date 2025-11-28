@@ -283,8 +283,9 @@
   overflow-y: visible;
   position: relative;
   z-index: 1;
-  padding-bottom: 60px; /* Add space for dropdowns at bottom */
+  padding-bottom: 120px; /* Increased space for dropdowns */
   padding-right: 20px; /* Ensure action buttons are visible */
+  min-height: 200px; /* Ensure minimum height for dropdown space */
 }
 
 /* Ensure table doesn't create stacking context issues */
@@ -296,14 +297,15 @@
 /* Ensure table section has enough space for dropdowns */
 .user-management__table-section {
   overflow: visible;
-  padding-bottom: 40px;
+  padding-bottom: 80px; /* Increased padding for dropdown space */
+  min-height: 250px; /* Ensure minimum height for single row tables */
 }
 
 .user-management__table {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  overflow: hidden;
+  overflow: visible; /* Changed from hidden to visible */
 }
 
 /* Table column widths */
@@ -317,24 +319,28 @@
 .user-management__table td:nth-child(2) {
   width: 12%;
   min-width: 100px;
+  text-align: center;
 }
 
 .user-management__table th:nth-child(3), /* Status */
 .user-management__table td:nth-child(3) {
   width: 15%;
   min-width: 120px;
+  text-align: center;
 }
 
 .user-management__table th:nth-child(4), /* Join Date */
 .user-management__table td:nth-child(4) {
   width: 15%;
   min-width: 120px;
+  text-align: center;
 }
 
 .user-management__table th:nth-child(5), /* Activity */
 .user-management__table td:nth-child(5) {
   width: 15%;
   min-width: 120px;
+  text-align: center;
 }
 
 .user-management__table th:nth-child(6), /* Actions */
@@ -367,7 +373,13 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
-  vertical-align: top;
+  vertical-align: middle;
+}
+
+/* Ensure proper vertical alignment for all table cells */
+.user-management__table th,
+.user-management__table td {
+  vertical-align: middle;
 }
 
 .user-management__user-cell {
@@ -466,15 +478,15 @@
 }
 
 .user-management__status-badge--active {
-  background-color: #d1fae5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
+  background-color: #7ed957;
+  color: #ffffff;
+  border: 1px solid #7ed957;
 }
 
 .user-management__status-badge--approved {
-  background-color: #d1fae5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
+  background-color: #7ed957;
+  color: #ffffff;
+  border: 1px solid #7ed957;
 }
 
 .user-management__status-badge--pending {
@@ -587,6 +599,14 @@
   isolation: isolate;
 }
 
+/* Force proper positioning for single row scenarios */
+.user-management__table tbody tr:only-child .user-management__actions,
+.user-management__table tbody:has(tr:only-child) tr .user-management__actions {
+  position: relative !important;
+  z-index: 9999998 !important;
+  overflow: visible !important;
+}
+
 /* Ensure table rows don't interfere with dropdowns */
 .user-management__table tbody tr {
   position: relative;
@@ -650,6 +670,32 @@
   transform: translateY(10px) !important;
 }
 
+/* Special handling for single row tables */
+.user-management__table tbody:has(tr:only-child) tr .user-management__dropdown {
+  top: 100% !important;
+  bottom: auto !important;
+  margin-top: 8px !important;
+  margin-bottom: 0 !important;
+  transform: translateY(-10px) !important;
+}
+
+.user-management__table tbody:has(tr:only-child) tr .user-management__dropdown.show {
+  transform: translateY(0) !important;
+}
+
+/* Fallback for browsers that don't support :has() selector */
+.user-management__table tbody tr:only-child .user-management__dropdown {
+  top: 100% !important;
+  bottom: auto !important;
+  margin-top: 8px !important;
+  margin-bottom: 0 !important;
+  transform: translateY(-10px) !important;
+}
+
+.user-management__table tbody tr:only-child .user-management__dropdown.show {
+  transform: translateY(0) !important;
+}
+
 .user-management__table tbody tr:last-child .user-management__dropdown.show,
 .user-management__table tbody tr:nth-last-child(2) .user-management__dropdown.show,
 .user-management__table tbody tr:nth-last-child(3) .user-management__dropdown.show {
@@ -667,6 +713,16 @@
 
 .user-management__table tbody:has(tr:only-child) .user-management__dropdown.show {
   transform: translateY(0) !important;
+}
+
+/* Emergency override - force all dropdowns to be visible when active */
+.user-management__dropdown.show {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 999999 !important;
+  pointer-events: auto !important;
+  position: absolute !important;
 }
 
 /* For tables with 2-4 rows, ensure first row always drops down */
@@ -691,6 +747,22 @@
   visibility: visible !important;
   transform: translateY(0) !important;
   z-index: 9999999 !important;
+  display: block !important;
+  pointer-events: auto !important;
+}
+
+/* Force dropdown visibility for single row tables */
+.user-management__table tbody tr:only-child .user-management__dropdown.show,
+.user-management__table tbody:has(tr:only-child) tr .user-management__dropdown.show {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+  z-index: 9999999 !important;
+  top: 100% !important;
+  bottom: auto !important;
+  transform: translateY(0) !important;
+  margin-top: 8px !important;
+  position: absolute !important;
 }
 
 .user-management__dropdown-item {

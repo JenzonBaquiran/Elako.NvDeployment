@@ -248,7 +248,13 @@ function Login() {
         <div className="login-form">
           <div className="login-form-content">
             <div className="logo-container">
-              <img src={logo} alt="Logo" className="brand-logo" />
+              <img 
+                src={logo} 
+                alt="Logo" 
+                className="brand-logo" 
+                onClick={() => navigate('/')}
+                style={{ cursor: 'pointer' }}
+              />
             </div>
             <p className="text">Digital Marketing Solution For The Micro, Small, and Medium Enterprises MSME's in Nueva Vizcaya</p>
             

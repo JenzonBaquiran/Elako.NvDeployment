@@ -424,7 +424,13 @@ function ForgotPassword() {
         <div className="login-form">
           <div className="login-form-content">
             <div className="logo-container">
-              <img src={logo} alt="Logo" className="brand-logo" />
+              <img 
+                src={logo} 
+                alt="Logo" 
+                className="brand-logo" 
+                onClick={() => navigate('/')}
+                style={{ cursor: 'pointer' }}
+              />
             </div>
 
             {step === 1 && renderStep1()}

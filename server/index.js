@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -140,13 +141,42 @@ const certificateUpload = multer({
 });
 
 // MongoDB Connection
-mongoose.connect("mongodb://127.0.0.1:27017/ElakoNv", {});
+let mongoURI;
+if (
+  process.env.DB_USERNAME &&
+  process.env.DB_PASSWORD &&
+  process.env.DB_USERNAME !== "your_actual_atlas_username_here"
+) {
+  mongoURI = process.env.MONGODB_URI?.replace(
+    "<db_username>",
+    process.env.DB_USERNAME
+  )?.replace("<db_password>", process.env.DB_PASSWORD);
+} else {
+  console.log("⚠️  Atlas credentials not configured, using local MongoDB");
+  mongoURI = "mongodb://127.0.0.1:27017/ElakoNv";
+}
+
+console.log(
+  "🔗 Attempting to connect to:",
+  mongoURI.replace(process.env.DB_PASSWORD, "***")
+);
+console.log("👤 Username:", process.env.DB_USERNAME);
+
+mongoose.connect(mongoURI);
 
 mongoose.connection.on("connected", () => {
-  console.log("✅ Connected to MongoDB");
+  console.log("✅ Connected to MongoDB Atlas");
+  console.log("Database:", mongoose.connection.name);
 });
 mongoose.connection.on("error", (err) => {
   console.error("❌ MongoDB connection error:", err);
+  console.log("\n🔧 Troubleshooting tips:");
+  console.log("1. Check if username exists in MongoDB Atlas → Database Access");
+  console.log("2. Verify username is case-sensitive");
+  console.log("3. Ensure user has database permissions");
+  console.log(
+    "4. Check if password contains special characters that need encoding"
+  );
 });
 
 // --- Password Strength Validation ---

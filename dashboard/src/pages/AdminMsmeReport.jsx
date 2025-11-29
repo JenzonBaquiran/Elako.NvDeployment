@@ -339,9 +339,16 @@ const AdminMsmeReport = () => {
 
   // Helper function to get badge information for a store
   const getStoreBadgeInfo = (storeId) => {
+    if (!badgesData || !Array.isArray(badgesData)) {
+      return { hasActiveBadge: false };
+    }
+    
     const badge = badgesData.find(badge => {
       // Handle both string IDs and populated objects
-      const badgeStoreId = typeof badge.storeId === 'object' ? badge.storeId._id : badge.storeId;
+      if (!badge || !badge.storeId) return false;
+      const badgeStoreId = typeof badge.storeId === 'object' && badge.storeId !== null 
+        ? badge.storeId._id 
+        : badge.storeId;
       return badgeStoreId === storeId;
     });
     

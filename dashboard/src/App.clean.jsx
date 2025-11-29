@@ -14,6 +14,7 @@ import ProductDetails from "./pages/ProductDetails";
 import CustomerStoreView from "./pages/CustomerStoreView";
 import CustomerHotPicks from "./pages/CustomerHotPicks";
 import CustomerTopStores from "./pages/CustomerTopStores";
+import DataTest from "./pages/DataTest";
 
 // Simple fallback component for testing
 const SimplePageTest = ({ title, message }) => (
@@ -38,6 +39,7 @@ const SimplePageTest = ({ title, message }) => (
       <a href="/login" style={{ margin: '5px', padding: '8px 16px', background: '#28a745', color: 'white', textDecoration: 'none', borderRadius: '4px', fontSize: '14px' }}>Login</a>
       <a href="/signup" style={{ margin: '5px', padding: '8px 16px', background: '#dc3545', color: 'white', textDecoration: 'none', borderRadius: '4px', fontSize: '14px' }}>Signup</a>
       <a href="/terms" style={{ margin: '5px', padding: '8px 16px', background: '#6c757d', color: 'white', textDecoration: 'none', borderRadius: '4px', fontSize: '14px' }}>Terms</a>
+      <a href="/data-test" style={{ margin: '5px', padding: '8px 16px', background: '#17a2b8', color: 'white', textDecoration: 'none', borderRadius: '4px', fontSize: '14px' }}>📊 Data</a>
     </div>
   </div>
 );
@@ -59,7 +61,7 @@ function App() {
           <Route path="/hot-picks" element={<CustomerHotPicks />} />
           <Route path="/top-stores" element={<CustomerTopStores />} />
           
-          {/* Debug/Test Route */}
+          {/* Debug/Test Routes */}
           <Route 
             path="/test" 
             element={
@@ -69,6 +71,7 @@ function App() {
               />
             } 
           />
+          <Route path="/data-test" element={<DataTest />} />
           
           {/* Test Routes for pages being developed */}
           <Route 

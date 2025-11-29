@@ -22,7 +22,7 @@ const AdminAnalytics = () => {
   // Fetch MSME reports data
   const fetchMsmeData = async () => {
     try {
-      const response = await fetch('http://localhost:1337/api/admin/msme-reports');
+      const response = await apiCall('/api/admin/msme-reports');
       const data = await response.json();
       
       if (data.success && data.data) {
@@ -38,7 +38,7 @@ const AdminAnalytics = () => {
   // Fetch monthly growth data with real profile views and ratings
   const fetchMonthlyGrowthData = async () => {
     try {
-      const response = await fetch('http://localhost:1337/api/admin/analytics/monthly-growth');
+      const response = await apiCall('/api/admin/analytics/monthly-growth');
       const data = await response.json();
       
       if (data.success && data.monthlyData) {
@@ -54,7 +54,7 @@ const AdminAnalytics = () => {
   // Fetch real top products
   const fetchTopProducts = async () => {
     try {
-      const response = await fetch('http://localhost:1337/api/admin/hot-picks');
+      const response = await apiCall('/api/admin/hot-picks');
       const data = await response.json();
       
       if (data.success && data.products) {

@@ -8681,7 +8681,7 @@ app.get("/api/hot-picks", async (req, res) => {
         mainImage: mainImage,
         images: product.pictures || (product.picture ? [product.picture] : []),
         imageUrl: mainImage
-          ? `http://localhost:1337/uploads/${mainImage}`
+          ? `https://elakonvdeployment-production.up.railway.app/uploads/${mainImage}`
           : null,
         // Rating information
         rating: averageRating,
@@ -8827,7 +8827,7 @@ app.get("/api/hot-picks/all", async (req, res) => {
         mainImage: mainImage,
         images: product.pictures || (product.picture ? [product.picture] : []),
         imageUrl: mainImage
-          ? `http://localhost:1337/uploads/${mainImage}`
+          ? `https://elakonvdeployment-production.up.railway.app/uploads/${mainImage}`
           : null,
         // Rating information
         rating: averageRating,

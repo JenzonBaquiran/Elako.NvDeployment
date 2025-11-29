@@ -71,7 +71,7 @@ const ProductDetails = () => {
 
   const fetchProductDetails = async () => {
     try {
-      const response = await fetch(`http://localhost:1337/api/products/${productId}`);
+      const response = await fetch(`${API_BASE_URL}/api/products/${productId}`);
       const data = await response.json();
       if (data.success) {
         setProduct(data.product);

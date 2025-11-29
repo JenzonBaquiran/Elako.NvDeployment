@@ -23,7 +23,7 @@ const BlogHero = () => {
 
   const fetchBlogPosts = async () => {
     try {
-      const response = await fetch('http://localhost:1337/api/blog-posts/published');
+      const response = await fetch(`${API_BASE_URL}/api/blog-posts/published`);
       const data = await response.json();
       if (data.success) {
         setBlogPosts(data.posts);
@@ -153,7 +153,7 @@ const BlogHero = () => {
   const incrementBlogViews = async (postId) => {
     try {
       console.log('📈 Incrementing views for BlogHero post:', postId);
-      const response = await fetch(`http://localhost:1337/api/blog-posts/${postId}/increment-views`, {
+      const response = await fetch(`${API_BASE_URL}/api/blog-posts/${postId}/increment-views`, {
         method: 'POST'
       });
       

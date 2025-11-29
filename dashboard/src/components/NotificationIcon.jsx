@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config/api';
 import { 
   IconButton, 
   Badge,
@@ -56,7 +57,7 @@ const NotificationIcon = ({ storeId }) => {
   const fetchNotifications = async () => {
     try {
       console.log('Fetching notifications for store:', storeId);
-      const response = await fetch(`http://localhost:1337/api/notifications/${storeId}?limit=10`);
+      const response = await fetch(`${API_BASE_URL}/api/notifications/${storeId}?limit=10`);
       const data = await response.json();
       
       console.log('Notification response:', data);
@@ -129,7 +130,7 @@ const NotificationIcon = ({ storeId }) => {
     if (selectedNotifications.length === 0) return;
 
     try {
-      await fetch('http://localhost:1337/api/notifications/delete-multiple', {
+      await fetch(`${API_BASE_URL}/api/notifications/delete-multiple`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -164,7 +165,7 @@ const NotificationIcon = ({ storeId }) => {
 
   const handleConfirmDeleteAll = async () => {
     try {
-      await fetch(`http://localhost:1337/api/notifications/${storeId}/delete-all`, {
+      await fetch(`${API_BASE_URL}/api/notifications/${storeId}/delete-all`, {
         method: 'DELETE',
       });
 
@@ -181,7 +182,7 @@ const NotificationIcon = ({ storeId }) => {
 
   const handleDeleteSingleNotification = async (notificationId) => {
     try {
-      await fetch(`http://localhost:1337/api/notifications/${notificationId}`, {
+      await fetch(`${API_BASE_URL}/api/notifications/${notificationId}`, {
         method: 'DELETE',
       });
 
@@ -199,7 +200,7 @@ const NotificationIcon = ({ storeId }) => {
 
   const markAsRead = async (notificationId) => {
     try {
-      await fetch(`http://localhost:1337/api/notifications/${notificationId}/read`, {
+      await fetch(`${API_BASE_URL}/api/notifications/${notificationId}/read`, {
         method: 'PUT'
       });
       
@@ -220,7 +221,7 @@ const NotificationIcon = ({ storeId }) => {
 
   const markAllAsRead = async () => {
     try {
-      await fetch(`http://localhost:1337/api/notifications/${storeId}/read-all`, {
+      await fetch(`${API_BASE_URL}/api/notifications/${storeId}/read-all`, {
         method: 'PUT'
       });
       

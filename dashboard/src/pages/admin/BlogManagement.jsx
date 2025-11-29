@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminSidebar from '../AdminSidebar';
 import Notification from '../../components/Notification';
+import { API_BASE_URL } from '../../config/api';
 import '../../css/BlogManagement.css';
 
 const BlogManagement = () => {
@@ -68,7 +69,7 @@ const BlogManagement = () => {
 
   const fetchBlogPosts = async () => {
     try {
-      const response = await fetch('http://localhost:1337/api/blog-posts');
+      const response = await fetch(`${API_BASE_URL}/api/blog-posts`);
       const data = await response.json();
       if (data.success) {
         setBlogPosts(data.posts);
@@ -116,7 +117,7 @@ const BlogManagement = () => {
     formDataUpload.append('media', file);
 
     try {
-      const response = await fetch('http://localhost:1337/api/upload', {
+      const response = await fetch(`${API_BASE_URL}/api/upload`, {
         method: 'POST',
         body: formDataUpload
       });
@@ -136,8 +137,8 @@ const BlogManagement = () => {
     e.preventDefault();
     try {
       const url = editingPost 
-        ? `http://localhost:1337/api/blog-posts/${editingPost._id}`
-        : 'http://localhost:1337/api/blog-posts';
+        ? `${API_BASE_URL}/api/blog-posts/${editingPost._id}`
+        : `${API_BASE_URL}/api/blog-posts`;
       
       const method = editingPost ? 'PUT' : 'POST';
       
@@ -229,7 +230,7 @@ const BlogManagement = () => {
 
   const confirmDelete = async (id) => {
     try {
-      const response = await fetch(`http://localhost:1337/api/blog-posts/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/blog-posts/${id}`, {
         method: 'DELETE'
       });
       const data = await response.json();
@@ -320,7 +321,7 @@ const BlogManagement = () => {
         return (
           <div className="media-preview video">
             <video controls>
-              <source src={`http://localhost:1337/uploads/${post.mediaUrl}`} type="video/mp4" />
+              <source src={`${API_BASE_URL}/uploads/${post.mediaUrl}`} type="video/mp4" />
             </video>
           </div>
         );
@@ -328,7 +329,7 @@ const BlogManagement = () => {
       default:
         return (
           <div className="media-preview image">
-            <img src={`http://localhost:1337/uploads/${post.mediaUrl}`} alt={post.title} />
+            <img src={`${API_BASE_URL}/uploads/${post.mediaUrl}`} alt={post.title} />
           </div>
         );
     }
@@ -521,11 +522,11 @@ const BlogManagement = () => {
                     <div className="preview">
                       {formData.mediaType === 'video' ? (
                         <video controls width="200">
-                          <source src={`http://localhost:1337/uploads/${formData.mediaUrl}`} />
+                          <source src={`${API_BASE_URL}/uploads/${formData.mediaUrl}`} />
                         </video>
                       ) : (
                         <img 
-                          src={`http://localhost:1337/uploads/${formData.mediaUrl}`} 
+                          src={`${API_BASE_URL}/uploads/${formData.mediaUrl}`} 
                           alt="Preview" 
                           width="200"
                         />

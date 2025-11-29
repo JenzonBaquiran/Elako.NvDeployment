@@ -12,6 +12,7 @@ import {
   EmojiEvents
 } from "@mui/icons-material";
 import AdminSidebar from "./AdminSidebar";
+import { API_BASE_URL } from '../config/api';
 import "../css/AdminOverview.css";
 
 const AdminOverview = () => {
@@ -37,7 +38,7 @@ const AdminOverview = () => {
   // Fetch dashboard statistics
   const fetchDashboardStats = async () => {
     try {
-      const response = await fetch('http://localhost:1337/api/admin/dashboard-stats');
+      const response = await fetch(`${API_BASE_URL}/api/admin/dashboard-stats`);
       const data = await response.json();
       
       if (data.success) {
@@ -56,7 +57,7 @@ const AdminOverview = () => {
   const fetchRecentActivities = async () => {
     setActivitiesLoading(true);
     try {
-      const response = await fetch('http://localhost:1337/api/admin/recent-activities');
+      const response = await fetch(`${API_BASE_URL}/api/admin/recent-activities`);
       const data = await response.json();
       
       if (data.success) {
@@ -75,7 +76,7 @@ const AdminOverview = () => {
   const fetchTopStores = async () => {
     setTopStoresLoading(true);
     try {
-      const response = await fetch('http://localhost:1337/api/badges/admin/stores?isActive=true');
+      const response = await fetch(`${API_BASE_URL}/api/badges/admin/stores?isActive=true`);
       const data = await response.json();
       
       if (data.success) {

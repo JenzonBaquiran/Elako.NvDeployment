@@ -208,7 +208,7 @@ const AdminMsmeOversight = () => {
       const newVisibility = !msme.isVisible;
 
       // Call API to update visibility
-      const response = await fetch(`http://localhost:1337/api/admin/msme/${msme._id}/visibility`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/msme/${msme._id}/visibility`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -243,7 +243,7 @@ const AdminMsmeOversight = () => {
     setLoadingCertificates(true);
     
     try {
-      const response = await fetch(`http://localhost:1337/api/msme/${msme.id}/certificates`);
+      const response = await fetch(`${API_BASE_URL}/api/msme/${msme.id}/certificates`);
       const data = await response.json();
       
       if (data.success) {
@@ -540,7 +540,7 @@ const AdminMsmeOversight = () => {
                     {certificates.mayorsPermit ? (
                       <button 
                         className="admin-msme-oversight__view-certificate-btn"
-                        onClick={() => handleViewCertificate('Mayor\'s Permit', `http://localhost:1337/uploads/${certificates.mayorsPermit}`)}
+                        onClick={() => handleViewCertificate('Mayor\'s Permit', `${API_BASE_URL}/uploads/${certificates.mayorsPermit}`)}
                       >
                         View Document
                       </button>
@@ -554,7 +554,7 @@ const AdminMsmeOversight = () => {
                     {certificates.bir ? (
                       <button 
                         className="admin-msme-oversight__view-certificate-btn"
-                        onClick={() => handleViewCertificate('BIR Certificate', `http://localhost:1337/uploads/${certificates.bir}`)}
+                        onClick={() => handleViewCertificate('BIR Certificate', `${API_BASE_URL}/uploads/${certificates.bir}`)}
                       >
                         View Document
                       </button>
@@ -568,7 +568,7 @@ const AdminMsmeOversight = () => {
                     {certificates.dti ? (
                       <button 
                         className="admin-msme-oversight__view-certificate-btn"
-                        onClick={() => handleViewCertificate('DTI Certificate', `http://localhost:1337/uploads/${certificates.dti}`)}
+                        onClick={() => handleViewCertificate('DTI Certificate', `${API_BASE_URL}/uploads/${certificates.dti}`)}
                       >
                         View Document
                       </button>

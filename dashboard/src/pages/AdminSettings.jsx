@@ -5,6 +5,7 @@ import Notification from "../components/Notification";
 import PasswordStrengthIndicator from "../components/PasswordStrengthIndicator";
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { validation } from '../utils/validation';
+import { API_BASE_URL } from '../config/api';
 import "../css/AdminSettings.css";
 
 const AdminSettings = () => {
@@ -69,7 +70,7 @@ const AdminSettings = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:1337/api/admin/${user.id}/profile`);
+      const response = await fetch(`${API_BASE_URL}/api/admin/${user.id}/profile`);
       const data = await response.json();
 
       if (data.success) {
@@ -135,7 +136,7 @@ const AdminSettings = () => {
       }
       
       // Make actual API call to save the profile data
-      const response = await fetch(`http://localhost:1337/api/admin/admins/${user.id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/admins/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -212,7 +213,7 @@ const AdminSettings = () => {
     try {
       setPasswordLoading(true);
       
-      const response = await fetch(`http://localhost:1337/api/admin/${user.id}/change-password`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/${user.id}/change-password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -253,7 +254,7 @@ const AdminSettings = () => {
 
   const confirmDeleteAccount = async () => {
     try {
-      const response = await fetch(`http://localhost:1337/api/admin/${user.id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/admin/${user.id}`, {
         method: 'DELETE',
       });
 

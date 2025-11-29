@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
+import { API_BASE_URL } from '../config/api';
 import './FollowButton.css';
 
 const FollowButton = ({ storeId, storeName, onFollowChange }) => {
@@ -20,7 +21,7 @@ const FollowButton = ({ storeId, storeName, onFollowChange }) => {
     try {
       console.log('Checking follow status for store:', storeId, 'customer:', user._id);
       const response = await fetch(
-        `http://localhost:1337/api/stores/${storeId}/follow-status/${user._id}`
+        `${API_BASE_URL}/api/stores/${storeId}/follow-status/${user._id}`
       );
       const data = await response.json();
 
@@ -50,7 +51,7 @@ const FollowButton = ({ storeId, storeName, onFollowChange }) => {
       const action = isFollowing ? 'unfollow' : 'follow';
       
       const response = await fetch(
-        `http://localhost:1337/api/stores/${storeId}/follow`,
+        `${API_BASE_URL}/api/stores/${storeId}/follow`,
         {
           method: 'POST',
           headers: {

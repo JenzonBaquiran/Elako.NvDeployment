@@ -2,7 +2,7 @@
 // This utility ensures that store views are recorded only once per session
 // when a user visits a store, regardless of the entry point
 
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL } from "../config/api";
 
 export const recordStoreView = async (storeId, userId, navigate) => {
   // Only record page view for authenticated customers
@@ -15,18 +15,15 @@ export const recordStoreView = async (storeId, userId, navigate) => {
   // Always attempt to record the view - let the server handle duplicate prevention
   // The server already has daily duplicate prevention, so we don't need session-based blocking
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/stores/${storeId}/view`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          customerId: userId,
-        }),
-      }
-    );
+    const response = await fetch(`${API_BASE_URL}/api/stores/${storeId}/view`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        customerId: userId,
+      }),
+    });
 
     const data = await response.json();
 

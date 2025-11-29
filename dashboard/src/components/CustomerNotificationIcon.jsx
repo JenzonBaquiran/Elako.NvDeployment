@@ -65,7 +65,7 @@ const CustomerNotificationIcon = () => {
       setLoading(true);
       console.log('🔍 Fetching notifications for user ID:', user._id);
       console.log('📝 Full user object:', user);
-      const response = await fetch(`http://localhost:1337/api/customer-notifications/${user._id}?limit=10`);
+      const response = await fetch(`${API_BASE_URL}/api/customer-notifications/${user._id}?limit=10`);
       const data = await response.json();
       
       console.log('📨 Notification API response:', data);
@@ -140,7 +140,7 @@ const CustomerNotificationIcon = () => {
     try {
       // Mark as read
       if (!notification.isRead) {
-        await fetch(`http://localhost:1337/api/customer-notifications/${notification._id}/read`, {
+        await fetch(`${API_BASE_URL}/api/customer-notifications/${notification._id}/read`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -244,7 +244,7 @@ const CustomerNotificationIcon = () => {
         setNotifications(prev => prev.filter(n => n._id !== notificationId));
       }
       
-      const response = await fetch(`http://localhost:1337/api/customer-notifications/${notificationId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/customer-notifications/${notificationId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -305,7 +305,7 @@ const CustomerNotificationIcon = () => {
     });
 
     try {
-      const response = await fetch(`http://localhost:1337/api/customer-notifications/delete-multiple`, {
+      const response = await fetch(`${API_BASE_URL}/api/customer-notifications/delete-multiple`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -351,7 +351,7 @@ const CustomerNotificationIcon = () => {
     console.log('Confirm Delete All clicked, customerId:', customerId, 'notifications.length:', notifications.length);
 
     try {
-      const response = await fetch(`http://localhost:1337/api/customer-notifications/${customerId}/delete-all`, {
+      const response = await fetch(`${API_BASE_URL}/api/customer-notifications/${customerId}/delete-all`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -386,7 +386,7 @@ const CustomerNotificationIcon = () => {
     try {
       // Mark as read
       if (!notification.isRead) {
-        await fetch(`http://localhost:1337/api/customer-notifications/${notification._id}/read`, {
+        await fetch(`${API_BASE_URL}/api/customer-notifications/${notification._id}/read`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -455,7 +455,7 @@ const CustomerNotificationIcon = () => {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await fetch(`http://localhost:1337/api/customer-notifications/${user._id}/read-all`, {
+      await fetch(`${API_BASE_URL}/api/customer-notifications/${user._id}/read-all`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

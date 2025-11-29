@@ -3,6 +3,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from './NotificationProvider';
+import { API_BASE_URL } from '../config/api';
 import './FavoriteButton.css';
 
 const FavoriteButton = ({ 
@@ -27,7 +28,7 @@ const FavoriteButton = ({
   const checkFavoriteStatus = async () => {
     try {
       const response = await fetch(
-        `http://localhost:1337/api/customers/${user._id}/favorites/${productId}/check`
+        `${API_BASE_URL}/api/customers/${user._id}/favorites/${productId}/check`
       );
       const data = await response.json();
       
@@ -61,7 +62,7 @@ const FavoriteButton = ({
 
     try {
       const response = await fetch(
-        `http://localhost:1337/api/customers/${user._id}/favorites/${productId}`,
+        `${API_BASE_URL}/api/customers/${user._id}/favorites/${productId}`,
         {
           method: 'POST',
           headers: {

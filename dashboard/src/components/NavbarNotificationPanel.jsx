@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../config/api';
 import { 
   IconButton, 
   Badge,
@@ -38,7 +39,7 @@ const NavbarNotificationPanel = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:1337/api/customer-notifications/${user._id}?limit=10`);
+      const response = await fetch(`${API_BASE_URL}/api/customer-notifications/${user._id}?limit=10`);
       const data = await response.json();
 
       if (data.success) {
@@ -75,7 +76,7 @@ const NavbarNotificationPanel = () => {
     if (!user?._id || unreadCount === 0) return;
     
     try {
-      const response = await fetch(`http://localhost:1337/api/customer-notifications/${user._id}/mark-all-read`, {
+      const response = await fetch(`${API_BASE_URL}/api/customer-notifications/${user._id}/mark-all-read`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +96,7 @@ const NavbarNotificationPanel = () => {
     try {
       // Mark as read
       if (!notification.isRead) {
-        await fetch(`http://localhost:1337/api/customer-notifications/${notification._id}/read`, {
+        await fetch(`${API_BASE_URL}/api/customer-notifications/${notification._id}/read`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -274,7 +275,7 @@ const NavbarNotificationPanel = () => {
                             <Box className="navbar-notification-panel__product-info">
                               {notification.productId.images && notification.productId.images.length > 0 && (
                                 <img
-                                  src={`http://localhost:1337${notification.productId.images[0]}`}
+                                  src={`${API_BASE_URL}${notification.productId.images[0]}`}
                                   alt={notification.productId.productName}
                                   className="navbar-notification-panel__product-image"
                                 />

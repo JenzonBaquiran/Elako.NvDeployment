@@ -1,5 +1,5 @@
 // Search Service for handling search API calls
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL } from "../config/api";
 
 class SearchService {
   static baseURL = `${API_BASE_URL}/api`;

@@ -8,6 +8,12 @@ import NotificationProvider from "./components/NotificationProvider";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import TermsPage from "./pages/TermsPage";
+import ProductDetails from "./pages/ProductDetails";
+import CustomerStoreView from "./pages/CustomerStoreView";
+import CustomerHotPicks from "./pages/CustomerHotPicks";
+import CustomerTopStores from "./pages/CustomerTopStores";
 
 // Simple fallback component for testing
 const SimplePageTest = ({ title, message }) => (
@@ -40,10 +46,16 @@ function App() {
       <NotificationProvider>
         <BrowserRouter>
           <Routes>
-          {/* Working Routes */}
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/store/:id" element={<CustomerStoreView />} />
+          <Route path="/hot-picks" element={<CustomerHotPicks />} />
+          <Route path="/top-stores" element={<CustomerTopStores />} />
           
           {/* Test Routes for pages being developed */}
           <Route 

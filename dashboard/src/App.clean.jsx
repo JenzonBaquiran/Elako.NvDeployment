@@ -15,6 +15,7 @@ import CustomerStoreView from "./pages/CustomerStoreView";
 import CustomerHotPicks from "./pages/CustomerHotPicks";
 import CustomerTopStores from "./pages/CustomerTopStores";
 import DataTest from "./pages/DataTest";
+import SystemDataOverview from "./pages/SystemDataOverview";
 
 // Admin Components
 import AdminOverview from "./pages/AdminOverview";
@@ -99,6 +100,7 @@ function App() {
             } 
           />
           <Route path="/data-test" element={<DataTest />} />
+          <Route path="/system-data" element={<SystemDataOverview />} />
           
           {/* Admin Routes */}
           <Route path="/admin-overview" element={<AdminOverview />} />

@@ -7,6 +7,7 @@ import FavoriteButton from '../components/FavoriteButton';
 import FollowButton from '../components/FollowButton';
 import TopFanCongratulations from '../components/TopFanCongratulations';
 import { recordStoreView } from '../utils/storeViewTracker';
+import { API_BASE_URL } from '../config/api';
 import '../css/CustomerFavorites.css';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -50,7 +51,7 @@ const CustomerFavorites = () => {
   const fetchFavoriteProducts = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:1337/api/customers/${user._id}/favorites`);
+      const response = await fetch(`${API_BASE_URL}/api/customers/${user._id}/favorites`);
       const data = await response.json();
       
       if (data.success) {
@@ -69,7 +70,7 @@ const CustomerFavorites = () => {
   const fetchFollowedStores = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:1337/api/customers/${user._id}/following`);
+      const response = await fetch(`${API_BASE_URL}/api/customers/${user._id}/following`);
       const data = await response.json();
       
       if (data.success) {
@@ -125,7 +126,7 @@ const CustomerFavorites = () => {
       setBadgeLoading(true);
       
       // First get existing badge
-      const getResponse = await fetch(`http://localhost:1337/api/badges/customer/${user._id}`, {
+      const getResponse = await fetch(`${API_BASE_URL}/api/badges/customer/${user._id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -155,7 +156,7 @@ const CustomerFavorites = () => {
         }
       } else {
         // Try to calculate badge if none exists
-        const calculateResponse = await fetch(`http://localhost:1337/api/badges/customer/${user._id}/calculate`, {
+        const calculateResponse = await fetch(`${API_BASE_URL}/api/badges/customer/${user._id}/calculate`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -200,7 +201,7 @@ const CustomerFavorites = () => {
 
   const markCelebrationShown = async () => {
     try {
-      const response = await fetch('http://localhost:1337/api/badges/celebration-shown', {
+      const response = await fetch(`${API_BASE_URL}/api/badges/celebration-shown`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -227,7 +228,7 @@ const CustomerFavorites = () => {
     
     try {
       // Force fetch the latest badge data
-      const response = await fetch(`http://localhost:1337/api/badges/customer/${user._id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/badges/customer/${user._id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -246,7 +247,7 @@ const CustomerFavorites = () => {
       } else {
         // Create a test badge if none exists
         console.log('🆕 Creating test badge for user ID:', user._id);
-        const createResponse = await fetch(`http://localhost:1337/api/badges/test/create-top-fan/${user._id}`, {
+        const createResponse = await fetch(`${API_BASE_URL}/api/badges/test/create-top-fan/${user._id}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -288,7 +289,7 @@ const CustomerFavorites = () => {
 
   const getProductImageUrl = (product) => {
     if (product.picture) {
-      return `http://localhost:1337/uploads/${product.picture}`;
+      return `${API_BASE_URL}/uploads/${product.picture}`;
     }
     return null;
   };

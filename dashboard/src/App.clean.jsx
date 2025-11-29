@@ -34,8 +34,10 @@ const SimplePageTest = ({ title, message }) => (
       display: 'inline-block'
     }}>
       <p><strong>Navigation:</strong></p>
-      <a href="/" style={{ margin: '10px', padding: '10px 20px', background: '#007bff', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>Home</a>
-      <a href="/login" style={{ margin: '10px', padding: '10px 20px', background: '#28a745', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>Login</a>
+      <a href="/" style={{ margin: '5px', padding: '8px 16px', background: '#007bff', color: 'white', textDecoration: 'none', borderRadius: '4px', fontSize: '14px' }}>Home</a>
+      <a href="/login" style={{ margin: '5px', padding: '8px 16px', background: '#28a745', color: 'white', textDecoration: 'none', borderRadius: '4px', fontSize: '14px' }}>Login</a>
+      <a href="/signup" style={{ margin: '5px', padding: '8px 16px', background: '#dc3545', color: 'white', textDecoration: 'none', borderRadius: '4px', fontSize: '14px' }}>Signup</a>
+      <a href="/terms" style={{ margin: '5px', padding: '8px 16px', background: '#6c757d', color: 'white', textDecoration: 'none', borderRadius: '4px', fontSize: '14px' }}>Terms</a>
     </div>
   </div>
 );
@@ -56,6 +58,17 @@ function App() {
           <Route path="/store/:id" element={<CustomerStoreView />} />
           <Route path="/hot-picks" element={<CustomerHotPicks />} />
           <Route path="/top-stores" element={<CustomerTopStores />} />
+          
+          {/* Debug/Test Route */}
+          <Route 
+            path="/test" 
+            element={
+              <SimplePageTest 
+                title="🔧 Routing Test" 
+                message="If you can see this page, routing is working correctly! All routes have been fixed."
+              />
+            } 
+          />
           
           {/* Test Routes for pages being developed */}
           <Route 

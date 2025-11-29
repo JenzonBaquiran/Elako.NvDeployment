@@ -87,6 +87,24 @@ app.use(
 );
 app.use(express.json());
 
+// Health check route
+app.get("/", (req, res) => {
+  res.json({
+    status: "OK",
+    message: "Elako.Nv Backend API is running",
+    timestamp: new Date().toISOString(),
+    database: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected"
+  });
+});
+
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "healthy",
+    database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Serve uploaded images statically
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -157,7 +175,15 @@ const certificateUpload = multer({
 
 // MongoDB Connection
 let mongoURI;
-if (
+
+// Use Railway MongoDB connection string if available
+if (process.env.MONGODB_URI) {
+  mongoURI = process.env.MONGODB_URI;
+  console.log("🚀 Using Railway MongoDB connection");
+} else if (process.env.MONGO_URL) {
+  mongoURI = process.env.MONGO_URL;
+  console.log("🚀 Using Railway MONGO_URL connection");
+} else if (
   process.env.DB_USERNAME &&
   process.env.DB_PASSWORD &&
   process.env.DB_USERNAME !== "your_actual_atlas_username_here"
@@ -166,16 +192,14 @@ if (
     "<db_username>",
     process.env.DB_USERNAME
   )?.replace("<db_password>", process.env.DB_PASSWORD);
+  console.log("🌐 Using MongoDB Atlas connection");
 } else {
-  console.log("⚠️  Atlas credentials not configured, using local MongoDB");
+  console.log("⚠️  No database configuration found, using local MongoDB");
   mongoURI = "mongodb://127.0.0.1:27017/ElakoNv";
 }
 
-console.log(
-  "🔗 Attempting to connect to:",
-  mongoURI.replace(process.env.DB_PASSWORD, "***")
-);
-console.log("👤 Username:", process.env.DB_USERNAME);
+console.log("🔗 Attempting to connect to MongoDB...");
+console.log("Database type:", mongoURI.includes('railway') ? 'Railway MongoDB' : mongoURI.includes('mongodb.net') ? 'MongoDB Atlas' : 'Local MongoDB');
 
 mongoose.connect(mongoURI);
 

@@ -4,6 +4,7 @@ import Header from './Navbar';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
 import FollowButton from '../components/FollowButton';
+import { API_BASE_URL } from '../config/api';
 import '../css/CustomerStoreView.css';
 import defaultStoreImg from '../assets/PAINTINGS.png';
 import foodStoreImg from '../assets/shakshouka.jpg';

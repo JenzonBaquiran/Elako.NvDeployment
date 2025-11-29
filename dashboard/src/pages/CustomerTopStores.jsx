@@ -5,6 +5,7 @@ import Footer from './Footer';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
 import heroPic from '../pictures/IMG_6125.jpg';
+import { API_BASE_URL } from '../config/api';
 import '../css/Home.css';
 import '../css/CustomerTopStores.css';
 
@@ -35,8 +36,8 @@ function CustomerTopStores() {
       
       // Include customer ID if user is logged in for follow status
       const url = user && user._id 
-        ? `http://localhost:1337/api/top-stores/all?page=${currentPage}&limit=16&customerId=${user._id}`
-        : `http://localhost:1337/api/top-stores/all?page=${currentPage}&limit=16`;
+        ? `${API_BASE_URL}/api/top-stores/all?page=${currentPage}&limit=16&customerId=${user._id}`
+        : `${API_BASE_URL}/api/top-stores/all?page=${currentPage}&limit=16`;
       
       const response = await fetch(url);
       const data = await response.json();
@@ -75,7 +76,7 @@ function CustomerTopStores() {
     const action = isFollowing ? 'unfollow' : 'follow';
     
     try {
-      const response = await fetch(`http://localhost:1337/api/stores/${store._id}/follow`, {
+      const response = await fetch(`${API_BASE_URL}/api/stores/${store._id}/follow`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -173,9 +174,9 @@ function CustomerTopStores() {
                 const isNew = isNewStore(store.createdAt);
                 // Use cover photo or store logo, fallback to hero image
                 const storeImage = store.dashboard?.coverPhoto 
-                  ? `http://localhost:1337/uploads/${store.dashboard.coverPhoto}` 
+                  ? `${API_BASE_URL}/uploads/${store.dashboard.coverPhoto}` 
                   : store.dashboard?.storeLogo 
-                    ? `http://localhost:1337/uploads/${store.dashboard.storeLogo}` 
+                    ? `${API_BASE_URL}/uploads/${store.dashboard.storeLogo}` 
                     : heroPic;
                 const isFollowed = store.isFollowing || false;
                 

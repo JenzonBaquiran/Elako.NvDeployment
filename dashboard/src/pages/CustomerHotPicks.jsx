@@ -34,8 +34,8 @@ function CustomerHotPicks() {
       
       // Include customer ID if user is logged in for favorite status
       const url = user && user._id 
-        ? `http://localhost:1337/api/hot-picks/all?page=${currentPage}&limit=12&customerId=${user._id}`
-        : `http://localhost:1337/api/hot-picks/all?page=${currentPage}&limit=12`;
+        ? `${API_BASE_URL}/api/hot-picks/all?page=${currentPage}&limit=12&customerId=${user._id}`
+        : `${API_BASE_URL}/api/hot-picks/all?page=${currentPage}&limit=12`;
       
       const response = await fetch(url);
       const data = await response.json();

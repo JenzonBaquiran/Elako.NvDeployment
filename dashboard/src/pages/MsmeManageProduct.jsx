@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
 import { validateForm, checkProductCompletion } from '../utils/validation';
 import ValidationMessage from '../components/ValidationMessage';
+import { API_BASE_URL } from '../config/api';
 import '../css/MsmeManageProduct.css';
 import shakshoukaImg from '../assets/shakshouka.jpg';
 import logoImage from '../logos/Icon on bright.png';
@@ -108,7 +109,7 @@ const MsmeManageProduct = () => {
     setLoading(true);
     try {
       // Fetch all products without filters - let frontend handle filtering
-      const response = await fetch(`http://localhost:1337/api/msme/${user._id}/products`);
+      const response = await fetch(`${API_BASE_URL}/api/msme/${user._id}/products`);
       const data = await response.json();
       
       if (data.success) {
@@ -127,7 +128,7 @@ const MsmeManageProduct = () => {
   const createProduct = async (productData) => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:1337/api/products', {
+      const response = await fetch(`${API_BASE_URL}/api/products`, {
         method: 'POST',
         body: productData
       });
@@ -169,7 +170,7 @@ const MsmeManageProduct = () => {
         picturesCount: productData.getAll('pictures').length
       });
       
-      const response = await fetch(`http://localhost:1337/api/products/${productId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
         method: 'PUT',
         body: productData
       });
@@ -197,7 +198,7 @@ const MsmeManageProduct = () => {
 
   const deleteProduct = async (productId) => {
     try {
-      const response = await fetch(`http://localhost:1337/api/products/${productId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
         method: 'DELETE'
       });
       
@@ -220,7 +221,7 @@ const MsmeManageProduct = () => {
 
   const toggleProductVisibility = async (productId, currentVisibility) => {
     try {
-      const response = await fetch(`http://localhost:1337/api/products/${productId}/visibility`, {
+      const response = await fetch(`${API_BASE_URL}/api/products/${productId}/visibility`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -672,7 +673,7 @@ const MsmeManageProduct = () => {
       
       // Set image previews for existing images
       const existingPreviews = product.pictures.map(pic => 
-        pic.startsWith('http') ? pic : `http://localhost:1337/uploads/${pic}`
+        pic.startsWith('http') ? pic : `${API_BASE_URL}/uploads/${pic}`
       );
       setImagePreview(existingPreviews);
       setSelectedImages([]); // No new images selected yet
@@ -681,7 +682,7 @@ const MsmeManageProduct = () => {
       setExistingImages([product.picture]);
       const preview = product.picture.startsWith('http') 
         ? product.picture 
-        : `http://localhost:1337/uploads/${product.picture}`;
+        : `${API_BASE_URL}/uploads/${product.picture}`;
       setImagePreview([preview]);
       setSelectedImages([]);
     } else {
@@ -770,7 +771,7 @@ const MsmeManageProduct = () => {
 
   const getProductImageUrl = (product) => {
     if (product.picture) {
-      return `http://localhost:1337/uploads/${product.picture}`;
+      return `${API_BASE_URL}/uploads/${product.picture}`;
     }
     return shakshoukaImg; // Default image
   };

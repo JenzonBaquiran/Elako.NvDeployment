@@ -472,7 +472,7 @@ const ProductDetails = () => {
                     console.log('Submitting feedback with data:', requestBody);
                     console.log('Product ID:', productId);
                     
-                    const res = await fetch(`http://localhost:1337/api/products/${productId}/feedback`, {
+                    const res = await fetch(`${API_BASE_URL}/api/products/${productId}/feedback`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify(requestBody)

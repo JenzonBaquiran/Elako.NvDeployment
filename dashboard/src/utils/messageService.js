@@ -1,10 +1,12 @@
-const API_BASE_URL = "http://localhost:1337/api";
+import { API_BASE_URL } from '../config/api';
+
+const MESSAGE_API_BASE_URL = `${API_BASE_URL}/api`;
 
 class MessageService {
   // Create or get conversation between two users
   async createOrGetConversation(userId, userModel, targetId, targetModel) {
     try {
-      const response = await fetch(`${API_BASE_URL}/conversations`, {
+      const response = await fetch(`${MESSAGE_API_BASE_URL}/conversations`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -38,7 +40,7 @@ class MessageService {
       );
 
       const response = await fetch(
-        `${API_BASE_URL}/users/${userId}/conversations?userModel=${userModel}`
+        `${MESSAGE_API_BASE_URL}/users/${userId}/conversations?userModel=${userModel}`
       );
 
       const data = await response.json();
@@ -75,7 +77,7 @@ class MessageService {
   async getConversationMessages(conversationId, page = 1, limit = 50) {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/conversations/${conversationId}/messages?page=${page}&limit=${limit}`
+        `${MESSAGE_API_BASE_URL}/conversations/${conversationId}/messages?page=${page}&limit=${limit}`
       );
 
       const data = await response.json();
@@ -98,7 +100,7 @@ class MessageService {
   async sendMessage(conversationId, messageData) {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/conversations/${conversationId}/messages`,
+        `${MESSAGE_API_BASE_URL}/conversations/${conversationId}/messages`,
         {
           method: "POST",
           headers: {
@@ -125,7 +127,7 @@ class MessageService {
   async markMessagesAsRead(conversationId, userId) {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/conversations/${conversationId}/read`,
+        `${MESSAGE_API_BASE_URL}/conversations/${conversationId}/read`,
         {
           method: "PATCH",
           headers: {
@@ -152,7 +154,7 @@ class MessageService {
   async getUnreadCount(userId) {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/users/${userId}/unread-count`
+        `${MESSAGE_API_BASE_URL}/users/${userId}/unread-count`
       );
 
       const data = await response.json();
@@ -172,7 +174,7 @@ class MessageService {
   async deleteConversation(conversationId) {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/conversations/${conversationId}`,
+        `${MESSAGE_API_BASE_URL}/conversations/${conversationId}`,
         {
           method: "DELETE",
           headers: {

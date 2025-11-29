@@ -1,11 +1,13 @@
-const API_BASE_URL = "http://localhost:1337/api";
+import { API_BASE_URL } from '../config/api';
+
+const NOTIFICATION_API_BASE_URL = `${API_BASE_URL}/api`;
 
 class NotificationService {
   // Get customer notifications
   async getCustomerNotifications(customerId, page = 1, limit = 20) {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/customers/${customerId}/notifications?page=${page}&limit=${limit}`
+        `${NOTIFICATION_API_BASE_URL}/customers/${customerId}/notifications?page=${page}&limit=${limit}`
       );
 
       const data = await response.json();
@@ -25,7 +27,7 @@ class NotificationService {
   async getMsmeNotifications(msmeId, page = 1, limit = 20) {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/msme/${msmeId}/notifications?page=${page}&limit=${limit}`
+        `${NOTIFICATION_API_BASE_URL}/msme/${msmeId}/notifications?page=${page}&limit=${limit}`
       );
 
       const data = await response.json();
@@ -45,7 +47,7 @@ class NotificationService {
   async markCustomerNotificationAsRead(customerId, notificationId) {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/customers/${customerId}/notifications/${notificationId}/read`,
+        `${NOTIFICATION_API_BASE_URL}/customers/${customerId}/notifications/${notificationId}/read`,
         {
           method: "PATCH",
           headers: {
@@ -71,7 +73,7 @@ class NotificationService {
   async markMsmeNotificationAsRead(msmeId, notificationId) {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/msme/${msmeId}/notifications/${notificationId}/read`,
+        `${NOTIFICATION_API_BASE_URL}/msme/${msmeId}/notifications/${notificationId}/read`,
         {
           method: "PATCH",
           headers: {
@@ -97,7 +99,7 @@ class NotificationService {
   async markAllCustomerNotificationsAsRead(customerId) {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/customers/${customerId}/notifications/mark-all-read`,
+        `${NOTIFICATION_API_BASE_URL}/customers/${customerId}/notifications/mark-all-read`,
         {
           method: "PATCH",
           headers: {
@@ -125,7 +127,7 @@ class NotificationService {
   async markAllMsmeNotificationsAsRead(msmeId) {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/msme/${msmeId}/notifications/mark-all-read`,
+        `${NOTIFICATION_API_BASE_URL}/msme/${msmeId}/notifications/mark-all-read`,
         {
           method: "PATCH",
           headers: {

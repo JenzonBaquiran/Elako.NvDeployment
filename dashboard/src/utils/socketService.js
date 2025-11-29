@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 
 // Socket configuration
-const SOCKET_URL = "http://localhost:1337";
+const SOCKET_URL = "https://elakonvdeployment-production.up.railway.app";
 
 class SocketService {
   constructor() {

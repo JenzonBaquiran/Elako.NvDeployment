@@ -1,6 +1,8 @@
 // Search Service for handling search API calls
+import { API_BASE_URL } from '../config/api';
+
 class SearchService {
-  static baseURL = "http://localhost:1337/api";
+  static baseURL = `${API_BASE_URL}/api`;
 
   // Perform search with debouncing
   static async search(query, type = "all", limit = 10) {

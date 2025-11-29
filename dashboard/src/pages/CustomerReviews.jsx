@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import CustomerSidebar from './CustomerSidebar';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
+import { API_BASE_URL } from '../config/api';
 import '../css/CustomerReviews.css';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
@@ -38,7 +39,7 @@ const CustomerReviews = () => {
     setLoading(true);
     try {
       console.log('Fetching reviews for customer:', user._id);
-      const response = await fetch(`http://localhost:1337/api/customers/${user._id}/reviews`);
+      const response = await fetch(`${API_BASE_URL}/api/customers/${user._id}/reviews`);
       const data = await response.json();
       
       console.log('Reviews API response:', data);
@@ -113,7 +114,7 @@ const CustomerReviews = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:1337/api/reviews/${reviewId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/reviews/${reviewId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -160,7 +161,7 @@ const CustomerReviews = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:1337/api/reviews/${reviewId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/reviews/${reviewId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -192,7 +193,7 @@ const CustomerReviews = () => {
 
   const getProductImageUrl = (imagePath) => {
     if (imagePath) {
-      return `http://localhost:1337/uploads/${imagePath}`;
+      return `${API_BASE_URL}/uploads/${imagePath}`;
     }
     return null;
   };

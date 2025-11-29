@@ -35,7 +35,7 @@ const CustomerViewStore = () => {
     setLoading(true);
     try {
       // For Browse Stores page, show ALL stores (don't exclude followed stores)
-      const url = 'http://localhost:1337/api/stores';
+      const url = `${API_BASE_URL}/api/stores`;
         
       const response = await fetch(url);
       const data = await response.json();
@@ -155,7 +155,7 @@ const CustomerViewStore = () => {
     const action = isFollowing ? 'unfollow' : 'follow';
 
     try {
-      const response = await fetch(`http://localhost:1337/api/stores/${store._id}/follow`, {
+      const response = await fetch(`${API_BASE_URL}/api/stores/${store._id}/follow`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

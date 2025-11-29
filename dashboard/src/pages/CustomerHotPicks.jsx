@@ -4,6 +4,7 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import { useAuth } from '../contexts/AuthContext';
 import FavoriteButton from '../components/FavoriteButton';
+import { API_BASE_URL } from '../config/api';
 import heroPic from '../pictures/IMG_6125.jpg';
 import '../css/Home.css';
 import '../css/CustomerHotpicks.css';

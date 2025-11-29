@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import CustomerSidebar from './CustomerSidebar';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
+import { API_BASE_URL } from '../config/api';
 import { formatDistanceToNow } from 'date-fns';
 import '../css/CustomerNotifications.css';
 import {
@@ -63,7 +64,7 @@ const CustomerNotifications = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:1337/api/customer-notifications/${user._id}?limit=50`);
+      const response = await fetch(`${API_BASE_URL}/api/customer-notifications/${user._id}?limit=50`);
       const data = await response.json();
 
       if (data.success) {
@@ -87,7 +88,7 @@ const CustomerNotifications = () => {
     try {
       // Mark as read if not already read
       if (!notification.isRead) {
-        await fetch(`http://localhost:1337/api/customer-notifications/${notification._id}/read`, {
+        await fetch(`${API_BASE_URL}/api/customer-notifications/${notification._id}/read`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -151,7 +152,7 @@ const CustomerNotifications = () => {
     event.stopPropagation();
     
     try {
-      await fetch(`http://localhost:1337/api/customer-notifications/${notificationId}/read`, {
+      await fetch(`${API_BASE_URL}/api/customer-notifications/${notificationId}/read`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -174,7 +175,7 @@ const CustomerNotifications = () => {
 
   const handleMarkAllAsRead = async () => {
     try {
-      await fetch(`http://localhost:1337/api/customer-notifications/${user._id}/read-all`, {
+      await fetch(`${API_BASE_URL}/api/customer-notifications/${user._id}/read-all`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -398,7 +399,7 @@ const CustomerNotifications = () => {
                           <div className="customer-notifications__product-info">
                             {notification.productId.picture && (
                               <Avatar
-                                src={`http://localhost:1337/uploads/${notification.productId.picture}`}
+                                src={`${API_BASE_URL}/uploads/${notification.productId.picture}`}
                                 alt={notification.productId.productName}
                                 className="customer-notifications__product-image"
                               />

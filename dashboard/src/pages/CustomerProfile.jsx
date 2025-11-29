@@ -6,6 +6,7 @@ import TopFanCongratulations from '../components/TopFanCongratulations';
 import Notification from '../components/Notification';
 import PasswordStrengthIndicator from '../components/PasswordStrengthIndicator';
 import { validation } from '../utils/validation';
+import { API_BASE_URL } from '../config/api';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import '../css/CustomerProfile.css';
 import EditIcon from '@mui/icons-material/Edit';
@@ -103,7 +104,7 @@ const CustomerProfile = () => {
   const fetchCustomerProfile = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:1337/api/customers/${user.id}/profile`);
+      const response = await fetch(`${API_BASE_URL}/api/customers/${user.id}/profile`);
       const data = await response.json();
 
       if (data.success) {
@@ -147,7 +148,7 @@ const CustomerProfile = () => {
   // Utility function to fetch detailed favorite products (for future use)
   const fetchFavoriteProducts = async () => {
     try {
-      const response = await fetch(`http://localhost:1337/api/customers/${user.id}/favorite-products`);
+      const response = await fetch(`${API_BASE_URL}/api/customers/${user.id}/favorite-products`);
       const data = await response.json();
       
       if (data.success) {
@@ -165,7 +166,7 @@ const CustomerProfile = () => {
   // Utility function to fetch detailed followed stores (for future use)
   const fetchFollowedStores = async () => {
     try {
-      const response = await fetch(`http://localhost:1337/api/customers/${user.id}/followed-stores`);
+      const response = await fetch(`${API_BASE_URL}/api/customers/${user.id}/followed-stores`);
       const data = await response.json();
       
       if (data.success) {
@@ -183,7 +184,7 @@ const CustomerProfile = () => {
   // Utility function to fetch detailed review statistics (for future use)
   const fetchReviewStatistics = async () => {
     try {
-      const response = await fetch(`http://localhost:1337/api/customers/${user.id}/review-stats`);
+      const response = await fetch(`${API_BASE_URL}/api/customers/${user.id}/review-stats`);
       const data = await response.json();
       
       if (data.success) {
@@ -231,7 +232,7 @@ const CustomerProfile = () => {
     try {
       setSaving(true);
       
-      const response = await fetch(`http://localhost:1337/api/customers/${profileData.id}/profile`, {
+      const response = await fetch(`${API_BASE_URL}/api/customers/${profileData.id}/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -330,7 +331,7 @@ const CustomerProfile = () => {
     try {
       setSaving(true);
 
-      const response = await fetch(`http://localhost:1337/api/customers/${user.id}/change-password`, {
+      const response = await fetch(`${API_BASE_URL}/api/customers/${user.id}/change-password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -381,7 +382,7 @@ const CustomerProfile = () => {
     try {
       setSaving(true);
 
-      const response = await fetch(`http://localhost:1337/api/customers/${user.id}/delete-account`, {
+      const response = await fetch(`${API_BASE_URL}/api/customers/${user.id}/delete-account`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -415,7 +416,7 @@ const CustomerProfile = () => {
       setBadgeLoading(true);
       
       // First calculate/update the badge
-      const calculateResponse = await fetch(`http://localhost:1337/api/badges/customer/${user.id}/calculate`, {
+      const calculateResponse = await fetch(`${API_BASE_URL}/api/badges/customer/${user.id}/calculate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -459,7 +460,7 @@ const CustomerProfile = () => {
 
   const markCelebrationShown = async () => {
     try {
-      const response = await fetch('http://localhost:1337/api/badges/celebration-shown', {
+      const response = await fetch(`${API_BASE_URL}/api/badges/celebration-shown`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

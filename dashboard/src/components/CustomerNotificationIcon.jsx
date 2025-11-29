@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { API_BASE_URL } from '../config/api';
 import { 
   IconButton, 
   Badge,
@@ -611,7 +612,7 @@ const CustomerNotificationIcon = () => {
                       <div className="customer-notification-icon__product-info">
                         {notification.productId.picture && (
                           <Avatar
-                            src={`http://localhost:1337/uploads/${notification.productId.picture}`}
+                            src={`${API_BASE_URL}/uploads/${notification.productId.picture}`}
                             alt={notification.productId.productName}
                             className="customer-notification-icon__product-image"
                           />

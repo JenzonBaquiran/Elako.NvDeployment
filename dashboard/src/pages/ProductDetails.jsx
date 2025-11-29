@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from './Navbar';
 import FavoriteButton from '../components/FavoriteButton';
+import { API_BASE_URL } from '../config/api';
 import '../css/ProductDetails.css';
 
 const ProductDetails = () => {
@@ -45,11 +46,11 @@ const ProductDetails = () => {
     
     // Add images from pictures array (new multiple image system)
     if (product.pictures && product.pictures.length > 0) {
-      images = product.pictures.map(pic => `http://localhost:1337/uploads/${pic}`);
+      images = product.pictures.map(pic => `${API_BASE_URL}/uploads/${pic}`);
     } 
     // Fallback to single picture (backward compatibility)
     else if (product.picture) {
-      images = [`http://localhost:1337/uploads/${product.picture}`];
+      images = [`${API_BASE_URL}/uploads/${product.picture}`];
     }
     
     return images;
@@ -106,7 +107,7 @@ const ProductDetails = () => {
             {/* Main Image Display */}
             <div className="product-details-main-image-container">
               <img 
-                src={getAllImages()[selectedImageIndex] || `http://localhost:1337/uploads/${product.picture}`} 
+                src={getAllImages()[selectedImageIndex] || `${API_BASE_URL}/uploads/${product.picture}`} 
                 alt={product.productName} 
                 className="product-details-image" 
               />

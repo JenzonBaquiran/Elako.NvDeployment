@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config/api';
 import heroPic from '../pictures/IMG_6125.jpg';
 import crafts1 from '../pictures/CRAFTS1.png';
 import bukoPie from '../pictures/BUKO PIE.png';
@@ -78,7 +79,7 @@ const BlogHero = () => {
       case 'youtube':
         return post.mediaUrl;
       case 'video':
-        return `http://localhost:1337/uploads/${post.mediaUrl}`;
+        return `${API_BASE_URL}/uploads/${post.mediaUrl}`;
       case 'image':
       default:
         // Check if it's a local image from our pictures folder
@@ -91,7 +92,7 @@ const BlogHero = () => {
             default: return heroPic;
           }
         }
-        return `http://localhost:1337/uploads/${post.mediaUrl}`;
+        return `${API_BASE_URL}/uploads/${post.mediaUrl}`;
     }
   };
 

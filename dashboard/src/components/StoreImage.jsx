@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../config/api';
 import defaultStoreImg from '../assets/pic.jpg';
 import foodStoreImg from '../assets/shakshouka.jpg';
 
@@ -24,13 +25,13 @@ const StoreImage = ({ store, className, alt }) => {
 
     // Priority: storeLogo > coverPhoto > fallback
     if (store.dashboard?.storeLogo) {
-      const logoUrl = `http://localhost:1337/uploads/${store.dashboard.storeLogo}`;
+      const logoUrl = `${API_BASE_URL}/uploads/${store.dashboard.storeLogo}`;
       console.log('Using storeLogo:', logoUrl);
       return logoUrl;
     }
     
     if (store.dashboard?.coverPhoto) {
-      const coverUrl = `http://localhost:1337/uploads/${store.dashboard.coverPhoto}`;
+      const coverUrl = `${API_BASE_URL}/uploads/${store.dashboard.coverPhoto}`;
       console.log('Using coverPhoto:', coverUrl);
       return coverUrl;
     }

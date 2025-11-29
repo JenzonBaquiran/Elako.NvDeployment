@@ -109,6 +109,105 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// Database collections overview endpoint
+app.get("/api/data-overview", async (req, res) => {
+  try {
+    const collections = {};
+    
+    // Get counts for each collection
+    collections.customers = {
+      count: await Customer.countDocuments(),
+      sampleData: await Customer.findOne().select('-password').lean()
+    };
+    
+    collections.msmes = {
+      count: await MSME.countDocuments(),
+      sampleData: await MSME.findOne().select('-password').lean()
+    };
+    
+    collections.admins = {
+      count: await Admin.countDocuments(),
+      sampleData: await Admin.findOne().select('-password').lean()
+    };
+    
+    collections.products = {
+      count: await Product.countDocuments(),
+      sampleData: await Product.findOne().lean()
+    };
+    
+    collections.dashboards = {
+      count: await Dashboard.countDocuments(),
+      sampleData: await Dashboard.findOne().lean()
+    };
+    
+    collections.pageViews = {
+      count: await PageView.countDocuments(),
+      sampleData: await PageView.findOne().lean()
+    };
+    
+    collections.notifications = {
+      count: await Notification.countDocuments(),
+      sampleData: await Notification.findOne().lean()
+    };
+    
+    collections.customerNotifications = {
+      count: await CustomerNotification.countDocuments(),
+      sampleData: await CustomerNotification.findOne().lean()
+    };
+    
+    collections.blogPosts = {
+      count: await BlogPost.countDocuments(),
+      sampleData: await BlogPost.findOne().lean()
+    };
+    
+    collections.msmeBlogPosts = {
+      count: await MsmeBlogPost.countDocuments(),
+      sampleData: await MsmeBlogPost.findOne().lean()
+    };
+    
+    collections.messages = {
+      count: await Message.countDocuments(),
+      sampleData: await Message.findOne().lean()
+    };
+    
+    collections.conversations = {
+      count: await Conversation.countDocuments(),
+      sampleData: await Conversation.findOne().lean()
+    };
+    
+    collections.storeBadges = {
+      count: await StoreBadge.countDocuments(),
+      sampleData: await StoreBadge.findOne().lean()
+    };
+    
+    collections.customerBadges = {
+      count: await CustomerBadge.countDocuments(),
+      sampleData: await CustomerBadge.findOne().lean()
+    };
+    
+    collections.auditLogs = {
+      count: await AuditLog.countDocuments(),
+      sampleData: await AuditLog.findOne().lean()
+    };
+
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      database: mongoose.connection.name || 'elako-nv',
+      totalCollections: Object.keys(collections).length,
+      collections
+    });
+
+  } catch (error) {
+    console.error('Data overview error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch database overview',
+      error: error.message
+    });
+  }
+});
+
 // Database seeding endpoint
 app.post("/api/seed-database", async (req, res) => {
   try {

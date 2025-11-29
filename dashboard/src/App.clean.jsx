@@ -117,6 +117,12 @@ function App() {
           <Route path="/customer-profile" element={<CustomerProfile />} />
           <Route path="/customer-reviews" element={<CustomerReviews />} />
           <Route path="/customer-view-store/:id" element={<CustomerViewStore />} />
+          <Route path="/customer/stores" element={<CustomerViewStore />} />
+          <Route path="/customer/store/:id" element={<CustomerStoreView />} />
+          <Route path="/customer/hot-picks" element={<CustomerHotPicks />} />
+          <Route path="/customer/top-stores" element={<CustomerTopStores />} />
+          <Route path="/customer-message" element={<CustomerMessage />} />
+          <Route path="/customer-message/:storeId" element={<CustomerMessage />} />
           
           {/* MSME Routes */}
           <Route path="/msme-dashboard" element={<MsmeDashboard />} />
@@ -126,6 +132,9 @@ function App() {
           <Route path="/msme-reviews" element={<MsmeReviews />} />
           <Route path="/msme-messages" element={<MsmeMessage />} />
           <Route path="/msme-customize" element={<MsmeCustomizeDashboard />} />
+          <Route path="/msme-manage-product" element={<MsmeManageProduct />} />
+          <Route path="/msme-customize-dashboard" element={<MsmeCustomizeDashboard />} />
+          <Route path="/msme/customer/:customerId" element={<SimplePageTest title="Customer Profile" message="Customer profile view for MSME users" />} />
           
           {/* Catch all route */}
           <Route 

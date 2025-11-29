@@ -142,7 +142,7 @@ function Home() {
               className="hero-button hero-button-outline"
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                navigate('/customer/hot-picks');
+                navigate('/hot-picks');
               }}
             >
               View All 
@@ -214,7 +214,7 @@ function Home() {
     <div className="top-stores-viewall">
       <button 
         className="hero-button hero-button-outline"
-        onClick={() => navigate('/customer/top-stores')}
+        onClick={() => navigate('/top-stores')}
       >
         View All
       </button>

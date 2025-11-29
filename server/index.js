@@ -258,22 +258,34 @@ console.log(
     : "Local MongoDB"
 );
 
-mongoose.connect(mongoURI);
+// Connect to MongoDB with error handling
+async function connectToDatabase() {
+  try {
+    await mongoose.connect(mongoURI, {
+      serverSelectionTimeoutMS: 10000, // 10 seconds timeout
+    });
+    console.log("✅ Connected to MongoDB successfully");
+    console.log("Database:", mongoose.connection.name);
+  } catch (err) {
+    console.error("❌ MongoDB connection failed:", err.message);
+    console.log("⚠️  Server will continue without database connection");
+  }
+}
 
 mongoose.connection.on("connected", () => {
-  console.log("✅ Connected to MongoDB Atlas");
-  console.log("Database:", mongoose.connection.name);
+  console.log("✅ MongoDB connection established");
 });
+
 mongoose.connection.on("error", (err) => {
-  console.error("❌ MongoDB connection error:", err);
-  console.log("\n🔧 Troubleshooting tips:");
-  console.log("1. Check if username exists in MongoDB Atlas → Database Access");
-  console.log("2. Verify username is case-sensitive");
-  console.log("3. Ensure user has database permissions");
-  console.log(
-    "4. Check if password contains special characters that need encoding"
-  );
+  console.error("❌ MongoDB connection error:", err.message);
 });
+
+mongoose.connection.on("disconnected", () => {
+  console.log("⚠️  MongoDB disconnected");
+});
+
+// Start database connection
+connectToDatabase();
 
 // --- Password Strength Validation ---
 const isPasswordStrong = (password) => {
@@ -9838,9 +9850,21 @@ cron.schedule("0 0 * * *", async () => {
   }
 })();
 
+// --- Error Handlers ---
+process.on("uncaughtException", (err) => {
+  console.error("❌ Uncaught Exception:", err);
+  console.log("⚠️  Server continuing to run...");
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
+  console.log("⚠️  Server continuing to run...");
+});
+
 // --- Start Server ---
 server.listen(port, () => {
   console.log(`🚀 Server running at http://localhost:${port}`);
+  console.log(`🌐 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(`🔌 Socket.IO enabled for real-time messaging`);
   console.log(`⏰ Badge cleanup scheduled every hour`);
   console.log(`🏆 Top Store badge renewal: Every Sunday at 11:59 PM`);

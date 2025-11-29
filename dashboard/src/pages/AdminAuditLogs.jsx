@@ -82,7 +82,7 @@ const AdminAuditLogs = () => {
         if (!value) queryParams.delete(key);
       }
 
-      const response = await fetch(`http://localhost:1337/api/admin/audit-logs?${queryParams}`);
+      const response = await apiCall(`/api/admin/audit-logs?${queryParams}`);
       const data = await response.json();
 
       if (data.success) {
@@ -103,7 +103,7 @@ const AdminAuditLogs = () => {
 
   const fetchStatistics = async () => {
     try {
-      const response = await fetch('http://localhost:1337/api/admin/audit-logs/statistics?timeframe=30d');
+      const response = await apiCall('/api/admin/audit-logs/statistics?timeframe=30d');
       const data = await response.json();
       
       if (data.success) {

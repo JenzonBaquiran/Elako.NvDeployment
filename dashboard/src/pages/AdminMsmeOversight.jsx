@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminSidebar from './AdminSidebar';
 import '../css/AdminMsmeOversight.css';
+import { apiCall, API_BASE_URL } from '../config/api';
 import PeopleIcon from '@mui/icons-material/People';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -31,7 +32,7 @@ const AdminMsmeOversight = () => {
   // Fetch MSMEs from API
   const fetchMsmes = async () => {
     try {
-      const response = await fetch('http://localhost:1337/api/admin/users');
+      const response = await apiCall('/api/admin/users');
       const data = await response.json();
       
       if (data.msmes) {
@@ -75,7 +76,7 @@ const AdminMsmeOversight = () => {
   // Fetch MSME statistics (products, rating, followers)
   const fetchMsmeStatistics = async () => {
     try {
-      const response = await fetch('http://localhost:1337/api/admin/msme-statistics');
+      const response = await apiCall('/api/admin/msme-statistics');
       const data = await response.json();
       
       if (data.success && data.statistics) {
@@ -93,7 +94,7 @@ const AdminMsmeOversight = () => {
   // Fetch badge data for stores
   const fetchBadgeData = async () => {
     try {
-      const response = await fetch('http://localhost:1337/api/badges/admin/stores?isActive=true');
+      const response = await apiCall('/api/badges/admin/stores?isActive=true');
       const data = await response.json();
       
       if (data.success && data.badges) {

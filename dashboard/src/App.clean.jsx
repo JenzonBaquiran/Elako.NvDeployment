@@ -16,6 +16,33 @@ import CustomerHotPicks from "./pages/CustomerHotPicks";
 import CustomerTopStores from "./pages/CustomerTopStores";
 import DataTest from "./pages/DataTest";
 
+// Admin Components
+import AdminOverview from "./pages/AdminOverview";
+import AdminUserManagement from "./pages/AdminUserManagement";
+import AdminAnalytics from "./pages/AdminAnalytics";
+import AdminSettings from "./pages/AdminSettings";
+import AdminMsmeOversight from "./pages/AdminMsmeOversight";
+import AdminAuditLogs from "./pages/AdminAuditLogs";
+import AdminMsmeReport from "./pages/AdminMsmeReport";
+import BlogManagement from "./pages/admin/BlogManagement";
+
+// Customer Components
+import CustomerFavorites from "./pages/CustomerFavorites";
+import CustomerMessage from "./pages/CustomerMessage";
+import CustomerNotifications from "./pages/CustomerNotifications";
+import CustomerProfile from "./pages/CustomerProfile";
+import CustomerReviews from "./pages/CustomerReviews";
+import CustomerViewStore from "./pages/CustomerViewStore";
+
+// MSME Components
+import MsmeDashboard from "./pages/MsmeDashboard";
+import MsmeManageProduct from "./pages/MsmeManageProduct";
+import MsmeAnalytics from "./pages/MsmeAnalytics";
+import MsmeProfile from "./pages/MsmeProfile";
+import MsmeReviews from "./pages/MsmeReviews";
+import MsmeMessage from "./pages/MsmeMessage";
+import MsmeCustomizeDashboard from "./pages/MsmeCustomizeDashboard";
+
 // Simple fallback component for testing
 const SimplePageTest = ({ title, message }) => (
   <div style={{ 
@@ -73,23 +100,32 @@ function App() {
           />
           <Route path="/data-test" element={<DataTest />} />
           
-          {/* Test Routes for pages being developed */}
-          <Route 
-            path="/admin-overview" 
-            element={<SimplePageTest title="Admin Dashboard" message="Admin features are being restored..." />} 
-          />
-          <Route 
-            path="/admin-user-management" 
-            element={<SimplePageTest title="User Management" message="User management features coming soon..." />} 
-          />
-          <Route 
-            path="/msme-dashboard" 
-            element={<SimplePageTest title="MSME Dashboard" message="MSME features are being restored..." />} 
-          />
-          <Route 
-            path="/customer-store-view" 
-            element={<SimplePageTest title="Store View" message="Customer features coming soon..." />} 
-          />
+          {/* Admin Routes */}
+          <Route path="/admin-overview" element={<AdminOverview />} />
+          <Route path="/admin-user-management" element={<AdminUserManagement />} />
+          <Route path="/admin-analytics" element={<AdminAnalytics />} />
+          <Route path="/admin-settings" element={<AdminSettings />} />
+          <Route path="/admin-msme-oversight" element={<AdminMsmeOversight />} />
+          <Route path="/admin-audit-logs" element={<AdminAuditLogs />} />
+          <Route path="/admin-msme-report" element={<AdminMsmeReport />} />
+          <Route path="/admin-blog-management" element={<BlogManagement />} />
+          
+          {/* Customer Routes */}
+          <Route path="/customer-favorites" element={<CustomerFavorites />} />
+          <Route path="/customer-messages" element={<CustomerMessage />} />
+          <Route path="/customer-notifications" element={<CustomerNotifications />} />
+          <Route path="/customer-profile" element={<CustomerProfile />} />
+          <Route path="/customer-reviews" element={<CustomerReviews />} />
+          <Route path="/customer-view-store/:id" element={<CustomerViewStore />} />
+          
+          {/* MSME Routes */}
+          <Route path="/msme-dashboard" element={<MsmeDashboard />} />
+          <Route path="/msme-products" element={<MsmeManageProduct />} />
+          <Route path="/msme-analytics" element={<MsmeAnalytics />} />
+          <Route path="/msme-profile" element={<MsmeProfile />} />
+          <Route path="/msme-reviews" element={<MsmeReviews />} />
+          <Route path="/msme-messages" element={<MsmeMessage />} />
+          <Route path="/msme-customize" element={<MsmeCustomizeDashboard />} />
           
           {/* Catch all route */}
           <Route 

@@ -436,40 +436,44 @@ const MsmeProfile = () => {
                 </button>
               </div>
               <div className="msme-profile__info-fields">
-                <div className="msme-profile__field">
-                  <label>Business Name</label>
-                  <span>{profileData.businessName || 'Not provided'}</span>
-                </div>
-                <div className="msme-profile__field">
-                  <label>Email Address</label>
-                  {isEditing ? (
-                    <input
-                      type="email"
-                      value={profileData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="msme-profile__edit-input"
-                    />
-                  ) : (
-                    <span>{profileData.email || 'Not provided'}</span>
-                  )}
-                </div>
-                <div className="msme-profile__field">
-                  <label>Phone Number</label>
-                  {isEditing ? (
-                    <input
-                      type="tel"
-                      value={profileData.contactNumber}
-                      onChange={(e) => handleInputChange('contactNumber', e.target.value)}
-                      className="msme-profile__edit-input"
-                    />
-                  ) : (
-                    <span>{profileData.contactNumber || 'Not provided'}</span>
-                  )}
+                <div className="msme-profile__field-row">
+                  <div className="msme-profile__field">
+                    <label>Business Name</label>
+                    <span>{profileData.businessName || 'Not provided'}</span>
+                  </div>
+                  <div className="msme-profile__field">
+                    <label>Business Category</label>
+                    <span>{profileData.category === 'food' ? 'Food & Beverage' : profileData.category === 'artisan' ? 'Artisan' : 'Not provided'}</span>
+                  </div>
                 </div>
 
-                <div className="msme-profile__field">
-                  <label>Business Category</label>
-                  <span>{profileData.category === 'food' ? 'Food & Beverage' : profileData.category === 'artisan' ? 'Artisan' : 'Not provided'}</span>
+                <div className="msme-profile__field-row">
+                  <div className="msme-profile__field">
+                    <label>Phone Number</label>
+                    {isEditing ? (
+                      <input
+                        type="tel"
+                        value={profileData.contactNumber}
+                        onChange={(e) => handleInputChange('contactNumber', e.target.value)}
+                        className="msme-profile__edit-input"
+                      />
+                    ) : (
+                      <span>{profileData.contactNumber || 'Not provided'}</span>
+                    )}
+                  </div>
+                  <div className="msme-profile__field">
+                    <label>Email Address</label>
+                    {isEditing ? (
+                      <input
+                        type="email"
+                        value={profileData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        className="msme-profile__edit-input"
+                      />
+                    ) : (
+                      <span>{profileData.email || 'Not provided'}</span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="msme-profile__field msme-profile__field--full">

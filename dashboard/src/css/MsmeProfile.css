@@ -263,8 +263,8 @@
 
 .msme-profile__info-fields {
   flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 16px;
 }
 
@@ -276,6 +276,16 @@
 
 .msme-profile__field--full {
   grid-column: 1 / -1;
+}
+
+.msme-profile__field-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.msme-profile__field-row .msme-profile__field {
+  flex: 1;
 }
 
 .msme-profile__field label {
@@ -644,7 +654,12 @@
   }
 
   .msme-profile__info-fields {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .msme-profile__field-row {
+    flex-direction: column;
+    gap: 12px;
   }
 
   .msme-profile__business-content {

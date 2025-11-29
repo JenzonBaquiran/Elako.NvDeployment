@@ -1115,21 +1115,23 @@
   color: white;
   border: none;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .remove-image-btn:hover {
   background-color: #dc2626;
-  transform: scale(1.1);
+  transform: scale(1.15);
+  box-shadow: 0 3px 8px rgba(220, 38, 38, 0.4);
 }
 
 .image-number {
@@ -1326,6 +1328,8 @@
   flex-direction: column;
   gap: 2px;
   flex-grow: 1;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .variant-name {
@@ -1333,12 +1337,14 @@
   color: #1f2937;
   font-size: 13px;
   text-transform: capitalize;
+  text-align: left;
 }
 
 .variant-price {
   font-size: 12px;
   color: #059669;
   font-weight: 600;
+  text-align: left;
 }
 
 .variant-actions {
@@ -1372,10 +1378,10 @@
 }
 
 .remove-btn {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: #ef4444;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   padding: 4px 8px;
   font-size: 12px;
   cursor: pointer;
@@ -1390,7 +1396,7 @@
 }
 
 .remove-btn:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  background: #dc2626;
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
 }

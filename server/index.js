@@ -6,6 +6,7 @@ const path = require("path");
 const bcrypt = require("bcryptjs");
 const http = require("http");
 const socketIo = require("socket.io");
+const cron = require("node-cron");
 
 // Import Utils
 const {
@@ -9560,6 +9561,146 @@ setInterval(async () => {
   }
 }, 60 * 60 * 1000); // Run every hour
 
+// --- Automatic Top Store Badge Renewal System ---
+// Recalculate badges every Sunday at 11:59 PM (weekly renewal)
+cron.schedule("59 23 * * 0", async () => {
+  console.log("🏆 Starting weekly Top Store badge recalculation...");
+
+  try {
+    // Get all stores and recalculate their ratings
+    const stores = await MSME.find({}).lean();
+    console.log(
+      `📊 Analyzing ${stores.length} stores for badge eligibility...`
+    );
+
+    const storeAnalysis = [];
+
+    for (const store of stores) {
+      // Calculate ratings from products
+      const products = await Product.find({ msmeId: store._id });
+      let totalRating = 0;
+      let ratingCount = 0;
+
+      for (const product of products) {
+        if (product.feedback && product.feedback.length > 0) {
+          const productRating =
+            product.feedback.reduce((sum, f) => sum + f.rating, 0) /
+            product.feedback.length;
+          totalRating += productRating;
+          ratingCount++;
+        }
+      }
+
+      const averageRating = ratingCount > 0 ? totalRating / ratingCount : 0;
+
+      // Get weekly views
+      let weeklyViews = 0;
+      try {
+        const stats = await PageView.getStoreStats(store._id);
+        weeklyViews = stats.weekly;
+      } catch (error) {
+        console.log(`Warning: Could not get stats for ${store.businessName}`);
+      }
+
+      storeAnalysis.push({
+        storeId: store._id,
+        businessName: store.businessName,
+        averageRating: averageRating,
+        weeklyViews: weeklyViews,
+        meetsRatingCriteria: averageRating >= 4.0,
+        meetsViewsCriteria: weeklyViews >= 25,
+      });
+    }
+
+    // Sort by rating (highest first)
+    storeAnalysis.sort((a, b) => b.averageRating - a.averageRating);
+
+    // Deactivate all existing badges first
+    await StoreBadge.updateMany({}, { isActive: false });
+    console.log("🧹 Deactivated all existing Top Store badges");
+
+    // Award badges to qualifying stores
+    const qualifyingStores = storeAnalysis.filter(
+      (store) => store.meetsRatingCriteria && store.meetsViewsCriteria
+    );
+
+    // If no stores meet both criteria, award to top 3 by rating (minimum 3.5 rating)
+    if (qualifyingStores.length === 0) {
+      const topStores = storeAnalysis
+        .filter((store) => store.averageRating >= 3.5)
+        .slice(0, 3);
+      qualifyingStores.push(...topStores);
+      console.log(
+        "📝 No stores met both criteria, awarding to top 3 by rating"
+      );
+    }
+
+    console.log(`🏆 Awarding badges to ${qualifyingStores.length} stores:`);
+
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay());
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+
+    for (const store of qualifyingStores) {
+      const newBadge = new StoreBadge({
+        storeId: store.storeId,
+        weekStart: weekStart,
+        weekEnd: weekEnd,
+        isActive: true,
+        awardedAt: now,
+        criteria: {
+          storeRating: {
+            required: 4.0,
+            current: store.averageRating,
+            met: store.meetsRatingCriteria,
+          },
+          productRatings: {
+            required: 4.0,
+            current: store.averageRating,
+            met: store.meetsRatingCriteria,
+          },
+          profileViews: {
+            required: 25,
+            current: store.weeklyViews,
+            met: store.meetsViewsCriteria,
+          },
+          blogViews: {
+            required: 10,
+            current: 0,
+            met: false,
+          },
+        },
+        celebrationShown: false,
+      });
+
+      await newBadge.save();
+      console.log(
+        `✅ Badge awarded to: ${
+          store.businessName
+        } (${store.averageRating.toFixed(1)}★, ${store.weeklyViews} views)`
+      );
+    }
+
+    console.log("🎉 Weekly Top Store badge renewal completed!");
+  } catch (error) {
+    console.error("❌ Error in weekly badge recalculation:", error);
+  }
+});
+
+// Also run badge recalculation daily at midnight to catch any rating changes
+cron.schedule("0 0 * * *", async () => {
+  console.log("🔄 Running daily badge status check...");
+
+  try {
+    await BadgeService.processAllBadges();
+    console.log("✅ Daily badge status check completed");
+  } catch (error) {
+    console.error("❌ Error in daily badge check:", error);
+  }
+});
+
 // Run initial cleanup on server start
 (async () => {
   try {
@@ -9576,4 +9717,6 @@ server.listen(port, () => {
   console.log(`🚀 Server running at http://localhost:${port}`);
   console.log(`🔌 Socket.IO enabled for real-time messaging`);
   console.log(`⏰ Badge cleanup scheduled every hour`);
+  console.log(`🏆 Top Store badge renewal: Every Sunday at 11:59 PM`);
+  console.log(`🔄 Daily badge status check: Every day at midnight`);
 });

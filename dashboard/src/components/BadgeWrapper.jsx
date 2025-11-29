@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import useBadges from '../hooks/useBadges';
 
 const BadgeWrapper = ({ 
   userId, 
@@ -19,22 +20,6 @@ const BadgeWrapper = ({
       {children}
       
       {/* Future badge display will go here */}
-      {badge && userType === 'store' && (
-        <div style={{
-          position: 'absolute',
-          top: '10px',
-          right: '10px',
-          background: 'gold',
-          color: 'black',
-          padding: '4px 8px',
-          borderRadius: '12px',
-          fontSize: '12px',
-          fontWeight: 'bold',
-          zIndex: 10
-        }}>
-          🏆 TOP STORE
-        </div>
-      )}
     </div>
   );
 };

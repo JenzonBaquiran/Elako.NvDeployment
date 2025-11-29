@@ -693,7 +693,7 @@ input:checked + .admin-msme-oversight__toggle-slider:before {
 .admin-msme-oversight__certificate-link {
   display: inline-block;
   padding: 8px 16px;
-  background: #007bff;
+  background: #313131;
   color: white;
   text-decoration: none;
   border-radius: 6px;
@@ -704,7 +704,7 @@ input:checked + .admin-msme-oversight__toggle-slider:before {
 }
 
 .admin-msme-oversight__certificate-link:hover {
-  background: #0056b3;
+  background: #7ed957;
   text-decoration: none;
   color: white;
 }
@@ -813,7 +813,7 @@ input:checked + .admin-msme-oversight__toggle-slider:before {
 .admin-msme-oversight__fallback-link {
   display: inline-block;
   padding: 8px 16px;
-  background: #007bff;
+  background: #313131;
   color: white;
   text-decoration: none;
   border-radius: 6px;
@@ -824,7 +824,7 @@ input:checked + .admin-msme-oversight__toggle-slider:before {
 }
 
 .admin-msme-oversight__fallback-link:hover {
-  background: #0056b3;
+  background: #7ed957;
   text-decoration: none;
   color: white;
 }
@@ -843,7 +843,7 @@ input:checked + .admin-msme-oversight__toggle-slider:before {
 .admin-msme-oversight__view-certificate-btn {
   width: 100%;
   padding: 12px 16px;
-  background: #007bff;
+  background: #313131;
   color: white;
   border: none;
   border-radius: 6px;
@@ -854,7 +854,7 @@ input:checked + .admin-msme-oversight__toggle-slider:before {
 }
 
 .admin-msme-oversight__view-certificate-btn:hover {
-  background: #0056b3;
+  background: #7ed957;
   transform: translateY(-1px);
 }
 

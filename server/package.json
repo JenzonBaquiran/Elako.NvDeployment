@@ -17,6 +17,7 @@
     "file-server": "^2.2.1",
     "mongoose": "^8.13.2",
     "multer": "^2.0.0",
+    "node-cron": "^4.2.1",
     "node-fetch": "^2.7.0",
     "nodemailer": "^7.0.9",
     "socket.io": "^4.8.1",

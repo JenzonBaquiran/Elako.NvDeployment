@@ -1,55 +1,6 @@
-import React from "react";
-
-function App() {
-  return (
-    <div style={{ padding: '40px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
-      <h1 style={{ color: '#007bff', marginBottom: '20px' }}>🚀 Elako.Nv System</h1>
-      <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', margin: '20px 0' }}>
-        <h2>✅ Deployment Successful!</h2>
-        <p><strong>Frontend:</strong> https://elako-nv-deployment.vercel.app</p>
-        <p><strong>Backend:</strong> https://elakonvdeployment-production.up.railway.app</p>
-        <p><strong>Database:</strong> MongoDB on Railway</p>
-      </div>
-      <div style={{ marginTop: '30px' }}>
-        <h3>🎯 Next Steps:</h3>
-        <p>Your system is now live! You can now:</p>
-        <ul style={{ textAlign: 'left', display: 'inline-block' }}>
-          <li>Access the admin dashboard</li>
-          <li>Manage MSME users</li>
-          <li>Handle customer interactions</li>
-          <li>View analytics and reports</li>
-        </ul>
-      </div>
-    </div>
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/terms" element={<TermsPage />} />
-            
-            {/* Admin Protected Routes */}
-            <Route 
-              path="/admin-user-management" 
-              element={
-                <ProtectedRoute allowedUserTypes={['admin']}>
-                  <AdminUserManagement />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin-overview" 
-              element={
-                <ProtectedRoute allowedUserTypes={['admin']}>
-                  <AdminOverview />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin-msme-oversight" 
-              element={
-                <ProtectedRoute allowedUserTypes={['admin']}>
-                  <AdminMsmeOversight />
-                </ProtectedRoute>
-              } 
-            />
+// This file redirects to the full application
+// The actual app is in App.full.jsx
+export { default } from './App.full.jsx';
             <Route 
               path="/admin-analytics" 
               element={

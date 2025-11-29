@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { apiCall } from '../config/api';
 
 const AuthContext = createContext();
 
@@ -98,11 +99,8 @@ export const AuthProvider = ({ children }) => {
             sessionDuration: sessionDuration
           });
           
-          const response = await fetch('http://localhost:1337/api/admin/logout', {
+          const response = await apiCall('/api/admin/logout', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
             body: JSON.stringify({
               adminId: user.id,
               username: user.username,

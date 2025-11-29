@@ -5,7 +5,7 @@ const config = {
   },
   production: {
     API_BASE_URL:
-      import.meta.env.VITE_API_URL || "https://your-railway-url.up.railway.app",
+      import.meta.env.VITE_API_URL || "https://elakonvdeployment-production.up.railway.app",
   },
 };
 

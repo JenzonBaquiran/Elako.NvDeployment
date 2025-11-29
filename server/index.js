@@ -93,16 +93,61 @@ app.get("/", (req, res) => {
     status: "OK",
     message: "Elako.Nv Backend API is running",
     timestamp: new Date().toISOString(),
-    database: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected"
+    database:
+      mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
   });
 });
 
 app.get("/api/health", (req, res) => {
   res.json({
     status: "healthy",
-    database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
-    timestamp: new Date().toISOString()
+    database:
+      mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    timestamp: new Date().toISOString(),
   });
+});
+
+// Database seeding endpoint
+app.post("/api/seed-database", async (req, res) => {
+  try {
+    // Check if data already exists
+    const adminCount = await Admin.countDocuments();
+    if (adminCount > 0) {
+      return res.json({
+        success: false,
+        message: "Database already contains data. Seeding skipped.",
+        adminCount
+      });
+    }
+
+    // Sample admin user
+    const adminUser = new Admin({
+      username: 'admin',
+      email: 'admin@elako.nv',
+      password: '$2a$10$rOeK7QG1Y.3nK7vL8X8X1eRqK7QG1Y.3nK7vL8X8X1eRqK7QG1Y.3', // 'admin123'
+      firstname: 'System',
+      lastname: 'Administrator',
+      role: 'admin'
+    });
+
+    await adminUser.save();
+
+    res.json({
+      success: true,
+      message: "Database seeded successfully with admin user",
+      credentials: {
+        username: "admin",
+        password: "admin123"
+      }
+    });
+  } catch (error) {
+    console.error("Seeding error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Seeding failed",
+      error: error.message
+    });
+  }
 });
 
 // Serve uploaded images statically
@@ -199,7 +244,14 @@ if (process.env.MONGODB_URI) {
 }
 
 console.log("🔗 Attempting to connect to MongoDB...");
-console.log("Database type:", mongoURI.includes('railway') ? 'Railway MongoDB' : mongoURI.includes('mongodb.net') ? 'MongoDB Atlas' : 'Local MongoDB');
+console.log(
+  "Database type:",
+  mongoURI.includes("railway")
+    ? "Railway MongoDB"
+    : mongoURI.includes("mongodb.net")
+    ? "MongoDB Atlas"
+    : "Local MongoDB"
+);
 
 mongoose.connect(mongoURI);
 

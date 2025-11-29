@@ -630,12 +630,14 @@
 
   .msme-profile__stats {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 12px;
     justify-items: stretch;
+    margin-bottom: 20px;
   }
 
   .msme-profile__stat-box {
     max-width: 100%;
+    padding: 16px 8px;
   }
 
   .msme-profile__content-grid {

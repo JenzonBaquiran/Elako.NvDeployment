@@ -4,6 +4,7 @@ import { Visibility, VisibilityOff, PersonOutline, Apartment } from "@mui/icons-
 import { useNavigate } from "react-router-dom";
 import TermsAgreementModal from "../components/TermsAgreementModal";
 import PasswordStrengthIndicator from "../components/PasswordStrengthIndicator";
+import { API_BASE_URL } from "../config/api";
 import "../css/Signup.css";
 import logo from "../logos/Icon on dark with text.png";
 
@@ -239,7 +240,7 @@ function Signup() {
 
     try {
       const { confirmPassword, ...submitData } = customerData;
-      const response = await fetch("http://localhost:1337/api/customers/register", {
+      const response = await fetch(`${API_BASE_URL}/api/customers/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submitData),
@@ -318,7 +319,7 @@ function Signup() {
         }
       });
 
-      const response = await fetch("http://localhost:1337/api/msme/register", {
+      const response = await fetch(`${API_BASE_URL}/api/msme/register`, {
         method: "POST",
         body: formData, // Send as FormData instead of JSON
       });

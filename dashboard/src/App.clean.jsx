@@ -7,6 +7,7 @@ import NotificationProvider from "./components/NotificationProvider";
 // Only import components we know exist and work
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 // Simple fallback component for testing
 const SimplePageTest = ({ title, message }) => (
@@ -42,6 +43,7 @@ function App() {
           {/* Working Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           
           {/* Test Routes for pages being developed */}
           <Route 

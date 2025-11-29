@@ -4,6 +4,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
 import { useAuth } from "../contexts/AuthContext";
+import { API_BASE_URL } from "../config/api";
 import "../css/Login.css";
 import logo from "../logos/Icon on bright with text.png";
 
@@ -122,7 +123,7 @@ function Login() {
 
     try {
       // Try admin login first
-      let response = await fetch("http://localhost:1337/api/admin/login", {
+      let response = await fetch(`${API_BASE_URL}/api/admin/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -153,7 +154,7 @@ function Login() {
       }
 
       // Try customer login
-      response = await fetch("http://localhost:1337/api/customers/login", {
+      response = await fetch(`${API_BASE_URL}/api/customers/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -179,7 +180,7 @@ function Login() {
       }
 
       // Try MSME login
-      response = await fetch("http://localhost:1337/api/msme/login", {
+      response = await fetch(`${API_BASE_URL}/api/msme/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -8,6 +8,7 @@ import BadgeWrapper from '../components/BadgeWrapper';
 // import BadgeCelebration from '../components/BadgeCelebration';
 import { useAuth } from '../contexts/AuthContext';
 import { recordStoreView } from '../utils/storeViewTracker';
+import { API_BASE_URL } from '../config/api';
 import heroPic from '../pictures/IMG_6125.jpg';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import '../css/Home.css';
@@ -32,7 +33,7 @@ function Home() {
   const fetchNewStores = async () => {
     try {
       // Use the stores endpoint that properly filters for approved and visible stores
-      const storesResponse = await fetch('http://localhost:1337/api/stores');
+      const storesResponse = await fetch(`${API_BASE_URL}/api/stores`);
       const storesData = await storesResponse.json();
       
       if (storesData.success) {
@@ -55,8 +56,8 @@ function Home() {
       // Fetch top stores with 4.5-5.0 rating, limit to 6
       // Include customer ID if user is logged in for follow status
       const url = user && user._id 
-        ? `http://localhost:1337/api/top-stores?limit=6&customerId=${user._id}`
-        : 'http://localhost:1337/api/top-stores?limit=6';
+        ? `${API_BASE_URL}/api/top-stores?limit=6&customerId=${user._id}`
+        : `${API_BASE_URL}/api/top-stores?limit=6`;
       
       const topStoresResponse = await fetch(url);
       const topStoresData = await topStoresResponse.json();
@@ -78,8 +79,8 @@ function Home() {
       // Fetch hot picks products with 4.5-5.0 rating, limit to 4
       // Include customer ID if user is logged in for favorite status
       const url = user && user._id 
-        ? `http://localhost:1337/api/hot-picks?limit=4&customerId=${user._id}`
-        : 'http://localhost:1337/api/hot-picks?limit=4';
+        ? `${API_BASE_URL}/api/hot-picks?limit=4&customerId=${user._id}`
+        : `${API_BASE_URL}/api/hot-picks?limit=4`;
       
       const hotPicksResponse = await fetch(url);
       const hotPicksData = await hotPicksResponse.json();
@@ -236,9 +237,9 @@ function Home() {
         topStores.map((store) => {
           const dashboard = store.dashboard;
           const storeImage = dashboard?.coverPhoto 
-            ? `http://localhost:1337/uploads/${dashboard.coverPhoto}` 
+            ? `${API_BASE_URL}/uploads/${dashboard.coverPhoto}` 
             : (dashboard?.storeLogo 
-                ? `http://localhost:1337/uploads/${dashboard.storeLogo}` 
+                ? `${API_BASE_URL}/uploads/${dashboard.storeLogo}` 
                 : heroPic);
           const businessName = dashboard?.businessName || store.businessName;
           const description = dashboard?.description || 'High-quality MSME products and services';
@@ -315,7 +316,7 @@ function Home() {
       newStores.map((store) => {
         const dashboard = store.dashboard;
         const storeLogo = dashboard?.storeLogo 
-          ? `http://localhost:1337/uploads/${dashboard.storeLogo}` 
+          ? `${API_BASE_URL}/uploads/${dashboard.storeLogo}` 
           : heroPic;
         const businessName = dashboard?.businessName || store.businessName;
         const description = dashboard?.description || 'MSME business services';

@@ -120,6 +120,7 @@ function App() {
           <Route path="/customer-reviews" element={<CustomerReviews />} />
           <Route path="/customer-view-store/:id" element={<CustomerViewStore />} />
           <Route path="/customer/stores" element={<CustomerViewStore />} />
+          <Route path="/customer/stores/:id" element={<CustomerStoreView />} />
           <Route path="/customer/store/:id" element={<CustomerStoreView />} />
           <Route path="/customer/hot-picks" element={<CustomerHotPicks />} />
           <Route path="/customer/top-stores" element={<CustomerTopStores />} />

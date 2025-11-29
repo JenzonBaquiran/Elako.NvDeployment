@@ -123,7 +123,7 @@ const CustomerNotifications = () => {
       
       case 'store_detail':
         if (storeId?._id) {
-          navigate(`/customer/store/${storeId._id}`);
+          navigate(`/customer/stores/${storeId._id}`);
         }
         break;
       
@@ -142,7 +142,7 @@ const CustomerNotifications = () => {
         if (['new_product', 'price_drop', 'availability_alert'].includes(type) && productId?._id) {
           navigate(`/product/${productId._id}`);
         } else if (type === 'store_promotion' && storeId?._id) {
-          navigate(`/customer/store/${storeId._id}`);
+          navigate(`/customer/stores/${storeId._id}`);
         }
         break;
     }

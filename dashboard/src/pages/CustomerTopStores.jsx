@@ -218,7 +218,7 @@ function CustomerTopStores() {
                           className="customer-view-store-visit-btn"
                           onClick={() => {
                             window.scrollTo({ top: 0, behavior: 'smooth' });
-                            navigate(`/customer/store/${store._id}`);
+                            navigate(`/customer/stores/${store._id}`);
                           }}
                         >
                           Visit Store

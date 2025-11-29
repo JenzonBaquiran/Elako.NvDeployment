@@ -8,7 +8,7 @@ export const recordStoreView = async (storeId, userId, navigate) => {
   // Only record page view for authenticated customers
   if (!userId) {
     console.log("User not authenticated, skipping view recording");
-    navigate(`/customer/store/${storeId}`);
+    navigate(`/customer/stores/${storeId}`);
     return;
   }
 
@@ -41,7 +41,7 @@ export const recordStoreView = async (storeId, userId, navigate) => {
   }
 
   // Navigate to the store page regardless of whether view recording succeeded
-  navigate(`/customer/store/${storeId}`);
+  navigate(`/customer/stores/${storeId}`);
 };
 
 // Utility to check if a store has been viewed in the current session

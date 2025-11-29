@@ -424,7 +424,7 @@ const CustomerNotificationIcon = () => {
       
       case 'store_detail':
         if (storeId?._id) {
-          navigate(`/customer/store/${storeId._id}`);
+          navigate(`/customer/stores/${storeId._id}`);
         }
         break;
       
@@ -447,7 +447,7 @@ const CustomerNotificationIcon = () => {
         }
         // For 'store_promotion' - navigate to store
         else if (type === 'store_promotion' && storeId?._id) {
-          navigate(`/customer/store/${storeId._id}`);
+          navigate(`/customer/stores/${storeId._id}`);
         }
         break;
     }

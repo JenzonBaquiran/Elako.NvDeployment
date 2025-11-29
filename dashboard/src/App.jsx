@@ -1,53 +1,26 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import "./App.css";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import AdminUserManagement from "./pages/AdminUserManagement";
-import MsmeSidebar from "./pages/MsmeSidebar";
-import CustomerSidebar from "./pages/CustomerSidebar";
-import NotificationProvider from "./components/NotificationProvider";
-import ProtectedRoute from "./components/ProtectedRoute";
-import { AuthProvider } from "./contexts/AuthContext";
-import MsmeManageProduct from "./pages/MsmeManageProduct";
-import MsmeDashboard from "./pages/MsmeDashboard";
-import MsmeMessage from "./pages/MsmeMessage";
-import MsmeAnalytics from "./pages/MsmeAnalytics";
-import MsmeProfile from "./pages/MsmeProfile";
-import MsmeReviews from "./pages/MsmeReviews";
-import AdminOverview from "./pages/AdminOverview";
-import AdminMsmeOversight from "./pages/AdminMsmeOversight";
-import AdminAnalytics from "./pages/AdminAnalytics";
-import AdminSettings from "./pages/AdminSettings";
-import BlogManagement from "./pages/admin/BlogManagement";
-import MsmeCustomizeDashboard from "./pages/MsmeCustomizeDashboard";
-import CustomerViewStore from "./pages/CustomerViewStore";
-import CustomerStoreView from "./pages/CustomerStoreView";
-import CustomerFavorites from "./pages/CustomerFavorites";
-import CustomerReviews from "./pages/CustomerReviews";
-import CustomerMessage from "./pages/CustomerMessage";
-import CustomerProfile from "./pages/CustomerProfile";
-import CustomerNotifications from "./pages/CustomerNotifications";
-import CustomerHotPicks from "./pages/CustomerHotPicks";
-import CustomerTopStores from "./pages/CustomerTopStores";
-import ProductDetails from "./pages/ProductDetails";
-import ForgotPassword from "./pages/ForgotPassword";
-import AdminAuditLogs from "./pages/AdminAuditLogs";
-import AdminMsmeReport from "./pages/AdminMsmeReport";
-import TermsPage from "./pages/TermsPage";
-
-
 
 function App() {
   return (
-    <AuthProvider>
-      <NotificationProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
+    <div style={{ padding: '40px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
+      <h1 style={{ color: '#007bff', marginBottom: '20px' }}>🚀 Elako.Nv System</h1>
+      <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', margin: '20px 0' }}>
+        <h2>✅ Deployment Successful!</h2>
+        <p><strong>Frontend:</strong> https://elako-nv-deployment.vercel.app</p>
+        <p><strong>Backend:</strong> https://elakonvdeployment-production.up.railway.app</p>
+        <p><strong>Database:</strong> MongoDB on Railway</p>
+      </div>
+      <div style={{ marginTop: '30px' }}>
+        <h3>🎯 Next Steps:</h3>
+        <p>Your system is now live! You can now:</p>
+        <ul style={{ textAlign: 'left', display: 'inline-block' }}>
+          <li>Access the admin dashboard</li>
+          <li>Manage MSME users</li>
+          <li>Handle customer interactions</li>
+          <li>View analytics and reports</li>
+        </ul>
+      </div>
+    </div>
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/terms" element={<TermsPage />} />

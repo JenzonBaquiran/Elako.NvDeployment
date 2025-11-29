@@ -109,7 +109,7 @@ const CustomerStoreView = () => {
 
   const fetchStoreDetails = async () => {
     try {
-      const response = await fetch(`http://localhost:1337/api/stores/${storeId}`);
+      const response = await fetch(`${API_BASE_URL}/api/stores/${storeId}`);
       const data = await response.json();
 
       if (data.success) {
@@ -128,7 +128,7 @@ const CustomerStoreView = () => {
 
   const fetchStoreProducts = async () => {
     try {
-      const response = await fetch(`http://localhost:1337/api/msme/${storeId}/products`);
+      const response = await fetch(`${API_BASE_URL}/api/msme/${storeId}/products`);
       const data = await response.json();
 
       if (data.success) {
@@ -143,7 +143,7 @@ const CustomerStoreView = () => {
 
   const fetchTopRatedProducts = async () => {
     try {
-      const response = await fetch(`http://localhost:1337/api/msme/${storeId}/products/top-rated`);
+      const response = await fetch(`${API_BASE_URL}/api/msme/${storeId}/products/top-rated`);
       const data = await response.json();
 
       if (data.success) {
@@ -156,7 +156,7 @@ const CustomerStoreView = () => {
 
   const fetchProductFeedbacks = async () => {
     try {
-      const response = await fetch(`http://localhost:1337/api/msme/${storeId}/products/feedbacks`);
+      const response = await fetch(`${API_BASE_URL}/api/msme/${storeId}/products/feedbacks`);
       const data = await response.json();
 
       if (data.success) {
@@ -174,7 +174,7 @@ const CustomerStoreView = () => {
     setLoadingExistingRating(true);
     try {
       const userId = user.id || user._id;
-      const response = await fetch(`http://localhost:1337/api/stores/${storeId}/rating/${userId}`);
+      const response = await fetch(`${API_BASE_URL}/api/stores/${storeId}/rating/${userId}`);
       const data = await response.json();
 
       if (data.success) {
@@ -197,7 +197,7 @@ const CustomerStoreView = () => {
     setBlogPostsLoading(true);
     try {
       console.log('🔄 Fetching blog posts for store:', storeId);
-      const response = await fetch(`http://localhost:1337/api/msme/${storeId}/blog-posts`);
+      const response = await fetch(`${API_BASE_URL}/api/msme/${storeId}/blog-posts`);
       console.log('📡 Response status:', response.status, response.statusText);
 
       if (!response.ok) {
@@ -243,7 +243,7 @@ const CustomerStoreView = () => {
     if (blog.mediaType === 'youtube') {
       return blog.mediaUrl;
     }
-    return `http://localhost:1337/uploads/${blog.mediaUrl}`;
+    return `${API_BASE_URL}/uploads/${blog.mediaUrl}`;
   };
 
   // Get YouTube thumbnail function (matching MSME dashboard)
@@ -386,7 +386,7 @@ const CustomerStoreView = () => {
   const incrementMsmeBlogViews = async (postId) => {
     try {
       console.log('📈 Incrementing views for MSME blog post:', postId);
-      const response = await fetch(`http://localhost:1337/api/msme/blog-posts/${postId}`);
+      const response = await fetch(`${API_BASE_URL}/api/msme/blog-posts/${postId}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -495,7 +495,7 @@ const CustomerStoreView = () => {
       const userName = `${user.firstname} ${user.lastname}`.trim();
       const userId = user.id || user._id;
 
-      const response = await fetch(`http://localhost:1337/api/stores/${storeId}/rating`, {
+      const response = await fetch(`${API_BASE_URL}/api/stores/${storeId}/rating`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -583,7 +583,7 @@ const CustomerStoreView = () => {
     const action = isFollowing ? 'unfollow' : 'follow';
 
     try {
-      const response = await fetch(`http://localhost:1337/api/stores/${storeId}/follow`, {
+      const response = await fetch(`${API_BASE_URL}/api/stores/${storeId}/follow`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -612,11 +612,11 @@ const CustomerStoreView = () => {
 
   const getStoreImageUrl = (store) => {
     if (store?.dashboard?.storeLogo) {
-      return `http://localhost:1337/uploads/${store.dashboard.storeLogo}`;
+      return `${API_BASE_URL}/uploads/${store.dashboard.storeLogo}`;
     }
 
     if (store?.dashboard?.coverPhoto) {
-      return `http://localhost:1337/uploads/${store.dashboard.coverPhoto}`;
+      return `${API_BASE_URL}/uploads/${store.dashboard.coverPhoto}`;
     }
 
     if (store?.category === 'food') {
@@ -630,7 +630,7 @@ const CustomerStoreView = () => {
 
   const getProductImageUrl = (product) => {
     if (product.picture) {
-      return `http://localhost:1337/uploads/${product.picture}`;
+      return `${API_BASE_URL}/uploads/${product.picture}`;
     }
     return foodStoreImg; // Default product image
   };
@@ -697,7 +697,7 @@ const CustomerStoreView = () => {
       <section className="store-cover-hero">
         <div className="cover-hero-image">
           <img
-            src={dashboard.coverPhoto ? `http://localhost:1337/uploads/${dashboard.coverPhoto}` : getStoreImageUrl(store)}
+            src={dashboard.coverPhoto ? `${API_BASE_URL}/uploads/${dashboard.coverPhoto}` : getStoreImageUrl(store)}
             alt={store.businessName}
             className="cover-hero-img"
             onError={(e) => {

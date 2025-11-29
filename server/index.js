@@ -116,18 +116,18 @@ app.post("/api/seed-database", async (req, res) => {
       return res.json({
         success: false,
         message: "Database already contains data. Seeding skipped.",
-        adminCount
+        adminCount,
       });
     }
 
     // Sample admin user
     const adminUser = new Admin({
-      username: 'admin',
-      email: 'admin@elako.nv',
-      password: '$2a$10$rOeK7QG1Y.3nK7vL8X8X1eRqK7QG1Y.3nK7vL8X8X1eRqK7QG1Y.3', // 'admin123'
-      firstname: 'System',
-      lastname: 'Administrator',
-      role: 'admin'
+      username: "admin",
+      email: "admin@elako.nv",
+      password: "$2a$10$rOeK7QG1Y.3nK7vL8X8X1eRqK7QG1Y.3nK7vL8X8X1eRqK7QG1Y.3", // 'admin123'
+      firstname: "System",
+      lastname: "Administrator",
+      role: "admin",
     });
 
     await adminUser.save();
@@ -137,17 +137,22 @@ app.post("/api/seed-database", async (req, res) => {
       message: "Database seeded successfully with admin user",
       credentials: {
         username: "admin",
-        password: "admin123"
-      }
+        password: "admin123",
+      },
     });
   } catch (error) {
     console.error("Seeding error:", error);
     res.status(500).json({
       success: false,
       message: "Seeding failed",
-      error: error.message
+      error: error.message,
     });
   }
+});
+
+// Serve seeding page
+app.get("/seed", (req, res) => {
+  res.sendFile(path.join(__dirname, "seed.html"));
 });
 
 // Serve uploaded images statically

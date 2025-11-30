@@ -12,6 +12,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import BusinessIcon from '@mui/icons-material/Business';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import CloseIcon from '@mui/icons-material/Close';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 const AdminMsmeReport = () => {
   const { showSuccess, showError } = useNotification();
@@ -433,6 +434,40 @@ const AdminMsmeReport = () => {
     }
   };
 
+  // Badge management functions
+  const getStoreBadgeInfo = (storeId) => {
+    const badge = badgesData.find(b => b.storeId === storeId && b.isActive);
+    return {
+      hasActiveBadge: !!badge,
+      badge: badge || null,
+      awardedAt: badge?.awardedAt
+    };
+  };
+
+  const handleAwardBadge = async (storeId, storeName) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/badges/admin/award-store/${storeId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        showSuccess(`Top Store badge awarded to ${storeName}!`, 'Badge Awarded');
+        // Refresh badge data
+        await fetchBadgesData();
+      } else {
+        showError(data.error || 'Failed to award badge', 'Award Failed');
+      }
+    } catch (error) {
+      console.error('Error awarding badge:', error);
+      showError('Failed to award badge. Please try again.', 'Network Error');
+    }
+  };
+
   return (
     <div className="admin-msme-reports">
       <AdminSidebar onSidebarToggle={handleSidebarToggle} />
@@ -638,6 +673,25 @@ const AdminMsmeReport = () => {
                           >
                             <VisibilityIcon sx={{ fontSize: 16 }} />
                           </button>
+                          {!getStoreBadgeInfo(report._id).hasActiveBadge && (
+                            <button 
+                              className="admin-msme-reports__award-btn"
+                              onClick={() => handleAwardBadge(report._id, report.businessName)}
+                              title="Award Top Store Badge"
+                              style={{ 
+                                background: '#ff9800', 
+                                color: 'white', 
+                                border: 'none', 
+                                borderRadius: '4px', 
+                                padding: '6px 8px', 
+                                marginLeft: '5px',
+                                cursor: 'pointer',
+                                fontSize: '14px'
+                              }}
+                            >
+                              🏆
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

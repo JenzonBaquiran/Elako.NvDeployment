@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from './Navbar';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
+import { API_BASE_URL } from '../config/api';
 import FollowButton from '../components/FollowButton';
 import StoreImage from '../components/StoreImage';
 import { recordStoreView } from '../utils/storeViewTracker';

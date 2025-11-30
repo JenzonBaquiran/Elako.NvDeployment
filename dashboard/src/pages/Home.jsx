@@ -15,13 +15,24 @@ import '../css/Home.css';
 
 function Home() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [newStores, setNewStores] = useState([]);
   const [topStores, setTopStores] = useState([]);
   const [hotPicks, setHotPicks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [topStoresLoading, setTopStoresLoading] = useState(true);
   const [hotPicksLoading, setHotPicksLoading] = useState(true);
+
+  // Authentication helper function
+  const requireAuth = (callback) => {
+    if (!isAuthenticated) {
+      // Show alert and redirect to login
+      alert('Please login to continue');
+      navigate('/login');
+      return;
+    }
+    callback();
+  };
 
   // Fetch new stores, top stores, and hot picks from backend
   useEffect(() => {
@@ -140,10 +151,10 @@ function Home() {
           <div className="hot-picks-viewall">
             <button 
               className="hero-button hero-button-outline"
-              onClick={() => {
+              onClick={() => requireAuth(() => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 navigate('/hot-picks');
-              }}
+              })}
             >
               View All 
             </button>
@@ -191,10 +202,10 @@ function Home() {
                       </div>
                       <button 
                         className="hero-button hero-button-primary hot-pick-button" 
-                        onClick={() => {
+                        onClick={() => requireAuth(() => {
                           window.scrollTo({ top: 0, behavior: 'smooth' });
                           navigate(`/products/${product._id}`);
-                        }}
+                        })}
                       >
                         View Product
                       </button>
@@ -214,7 +225,7 @@ function Home() {
     <div className="top-stores-viewall">
       <button 
         className="hero-button hero-button-outline"
-        onClick={() => navigate('/top-stores')}
+        onClick={() => requireAuth(() => navigate('/top-stores'))}
       >
         View All
       </button>
@@ -270,9 +281,9 @@ function Home() {
                   </div>
                   <button 
                     className="hero-button hero-button-outline top-stores-button" 
-                    onClick={() => {
+                    onClick={() => requireAuth(() => {
                       recordStoreView(store._id, user?._id, navigate);
-                    }}
+                    })}
                   >
                     Visit Store
                   </button>
@@ -293,7 +304,7 @@ function Home() {
     <div className="recently-joined-viewall">
        <button 
          className="hero-button hero-button-outline"
-         onClick={() => navigate('/customer/stores')}
+         onClick={() => requireAuth(() => navigate('/customer/stores'))}
        >
          View All
        </button>
@@ -403,9 +414,9 @@ function Home() {
                 
                 <button 
                   className="store-learn-btn"
-                  onClick={() => {
+                  onClick={() => requireAuth(() => {
                     recordStoreView(store._id, user?._id, navigate);
-                  }}
+                  })}
                 >
                   Visit Store
                 </button>

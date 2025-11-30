@@ -9362,79 +9362,37 @@ app.post("/api/badges/admin/award-store/:storeId", async (req, res) => {
   
   try {
     const { storeId } = req.params;
-    console.log(`Finding store with ID: ${storeId}`);
-
-    // Find the store
-    const store = await MSME.findById(storeId);
-    if (!store) {
-      console.log(`Store not found: ${storeId}`);
-      return res.status(404).json({
+    
+    // Call BadgeService.manuallyAwardStoreBadge()
+    const result = await BadgeService.manuallyAwardStoreBadge(storeId);
+    
+    if (result.success) {
+      console.log(`✅ Badge awarded successfully to store: ${storeId}`);
+      res.json({
+        success: true,
+        message: result.message,
+        badge: {
+          id: result.badge._id,
+          storeId: result.badge.storeId,
+          badgeType: result.badge.badgeType,
+          weekStart: result.badge.weekStart,
+          weekEnd: result.badge.weekEnd,
+          awardedAt: result.badge.awardedAt,
+          expiresAt: result.badge.expiresAt,
+          isActive: result.badge.isActive,
+          manuallyAwarded: result.badge.manuallyAwarded
+        }
+      });
+    } else {
+      console.log(`❌ Failed to award badge: ${result.error}`);
+      res.status(400).json({
         success: false,
-        error: "Store not found",
+        error: result.error
       });
     }
-    
-    console.log(`Store found: ${store.businessName}`);
-
-    // Check if store already has an active badge
-    console.log(`Checking for existing badge for store: ${storeId}`);
-    const existingBadge = await StoreBadge.findOne({
-      storeId: storeId,
-      isActive: true,
-    });
-
-    if (existingBadge) {
-      console.log(`Store ${storeId} already has active badge: ${existingBadge._id}`);
-      return res.status(400).json({
-        success: false,
-        error: "Store already has an active Top Store badge",
-      });
-    }
-
-    // Create new badge
-    console.log(`Creating new badge for store: ${storeId}`);
-    const newBadge = new StoreBadge({
-      storeId: storeId,
-      badgeType: "TOP_STORE",
-      title: "Top Store",
-      description:
-        "Awarded for exceptional store performance and customer satisfaction",
-      icon: "🏆",
-      color: "#FFD700",
-      isActive: true,
-      awardedAt: new Date(),
-      weekStart: new Date(),
-      weekEnd: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-      celebrationShown: false,
-    });
-
-    console.log(`Saving badge to database...`);
-    await newBadge.save();
-    
-    console.log(`✅ Badge saved successfully! ID: ${newBadge._id}`);
-    console.log(
-      `🏆 Admin awarded Top Store badge to ${store.businessName} (ID: ${storeId})`
-    );
-
-    res.json({
-      success: true,
-      message: `Top Store badge awarded to ${store.businessName}`,
-      badge: {
-        id: newBadge._id,
-        storeId: newBadge.storeId,
-        badgeType: newBadge.badgeType,
-        weekStart: newBadge.weekStart,
-        weekEnd: newBadge.weekEnd,
-        awardedAt: newBadge.awardedAt,
-        expiresAt: newBadge.expiresAt,
-        isActive: newBadge.isActive,
-      },
-    });
   } catch (error) {
     console.error("❌ Error awarding store badge:", error);
     console.error("Error details:", error.message);
-    console.error("Stack trace:", error.stack);
     res.status(500).json({
       success: false,
       error: "Failed to award badge",

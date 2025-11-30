@@ -664,7 +664,7 @@ const AdminMsmeReport = () => {
                           >
                             <VisibilityIcon sx={{ fontSize: 16 }} />
                           </button>
-                          {!getStoreBadgeInfo(report._id).hasActiveBadge && (
+                          {!getStoreBadgeInfo(report._id).hasActiveBadge ? (
                             <button 
                               className="admin-msme-reports__award-btn"
                               onClick={() => handleAwardBadge(report._id, report.businessName)}
@@ -682,7 +682,7 @@ const AdminMsmeReport = () => {
                             >
                               <EmojiEventsIcon sx={{ fontSize: 16 }} />
                             </button>
-                          )}
+                          ) : null}
                         </div>
                       </td>
                     </tr>

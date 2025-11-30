@@ -350,6 +350,102 @@ class BadgeService {
       console.error("Error marking celebration as shown:", error);
     }
   }
+
+  async manuallyAwardStoreBadge(storeId) {
+    try {
+      console.log(`🏆 ManuallyAwardStoreBadge called for storeId: ${storeId}`);
+
+      // 1. Validate store exists
+      const store = await MSME.findById(storeId);
+      if (!store) {
+        throw new Error("Store not found");
+      }
+      console.log(`✅ Store found: ${store.businessName}`);
+
+      // 2. Check if already has active badge for current week
+      const now = new Date();
+      const weekStart = new Date(now);
+      weekStart.setHours(0, 0, 0, 0);
+      weekStart.setDate(now.getDate() - now.getDay()); // Start of current week
+
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 6); // End of current week
+      weekEnd.setHours(23, 59, 59, 999);
+
+      let existingBadge = await StoreBadge.findOne({
+        storeId: storeId,
+        weekStart: { $lte: weekEnd },
+        weekEnd: { $gte: weekStart }
+      });
+
+      // 3. Create or find existing badge for current week
+      if (!existingBadge) {
+        console.log(`Creating new badge for current week`);
+        existingBadge = new StoreBadge({
+          storeId: storeId,
+          badgeType: "top_store",
+          weekStart: weekStart,
+          weekEnd: weekEnd,
+          awardedAt: new Date(),
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+          isActive: false,
+          celebrationShown: false,
+          criteria: {
+            storeRating: {
+              current: 0,
+              required: 4.0,
+              met: false
+            },
+            productRatings: {
+              current: 0,
+              required: 4.0,
+              met: false
+            },
+            customerEngagement: {
+              current: 0,
+              required: 50,
+              met: false
+            },
+            profileViews: {
+              current: 0,
+              required: 100,
+              met: false
+            }
+          }
+        });
+      } else {
+        console.log(`Found existing badge: ${existingBadge._id}`);
+      }
+
+      // 4. Set badge as active and manually awarded
+      existingBadge.isActive = true;
+      existingBadge.manuallyAwarded = true;
+      existingBadge.awardedAt = new Date();
+
+      // 5. Mark all criteria as met (manual override)
+      existingBadge.criteria.storeRating.met = true;
+      existingBadge.criteria.productRatings.met = true;
+      existingBadge.criteria.customerEngagement.met = true;
+      existingBadge.criteria.profileViews.met = true;
+
+      // 6. Save and return success
+      await existingBadge.save();
+      console.log(`✅ Badge saved successfully: ${existingBadge._id}`);
+
+      return {
+        success: true,
+        badge: existingBadge,
+        message: `Top Store badge awarded to ${store.businessName}`
+      };
+
+    } catch (error) {
+      console.error("❌ Error in manuallyAwardStoreBadge:", error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
 }
 
 module.exports = new BadgeService();

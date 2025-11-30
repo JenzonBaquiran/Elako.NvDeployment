@@ -26,8 +26,7 @@ function Home() {
   // Authentication helper function
   const requireAuth = (callback) => {
     if (!isAuthenticated) {
-      // Show alert and redirect to login
-      alert('Please login to continue');
+      // Automatically redirect to login without alert
       navigate('/login');
       return;
     }

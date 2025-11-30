@@ -274,7 +274,7 @@ const CustomerFavorites = () => {
   };
 
   const handleViewProduct = (productId) => {
-    navigate(`/product/${productId}`);
+    navigate(`/products/${productId}`);
   };
 
   const handleViewStore = (storeId) => {

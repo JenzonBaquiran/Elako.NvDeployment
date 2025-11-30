@@ -963,7 +963,7 @@ const CustomerStoreView = () => {
                     </div>
                     <button
                       className="product-view-btn"
-                      onClick={() => navigate(`/product/${product._id}`)}
+                      onClick={() => navigate(`/products/${product._id}`)}
                     >
                       View Product
                     </button>

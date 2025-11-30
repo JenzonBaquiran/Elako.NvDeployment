@@ -188,7 +188,7 @@ const CustomerReviews = () => {
   };
 
   const handleViewProduct = (productId) => {
-    navigate(`/product/${productId}`);
+    navigate(`/products/${productId}`);
   };
 
   const getProductImageUrl = (imagePath) => {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminSidebar from './AdminSidebar';
 import { useNotification } from '../components/NotificationProvider';
+import { API_BASE_URL } from '../config/api';
 import { format } from 'date-fns';
 import '../css/AdminMsmeReport.css';
 import StoreIcon from '@mui/icons-material/Store';
@@ -48,7 +49,7 @@ const AdminMsmeReport = () => {
 
   const fetchBadgesData = async () => {
     try {
-      const response = await fetch('http://localhost:1337/api/badges/admin/stores');
+      const response = await fetch(`${API_BASE_URL}/api/badges/admin/stores`);
       const data = await response.json();
       
       if (data.success) {
@@ -66,7 +67,7 @@ const AdminMsmeReport = () => {
       setLoading(true);
       
       // Fetch real MSME data from API
-      const response = await fetch('http://localhost:1337/api/admin/msme-reports');
+      const response = await fetch(`${API_BASE_URL}/api/admin/msme-reports`);
       const data = await response.json();
       
       if (data.success) {

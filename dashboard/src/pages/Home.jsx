@@ -193,7 +193,7 @@ function Home() {
                         className="hero-button hero-button-primary hot-pick-button" 
                         onClick={() => {
                           window.scrollTo({ top: 0, behavior: 'smooth' });
-                          navigate(`/product/${product._id}`);
+                          navigate(`/products/${product._id}`);
                         }}
                       >
                         View Product

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar";
 import { useNotification } from "../components/NotificationProvider";
+import { API_BASE_URL } from "../config/api";
 import "../css/AdminUserManagement-standalone.css";
 
 const AdminUserManagement = () => {
@@ -70,7 +71,7 @@ const AdminUserManagement = () => {
 
   const fetchAdmins = async () => {
     try {
-      const response = await fetch("http://localhost:1337/api/admin/admins");
+      const response = await fetch(`${API_BASE_URL}/api/admin/admins`);
       
       if (!response.ok) {
         throw new Error("Failed to fetch admins");
@@ -101,7 +102,7 @@ const AdminUserManagement = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:1337/api/admin/users");
+      const response = await fetch(`${API_BASE_URL}/api/admin/users`);
       
       if (!response.ok) {
         throw new Error("Failed to fetch users");
@@ -336,11 +337,11 @@ const AdminUserManagement = () => {
       try {
         let endpoint;
         if (userType === "Customer") {
-          endpoint = `http://localhost:1337/api/admin/customers/${userId}`;
+          endpoint = `${API_BASE_URL}/api/admin/customers/${userId}`;
         } else if (userType === "MSME") {
-          endpoint = `http://localhost:1337/api/admin/msme/${userId}`;
+          endpoint = `${API_BASE_URL}/api/admin/msme/${userId}`;
         } else if (userType === "Admin") {
-          endpoint = `http://localhost:1337/api/admin/admins/${userId}`;
+          endpoint = `${API_BASE_URL}/api/admin/admins/${userId}`;
         }
         
         const response = await fetch(endpoint, { method: "DELETE" });
@@ -366,9 +367,9 @@ const AdminUserManagement = () => {
     try {
       let endpoint;
       if (userType === "Admin") {
-        endpoint = `http://localhost:1337/api/admin/admins/${userId}/status`;
+        endpoint = `${API_BASE_URL}/api/admin/admins/${userId}/status`;
       } else {
-        endpoint = `http://localhost:1337/api/msme/${userId}/status`;
+        endpoint = `${API_BASE_URL}/api/msme/${userId}/status`;
       }
       
       const response = await fetch(endpoint, {
@@ -403,7 +404,7 @@ const AdminUserManagement = () => {
     if (user.type === 'MSME') {
       setLoadingCertificates(true);
       try {
-        const response = await fetch(`http://localhost:1337/api/msme/${user.id}/certificates`);
+        const response = await fetch(`${API_BASE_URL}/api/msme/${user.id}/certificates`);
         const data = await response.json();
         
         if (data.success) {
@@ -444,7 +445,7 @@ const AdminUserManagement = () => {
     setMsmeFormLoading(true);
 
     try {
-      const response = await fetch("http://localhost:1337/api/admin/msme/create", {
+      const response = await fetch(`${API_BASE_URL}/api/admin/msme/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(msmeFormData)
@@ -485,7 +486,7 @@ const AdminUserManagement = () => {
       // Get current admin info from localStorage
       const currentAdmin = JSON.parse(localStorage.getItem('user') || '{}');
       
-      const response = await fetch("http://localhost:1337/api/admin/create", {
+      const response = await fetch(`${API_BASE_URL}/api/admin/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -607,7 +608,7 @@ const AdminUserManagement = () => {
       let requestBody = {};
 
       if (editingUser.type === 'Admin') {
-        endpoint = `http://localhost:1337/api/admin/admins/${editingUser.id}`;
+        endpoint = `${API_BASE_URL}/api/admin/admins/${editingUser.id}`;
         requestBody = {
           username: editUserFormData.username,
           firstname: editUserFormData.firstname,
@@ -615,7 +616,7 @@ const AdminUserManagement = () => {
           email: editUserFormData.email
         };
       } else if (editingUser.type === 'MSME') {
-        endpoint = `http://localhost:1337/api/admin/msme/${editingUser.id}/update`;
+        endpoint = `${API_BASE_URL}/api/admin/msme/${editingUser.id}/update`;
         requestBody = {
           username: editUserFormData.username,
           businessName: editUserFormData.businessName,
@@ -624,7 +625,7 @@ const AdminUserManagement = () => {
           clientProfilingNumber: editUserFormData.clientProfilingNumber
         };
       } else if (editingUser.type === 'Customer') {
-        endpoint = `http://localhost:1337/api/admin/customers/${editingUser.id}/update`;
+        endpoint = `${API_BASE_URL}/api/admin/customers/${editingUser.id}/update`;
         requestBody = {
           username: editUserFormData.username,
           firstname: editUserFormData.firstname,
@@ -1587,7 +1588,7 @@ const AdminUserManagement = () => {
                         {certificates.mayorsPermit ? (
                           <button 
                             className="user-management__view-certificate-btn"
-                            onClick={() => handleViewCertificate('Mayor\'s Permit', `http://localhost:1337/uploads/${certificates.mayorsPermit}`)}
+                            onClick={() => handleViewCertificate('Mayor\'s Permit', `${API_BASE_URL}/uploads/${certificates.mayorsPermit}`)}
                           >
                             View Document
                           </button>
@@ -1601,7 +1602,7 @@ const AdminUserManagement = () => {
                         {certificates.bir ? (
                           <button 
                             className="user-management__view-certificate-btn"
-                            onClick={() => handleViewCertificate('BIR Certificate', `http://localhost:1337/uploads/${certificates.bir}`)}
+                            onClick={() => handleViewCertificate('BIR Certificate', `${API_BASE_URL}/uploads/${certificates.bir}`)}
                           >
                             View Document
                           </button>
@@ -1615,7 +1616,7 @@ const AdminUserManagement = () => {
                         {certificates.dti ? (
                           <button 
                             className="user-management__view-certificate-btn"
-                            onClick={() => handleViewCertificate('DTI Certificate', `http://localhost:1337/uploads/${certificates.dti}`)}
+                            onClick={() => handleViewCertificate('DTI Certificate', `${API_BASE_URL}/uploads/${certificates.dti}`)}
                           >
                             View Document
                           </button>

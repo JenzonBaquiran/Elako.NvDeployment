@@ -167,7 +167,7 @@ const MsmeReviews = () => {
   };
 
   const handleViewProduct = (productId) => {
-    navigate(`/product/${productId}`);
+    navigate(`/products/${productId}`);
   };
 
   const getProductImageUrl = (product) => {

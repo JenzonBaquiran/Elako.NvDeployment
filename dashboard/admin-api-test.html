@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .loading { color: #666; }
+        .error { color: red; }
+        .success { color: green; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Admin API Test</h1>
+    <div id="results"></div>
+
+    <script>
+        const API_BASE_URL = 'https://elakonvdeployment-production.up.railway.app';
+        const resultsDiv = document.getElementById('results');
+
+        // Test admin endpoints
+        const testEndpoints = [
+            { name: 'Admin Users', url: '/api/admin/users' },
+            { name: 'Admin Admins', url: '/api/admin/admins' },
+            { name: 'Health Check', url: '/api/health' },
+            { name: 'Products', url: '/api/products?limit=1' }
+        ];
+
+        async function testEndpoint(endpoint) {
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test';
+            testDiv.innerHTML = `<h3>Testing: ${endpoint.name}</h3><p class="loading">Loading...</p>`;
+            resultsDiv.appendChild(testDiv);
+
+            try {
+                console.log(`Testing: ${API_BASE_URL}${endpoint.url}`);
+                const response = await fetch(`${API_BASE_URL}${endpoint.url}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log(`${endpoint.name} Response status:`, response.status);
+                
+                let data;
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    data = await response.text();
+                }
+                
+                console.log(`${endpoint.name} Response data:`, data);
+                
+                if (response.ok) {
+                    testDiv.innerHTML = `
+                        <h3 class="success">✅ ${endpoint.name} - SUCCESS</h3>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>URL:</strong> ${API_BASE_URL}${endpoint.url}</p>
+                        <pre>${JSON.stringify(data, null, 2).substring(0, 1000)}${JSON.stringify(data, null, 2).length > 1000 ? '...' : ''}</pre>
+                    `;
+                } else {
+                    testDiv.innerHTML = `
+                        <h3 class="error">❌ ${endpoint.name} - FAILED</h3>
+                        <p><strong>Status:</strong> ${response.status}</p>
+                        <p><strong>URL:</strong> ${API_BASE_URL}${endpoint.url}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                console.error(`${endpoint.name} Error:`, error);
+                testDiv.innerHTML = `
+                    <h3 class="error">❌ ${endpoint.name} - NETWORK ERROR</h3>
+                    <p><strong>URL:</strong> ${API_BASE_URL}${endpoint.url}</p>
+                    <p class="error">Error: ${error.message}</p>
+                `;
+            }
+        }
+
+        // Test all endpoints
+        testEndpoints.forEach(endpoint => testEndpoint(endpoint));
+    </script>
+</body>
+</html>

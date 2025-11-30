@@ -117,7 +117,7 @@ const CustomerNotifications = () => {
     switch (actionType) {
       case 'product_detail':
         if (productId?._id) {
-          navigate(`/product/${productId._id}`);
+          navigate(`/products/${productId._id}`);
         }
         break;
       
@@ -140,7 +140,7 @@ const CustomerNotifications = () => {
       case 'none':
       default:
         if (['new_product', 'price_drop', 'availability_alert'].includes(type) && productId?._id) {
-          navigate(`/product/${productId._id}`);
+          navigate(`/products/${productId._id}`);
         } else if (type === 'store_promotion' && storeId?._id) {
           navigate(`/customer/stores/${storeId._id}`);
         }

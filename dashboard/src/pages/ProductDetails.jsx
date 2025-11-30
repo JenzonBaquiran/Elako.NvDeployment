@@ -28,8 +28,13 @@ const ProductDetails = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
+    console.log('ProductDetails useEffect triggered');
+    console.log('productId from params:', productId);
     if (productId) {
       fetchProductDetails();
+    } else {
+      setError('No product ID provided');
+      setLoading(false);
     }
   }, [productId]);
 
@@ -71,25 +76,73 @@ const ProductDetails = () => {
 
   const fetchProductDetails = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/products/${productId}`);
+      console.log('API_BASE_URL:', API_BASE_URL);
+      console.log('Fetching product ID:', productId);
+      console.log('Full API URL:', `${API_BASE_URL}/api/products/${productId}`);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      const response = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      console.log('Response status:', response.status);
+      
       const data = await response.json();
+      console.log('Response data:', data);
+      
       if (data.success) {
         setProduct(data.product);
       } else {
-        setError('Product not found');
+        setError(data.error || 'Product not found');
       }
     } catch (err) {
-      setError('Failed to load product');
+      console.error('Fetch error:', err);
+      if (err.name === 'AbortError') {
+        setError('Request timed out - please try again');
+      } else {
+        setError('Failed to load product: ' + err.message);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) {
-    return <div className="product-details-container"><Header /><div className="loading-state">Loading...</div></div>;
+    return (
+      <div className="product-details-container">
+        <Header />
+        <div className="product-details-content">
+          <div className="loading-state" style={{textAlign: 'center', padding: '50px', fontSize: '18px'}}>
+            Loading product details...
+          </div>
+        </div>
+      </div>
+    );
   }
+  
   if (error || !product) {
-    return <div className="product-details-container"><Header /><div className="error-state">{error || 'Product not found'}</div></div>;
+    return (
+      <div className="product-details-container">
+        <Header />
+        <div className="product-details-content">
+          <button className="product-details-back-button" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+          <div className="error-state" style={{textAlign: 'center', padding: '50px'}}>
+            <h2 style={{color: '#e74c3c', marginBottom: '20px'}}>Product Not Found</h2>
+            <p style={{fontSize: '16px', color: '#666', marginBottom: '20px'}}>
+              {error || 'The product you\'re looking for doesn\'t exist or has been removed.'}
+            </p>
+            <p style={{fontSize: '14px', color: '#999'}}>
+              Product ID: {productId}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .product { border: 1px solid #ddd; padding: 20px; margin: 10px; border-radius: 8px; }
+        .loading { color: #666; }
+        .error { color: red; }
+        img { max-width: 300px; height: auto; }
+    </style>
+</head>
+<body>
+    <h1>Product Details API Test</h1>
+    <div id="results"></div>
+
+    <script>
+        const API_BASE_URL = 'https://elakonvdeployment-production.up.railway.app';
+        const resultsDiv = document.getElementById('results');
+
+        // Test product IDs we confirmed work
+        const testProductIds = [
+            '690071580b148a9313234ae9', // pouch
+            '68ce72f9d04b5fba974251da', // Buko Pie
+            '68ff635ddce5fad5b0169e24', // Painteristism
+        ];
+
+        async function testProduct(productId) {
+            const productDiv = document.createElement('div');
+            productDiv.className = 'product';
+            productDiv.innerHTML = `<h3>Testing Product ID: ${productId}</h3><p class="loading">Loading...</p>`;
+            resultsDiv.appendChild(productDiv);
+
+            try {
+                console.log(`Testing: ${API_BASE_URL}/api/products/${productId}`);
+                const response = await fetch(`${API_BASE_URL}/api/products/${productId}`);
+                console.log('Response status:', response.status);
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (data.success && data.product) {
+                    const product = data.product;
+                    productDiv.innerHTML = `
+                        <h3>✅ ${product.productName}</h3>
+                        <p><strong>Price:</strong> ₱${product.price}</p>
+                        <p><strong>Description:</strong> ${product.description}</p>
+                        <p><strong>Available:</strong> ${product.availability ? 'Yes' : 'No'}</p>
+                        <p><strong>Rating:</strong> ${product.averageRating || 'No rating'}</p>
+                        ${product.picture ? `<img src="${API_BASE_URL}/uploads/${product.picture}" alt="${product.productName}">` : ''}
+                        <p><strong>API Response:</strong> Success</p>
+                    `;
+                } else {
+                    productDiv.innerHTML = `
+                        <h3>❌ Product Not Found</h3>
+                        <p>Product ID: ${productId}</p>
+                        <p>Error: ${data.error || 'Unknown error'}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                productDiv.innerHTML = `
+                    <h3>❌ Network Error</h3>
+                    <p>Product ID: ${productId}</p>
+                    <p class="error">Error: ${error.message}</p>
+                `;
+            }
+        }
+
+        // Test all products
+        testProductIds.forEach(id => testProduct(id));
+    </script>
+</body>
+</html>

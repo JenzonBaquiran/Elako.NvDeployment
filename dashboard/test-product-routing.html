@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Routing Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { border: 1px solid #ddd; padding: 20px; margin: 10px 0; border-radius: 8px; }
+        .success { color: green; }
+        .error { color: red; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Product Routing & API Test</h1>
+    
+    <div class="test-section">
+        <h2>API Direct Test</h2>
+        <button onclick="testAPI()">Test API Call</button>
+        <div id="api-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Frontend Routing Test</h2>
+        <button onclick="testRouting()">Test Frontend Route</button>
+        <div id="routing-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Product Links</h2>
+        <a href="http://localhost:5174/products/690071580b148a9313234ae9" target="_blank">
+            Test Product 1 (should work)
+        </a><br>
+        <a href="http://localhost:5174/products/69017529494f4355e234ad7" target="_blank">
+            Test Product 2 (from screenshot)
+        </a>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:1337';
+        
+        async function testAPI() {
+            const result = document.getElementById('api-result');
+            result.innerHTML = 'Testing API...';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/products/690071580b148a9313234ae9`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = `<div class="success">✅ API Works: ${data.product.productName}</div>`;
+                } else {
+                    result.innerHTML = `<div class="error">❌ API Error: ${data.error}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testRouting() {
+            const result = document.getElementById('routing-result');
+            result.innerHTML = 'Testing routing...';
+            
+            // Test if we can access the frontend route
+            try {
+                const response = await fetch('http://localhost:5174/products/690071580b148a9313234ae9');
+                if (response.ok) {
+                    result.innerHTML = '<div class="success">✅ Frontend route is accessible</div>';
+                } else {
+                    result.innerHTML = `<div class="error">❌ Frontend route returned: ${response.status}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Frontend route error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

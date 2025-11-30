@@ -9352,20 +9352,20 @@ app.get("/api/badges/admin/award-store/:storeId", async (req, res) => {
     error: "This endpoint only accepts POST requests",
     method: req.method,
     storeId: req.params.storeId,
-    message: "Use POST method to award badge"
+    message: "Use POST method to award badge",
   });
 });
 
 // Award store badge (admin endpoint)
 app.post("/api/badges/admin/award-store/:storeId", async (req, res) => {
   console.log(`🏆 Award badge request for store: ${req.params.storeId}`);
-  
+
   try {
     const { storeId } = req.params;
-    
+
     // Call BadgeService.manuallyAwardStoreBadge()
     const result = await BadgeService.manuallyAwardStoreBadge(storeId);
-    
+
     if (result.success) {
       console.log(`✅ Badge awarded successfully to store: ${storeId}`);
       res.json({
@@ -9380,14 +9380,14 @@ app.post("/api/badges/admin/award-store/:storeId", async (req, res) => {
           awardedAt: result.badge.awardedAt,
           expiresAt: result.badge.expiresAt,
           isActive: result.badge.isActive,
-          manuallyAwarded: result.badge.manuallyAwarded
-        }
+          manuallyAwarded: result.badge.manuallyAwarded,
+        },
       });
     } else {
       console.log(`❌ Failed to award badge: ${result.error}`);
       res.status(400).json({
         success: false,
-        error: result.error
+        error: result.error,
       });
     }
   } catch (error) {
@@ -9396,7 +9396,7 @@ app.post("/api/badges/admin/award-store/:storeId", async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Failed to award badge",
-      details: error.message
+      details: error.message,
     });
   }
 });

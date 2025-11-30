@@ -375,7 +375,7 @@ class BadgeService {
       let existingBadge = await StoreBadge.findOne({
         storeId: storeId,
         weekStart: { $lte: weekEnd },
-        weekEnd: { $gte: weekStart }
+        weekEnd: { $gte: weekStart },
       });
 
       // 3. Create or find existing badge for current week
@@ -394,24 +394,24 @@ class BadgeService {
             storeRating: {
               current: 0,
               required: 4.0,
-              met: false
+              met: false,
             },
             productRatings: {
               current: 0,
               required: 4.0,
-              met: false
+              met: false,
             },
             customerEngagement: {
               current: 0,
               required: 50,
-              met: false
+              met: false,
             },
             profileViews: {
               current: 0,
               required: 100,
-              met: false
-            }
-          }
+              met: false,
+            },
+          },
         });
       } else {
         console.log(`Found existing badge: ${existingBadge._id}`);
@@ -435,14 +435,13 @@ class BadgeService {
       return {
         success: true,
         badge: existingBadge,
-        message: `Top Store badge awarded to ${store.businessName}`
+        message: `Top Store badge awarded to ${store.businessName}`,
       };
-
     } catch (error) {
       console.error("❌ Error in manuallyAwardStoreBadge:", error);
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }

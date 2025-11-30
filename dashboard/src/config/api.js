@@ -1,4 +1,4 @@
-// API Configuration for different environments
+// API Configuration - Use Vite environment variable first, then fallback to config
 const config = {
   development: {
     API_BASE_URL: "http://localhost:1337",
@@ -9,7 +9,11 @@ const config = {
 };
 
 const environment = import.meta.env.MODE || "development";
-export const API_BASE_URL = config[environment].API_BASE_URL;
+
+// Use Vite env variable first, then fallback to config
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 
+                           import.meta.env.VITE_API_BASE_URL || 
+                           config[environment].API_BASE_URL;
 
 // Helper function for API calls
 export const apiCall = async (endpoint, options = {}) => {

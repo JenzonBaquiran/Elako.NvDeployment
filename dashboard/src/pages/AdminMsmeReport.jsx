@@ -669,6 +669,7 @@ const AdminMsmeReport = () => {
                               className="admin-msme-reports__award-btn"
                               onClick={() => handleAwardBadge(report._id, report.businessName)}
                               title="Award Top Store Badge"
+                              disabled={loading}
                               style={{ 
                                 background: '#ff9800', 
                                 color: 'white', 
@@ -676,11 +677,10 @@ const AdminMsmeReport = () => {
                                 borderRadius: '4px', 
                                 padding: '6px 8px', 
                                 marginLeft: '5px',
-                                cursor: 'pointer',
-                                fontSize: '14px'
+                                cursor: 'pointer'
                               }}
                             >
-                              🏆
+                              <EmojiEventsIcon sx={{ fontSize: 16 }} />
                             </button>
                           )}
                         </div>

@@ -256,21 +256,27 @@ app.get("/seed", (req, res) => {
 });
 
 // Serve uploaded images statically with proper headers
-app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
-  setHeaders: (res, path) => {
-    // Set proper CORS headers for files
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
-    
-    // Set proper content types
-    if (path.endsWith('.pdf')) {
-      res.setHeader('Content-Type', 'application/pdf');
-    } else if (path.match(/\.(jpg|jpeg|png|gif)$/i)) {
-      res.setHeader('Content-Type', 'image/' + path.split('.').pop().toLowerCase());
-    }
-  }
-}));
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"), {
+    setHeaders: (res, path) => {
+      // Set proper CORS headers for files
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Methods", "GET");
+      res.header("Access-Control-Allow-Headers", "Content-Type");
+
+      // Set proper content types
+      if (path.endsWith(".pdf")) {
+        res.setHeader("Content-Type", "application/pdf");
+      } else if (path.match(/\.(jpg|jpeg|png|gif)$/i)) {
+        res.setHeader(
+          "Content-Type",
+          "image/" + path.split(".").pop().toLowerCase()
+        );
+      }
+    },
+  })
+);
 
 // Multer setup for image uploads
 const storage = multer.diskStorage({
@@ -1083,13 +1089,14 @@ app.get("/api/msme/:id/certificates", async (req, res) => {
     if (!msme) {
       return res.status(404).json({ error: "MSME not found" });
     }
-    
+
     // Add full URLs for certificates for easier frontend access
     const certificates = msme.certificates;
-    const serverUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://elakonvdeployment-production.up.railway.app'
-      : `http://localhost:${PORT}`;
-    
+    const serverUrl =
+      process.env.NODE_ENV === "production"
+        ? "https://elakonvdeployment-production.up.railway.app"
+        : `http://localhost:${PORT}`;
+
     if (certificates) {
       if (certificates.mayorsPermit) {
         certificates.mayorsPermitUrl = `${serverUrl}/uploads/${certificates.mayorsPermit}`;
@@ -1101,7 +1108,7 @@ app.get("/api/msme/:id/certificates", async (req, res) => {
         certificates.dtiUrl = `${serverUrl}/uploads/${certificates.dti}`;
       }
     }
-    
+
     res.json({
       success: true,
       businessName: msme.businessName,
@@ -9308,81 +9315,107 @@ app.get("/api/badges/store/:storeId", async (req, res) => {
 app.get("/api/badges/store/:storeId/active", async (req, res) => {
   try {
     const { storeId } = req.params;
-    
+
     const activeBadge = await StoreBadge.findOne({
       storeId: storeId,
-      isActive: true
+      isActive: true,
     });
 
     res.json({
       success: true,
       hasActiveBadge: !!activeBadge,
-      badge: activeBadge ? {
-        id: activeBadge._id,
-        storeId: activeBadge.storeId,
-        badgeType: activeBadge.badgeType,
-        weekStart: activeBadge.weekStart,
-        weekEnd: activeBadge.weekEnd,
-        awardedAt: activeBadge.awardedAt,
-        expiresAt: activeBadge.expiresAt,
-        isActive: activeBadge.isActive
-      } : null
+      badge: activeBadge
+        ? {
+            id: activeBadge._id,
+            storeId: activeBadge.storeId,
+            badgeType: activeBadge.badgeType,
+            weekStart: activeBadge.weekStart,
+            weekEnd: activeBadge.weekEnd,
+            awardedAt: activeBadge.awardedAt,
+            expiresAt: activeBadge.expiresAt,
+            isActive: activeBadge.isActive,
+          }
+        : null,
     });
   } catch (error) {
-    console.error('Error checking store badge status:', error);
+    console.error("Error checking store badge status:", error);
     res.status(500).json({
       success: false,
-      error: "Failed to check badge status"
+      error: "Failed to check badge status",
     });
   }
 });
 
+// Debug endpoint for award badge (GET)
+app.get("/api/badges/admin/award-store/:storeId", async (req, res) => {
+  res.json({
+    error: "This endpoint only accepts POST requests",
+    method: req.method,
+    storeId: req.params.storeId,
+    message: "Use POST method to award badge"
+  });
+});
+
 // Award store badge (admin endpoint)
 app.post("/api/badges/admin/award-store/:storeId", async (req, res) => {
+  console.log(`🏆 Award badge request for store: ${req.params.storeId}`);
+  
   try {
     const { storeId } = req.params;
-    
+    console.log(`Finding store with ID: ${storeId}`);
+
     // Find the store
     const store = await MSME.findById(storeId);
     if (!store) {
+      console.log(`Store not found: ${storeId}`);
       return res.status(404).json({
         success: false,
-        error: "Store not found"
+        error: "Store not found",
       });
     }
+    
+    console.log(`Store found: ${store.businessName}`);
 
     // Check if store already has an active badge
+    console.log(`Checking for existing badge for store: ${storeId}`);
     const existingBadge = await StoreBadge.findOne({
       storeId: storeId,
-      isActive: true
+      isActive: true,
     });
 
     if (existingBadge) {
+      console.log(`Store ${storeId} already has active badge: ${existingBadge._id}`);
       return res.status(400).json({
         success: false,
-        error: "Store already has an active Top Store badge"
+        error: "Store already has an active Top Store badge",
       });
     }
 
     // Create new badge
+    console.log(`Creating new badge for store: ${storeId}`);
     const newBadge = new StoreBadge({
       storeId: storeId,
-      badgeType: 'TOP_STORE',
-      title: 'Top Store',
-      description: 'Awarded for exceptional store performance and customer satisfaction',
-      icon: '🏆',
-      color: '#FFD700',
+      badgeType: "TOP_STORE",
+      title: "Top Store",
+      description:
+        "Awarded for exceptional store performance and customer satisfaction",
+      icon: "🏆",
+      color: "#FFD700",
       isActive: true,
       awardedAt: new Date(),
       weekStart: new Date(),
       weekEnd: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-      celebrationShown: false
+      celebrationShown: false,
     });
 
+    console.log(`Saving badge to database...`);
     await newBadge.save();
     
-    console.log(`🏆 Admin awarded Top Store badge to ${store.businessName} (ID: ${storeId})`);
+    console.log(`✅ Badge saved successfully! ID: ${newBadge._id}`);
+    console.log(
+      `🏆 Admin awarded Top Store badge to ${store.businessName} (ID: ${storeId})`
+    );
 
     res.json({
       success: true,
@@ -9395,14 +9428,17 @@ app.post("/api/badges/admin/award-store/:storeId", async (req, res) => {
         weekEnd: newBadge.weekEnd,
         awardedAt: newBadge.awardedAt,
         expiresAt: newBadge.expiresAt,
-        isActive: newBadge.isActive
-      }
+        isActive: newBadge.isActive,
+      },
     });
   } catch (error) {
-    console.error('Error awarding store badge:', error);
+    console.error("❌ Error awarding store badge:", error);
+    console.error("Error details:", error.message);
+    console.error("Stack trace:", error.stack);
     res.status(500).json({
       success: false,
-      error: "Failed to award badge"
+      error: "Failed to award badge",
+      details: error.message
     });
   }
 });

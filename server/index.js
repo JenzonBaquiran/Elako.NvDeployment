@@ -255,8 +255,22 @@ app.get("/seed", (req, res) => {
   res.sendFile(path.join(__dirname, "seed.html"));
 });
 
-// Serve uploaded images statically
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Serve uploaded images statically with proper headers
+app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
+  setHeaders: (res, path) => {
+    // Set proper CORS headers for files
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    
+    // Set proper content types
+    if (path.endsWith('.pdf')) {
+      res.setHeader('Content-Type', 'application/pdf');
+    } else if (path.match(/\.(jpg|jpeg|png|gif)$/i)) {
+      res.setHeader('Content-Type', 'image/' + path.split('.').pop().toLowerCase());
+    }
+  }
+}));
 
 // Multer setup for image uploads
 const storage = multer.diskStorage({
@@ -1069,10 +1083,29 @@ app.get("/api/msme/:id/certificates", async (req, res) => {
     if (!msme) {
       return res.status(404).json({ error: "MSME not found" });
     }
+    
+    // Add full URLs for certificates for easier frontend access
+    const certificates = msme.certificates;
+    const serverUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://elakonvdeployment-production.up.railway.app'
+      : `http://localhost:${PORT}`;
+    
+    if (certificates) {
+      if (certificates.mayorsPermit) {
+        certificates.mayorsPermitUrl = `${serverUrl}/uploads/${certificates.mayorsPermit}`;
+      }
+      if (certificates.bir) {
+        certificates.birUrl = `${serverUrl}/uploads/${certificates.bir}`;
+      }
+      if (certificates.dti) {
+        certificates.dtiUrl = `${serverUrl}/uploads/${certificates.dti}`;
+      }
+    }
+    
     res.json({
       success: true,
       businessName: msme.businessName,
-      certificates: msme.certificates,
+      certificates: certificates,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

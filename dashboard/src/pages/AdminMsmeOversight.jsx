@@ -540,7 +540,7 @@ const AdminMsmeOversight = () => {
                     {certificates.mayorsPermit ? (
                       <button 
                         className="admin-msme-oversight__view-certificate-btn"
-                        onClick={() => handleViewCertificate('Mayor\'s Permit', `${API_BASE_URL}/uploads/${certificates.mayorsPermit}`)}
+                        onClick={() => handleViewCertificate('Mayor\'s Permit', certificates.mayorsPermitUrl || `${API_BASE_URL}/uploads/${certificates.mayorsPermit}`)}
                       >
                         View Document
                       </button>
@@ -554,7 +554,7 @@ const AdminMsmeOversight = () => {
                     {certificates.bir ? (
                       <button 
                         className="admin-msme-oversight__view-certificate-btn"
-                        onClick={() => handleViewCertificate('BIR Certificate', `${API_BASE_URL}/uploads/${certificates.bir}`)}
+                        onClick={() => handleViewCertificate('BIR Certificate', certificates.birUrl || `${API_BASE_URL}/uploads/${certificates.bir}`)}
                       >
                         View Document
                       </button>
@@ -568,7 +568,7 @@ const AdminMsmeOversight = () => {
                     {certificates.dti ? (
                       <button 
                         className="admin-msme-oversight__view-certificate-btn"
-                        onClick={() => handleViewCertificate('DTI Certificate', `${API_BASE_URL}/uploads/${certificates.dti}`)}
+                        onClick={() => handleViewCertificate('DTI Certificate', certificates.dtiUrl || `${API_BASE_URL}/uploads/${certificates.dti}`)}
                       >
                         View Document
                       </button>

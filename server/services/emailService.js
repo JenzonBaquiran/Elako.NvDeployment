@@ -1,21 +1,31 @@
 const nodemailer = require("nodemailer");
 
-// Email configuration
-// IMPORTANT: Replace with your actual email credentials
+// Email configuration using environment variables
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "elakonv@gmail.com", // Replace with your actual Gmail address
-    pass: "clqjphzkugqlhvrw", // Replace with your app password (remove spaces)
+    user: process.env.EMAIL_USER || "elakonv@gmail.com",
+    pass: process.env.EMAIL_PASSWORD || process.env.EMAIL_APP_PASSWORD,
   },
 });
 
-// SETUP INSTRUCTIONS:
-// 1. Enable 2-Factor Authentication on your Gmail account
-// 2. Go to Google Account → Security → App passwords
-// 3. Generate app password for "Mail"
-// 4. Use the 16-character password here (remove spaces)
-// 5. Replace both user and pass values above
+// Email service requires environment variables:
+// EMAIL_USER - Gmail address for sending emails
+// EMAIL_PASSWORD - Gmail app password (16 character code from Google Account Security)
+
+// Verify email configuration on startup (development only)
+if (process.env.NODE_ENV !== "production") {
+  transporter.verify((error, success) => {
+    if (error) {
+      console.log("❌ Email transporter error:", error);
+      console.log(
+        "💡 Make sure EMAIL_USER and EMAIL_PASSWORD environment variables are set"
+      );
+    } else {
+      console.log("✅ Email server is ready to send messages");
+    }
+  });
+}
 
 // FOR TESTING ONLY - Use Ethereal Email (fake SMTP service):
 // const transporter = nodemailer.createTransport({
@@ -67,7 +77,9 @@ const generateOTP = () => {
 const sendOTPEmail = async (email, otp, username) => {
   try {
     const mailOptions = {
-      from: '"ELako.NV Support" <elakonv@gmail.com>', // Your Gmail address
+      from: `"ELako.NV Support" <${
+        process.env.EMAIL_USER || "elakonv@gmail.com"
+      }>`,
       to: email,
       subject: "Password Reset OTP - ELako.NV",
       html: `
@@ -397,7 +409,9 @@ const sendStoreActivityEmail = async (
     }
 
     const mailOptions = {
-      from: '"ELako.NV Notifications" <elakonv@gmail.com>',
+      from: `"ELako.NV Notifications" <${
+        process.env.EMAIL_USER || "elakonv@gmail.com"
+      }>`,
       to: customerEmail,
       subject: subject,
       html: `
@@ -463,7 +477,9 @@ const sendWelcomeEmail = async (email, userName, userType) => {
     const websiteURL = process.env.WEBSITE_URL || "http://localhost:3000";
 
     const mailOptions = {
-      from: '"ELako.NV Team" <elakonv@gmail.com>',
+      from: `"ELako.NV Team" <${
+        process.env.EMAIL_USER || "elakonv@gmail.com"
+      }>`,
       to: email,
       subject: "Welcome to ELako.Nv — Your Account Has Been Created",
       html: `

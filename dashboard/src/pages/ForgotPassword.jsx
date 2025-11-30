@@ -19,6 +19,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "../components/NotificationProvider";
 import PasswordStrengthIndicator from "../components/PasswordStrengthIndicator";
+import { API_BASE_URL } from '../config/api';
 import "../css/Login.css";
 import logo from "../logos/Icon on bright with text.png";
 

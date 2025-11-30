@@ -9309,10 +9309,8 @@ app.get("/api/badges/store/:storeId/active", async (req, res) => {
   try {
     const { storeId } = req.params;
     
-    const activeBadge = await Badge.findOne({
-      userId: storeId,
-      userType: 'MSME',
-      badgeType: 'TOP_STORE',
+    const activeBadge = await StoreBadge.findOne({
+      storeId: storeId,
       isActive: true
     });
 
@@ -9321,12 +9319,13 @@ app.get("/api/badges/store/:storeId/active", async (req, res) => {
       hasActiveBadge: !!activeBadge,
       badge: activeBadge ? {
         id: activeBadge._id,
-        type: activeBadge.badgeType,
-        title: activeBadge.title,
-        description: activeBadge.description,
-        icon: activeBadge.icon,
+        storeId: activeBadge.storeId,
+        badgeType: activeBadge.badgeType,
+        weekStart: activeBadge.weekStart,
+        weekEnd: activeBadge.weekEnd,
         awardedAt: activeBadge.awardedAt,
-        expiresAt: activeBadge.expiresAt
+        expiresAt: activeBadge.expiresAt,
+        isActive: activeBadge.isActive
       } : null
     });
   } catch (error) {
@@ -9353,10 +9352,8 @@ app.post("/api/badges/admin/award-store/:storeId", async (req, res) => {
     }
 
     // Check if store already has an active badge
-    const existingBadge = await Badge.findOne({
-      userId: storeId,
-      userType: 'MSME',
-      badgeType: 'TOP_STORE',
+    const existingBadge = await StoreBadge.findOne({
+      storeId: storeId,
       isActive: true
     });
 
@@ -9368,9 +9365,8 @@ app.post("/api/badges/admin/award-store/:storeId", async (req, res) => {
     }
 
     // Create new badge
-    const newBadge = new Badge({
-      userId: storeId,
-      userType: 'MSME',
+    const newBadge = new StoreBadge({
+      storeId: storeId,
       badgeType: 'TOP_STORE',
       title: 'Top Store',
       description: 'Awarded for exceptional store performance and customer satisfaction',
@@ -9378,11 +9374,10 @@ app.post("/api/badges/admin/award-store/:storeId", async (req, res) => {
       color: '#FFD700',
       isActive: true,
       awardedAt: new Date(),
+      weekStart: new Date(),
+      weekEnd: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-      criteria: {
-        reason: 'Manual award by admin',
-        performance: 'excellent'
-      }
+      celebrationShown: false
     });
 
     await newBadge.save();
@@ -9394,12 +9389,13 @@ app.post("/api/badges/admin/award-store/:storeId", async (req, res) => {
       message: `Top Store badge awarded to ${store.businessName}`,
       badge: {
         id: newBadge._id,
-        type: newBadge.badgeType,
-        title: newBadge.title,
-        description: newBadge.description,
-        icon: newBadge.icon,
+        storeId: newBadge.storeId,
+        badgeType: newBadge.badgeType,
+        weekStart: newBadge.weekStart,
+        weekEnd: newBadge.weekEnd,
         awardedAt: newBadge.awardedAt,
-        expiresAt: newBadge.expiresAt
+        expiresAt: newBadge.expiresAt,
+        isActive: newBadge.isActive
       }
     });
   } catch (error) {

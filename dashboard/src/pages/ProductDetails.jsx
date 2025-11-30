@@ -9,7 +9,20 @@ import '../css/ProductDetails.css';
 const ProductDetails = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const { user, userType, isAuthenticated } = useAuth();
+  
+  // Safely get auth context, but don't fail if it's not available
+  let user = null;
+  let userType = null;
+  let isAuthenticated = false;
+  
+  try {
+    const authContext = useAuth();
+    user = authContext.user;
+    userType = authContext.userType;
+    isAuthenticated = authContext.isAuthenticated;
+  } catch (error) {
+    console.warn('Auth context not available, continuing without authentication');
+  }
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -74,9 +87,14 @@ const ProductDetails = () => {
 
   const fetchProductDetails = async () => {
     try {
+      console.log('Fetching product details for:', productId);
+      console.log('API Base URL:', API_BASE_URL);
+      
       // Validate product ID first
       if (!productId || productId === 'undefined' || productId === 'null') {
+        console.error('Invalid product ID:', productId);
         setError('Invalid product ID provided');
+        setLoading(false);
         return;
       }
       

@@ -435,15 +435,6 @@ const AdminMsmeReport = () => {
   };
 
   // Badge management functions
-  const getStoreBadgeInfo = (storeId) => {
-    const badge = badgesData.find(b => b.storeId === storeId && b.isActive);
-    return {
-      hasActiveBadge: !!badge,
-      badge: badge || null,
-      awardedAt: badge?.awardedAt
-    };
-  };
-
   const handleAwardBadge = async (storeId, storeName) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/badges/admin/award-store/${storeId}`, {

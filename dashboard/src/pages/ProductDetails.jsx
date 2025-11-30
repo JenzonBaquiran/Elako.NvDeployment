@@ -7,7 +7,7 @@ import { API_BASE_URL } from '../config/api';
 import '../css/ProductDetails.css';
 
 const ProductDetails = () => {
-  const { id: productId } = useParams();
+  const { productId } = useParams();
   const navigate = useNavigate();
   const { user, userType, isAuthenticated } = useAuth();
   const [product, setProduct] = useState(null);

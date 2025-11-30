@@ -84,7 +84,8 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/terms" element={<TermsPage />} />
-          <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/products/:productId" element={<ProductDetails />} />
+          <Route path="/product/:productId" element={<ProductDetails />} />
           <Route path="/store/:id" element={<CustomerStoreView />} />
           <Route path="/hot-picks" element={<CustomerHotPicks />} />
           <Route path="/top-stores" element={<CustomerTopStores />} />

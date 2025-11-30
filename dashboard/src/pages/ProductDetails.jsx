@@ -80,28 +80,54 @@ const ProductDetails = () => {
       console.log('Fetching product ID:', productId);
       console.log('Full API URL:', `${API_BASE_URL}/api/products/${productId}`);
       
+      // Validate product ID first
+      if (!productId || productId === 'undefined' || productId === 'null') {
+        setError('Invalid product ID provided');
+        return;
+      }
+      
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
       
       const response = await fetch(`${API_BASE_URL}/api/products/${productId}`, {
-        signal: controller.signal
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
       
       clearTimeout(timeoutId);
       console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
+      if (!response.ok) {
+        console.error('HTTP Error:', response.status, response.statusText);
+        if (response.status === 404) {
+          setError('Product not found - this product may have been removed or the ID is incorrect');
+        } else if (response.status === 500) {
+          setError('Server error - please try again later');
+        } else {
+          setError(`HTTP Error ${response.status}: ${response.statusText}`);
+        }
+        return;
+      }
       
       const data = await response.json();
       console.log('Response data:', data);
       
-      if (data.success) {
+      if (data.success && data.product) {
+        console.log('Product loaded successfully:', data.product.name);
         setProduct(data.product);
       } else {
-        setError(data.error || 'Product not found');
+        console.error('API returned success=false:', data);
+        setError(data.error || data.message || 'Product not found');
       }
     } catch (err) {
       console.error('Fetch error:', err);
       if (err.name === 'AbortError') {
         setError('Request timed out - please try again');
+      } else if (err.message.includes('Failed to fetch')) {
+        setError('Network error - please check your internet connection and try again');
       } else {
         setError('Failed to load product: ' + err.message);
       }

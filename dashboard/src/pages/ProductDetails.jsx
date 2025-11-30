@@ -28,19 +28,9 @@ const ProductDetails = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
-    console.log('===== ProductDetails Debug Info =====');
-    console.log('ProductDetails useEffect triggered');
-    console.log('productId from params:', productId);
-    console.log('productId type:', typeof productId);
-    console.log('productId length:', productId?.length);
-    console.log('Current URL:', window.location.href);
-    console.log('API_BASE_URL:', API_BASE_URL);
-    console.log('=====================================');
-    
     if (productId) {
       fetchProductDetails();
     } else {
-      console.error('No product ID provided - this is the issue!');
       setError('No product ID provided');
       setLoading(false);
     }
@@ -84,16 +74,8 @@ const ProductDetails = () => {
 
   const fetchProductDetails = async () => {
     try {
-      console.log('===== API Fetch Debug Info =====');
-      console.log('API_BASE_URL:', API_BASE_URL);
-      console.log('Fetching product ID:', productId);
-      console.log('Full API URL:', `${API_BASE_URL}/api/products/${productId}`);
-      console.log('Current environment mode:', import.meta.env.MODE);
-      console.log('================================');
-      
       // Validate product ID first
       if (!productId || productId === 'undefined' || productId === 'null') {
-        console.error('Invalid product ID detected:', productId);
         setError('Invalid product ID provided');
         return;
       }

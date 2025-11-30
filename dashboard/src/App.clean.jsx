@@ -110,6 +110,7 @@ function App() {
           <Route path="/admin-msme-oversight" element={<AdminMsmeOversight />} />
           <Route path="/admin-audit-logs" element={<AdminAuditLogs />} />
           <Route path="/admin-msme-report" element={<AdminMsmeReport />} />
+          <Route path="/admin-msme-reports" element={<AdminMsmeReport />} />
           <Route path="/admin-blog-management" element={<BlogManagement />} />
           
           {/* Customer Routes */}

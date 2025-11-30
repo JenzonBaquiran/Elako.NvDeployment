@@ -49,7 +49,7 @@ const handleEmbedUrl = (url) => {
 };
 
 const CustomerStoreView = () => {
-  const { storeId } = useParams();
+  const { id: storeId } = useParams();
   const navigate = useNavigate();
   const { user, userType } = useAuth();
   const { showSuccess, showError } = useNotification();

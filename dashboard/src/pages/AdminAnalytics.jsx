@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AdminSidebar from "./AdminSidebar";
+import { apiCall } from "../config/api";
 import "../css/AdminAnalytics.css";
 
 const AdminAnalytics = () => {

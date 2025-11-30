@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminSidebar from './AdminSidebar';
 import { useNotification } from '../components/NotificationProvider';
+import { apiCall } from '../config/api';
 import { format } from 'date-fns';
 import '../css/AdminAuditLogs-standalone.css';
 import LoginIcon from '@mui/icons-material/Login';

@@ -55,6 +55,14 @@ if (!fs.existsSync("uploads")) {
 }
 const port = process.env.PORT || 1337;
 
+// Dynamic base URL configuration
+const getBaseUrl = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return process.env.BASE_URL || 'https://elakonvdeployment-production.up.railway.app';
+  }
+  return `http://localhost:${port}`;
+};
+
 // Socket.IO setup
 const allowedOrigins = [
   "http://localhost:3000",
@@ -1092,10 +1100,7 @@ app.get("/api/msme/:id/certificates", async (req, res) => {
 
     // Add full URLs for certificates for easier frontend access
     const certificates = msme.certificates;
-    const serverUrl =
-      process.env.NODE_ENV === "production"
-        ? "https://elakonvdeployment-production.up.railway.app"
-        : `http://localhost:${PORT}`;
+    const serverUrl = getBaseUrl();
 
     if (certificates) {
       if (certificates.mayorsPermit) {
@@ -8768,7 +8773,7 @@ app.get("/api/hot-picks", async (req, res) => {
         mainImage: mainImage,
         images: product.pictures || (product.picture ? [product.picture] : []),
         imageUrl: mainImage
-          ? `https://elakonvdeployment-production.up.railway.app/uploads/${mainImage}`
+          ? `${getBaseUrl()}/uploads/${mainImage}`
           : null,
         // Rating information
         rating: averageRating,
@@ -8914,7 +8919,7 @@ app.get("/api/hot-picks/all", async (req, res) => {
         mainImage: mainImage,
         images: product.pictures || (product.picture ? [product.picture] : []),
         imageUrl: mainImage
-          ? `https://elakonvdeployment-production.up.railway.app/uploads/${mainImage}`
+          ? `${getBaseUrl()}/uploads/${mainImage}`
           : null,
         // Rating information
         rating: averageRating,

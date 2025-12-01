@@ -8,13 +8,14 @@ const config = {
   },
 };
 
-const environment = import.meta.env.MODE || "development";
+const environment = import.meta.env.MODE || "production";
 
-// Use Vite env variable first, then fallback to config
+// Use Vite env variable first, then fallback to config, with final fallback to production URL
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
   import.meta.env.VITE_API_BASE_URL ||
-  config[environment].API_BASE_URL;
+  config[environment]?.API_BASE_URL ||
+  "https://elakonvdeployment-production.up.railway.app";
 
 // Helper function for API calls
 export const apiCall = async (endpoint, options = {}) => {

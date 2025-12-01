@@ -18,6 +18,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../components/NotificationProvider';
 import MsmeSidebar from './MsmeSidebar';
 import TopStoreCongratulations from '../components/TopStoreCongratulations';
+import { API_BASE_URL } from '../config/api';
 import '../css/MsmeDashboard.css';
 
 const MsmeDashboard = () => {

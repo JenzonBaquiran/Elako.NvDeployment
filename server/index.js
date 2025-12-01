@@ -1461,7 +1461,18 @@ app.put("/api/msme/:id/profile/business", async (req, res) => {
 });
 
 // --- Admin Routes ---
+// Handle preflight requests for admin login
+app.options("/api/admin/login", cors(), (req, res) => {
+  res.sendStatus(200);
+});
+
 app.post("/api/admin/login", async (req, res) => {
+  console.log("Admin login attempt:", {
+    body: req.body,
+    headers: req.headers["content-type"],
+    method: req.method,
+  });
+
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -3730,6 +3741,42 @@ app.post("/api/stores/:storeId/view", async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Error recording page view",
+    });
+  }
+});
+
+// GET endpoint for store view - returns basic store info (handles accidental GET requests)
+app.get("/api/stores/:storeId/view", async (req, res) => {
+  try {
+    const { storeId } = req.params;
+
+    // Find the store
+    const store = await MSME.findById(storeId);
+    if (!store) {
+      return res.status(404).json({
+        success: false,
+        error: "Store not found",
+      });
+    }
+
+    // Return basic store information
+    res.json({
+      success: true,
+      message:
+        "Store view endpoint accessed via GET - use POST to record views",
+      store: {
+        id: store._id,
+        businessName: store.businessName,
+        businessType: store.businessType,
+        municipality: store.municipality,
+        profileViews: store.profileViews || 0,
+      },
+    });
+  } catch (error) {
+    console.error("Error in GET store view:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error accessing store view",
     });
   }
 });

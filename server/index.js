@@ -49,9 +49,10 @@ const fs = require("fs");
 const app = express();
 const server = http.createServer(app);
 
-// Ensure uploads directory exists
-if (!fs.existsSync("uploads")) {
-  fs.mkdirSync("uploads", { recursive: true });
+// Ensure uploads directory exists (in root directory)
+const uploadsDir = path.join(__dirname, "..", "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
 }
 const port = process.env.PORT || 1337;
 
@@ -70,10 +71,8 @@ const getBaseUrl = () => {
 const getImageUrl = (imageName) => {
   if (!imageName) return null;
   
-  const imagePath = path.join(__dirname, "uploads", imageName);
-  const imageExists = fs.existsSync(imagePath);
-  
-  if (imageExists) {
+  const imagePath = path.join(__dirname, "..", "uploads", imageName);
+  const imageExists = fs.existsSync(imagePath);  if (imageExists) {
     return `${getBaseUrl()}/uploads/${imageName}`;
   } else {
     console.log(`⚠️  Image not found: ${imageName} - using fallback`);
@@ -285,7 +284,7 @@ app.get("/seed", (req, res) => {
 // Serve uploaded images statically with proper headers
 app.use(
   "/uploads",
-  express.static(path.join(__dirname, "uploads"), {
+  express.static(path.join(__dirname, "..", "uploads"), {
     setHeaders: (res, path) => {
       // Set proper CORS headers for files
       res.header("Access-Control-Allow-Origin", "*");
@@ -308,7 +307,7 @@ app.use(
 // Multer setup for image uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/");
+    cb(null, path.join(__dirname, "..", "uploads"));
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -336,7 +335,7 @@ const upload = multer({
 // Separate multer configuration for certificates
 const certificateStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const certificatesDir = "uploads/certificates/";
+    const certificatesDir = path.join(__dirname, "..", "uploads", "certificates");
     if (!fs.existsSync(certificatesDir)) {
       fs.mkdirSync(certificatesDir, { recursive: true });
     }
@@ -2773,7 +2772,7 @@ app.put("/api/products/:id", upload.array("pictures", 10), async (req, res) => {
     if (imagesToDelete.length > 0) {
       console.log("Images to delete from filesystem:", imagesToDelete);
       imagesToDelete.forEach((imageFilename) => {
-        const imagePath = path.join(__dirname, "uploads", imageFilename);
+        const imagePath = path.join(__dirname, "..", "uploads", imageFilename);
         fs.unlink(imagePath, (err) => {
           if (err) {
             console.error(`Error deleting image file ${imageFilename}:`, err);

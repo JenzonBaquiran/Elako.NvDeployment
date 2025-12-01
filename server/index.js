@@ -70,9 +70,10 @@ const getBaseUrl = () => {
 // Helper function to check if image exists and provide fallback
 const getImageUrl = (imageName) => {
   if (!imageName) return null;
-  
+
   const imagePath = path.join(__dirname, "..", "uploads", imageName);
-  const imageExists = fs.existsSync(imagePath);  if (imageExists) {
+  const imageExists = fs.existsSync(imagePath);
+  if (imageExists) {
     return `${getBaseUrl()}/uploads/${imageName}`;
   } else {
     console.log(`⚠️  Image not found: ${imageName} - using fallback`);
@@ -133,6 +134,131 @@ app.get("/api/health", (req, res) => {
       mongoose.connection.readyState === 1 ? "connected" : "disconnected",
     timestamp: new Date().toISOString(),
   });
+});
+
+// Check and fix product images endpoint
+app.get("/api/admin/fix-images", async (req, res) => {
+  try {
+    // Get all available image files
+    const uploadsDir = path.join(__dirname, "..", "uploads");
+    const imageFiles = [];
+    
+    if (fs.existsSync(uploadsDir)) {
+      const files = fs.readdirSync(uploadsDir);
+      files.forEach(file => {
+        const ext = path.extname(file).toLowerCase();
+        if (['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif'].includes(ext)) {
+          imageFiles.push(file);
+        }
+      });
+    }
+
+    // Get all products
+    const totalProducts = await Product.countDocuments({});
+    const productsWithImages = await Product.countDocuments({
+      $or: [
+        { picture: { $exists: true, $ne: null, $ne: '' } },
+        { pictures: { $exists: true, $ne: [] } }
+      ]
+    });
+
+    // Get products without images
+    const productsWithoutImages = await Product.find({
+      $and: [
+        { $or: [{ picture: { $exists: false } }, { picture: null }, { picture: '' }] },
+        { $or: [{ pictures: { $exists: false } }, { pictures: { $size: 0 } }] }
+      ]
+    }).select('_id productName picture pictures').limit(10);
+
+    // If requested to fix, assign images
+    if (req.query.fix === 'true' && productsWithoutImages.length > 0 && imageFiles.length > 0) {
+      let imageIndex = 0;
+      const updates = [];
+      
+      for (const product of productsWithoutImages) {
+        if (imageIndex < imageFiles.length) {
+          const imageName = imageFiles[imageIndex];
+          
+          updates.push({
+            updateOne: {
+              filter: { _id: product._id },
+              update: {
+                $set: {
+                  picture: imageName,
+                  pictures: [imageName]
+                }
+              }
+            }
+          });
+          
+          imageIndex = (imageIndex + 1) % imageFiles.length;
+        }
+      }
+      
+      if (updates.length > 0) {
+        const result = await Product.bulkWrite(updates);
+        
+        // Refresh counts after update
+        const newProductsWithImages = await Product.countDocuments({
+          $or: [
+            { picture: { $exists: true, $ne: null, $ne: '' } },
+            { pictures: { $exists: true, $ne: [] } }
+          ]
+        });
+
+        res.json({
+          success: true,
+          message: `Updated ${result.modifiedCount} products with images`,
+          stats: {
+            totalProducts,
+            beforeUpdate: {
+              productsWithImages,
+              productsWithoutImages: totalProducts - productsWithImages
+            },
+            afterUpdate: {
+              productsWithImages: newProductsWithImages,
+              productsWithoutImages: totalProducts - newProductsWithImages
+            },
+            availableImages: imageFiles.length,
+            updatedCount: result.modifiedCount
+          }
+        });
+      } else {
+        res.json({
+          success: false,
+          message: "No updates needed",
+          stats: { totalProducts, productsWithImages, availableImages: imageFiles.length }
+        });
+      }
+    } else {
+      // Just return status
+      res.json({
+        success: true,
+        message: "Image status check",
+        stats: {
+          totalProducts,
+          productsWithImages,
+          productsWithoutImages: totalProducts - productsWithImages,
+          availableImages: imageFiles.length,
+          sampleProductsWithoutImages: productsWithoutImages.slice(0, 5).map(p => ({
+            id: p._id,
+            name: p.productName,
+            picture: p.picture,
+            pictures: p.pictures
+          }))
+        },
+        instructions: "Add ?fix=true to URL to automatically assign images to products"
+      });
+    }
+    
+  } catch (error) {
+    console.error("Error in fix-images endpoint:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error checking/fixing images",
+      message: error.message
+    });
+  }
 });
 
 // Database collections overview endpoint
@@ -335,7 +461,12 @@ const upload = multer({
 // Separate multer configuration for certificates
 const certificateStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const certificatesDir = path.join(__dirname, "..", "uploads", "certificates");
+    const certificatesDir = path.join(
+      __dirname,
+      "..",
+      "uploads",
+      "certificates"
+    );
     if (!fs.existsSync(certificatesDir)) {
       fs.mkdirSync(certificatesDir, { recursive: true });
     }

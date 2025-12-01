@@ -57,10 +57,29 @@ const port = process.env.PORT || 1337;
 
 // Dynamic base URL configuration
 const getBaseUrl = () => {
-  if (process.env.NODE_ENV === 'production') {
-    return process.env.BASE_URL || 'https://elakonvdeployment-production.up.railway.app';
+  if (process.env.NODE_ENV === "production") {
+    return (
+      process.env.BASE_URL ||
+      "https://elakonvdeployment-production.up.railway.app"
+    );
   }
   return `http://localhost:${port}`;
+};
+
+// Helper function to check if image exists and provide fallback
+const getImageUrl = (imageName) => {
+  if (!imageName) return null;
+  
+  const imagePath = path.join(__dirname, "uploads", imageName);
+  const imageExists = fs.existsSync(imagePath);
+  
+  if (imageExists) {
+    return `${getBaseUrl()}/uploads/${imageName}`;
+  } else {
+    console.log(`⚠️  Image not found: ${imageName} - using fallback`);
+    // Return null so frontend can use its fallback image
+    return null;
+  }
 };
 
 // Socket.IO setup
@@ -8772,9 +8791,7 @@ app.get("/api/hot-picks", async (req, res) => {
         // Image handling
         mainImage: mainImage,
         images: product.pictures || (product.picture ? [product.picture] : []),
-        imageUrl: mainImage
-          ? `${getBaseUrl()}/uploads/${mainImage}`
-          : null,
+        imageUrl: mainImage ? `${getBaseUrl()}/uploads/${mainImage}` : null,
         // Rating information
         rating: averageRating,
         averageRating: averageRating,
@@ -8918,9 +8935,7 @@ app.get("/api/hot-picks/all", async (req, res) => {
         // Image handling
         mainImage: mainImage,
         images: product.pictures || (product.picture ? [product.picture] : []),
-        imageUrl: mainImage
-          ? `${getBaseUrl()}/uploads/${mainImage}`
-          : null,
+        imageUrl: mainImage ? `${getBaseUrl()}/uploads/${mainImage}` : null,
         // Rating information
         rating: averageRating,
         averageRating: averageRating,

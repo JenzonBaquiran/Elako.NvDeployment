@@ -142,12 +142,12 @@ app.get("/api/admin/fix-images", async (req, res) => {
     // Get all available image files
     const uploadsDir = path.join(__dirname, "..", "uploads");
     const imageFiles = [];
-    
+
     if (fs.existsSync(uploadsDir)) {
       const files = fs.readdirSync(uploadsDir);
-      files.forEach(file => {
+      files.forEach((file) => {
         const ext = path.extname(file).toLowerCase();
-        if (['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif'].includes(ext)) {
+        if ([".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif"].includes(ext)) {
           imageFiles.push(file);
         }
       });
@@ -157,53 +157,65 @@ app.get("/api/admin/fix-images", async (req, res) => {
     const totalProducts = await Product.countDocuments({});
     const productsWithImages = await Product.countDocuments({
       $or: [
-        { picture: { $exists: true, $ne: null, $ne: '' } },
-        { pictures: { $exists: true, $ne: [] } }
-      ]
+        { picture: { $exists: true, $ne: null, $ne: "" } },
+        { pictures: { $exists: true, $ne: [] } },
+      ],
     });
 
     // Get products without images
     const productsWithoutImages = await Product.find({
       $and: [
-        { $or: [{ picture: { $exists: false } }, { picture: null }, { picture: '' }] },
-        { $or: [{ pictures: { $exists: false } }, { pictures: { $size: 0 } }] }
-      ]
-    }).select('_id productName picture pictures').limit(10);
+        {
+          $or: [
+            { picture: { $exists: false } },
+            { picture: null },
+            { picture: "" },
+          ],
+        },
+        { $or: [{ pictures: { $exists: false } }, { pictures: { $size: 0 } }] },
+      ],
+    })
+      .select("_id productName picture pictures")
+      .limit(10);
 
     // If requested to fix, assign images
-    if (req.query.fix === 'true' && productsWithoutImages.length > 0 && imageFiles.length > 0) {
+    if (
+      req.query.fix === "true" &&
+      productsWithoutImages.length > 0 &&
+      imageFiles.length > 0
+    ) {
       let imageIndex = 0;
       const updates = [];
-      
+
       for (const product of productsWithoutImages) {
         if (imageIndex < imageFiles.length) {
           const imageName = imageFiles[imageIndex];
-          
+
           updates.push({
             updateOne: {
               filter: { _id: product._id },
               update: {
                 $set: {
                   picture: imageName,
-                  pictures: [imageName]
-                }
-              }
-            }
+                  pictures: [imageName],
+                },
+              },
+            },
           });
-          
+
           imageIndex = (imageIndex + 1) % imageFiles.length;
         }
       }
-      
+
       if (updates.length > 0) {
         const result = await Product.bulkWrite(updates);
-        
+
         // Refresh counts after update
         const newProductsWithImages = await Product.countDocuments({
           $or: [
-            { picture: { $exists: true, $ne: null, $ne: '' } },
-            { pictures: { $exists: true, $ne: [] } }
-          ]
+            { picture: { $exists: true, $ne: null, $ne: "" } },
+            { pictures: { $exists: true, $ne: [] } },
+          ],
         });
 
         res.json({
@@ -213,21 +225,25 @@ app.get("/api/admin/fix-images", async (req, res) => {
             totalProducts,
             beforeUpdate: {
               productsWithImages,
-              productsWithoutImages: totalProducts - productsWithImages
+              productsWithoutImages: totalProducts - productsWithImages,
             },
             afterUpdate: {
               productsWithImages: newProductsWithImages,
-              productsWithoutImages: totalProducts - newProductsWithImages
+              productsWithoutImages: totalProducts - newProductsWithImages,
             },
             availableImages: imageFiles.length,
-            updatedCount: result.modifiedCount
-          }
+            updatedCount: result.modifiedCount,
+          },
         });
       } else {
         res.json({
           success: false,
           message: "No updates needed",
-          stats: { totalProducts, productsWithImages, availableImages: imageFiles.length }
+          stats: {
+            totalProducts,
+            productsWithImages,
+            availableImages: imageFiles.length,
+          },
         });
       }
     } else {
@@ -240,23 +256,139 @@ app.get("/api/admin/fix-images", async (req, res) => {
           productsWithImages,
           productsWithoutImages: totalProducts - productsWithImages,
           availableImages: imageFiles.length,
-          sampleProductsWithoutImages: productsWithoutImages.slice(0, 5).map(p => ({
-            id: p._id,
-            name: p.productName,
-            picture: p.picture,
-            pictures: p.pictures
-          }))
+          sampleProductsWithoutImages: productsWithoutImages
+            .slice(0, 5)
+            .map((p) => ({
+              id: p._id,
+              name: p.productName,
+              picture: p.picture,
+              pictures: p.pictures,
+            })),
         },
-        instructions: "Add ?fix=true to URL to automatically assign images to products"
+        instructions:
+          "Add ?fix=true to URL to automatically assign images to products",
       });
     }
-    
   } catch (error) {
     console.error("Error in fix-images endpoint:", error);
     res.status(500).json({
       success: false,
       error: "Error checking/fixing images",
-      message: error.message
+      message: error.message,
+    });
+  }
+});
+
+// New endpoint to fix broken image references (products that have images in DB but files don't exist)
+app.get("/api/admin/sync-images", async (req, res) => {
+  try {
+    // Get all available image files
+    const uploadsDir = path.join(__dirname, "..", "uploads");
+    const imageFiles = [];
+
+    if (fs.existsSync(uploadsDir)) {
+      const files = fs.readdirSync(uploadsDir);
+      files.forEach((file) => {
+        const ext = path.extname(file).toLowerCase();
+        if ([".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif"].includes(ext)) {
+          imageFiles.push(file);
+        }
+      });
+    }
+
+    // Get products with image references that may not exist as files
+    const productsWithImages = await Product.find({
+      $or: [
+        { picture: { $exists: true, $ne: null, $ne: "" } },
+        { pictures: { $exists: true, $ne: [] } },
+      ],
+    }).select("_id productName picture pictures");
+
+    const brokenImageProducts = [];
+    const validImageProducts = [];
+
+    for (const product of productsWithImages) {
+      const dbImage = product.picture || (product.pictures && product.pictures[0]);
+      if (dbImage) {
+        const imagePath = path.join(uploadsDir, dbImage);
+        if (!fs.existsSync(imagePath)) {
+          brokenImageProducts.push({
+            ...product.toObject(),
+            missingFile: dbImage
+          });
+        } else {
+          validImageProducts.push(product);
+        }
+      }
+    }
+
+    // If requested to sync, reassign broken images
+    if (
+      req.query.sync === "true" &&
+      brokenImageProducts.length > 0 &&
+      imageFiles.length > 0
+    ) {
+      const updates = [];
+
+      brokenImageProducts.forEach((product, index) => {
+        const newImage = imageFiles[index % imageFiles.length];
+        
+        updates.push({
+          updateOne: {
+            filter: { _id: product._id },
+            update: {
+              $set: {
+                picture: newImage,
+                pictures: [newImage],
+              },
+            },
+          },
+        });
+      });
+
+      const result = await Product.bulkWrite(updates);
+
+      res.json({
+        success: true,
+        message: `Successfully reassigned ${result.modifiedCount} broken image references`,
+        statistics: {
+          totalProductsWithImages: productsWithImages.length,
+          validImageProducts: validImageProducts.length,
+          brokenImageProducts: brokenImageProducts.length,
+          updatedProducts: result.modifiedCount,
+          availableImages: imageFiles.length,
+        },
+        updatedProducts: brokenImageProducts.slice(0, 10).map((p, index) => ({
+          productName: p.productName,
+          oldImage: p.missingFile,
+          newImage: imageFiles[index % imageFiles.length],
+        })),
+      });
+    } else {
+      res.json({
+        success: true,
+        message: "Image sync analysis complete",
+        statistics: {
+          totalProductsWithImages: productsWithImages.length,
+          validImageProducts: validImageProducts.length,
+          brokenImageProducts: brokenImageProducts.length,
+          availableImages: imageFiles.length,
+        },
+        brokenImageSamples: brokenImageProducts.slice(0, 10).map((p, index) => ({
+          productName: p.productName,
+          brokenImage: p.missingFile,
+          willBeAssigned: imageFiles[index % imageFiles.length] || "No images available",
+        })),
+        availableImageSamples: imageFiles.slice(0, 10),
+        note: "Add ?sync=true to actually reassign broken image references to available files",
+      });
+    }
+  } catch (error) {
+    console.error("Error in sync-images endpoint:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error syncing images",
+      message: error.message,
     });
   }
 });

@@ -1,8 +1,8 @@
 // Debug script to check what images are stored in the database
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // Connect to MongoDB - Use the same connection logic as the main server
-require('dotenv').config();
+require("dotenv").config();
 
 let mongoURI;
 
@@ -21,21 +21,25 @@ if (process.env.MONGODB_URI) {
 async function checkDatabaseImages() {
   try {
     await mongoose.connect(mongoURI);
-    console.log('✅ Connected to MongoDB');
+    console.log("✅ Connected to MongoDB");
 
     // Import Product model
-    const Product = require('./models/product.model');
-    
+    const Product = require("./models/product.model");
+
     // Find products with images
     const productsWithImages = await Product.find({
       $or: [
         { picture: { $exists: true, $ne: null } },
-        { pictures: { $exists: true, $ne: [] } }
-      ]
-    }).select('_id productName picture pictures msmeId').limit(20);
+        { pictures: { $exists: true, $ne: [] } },
+      ],
+    })
+      .select("_id productName picture pictures msmeId")
+      .limit(20);
 
-    console.log(`\n📊 Found ${productsWithImages.length} products with images:`);
-    
+    console.log(
+      `\n📊 Found ${productsWithImages.length} products with images:`
+    );
+
     productsWithImages.forEach((product, index) => {
       console.log(`\n${index + 1}. Product: ${product.productName}`);
       console.log(`   ID: ${product._id}`);
@@ -43,7 +47,7 @@ async function checkDatabaseImages() {
         console.log(`   Single picture: ${product.picture}`);
       }
       if (product.pictures && product.pictures.length > 0) {
-        console.log(`   Pictures array: [${product.pictures.join(', ')}]`);
+        console.log(`   Pictures array: [${product.pictures.join(", ")}]`);
       }
     });
 
@@ -51,8 +55,8 @@ async function checkDatabaseImages() {
     const totalWithImages = await Product.countDocuments({
       $or: [
         { picture: { $exists: true, $ne: null } },
-        { pictures: { $exists: true, $ne: [] } }
-      ]
+        { pictures: { $exists: true, $ne: [] } },
+      ],
     });
 
     console.log(`\n📈 Total products with images: ${totalWithImages}`);
@@ -63,21 +67,31 @@ async function checkDatabaseImages() {
 
     if (totalProducts > 0) {
       // Check all products to see their image fields
-      const allProducts = await Product.find({}).select('_id productName picture pictures rating').limit(10);
+      const allProducts = await Product.find({})
+        .select("_id productName picture pictures rating")
+        .limit(10);
       console.log(`\n🔍 Sample products in database:`);
       allProducts.forEach((product, index) => {
-        console.log(`   ${index + 1}. ${product.productName} (${product.rating || 0}★)`);
-        console.log(`      picture: ${product.picture || 'null'}`);
-        console.log(`      pictures: ${product.pictures ? JSON.stringify(product.pictures) : 'null'}`);
+        console.log(
+          `   ${index + 1}. ${product.productName} (${product.rating || 0}★)`
+        );
+        console.log(`      picture: ${product.picture || "null"}`);
+        console.log(
+          `      pictures: ${
+            product.pictures ? JSON.stringify(product.pictures) : "null"
+          }`
+        );
       });
     } else {
       console.log(`\n❌ No products found in database!`);
       console.log(`   Database URI: ${mongoURI}`);
-      
+
       // List all collections to see what's in the database
-      const collections = await mongoose.connection.db.listCollections().toArray();
+      const collections = await mongoose.connection.db
+        .listCollections()
+        .toArray();
       console.log(`\n📋 Collections in database:`);
-      collections.forEach(collection => {
+      collections.forEach((collection) => {
         console.log(`   - ${collection.name}`);
       });
     }
@@ -87,20 +101,27 @@ async function checkDatabaseImages() {
       rating: { $gte: 4.5 },
       $or: [
         { picture: { $exists: true, $ne: null } },
-        { pictures: { $exists: true, $ne: [] } }
-      ]
-    }).select('_id productName picture pictures rating').limit(10);
+        { pictures: { $exists: true, $ne: [] } },
+      ],
+    })
+      .select("_id productName picture pictures rating")
+      .limit(10);
 
-    console.log(`\n⭐ Top rated products (4.5+ stars) with images: ${topRatedWithImages.length}`);
+    console.log(
+      `\n⭐ Top rated products (4.5+ stars) with images: ${topRatedWithImages.length}`
+    );
     topRatedWithImages.forEach((product, index) => {
-      console.log(`   ${index + 1}. ${product.productName} (${product.rating}★)`);
-      console.log(`      Images: ${product.picture || product.pictures?.[0] || 'None'}`);
+      console.log(
+        `   ${index + 1}. ${product.productName} (${product.rating}★)`
+      );
+      console.log(
+        `      Images: ${product.picture || product.pictures?.[0] || "None"}`
+      );
     });
 
     mongoose.disconnect();
-    
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error("❌ Error:", error);
     mongoose.disconnect();
   }
 }
